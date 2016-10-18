@@ -15,7 +15,7 @@ galaxy_pvc: "galaxy-pvc"
 galaxy_metadata_name: "galaxy-k8s"
 galaxy_label_app: "galaxy-k8s"
 galaxy_internal_port: 8080
-#galaxy_node_port_exposed: 30700
+galaxy_node_port_exposed: 30700
 
 
 

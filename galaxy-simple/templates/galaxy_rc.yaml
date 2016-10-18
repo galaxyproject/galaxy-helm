@@ -25,8 +25,31 @@ spec:
         volumeMounts:
           - mountPath: "/opt/galaxy_data"
             name: galaxy-pvc
+{{ if .Values.development_folder }}
+          - mountPath: "/galaxy/config/galaxy.ini"
+            name: galaxy-ini 
+          - mountPath: "/galaxy/config/job_conf.xml"
+            name: galaxy-job-conf 
+          - mountPath: "/galaxy/config/tool_conf.xml"
+            name: galaxy-tool-conf
+          - mountPath: "/galaxy/tools/phenomenal"
+            name: phenomenal-tools           
+{{ end }}
       volumes:
         - name: galaxy-pvc
           persistentVolumeClaim:
               claimName: {{.Values.galaxy_pvc}}
-
+{{ if .Values.development_folder }}
+        - name: galaxy-ini
+          hostPath:
+            path: {{ .Values.development_folder }}/config/galaxy.ini
+        - name: galaxy-job-conf
+          hostPath:
+            path: {{ .Values.development_folder }}/config/job_conf.xml
+        - name: galaxy-tool-conf
+          hostPath:
+            path: {{ .Values.development_folder }}/config/tool_conf.xml
+        - name: phenomenal-tools
+          hostPath:
+            path: {{ .Values.development_folder }}/tools/phenomenal
+{{ end }}

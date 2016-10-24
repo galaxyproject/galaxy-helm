@@ -11,5 +11,5 @@ spec:
   accessModes:
     - ReadWriteMany
   hostPath:
-          path: "/mnt/sda1/galaxy-data"
+          path: "/data/galaxy-data"
 {{ end }}

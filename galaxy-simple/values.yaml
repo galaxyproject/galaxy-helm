@@ -5,6 +5,13 @@
 
 # For development mode, having config, tools and tools galaxy folders on <your_folder>, run with 
 # helm install --set development_folder=<your_folder> galaxy-simple
+#
+# For using on minikube with a Persistent Volume set by default to /mnt/sda1 use
+#
+# helm install --set pv_minikube="yes" galaxy-simple
+#
+# Above instructions can be used together, just concatenate with a comma.
+#
 
 # To be set on command call
 #dbPasswordBase64: "bnV0c2hlbGw=" 

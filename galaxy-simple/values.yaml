@@ -10,6 +10,10 @@
 #
 # helm install --set pv_minikube="yes" galaxy-simple
 #
+# For using an ingress to galaxy.my_domain use
+#
+# helm install --set use_ingress="yes",domain="mydomain.dev"
+#
 # Above instructions can be used together, just concatenate with a comma.
 #
 
@@ -27,7 +31,8 @@ galaxy_label_app: "galaxy-k8s"
 galaxy_internal_port: 8080
 galaxy_node_port_exposed: 30700
 
-
+# Ingress
+domain: "mydomain.dev" 
 
 # Storage request
 galaxy_pvc_capacity: "15Gi"

@@ -10,9 +10,13 @@
 #
 # helm install --set pv_minikube="yes" galaxy-simple
 #
-# For using an ingress to galaxy.my_domain use
+# For using an ingress to galaxy.mydomain.dev use
 #
 # helm install --set use_ingress="yes",domain="mydomain.dev"
+#
+# For using an ingress to galaxy.mydomain.dev using an external ingress controller, use:
+#
+# helm install --set use_ingress="yes",domain="mydomain.dev",external_ingress_controller="yes"
 #
 # Above instructions can be used together, just concatenate with a comma.
 #

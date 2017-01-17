@@ -7,7 +7,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{.Values.galaxy_label_app}}
+         app: {{.Values.galaxy_label_app}}
       annotations:
         pod.beta.kubernetes.io/init-containers: |-
           [

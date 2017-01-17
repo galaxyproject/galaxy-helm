@@ -7,7 +7,20 @@ spec:
   template:
     metadata:
       labels:
-         app: {{.Values.galaxy_label_app}} 
+        app: {{.Values.galaxy_label_app}}
+      annotations:
+        pod.beta.kubernetes.io/init-containers: |-
+          [
+            {
+              "name": "postgres-listener",
+              "image": "alpine",
+              "imagePullPolicy": "IfNotPresent",
+              "command": [
+                "sh", "-c",
+                "for i in $(seq 1 200); do nc -z -w3 postgresql-for-galaxy 5432 && exit 0 || sleep 3; done; exit 1"
+              ]
+            }
+          ]
     spec:
       containers:
       - name: galaxy-k8s

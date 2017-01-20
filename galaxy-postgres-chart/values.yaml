@@ -20,6 +20,10 @@
 #
 # helm install --set use_ingress="yes",domain="mydomain.dev",external_ingress_controller="yes"
 #
+# For setting the admin user
+#
+# helm install --set galaxy_admin_email="user@host.domain",galaxy_admin_password="mypasswd",galaxy_api_key="aksjdhas"
+#
 # Above instructions can be used together, just concatenate with a comma.
 # 
 
@@ -34,6 +38,10 @@ galaxy_label_app: "galaxy-k8s"
 galaxy_internal_port: 8080
 galaxy_node_port_exposed: 30700
 galaxy_pvc_capacity: "15Gi"
+galaxy_admin_email: ""
+galaxy_admin_username: "admin"
+galaxy_admin_password: ""
+galaxy_api_key: ""
 
 # Ingress
 domain: "mydomain.dev"

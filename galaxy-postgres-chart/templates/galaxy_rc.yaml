@@ -46,6 +46,28 @@ spec:
                 configMapKeyRef:
                       name: db-connection
                       key: db.name
+{{ if and .Values.galaxy_admin_email (and .Values.galaxy_admin_password .Values.galaxy_api_key) }}
+            - name: "GALAXY_ADMIN_EMAIL"
+              valueFrom:
+                configMapKeyRef:
+                      name: galaxy-admin-user
+                      key: email
+            - name: "GALAXY_ADMIN_USER"
+              valueFrom:
+                configMapKeyRef:
+                      name: galaxy-admin-user
+                      key: user
+            - name: "GALAXY_ADMIN_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                      name: galaxy-admin-secret
+                      key: password
+            - name: "GALAXY_API_KEY"
+              valueFrom:
+                secretKeyRef:
+                      name: galaxy-admin-secret
+                      key: api-key
+{{ end }}
         command: ["/bin/bash","-c","./ansible/run_galaxy_config.sh > config_db.log && ./run.sh --daemon && tail -f paster.log"]
         lifecycle: 
           preStop:

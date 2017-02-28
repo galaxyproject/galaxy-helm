@@ -18,6 +18,10 @@
 #
 # helm install --set use_ingress="yes",domain="mydomain.dev",external_ingress_controller="yes"
 #
+# To avoid creating the PVC (because is already there or created by another chart
+#
+# helm install --set galaxy_create_pvc=false
+#
 # Above instructions can be used together, just concatenate with a comma.
 #
 
@@ -29,7 +33,6 @@ galaxy_image_registry: "docker-registry.phenomenal-h2020.eu/"
 galaxy_image: "phnmnl/galaxy-k8s-runtime"
 galaxy_image_tag: ":latest"
 galaxy_pull_policy: "Always"
-galaxy_pvc: "galaxy-pvc"
 galaxy_metadata_name: "galaxy-k8s"
 galaxy_label_app: "galaxy-k8s"
 galaxy_internal_port: 8080
@@ -39,6 +42,7 @@ galaxy_node_port_exposed: 30700
 domain: "mydomain.dev" 
 
 # Storage request
+galaxy_pvc: "galaxy-pvc"
 galaxy_create_pvc: true
 galaxy_pvc_capacity: "15Gi"
 #postgres:

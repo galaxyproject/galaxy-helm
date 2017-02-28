@@ -24,6 +24,10 @@
 #
 # helm install --set galaxy_admin_email="user@host.domain",galaxy_admin_password="mypasswd",galaxy_api_key="aksjdhas"
 #
+# To avoid creating the PVC (because is already there or created by another chart
+#
+# helm install --set galaxy_create_pvc=false
+#
 # Above instructions can be used together, just concatenate with a comma.
 # 
 
@@ -33,12 +37,12 @@ galaxy_image: "phnmnl/galaxy-k8s-runtime"
 galaxy_image_tag: ":latest"
 galaxy_pull_policy: "Always"
 galaxy_pvc: "galaxy-pvc"
+galaxy_create_pvc: true
+galaxy_pvc_capacity: "15Gi"
 galaxy_metadata_name: "galaxy-k8s"
 galaxy_label_app: "galaxy-k8s"
 galaxy_internal_port: 8080
 galaxy_node_port_exposed: 30700
-galaxy_create_pvc: true
-galaxy_pvc_capacity: "15Gi"
 galaxy_admin_email: ""
 galaxy_admin_username: "admin"
 galaxy_admin_password: ""

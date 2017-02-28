@@ -1,3 +1,4 @@
+{{ if .Values.galaxy_create_pvc }}
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
@@ -8,3 +9,4 @@ spec:
   resources:
     requests:
       storage: {{.Values.galaxy_pvc_capacity}} 
+{{ end }}

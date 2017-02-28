@@ -9,3 +9,4 @@ spec:
   resources:
     requests:
       storage: {{.Values.galaxy_pvc_capacity}} 
+{{ end }}

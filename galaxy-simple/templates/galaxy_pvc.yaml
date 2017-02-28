@@ -1,3 +1,4 @@
+{{ if .Values.galaxy_create_pvc }}
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:

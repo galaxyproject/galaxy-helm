@@ -32,6 +32,7 @@ spec:
                       key: password 
         ports:
           - containerPort: 5432
+{{ if .Values.postgres_pvc }}
         volumeMounts:
           - mountPath: {{.Values.postgres_mount_point_PGDATA}}
             name: postgres-pvc
@@ -39,3 +40,4 @@ spec:
         - name: postgres-pvc
           persistentVolumeClaim:
               claimName: {{.Values.postgres_pvc}}
+{{ end }}

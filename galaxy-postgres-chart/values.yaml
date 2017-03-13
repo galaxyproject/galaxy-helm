@@ -28,6 +28,10 @@
 #
 # helm install --set galaxy_create_pvc=false
 #
+# To avoid altogether using a PVC for postgres (files are written inside the container, pod dies, Galaxy state is lost)
+#
+# helm install --set postgres.postgres_pvc=false
+#
 # Above instructions can be used together, just concatenate with a comma.
 # 
 

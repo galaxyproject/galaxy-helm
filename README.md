@@ -20,6 +20,7 @@ If using helm for the first time, you will need to initialize the helm on the cl
 
 ```
 $ helm init
+$ helm list # call a few times until no error is shown, this is to wait for the tiller pod from helm to be running on the cluster.
 $ helm repo add galaxy-helm-repo https://pcm32.github.io/galaxy-helm-charts
 ```
 
@@ -31,7 +32,7 @@ $ helm repo update
   
 ## Deployment scenarios
 
-Here we show different examples on how to deploy Galaxy on Kubernetes with these helm charts for Galaxy. 
+Here we show different examples on how to deploy Galaxy on Kubernetes with these helm charts for Galaxy. Many of the options above can be combined, it only requires the correct settings on the `--set` part.
 
 ### SQLite local deploy on Minikube
 
@@ -61,6 +62,14 @@ This will produce an instance accessible on the minukube ip (normally 192.168.99
 
 This will deploy an SQLite backend, so your Galaxy config files need to be coherent with that. If your configuration expects a Postgres backend, there are other configurations below that serve this purpose. 
 
+### SQLite local on Minikube using a different Galaxy container
+
+```
+$ helm install --set pv_minikube="yes",galaxy_image_registry="",galaxy_image="pcm32/galaxy-k8s-runtime",galaxy_image_tag=":v1" galaxy-helm-repo/galaxy-simple
+```
+
+This will try to pull the image `pcm32/galaxy-k8s-runtime` from Dockerhub. If you are using a locally tagged image which you haven't pushed to Dockerhub, you can add `galaxy_pull_policy="IfNotPresent"` to the set commands. For working with local images, you will probably want to redirect your host's docker client to the minikube VM's docker engine, and use that to build the images. See the minikube documentation for more details on that.
+
 ### Postgresql local deploy on Minikube
 
 ```
@@ -69,6 +78,15 @@ $ helm install --debug --set pv_minikube="yes" galaxy-helm-repo/galaxy-postgres-
 
 This will produce an instance accessible on the minukube ip (normally 192.168.99.100), port 30700. Postgresql will be the backend, running on a separate container.
 
+### Postgresql on a Kubernetes cluster
+
+#### With DNS set through an Ingress
+
+#### Securing the admin user
+
+#### Using existing Volume Claims for storage
+
+#### 
 
 
 # Funding

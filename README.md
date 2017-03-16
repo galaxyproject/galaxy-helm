@@ -33,13 +33,42 @@ $ helm repo update
 
 Here we show different examples on how to deploy Galaxy on Kubernetes with these helm charts for Galaxy. 
 
-### Simple local deploy on Minikube
+### SQLite local deploy on Minikube
 
 ```
 $ helm install --set pv_minikube="yes" galaxy-helm-repo/galaxy-simple
 ```
 
-This will produce an instance accessible on the minukube ip, port 30700.
+This will produce an instance accessible on the minukube ip (normally 192.168.99.100), port 30700.
+
+### SQLite local deploy on Minikube for developers
+
+If you are developing tools for Galaxy, and want to try them on the local setup shown above, you can override the contents of the tools and config folders used by the Galaxy instance to reflect your own settings:
+
+```
+$ helm install --set pv_minikube="yes",development_folder="/path/to/your/galaxy-folder-where-config-and-tools-folders-exists" galaxy-helm-repo/galaxy-simple
+```
+
+There are some variations on how you provide that `development_folder` path based on the OS where you're hosting minikube.
+
+On **macOS**, minikube mounts the host `/Users` onto `/Users` on the minikube VM, making all home folders available. This means that as long as the `/path/to/your/galaxy-folder` is within your home, the path to be used is transparently the same.
+
+On **Linux**, minikube mounts the host `/home` onto `/hosthome` on the minikube VM, which means that if your galaxy folder is available somewhere inside your home directory, it will be available to the Kubernetes cluster, yet the path given to Helm needs to reflect what is visible inside the minikube VM. So, if your Galaxy folder (containing config and tools folder) is available at `/home/jdoe/devel/galaxy`, then the path given for `development_folder` should be `/hosthome/jdoe/devel/galaxy` (please notice the replacement of `/home` with `/hosthome`.
+
+On **Windows**, the mount point inside the minikube VM changes from `C:\Users` to `/c/Users` (so files on `C:\Users\jdoe\devel\galaxy` would be visible on minikube and Kubernetes on `/c/Users/jdoe/devel/galaxy`) so the `development_folder` variable needs to be set accordingly.
+
+This will produce an instance accessible on the minukube ip (normally 192.168.99.100), port 30700.
+
+This will deploy an SQLite backend, so your Galaxy config files need to be coherent with that. If your configuration expects a Postgres backend, there are other configurations below that serve this purpose. 
+
+### Postgresql local deploy on Minikube
+
+```
+$ helm install --debug --set pv_minikube="yes" galaxy-helm-repo/galaxy-postgres-chart
+```
+
+This will produce an instance accessible on the minukube ip (normally 192.168.99.100), port 30700. Postgresql will be the backend, running on a separate container.
+
 
 
 # Funding

@@ -78,7 +78,7 @@ This will try to pull the image `pcm32/galaxy-k8s-runtime` from Dockerhub (which
 $ helm install --debug --set pv_minikube="yes" galaxy-helm-repo/galaxy-postgres-chart
 ```
 
-This will produce an instance accessible on the minukube ip (normally 192.168.99.100), port 30700. Postgresql will be the backend, running on a separate container. Please notice that the biggest difference compared to other cases now is the chart used. We expect to unify both charts in the future.
+This will produce an instance accessible on the minukube ip (normally 192.168.99.100), port 30700. Postgresql will be the backend, running on a separate container. Please notice that the biggest difference compared to other cases now is the chart used. We expect to unify both charts in the future. Most of the features explained for the SQLite deployment can be applied as well with the `galaxy-postres-chart`, using the same `--set` options above.
 
 ### Postgresql on a Kubernetes cluster
 
@@ -102,7 +102,7 @@ Provisioning instances that are publicly available might require, for security p
 $ helm install --set galaxy_admin_email="user@domain",galaxy_admin_password="six-character-password",galaxy_api_key="qwertyuio" galaxy-helm-repo/galaxy-postgres-chart
 ```
 
-This setup presumes that there is an available Persistent Volume provisioned which is concurrentlu accessible for read/write from all nodes (basically a shared filesystem, such as NFS or GlusterFS). This will create the instance, insert the API key, create the user with that password and set its email as admin. The injected API key will be removed then.
+This setup presumes that there is an available Persistent Volume provisioned which is concurrently accessible for read/write from all nodes (basically a shared filesystem, such as NFS or GlusterFS). This will create the instance, insert the API key, create the user with that password and set its email as admin. The injected API key will be removed then.
 
 
 # Funding

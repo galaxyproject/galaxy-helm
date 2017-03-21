@@ -1,0 +1,50 @@
+# Default values for galaxy-chart.
+# This is a YAML-formatted file.
+# Declare name/value pairs to be passed into your templates.
+# name: value
+
+# For development mode, having config, tools and tools galaxy folders on <your_folder>, run with 
+# helm install --set development_folder=<your_folder> galaxy-simple
+#
+# For using on minikube with a Persistent Volume set by default to /mnt/sda1 use
+#
+# helm install --set pv_minikube="yes" galaxy-simple
+#
+# For using an ingress to galaxy.mydomain.dev use
+#
+# helm install --set use_ingress="yes",domain="mydomain.dev"
+#
+# For using an ingress to galaxy.mydomain.dev using an external ingress controller, use:
+#
+# helm install --set use_ingress="yes",domain="mydomain.dev",external_ingress_controller="yes"
+#
+# To avoid creating the PVC (because is already there or created by another chart
+#
+# helm install --set galaxy_create_pvc=false
+#
+# Above instructions can be used together, just concatenate with a comma.
+#
+
+# To be set on command call
+#dbPasswordBase64: "bnV0c2hlbGw=" 
+
+# Galaxy RC
+galaxy_image_registry: "docker-registry.phenomenal-h2020.eu/"
+galaxy_image: "phnmnl/galaxy-k8s-runtime"
+galaxy_image_tag: ":v16.07-pheno_cv0.1.59"
+galaxy_pull_policy: "Always"
+galaxy_metadata_name: "galaxy-k8s"
+galaxy_label_app: "galaxy-k8s"
+galaxy_internal_port: 8080
+galaxy_node_port_exposed: 30700
+
+# Ingress
+domain: "mydomain.dev" 
+
+# Storage request
+galaxy_pvc: "galaxy-pvc"
+galaxy_create_pvc: true
+galaxy_pvc_capacity: "15Gi"
+#postgres:
+#        postgres_pvc: "postgres-pvc"
+#        postgres_pvc_capacity: "5Gi"

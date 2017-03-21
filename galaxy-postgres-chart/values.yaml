@@ -1,0 +1,60 @@
+# Default values for galaxy-chart.
+# This is a YAML-formatted file.
+# Declare name/value pairs to be passed into your templates.
+# name: value
+
+# To run within minikube using a created persistent volume on /data
+#
+# helm install --set pv_minikube="yes"
+#
+# To set postgresql password for the galaxy user 
+# (note that if the deployment will use an existing postgre database folder, the same password needs to be used as originally).
+# 
+# helm install --set postgres.db_password="new-password"
+#
+# For using an ingress to galaxy.mydomain.dev use
+#
+# helm install --set use_ingress="yes",domain="mydomain.dev"
+#
+# For using an ingress to galaxy.mydomain.dev using an external ingress controller, use:
+#
+# helm install --set use_ingress="yes",domain="mydomain.dev",external_ingress_controller="yes"
+#
+# For setting the admin user
+#
+# helm install --set galaxy_admin_email="user@host.domain",galaxy_admin_password="mypasswd",galaxy_api_key="aksjdhas"
+#
+# To avoid creating the PVC (because is already there or created by another chart
+#
+# helm install --set galaxy_create_pvc=false
+#
+# To avoid altogether using a PVC for postgres (files are written inside the container, pod dies, Galaxy state is lost)
+#
+# helm install --set postgres.postgres_pvc=false
+#
+# Above instructions can be used together, just concatenate with a comma.
+# 
+
+# Galaxy RC
+galaxy_image_registry: "container-registry.phenomenal-h2020.eu/"
+galaxy_image: "phnmnl/galaxy-k8s-runtime"
+galaxy_image_tag: ":v16.07-pheno_cv0.1.59"
+galaxy_pull_policy: "Always"
+galaxy_pvc: "galaxy-pvc"
+galaxy_create_pvc: true
+galaxy_pvc_capacity: "15Gi"
+galaxy_metadata_name: "galaxy-k8s"
+galaxy_label_app: "galaxy-k8s"
+galaxy_internal_port: 8080
+galaxy_node_port_exposed: 30700
+galaxy_admin_email: ""
+galaxy_admin_username: "admin"
+galaxy_admin_password: ""
+galaxy_api_key: ""
+
+# Ingress
+domain: "mydomain.dev"
+
+postgres:
+        db_password: "mypassword"
+        postgres_pvc: "galaxy-pvc" 

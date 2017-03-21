@@ -1,0 +1,15 @@
+{{ if .Values.pv_minikube }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv0001
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+          path: "/data/galaxy-data"
+{{ end }}

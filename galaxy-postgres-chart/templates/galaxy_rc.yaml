@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+    name: {{.Values.galaxy_metadata_name}} 
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+         app: {{.Values.galaxy_label_app}}
+      annotations:
+        pod.beta.kubernetes.io/init-containers: |-
+          [
+            {
+              "name": "postgres-listener",
+              "image": "alpine",
+              "imagePullPolicy": "IfNotPresent",
+              "command": [
+                "sh", "-c",
+                "for i in $(seq 1 200); do nc -z -w3 postgresql-for-galaxy 5432 && exit 0 || sleep 3; done; exit 1"
+              ]
+            }
+          ]
+    spec:
+      containers:
+      - name: galaxy-k8s
+        image: {{.Values.galaxy_image_registry}}{{.Values.galaxy_image}}{{.Values.galaxy_image_tag}}
+        imagePullPolicy: {{.Values.galaxy_pull_policy}}
+        env:
+            - name: "GALAXY_SEC_DB_ENGINE"
+              value: "postgresql"
+            - name: "GALAXY_SEC_DB_USER"
+              valueFrom:
+                configMapKeyRef:
+                      name: db-connection
+                      key: db.user
+            - name: "GALAXY_SEC_DB_PASS"
+              valueFrom:
+                secretKeyRef:
+                      name: galaxy-postgres-secret
+                      key: password
+            - name: "GALAXY_SEC_DB_HOST"
+              value: "postgresql-for-galaxy"
+            - name: "GALAXY_SEC_DB_NAME"
+              valueFrom:
+                configMapKeyRef:
+                      name: db-connection
+                      key: db.name
+{{ if and .Values.galaxy_admin_email (and .Values.galaxy_admin_password .Values.galaxy_api_key) }}
+            - name: "GALAXY_ADMIN_EMAIL"
+              valueFrom:
+                configMapKeyRef:
+                      name: galaxy-admin-user
+                      key: email
+            - name: "GALAXY_ADMIN_USER"
+              valueFrom:
+                configMapKeyRef:
+                      name: galaxy-admin-user
+                      key: user
+            - name: "GALAXY_ADMIN_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                      name: galaxy-admin-secret
+                      key: password
+            - name: "GALAXY_API_KEY"
+              valueFrom:
+                secretKeyRef:
+                      name: galaxy-admin-secret
+                      key: api-key
+{{ end }}
+        command: ["/bin/bash","-c","./ansible/run_galaxy_config.sh > config_db.log && ./run.sh --daemon && tail -f paster.log"]
+        lifecycle: 
+          preStop:
+            exec:
+               command:
+                   - "./run.sh"
+                   - "--stop" 
+        ports:
+          - containerPort: {{.Values.galaxy_internal_port}}
+        volumeMounts:
+          - mountPath: "/opt/galaxy_data"
+            name: galaxy-pvc
+      volumes:
+        - name: galaxy-pvc
+          persistentVolumeClaim:
+              claimName: {{.Values.galaxy_pvc}}
+

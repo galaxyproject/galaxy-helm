@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Simple Galaxy deployment (PhenoMeNal Alanine Release)
+name: galaxy-simple
+version: 0.1.5-phenomenal-alanine

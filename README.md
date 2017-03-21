@@ -104,6 +104,10 @@ $ helm install --set galaxy_admin_email="user@domain",galaxy_admin_password="six
 
 This setup presumes that there is an available Persistent Volume provisioned which is concurrently accessible for read/write from all nodes (basically a shared filesystem, such as NFS or GlusterFS). This will create the instance, insert the API key, create the user with that password and set its email as admin. The injected API key will be removed then.
 
+### Documentation on additional functionality
+
+More functionality in terms of variables that can be set can be found documented as part of the `values.yaml` file available inside each chart.
+
 
 # Funding
 

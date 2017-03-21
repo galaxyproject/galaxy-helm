@@ -32,13 +32,17 @@
 #
 # helm install --set postgres.postgres_pvc=false
 #
+# To set a new destination for the tools directory. This is by default set to a location inside the PVC
+#
+# helm install --set galaxy_tools_dest="/path/to/tools"
+#
 # Above instructions can be used together, just concatenate with a comma.
 # 
 
 # Galaxy RC
 galaxy_image_registry: "container-registry.phenomenal-h2020.eu/"
 galaxy_image: "phnmnl/galaxy-k8s-runtime"
-galaxy_image_tag: ":v16.07-pheno_cv0.1.59"
+galaxy_image_tag: ":latest"
 galaxy_pull_policy: "Always"
 galaxy_pvc: "galaxy-pvc"
 galaxy_create_pvc: true
@@ -51,6 +55,7 @@ galaxy_admin_email: ""
 galaxy_admin_username: "admin"
 galaxy_admin_password: ""
 galaxy_api_key: ""
+galaxy_tools_dest: "/opt/galaxy_data"
 
 # Ingress
 domain: "mydomain.dev"

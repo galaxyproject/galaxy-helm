@@ -22,6 +22,10 @@
 #
 # helm install --set galaxy_create_pvc=false
 #
+# To set a new destination for the tools directory. This is by default set to a location inside the PVC
+#
+# helm install --set galaxy_tools_dest="/path/to/tools"
+#
 # Above instructions can be used together, just concatenate with a comma.
 #
 
@@ -37,6 +41,7 @@ galaxy_metadata_name: "galaxy-k8s"
 galaxy_label_app: "galaxy-k8s"
 galaxy_internal_port: 8080
 galaxy_node_port_exposed: 30700
+galaxy_tools_dest: "/opt/galaxy_data/"
 
 # Ingress
 domain: "mydomain.dev" 

@@ -46,6 +46,10 @@ spec:
                 configMapKeyRef:
                       name: db-connection
                       key: db.name
+{{ if .Values.galaxy_tools_dest }}
+            - name: "TOOLS_DEST_PVC"
+              value: "{{.Values.galaxy_tools_dest}}"      
+{{ end }}
 {{ if and .Values.galaxy_admin_email (and .Values.galaxy_admin_password .Values.galaxy_api_key) }}
             - name: "GALAXY_ADMIN_EMAIL"
               valueFrom:

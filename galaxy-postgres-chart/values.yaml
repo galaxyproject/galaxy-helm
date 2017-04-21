@@ -36,9 +36,13 @@
 #
 # helm install --set galaxy_tools_dest="/path/to/tools"
 #
+# Set up supplementalGroups to GID 1000 for Kubernetes pods to write on privileged NFS. Needs to be an integer.
+#
+# helm install --set k8s_supp_group=1000
+#
 # Above instructions can be used together, just concatenate with a comma.
 # 
-
+# 
 # Galaxy RC
 galaxy_image_registry: "container-registry.phenomenal-h2020.eu/"
 galaxy_image: "phnmnl/galaxy-k8s-runtime"
@@ -56,6 +60,8 @@ galaxy_admin_username: "admin"
 galaxy_admin_password: ""
 galaxy_api_key: ""
 galaxy_tools_dest: "/opt/galaxy_data"
+
+k8s_supp_groups: ""
 
 # Ingress
 domain: "mydomain.dev"

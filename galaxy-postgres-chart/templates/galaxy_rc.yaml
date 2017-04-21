@@ -50,6 +50,10 @@ spec:
             - name: "TOOLS_DEST_PVC"
               value: "{{.Values.galaxy_tools_dest}}"      
 {{ end }}
+{{ if .Values.k8s_supp_groups }}
+            - name: "SUPP_GROUPS"
+              value: "{{.Values.k8s_supp_groups}}"
+{{ end }}
 {{ if and .Values.galaxy_admin_email (and .Values.galaxy_admin_password .Values.galaxy_api_key) }}
             - name: "GALAXY_ADMIN_EMAIL"
               valueFrom:
@@ -84,6 +88,10 @@ spec:
         volumeMounts:
           - mountPath: "/opt/galaxy_data"
             name: galaxy-pvc
+{{ if .Values.k8s_supp_group }}
+      securityContext:
+        supplementalGroups: [{{.Values.k8s_supp_group}}]
+{{ end }}
       volumes:
         - name: galaxy-pvc
           persistentVolumeClaim:

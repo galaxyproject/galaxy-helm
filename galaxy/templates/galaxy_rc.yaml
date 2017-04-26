@@ -8,6 +8,7 @@ spec:
     metadata:
       labels:
          app: {{.Values.galaxy_label_app}}
+{{ if .Values.galaxy_backend_postgres }}
       annotations:
         pod.beta.kubernetes.io/init-containers: |-
           [
@@ -21,12 +22,16 @@ spec:
               ]
             }
           ]
+{{ end }}
     spec:
       containers:
       - name: galaxy-k8s
         image: {{.Values.galaxy_image_registry}}{{.Values.galaxy_image}}{{.Values.galaxy_image_tag}}
         imagePullPolicy: {{.Values.galaxy_pull_policy}}
         env:
+            - name: "GALAXY_TOOLS_PULL_POLICY"
+              value: {{.Values.galaxy_pull_policy}} 
+{{ if .Values.galaxy_backend_postgres }}
             - name: "GALAXY_SEC_DB_ENGINE"
               value: "postgresql"
             - name: "GALAXY_SEC_DB_USER"
@@ -46,9 +51,18 @@ spec:
                 configMapKeyRef:
                       name: db-connection
                       key: db.name
+{{ end }}
 {{ if .Values.galaxy_tools_dest }}
             - name: "TOOLS_DEST_PVC"
               value: "{{.Values.galaxy_tools_dest}}"      
+{{ end }}
+{{ if .Values.k8s_supp_groups }}
+            - name: "SUPP_GROUPS"
+              value: "{{.Values.k8s_supp_groups}}"
+{{ end }}
+{{ if .Values.k8s_fs_group }}
+            - name: "FS_GROUP"
+              value: "{{.Values.k8s_fs_group}}"
 {{ end }}
 {{ if and .Values.galaxy_admin_email (and .Values.galaxy_admin_password .Values.galaxy_api_key) }}
             - name: "GALAXY_ADMIN_EMAIL"
@@ -84,8 +98,40 @@ spec:
         volumeMounts:
           - mountPath: "/opt/galaxy_data"
             name: galaxy-pvc
+{{ if .Values.development_folder }}
+          - mountPath: "/galaxy/config/galaxy.ini"
+            name: galaxy-ini 
+          - mountPath: "/galaxy/config/job_conf.xml"
+            name: galaxy-job-conf 
+          - mountPath: "/galaxy/config/tool_conf.xml"
+            name: galaxy-tool-conf
+          - mountPath: "/galaxy/tools/phenomenal"
+            name: phenomenal-tools           
+{{ end }}
+{{ if or .Values.k8s_supp_groups .Values.k8s_fs_group }}
+      securityContext:
+{{ if .Values.k8s_supp_groups }}
+        supplementalGroups: [{{.Values.k8s_supp_groups}}]
+{{ end }}
+{{ if .Values.k8s_fs_group }}
+        fsGroup: {{.Values.k8s_fs_group}}
+{{ end }}
+{{ end }}
       volumes:
         - name: galaxy-pvc
           persistentVolumeClaim:
               claimName: {{.Values.galaxy_pvc}}
-
+{{ if .Values.development_folder }}
+        - name: galaxy-ini
+          hostPath:
+            path: {{ .Values.development_folder }}/config/galaxy.ini
+        - name: galaxy-job-conf
+          hostPath:
+            path: {{ .Values.development_folder }}/config/job_conf.xml
+        - name: galaxy-tool-conf
+          hostPath:
+            path: {{ .Values.development_folder }}/config/tool_conf.xml
+        - name: phenomenal-tools
+          hostPath:
+            path: {{ .Values.development_folder }}/tools/phenomenal
+{{ end }}

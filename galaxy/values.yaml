@@ -36,14 +36,25 @@
 #
 # helm install --set galaxy_tools_dest="/path/to/tools"
 #
+# Set up supplementalGroups to GID 1000 for Kubernetes pods to write on privileged NFS. Needs to be an integer.
+#
+# helm install --set k8s_supp_group=1000
+#
+# Set up fsGroups to GID 2300 for Kubernetes to write on privileged file system. Needs to be an integer
+#
+# helm install --set ks8_fs_group=2300
+#
+# For development mode, having config, tools and tools galaxy folders on <your_folder>, run with 
+# helm install --set development_folder=<your_folder> galaxy-simple
+#
 # Above instructions can be used together, just concatenate with a comma.
 # 
-
+# 
 # Galaxy RC
 galaxy_image_registry: "container-registry.phenomenal-h2020.eu/"
 galaxy_image: "phnmnl/galaxy-k8s-runtime"
 galaxy_image_tag: ":latest"
-galaxy_pull_policy: "Always"
+galaxy_pull_policy: "IfNotPresent"
 galaxy_pvc: "galaxy-pvc"
 galaxy_create_pvc: true
 galaxy_pvc_capacity: "15Gi"
@@ -56,10 +67,13 @@ galaxy_admin_username: "admin"
 galaxy_admin_password: ""
 galaxy_api_key: ""
 galaxy_tools_dest: "/opt/galaxy_data"
+galaxy_backend_postgres: false
+
+k8s_supp_groups: ""
 
 # Ingress
 domain: "mydomain.dev"
 
-postgres:
+postgres_for_galaxy:
         db_password: "mypassword"
         postgres_pvc: "galaxy-pvc" 

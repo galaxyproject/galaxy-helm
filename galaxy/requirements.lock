@@ -1,0 +1,9 @@
+dependencies:
+- condition: ""
+  enabled: false
+  name: postgres_for_galaxy
+  repository: https://pcm32.github.io/galaxy-helm-charts
+  tags: null
+  version: 0.1.1
+digest: sha256:25933ca2e064ecfa3aaea3b3979d7e37236af82cc679ce69738e07f12e2c89bb
+generated: 2017-04-21T12:28:20.832459522+01:00

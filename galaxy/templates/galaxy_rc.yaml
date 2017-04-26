@@ -29,6 +29,8 @@ spec:
         image: {{.Values.galaxy_image_registry}}{{.Values.galaxy_image}}{{.Values.galaxy_image_tag}}
         imagePullPolicy: {{.Values.galaxy_pull_policy}}
         env:
+            - name: "GALAXY_TOOLS_PULL_POLICY"
+              value: {{.Values.galaxy_pull_policy}} 
 {{ if .Values.galaxy_backend_postgres }}
             - name: "GALAXY_SEC_DB_ENGINE"
               value: "postgresql"
@@ -57,6 +59,10 @@ spec:
 {{ if .Values.k8s_supp_groups }}
             - name: "SUPP_GROUPS"
               value: "{{.Values.k8s_supp_groups}}"
+{{ end }}
+{{ if .Values.k8s_fs_group }}
+            - name: "FS_GROUP"
+              value: "{{.Values.k8s_fs_group}}"
 {{ end }}
 {{ if and .Values.galaxy_admin_email (and .Values.galaxy_admin_password .Values.galaxy_api_key) }}
             - name: "GALAXY_ADMIN_EMAIL"
@@ -92,9 +98,24 @@ spec:
         volumeMounts:
           - mountPath: "/opt/galaxy_data"
             name: galaxy-pvc
-{{ if .Values.k8s_supp_group }}
+{{ if .Values.development_folder }}
+          - mountPath: "/galaxy/config/galaxy.ini"
+            name: galaxy-ini 
+          - mountPath: "/galaxy/config/job_conf.xml"
+            name: galaxy-job-conf 
+          - mountPath: "/galaxy/config/tool_conf.xml"
+            name: galaxy-tool-conf
+          - mountPath: "/galaxy/tools/phenomenal"
+            name: phenomenal-tools           
+{{ end }}
+{{ if or .Values.k8s_supp_groups .Values.k8s_fs_group }}
       securityContext:
-        supplementalGroups: [{{.Values.k8s_supp_group}}]
+{{ if .Values.k8s_supp_groups }}
+        supplementalGroups: [{{.Values.k8s_supp_groups}}]
+{{ end }}
+{{ if .Values.k8s_fs_group }}
+        fsGroup: {{.Values.k8s_fs_group}}
+{{ end }}
 {{ end }}
       volumes:
         - name: galaxy-pvc

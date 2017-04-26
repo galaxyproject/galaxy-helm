@@ -40,6 +40,9 @@
 #
 # helm install --set k8s_supp_group=1000
 #
+# For development mode, having config, tools and tools galaxy folders on <your_folder>, run with 
+# helm install --set development_folder=<your_folder> galaxy-simple
+#
 # Above instructions can be used together, just concatenate with a comma.
 # 
 # 

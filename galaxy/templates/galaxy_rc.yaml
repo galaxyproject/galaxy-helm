@@ -100,4 +100,17 @@ spec:
         - name: galaxy-pvc
           persistentVolumeClaim:
               claimName: {{.Values.galaxy_pvc}}
-
+{{ if .Values.development_folder }}
+        - name: galaxy-ini
+          hostPath:
+            path: {{ .Values.development_folder }}/config/galaxy.ini
+        - name: galaxy-job-conf
+          hostPath:
+            path: {{ .Values.development_folder }}/config/job_conf.xml
+        - name: galaxy-tool-conf
+          hostPath:
+            path: {{ .Values.development_folder }}/config/tool_conf.xml
+        - name: phenomenal-tools
+          hostPath:
+            path: {{ .Values.development_folder }}/tools/phenomenal
+{{ end }}

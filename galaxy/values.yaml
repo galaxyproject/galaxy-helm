@@ -60,12 +60,13 @@ galaxy_admin_username: "admin"
 galaxy_admin_password: ""
 galaxy_api_key: ""
 galaxy_tools_dest: "/opt/galaxy_data"
+galaxy_backend_postgres: false
 
 k8s_supp_groups: ""
 
 # Ingress
 domain: "mydomain.dev"
 
-postgres:
+postgres_for_galaxy:
         db_password: "mypassword"
         postgres_pvc: "galaxy-pvc" 

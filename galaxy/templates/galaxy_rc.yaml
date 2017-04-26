@@ -8,6 +8,7 @@ spec:
     metadata:
       labels:
          app: {{.Values.galaxy_label_app}}
+{{ if .Values.galaxy_backend_postgres }}
       annotations:
         pod.beta.kubernetes.io/init-containers: |-
           [
@@ -21,12 +22,14 @@ spec:
               ]
             }
           ]
+{{ end }}
     spec:
       containers:
       - name: galaxy-k8s
         image: {{.Values.galaxy_image_registry}}{{.Values.galaxy_image}}{{.Values.galaxy_image_tag}}
         imagePullPolicy: {{.Values.galaxy_pull_policy}}
         env:
+{{ if .Values.galaxy_backend_postgres }}
             - name: "GALAXY_SEC_DB_ENGINE"
               value: "postgresql"
             - name: "GALAXY_SEC_DB_USER"
@@ -46,6 +49,7 @@ spec:
                 configMapKeyRef:
                       name: db-connection
                       key: db.name
+{{ end }}
 {{ if .Values.galaxy_tools_dest }}
             - name: "TOOLS_DEST_PVC"
               value: "{{.Values.galaxy_tools_dest}}"      

@@ -99,7 +99,7 @@ spec:
           - mountPath: "/opt/galaxy_data"
             name: galaxy-pvc
 {{ if .Values.development_folder }}
-          - mountPath: "/galaxy/config/galaxy.ini"
+          - mountPath: "/galaxy/config/galaxy.ini.injected"
             name: galaxy-ini 
           - mountPath: "/galaxy/config/job_conf.xml"
             name: galaxy-job-conf 

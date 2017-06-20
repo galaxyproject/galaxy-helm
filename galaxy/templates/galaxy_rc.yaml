@@ -86,7 +86,7 @@ spec:
                       name: galaxy-admin-secret
                       key: api-key
 {{ end }}
-        command: ["/bin/bash","-c","./ansible/run_galaxy_config.sh > config_db.log && ./run.sh --daemon && tail -f paster.log"]
+        command: ["/bin/bash","-c","{{ if not .Values.galaxy_backend_postgres }}mkdir -p /opt/galaxy_data/database-sqlite && {{ end }}./ansible/run_galaxy_config.sh > config_db.log && ./run.sh --daemon && tail -f paster.log"]
         lifecycle: 
           preStop:
             exec:

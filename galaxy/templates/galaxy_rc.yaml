@@ -86,6 +86,20 @@ spec:
                       name: galaxy-admin-secret
                       key: api-key
 {{ end }}
+{{ if and .Values.smtp_server (and .Values.smtp_username .Values.smtp_password) }}
+            - name: "GALAXY_SMTP_SERVER"
+              value: "{{.Values.smtp_server}}"
+            - name: "GALAXY_SMTP_USERNAME"
+              value: "{{.Values.smtp_username}}"
+            - name: "GALAXY_SMTP_PASSWORD"
+              value: "{{.Values.smtp_password}}"
+            - name: "GALAXY_EMAIL_FROM"
+              value: "{{.Values.email_from}}"
+            - name: "GALAXY_URL"
+              value: "{{.Values.instance_resource_url}}"
+            - name: "GALAXY_SMTP_SSL"
+              value: "{{.Values.smtp_ssl}}" 
+{{ end }}
         command: ["/bin/bash","-c","{{ if not .Values.galaxy_backend_postgres }}mkdir -p /opt/galaxy_data/database-sqlite && {{ end }}./ansible/run_galaxy_config.sh > config_db.log && ./run.sh --daemon && tail -f paster.log"]
         lifecycle: 
           preStop:

@@ -47,6 +47,10 @@
 # For development mode, having config, tools and tools galaxy folders on <your_folder>, run with 
 # helm install --set development_folder=<your_folder> galaxy-simple
 #
+# For setting up an SMTP server for sending mail
+#
+# helm install --set smtp_server="your-server:port",smtp_username="your-user",smtp_password="your-pass",email_from="email-from@smtp-domain",instance_resource_url="https://your-galaxy-url",smtp_ssl=True
+#
 # Above instructions can be used together, just concatenate with a comma.
 # 
 # 
@@ -77,3 +81,6 @@ domain: "mydomain.dev"
 postgres_for_galaxy:
         db_password: "mypassword"
         postgres_pvc: "galaxy-pvc" 
+
+smtp_ssl: "False"
+

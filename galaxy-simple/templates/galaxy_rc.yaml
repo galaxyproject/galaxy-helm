@@ -13,7 +13,12 @@ spec:
       - name: galaxy-k8s
         image: {{.Values.galaxy_image_registry}}{{.Values.galaxy_image}}{{.Values.galaxy_image_tag}}
         imagePullPolicy: {{.Values.galaxy_pull_policy}}
-        command: ["/bin/bash","-c", "mkdir -p /opt/galaxy_data/database-sqlite && ./run.sh --daemon && tail -f paster.log"]
+        {{ if .Values.galaxy_tools_dest }}
+        env:
+                - name: "TOOLS_DEST_PVC"
+                  value: "{{.Values.galaxy_tools_dest}}"      
+        {{ end }}
+        command: ["/bin/bash","-c", "mkdir -p /opt/galaxy_data/database-sqlite && ./ansible/run_galaxy_config.sh > galaxy_config.log && ./run.sh --daemon && tail -f paster.log"]
         lifecycle: 
           preStop:
             exec:

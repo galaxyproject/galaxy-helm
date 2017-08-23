@@ -8,6 +8,7 @@ spec:
     metadata:
       labels:
          app: {{.Values.galaxy_label_app}}
+{{ if .Values.galaxy_backend_postgres }}
       annotations:
         pod.beta.kubernetes.io/init-containers: |-
           [
@@ -21,12 +22,16 @@ spec:
               ]
             }
           ]
+{{ end }}
     spec:
       containers:
       - name: galaxy-k8s
         image: {{.Values.galaxy_image_registry}}{{.Values.galaxy_image}}{{.Values.galaxy_image_tag}}
         imagePullPolicy: {{.Values.galaxy_pull_policy}}
         env:
+            - name: "GALAXY_TOOLS_PULL_POLICY"
+              value: {{.Values.galaxy_pull_policy}} 
+{{ if .Values.galaxy_backend_postgres }}
             - name: "GALAXY_SEC_DB_ENGINE"
               value: "postgresql"
             - name: "GALAXY_SEC_DB_USER"
@@ -46,6 +51,19 @@ spec:
                 configMapKeyRef:
                       name: db-connection
                       key: db.name
+{{ end }}
+{{ if .Values.galaxy_tools_dest }}
+            - name: "TOOLS_DEST_PVC"
+              value: "{{.Values.galaxy_tools_dest}}"      
+{{ end }}
+{{ if .Values.k8s_supp_groups }}
+            - name: "SUPP_GROUPS"
+              value: "{{.Values.k8s_supp_groups}}"
+{{ end }}
+{{ if .Values.k8s_fs_group }}
+            - name: "FS_GROUP"
+              value: "{{.Values.k8s_fs_group}}"
+{{ end }}
 {{ if and .Values.galaxy_admin_email (and .Values.galaxy_admin_password .Values.galaxy_api_key) }}
             - name: "GALAXY_ADMIN_EMAIL"
               valueFrom:
@@ -68,7 +86,21 @@ spec:
                       name: galaxy-admin-secret
                       key: api-key
 {{ end }}
-        command: ["/bin/bash","-c","./ansible/run_galaxy_config.sh > config_db.log && ./run.sh --daemon && tail -f paster.log"]
+{{ if and .Values.smtp_server (and .Values.smtp_username .Values.smtp_password) }}
+            - name: "GALAXY_SMTP_SERVER"
+              value: "{{.Values.smtp_server}}"
+            - name: "GALAXY_SMTP_USERNAME"
+              value: "{{.Values.smtp_username}}"
+            - name: "GALAXY_SMTP_PASSWORD"
+              value: "{{.Values.smtp_password}}"
+            - name: "GALAXY_EMAIL_FROM"
+              value: "{{.Values.email_from}}"
+            - name: "GALAXY_URL"
+              value: "{{.Values.instance_resource_url}}"
+            - name: "GALAXY_SMTP_SSL"
+              value: "{{.Values.smtp_ssl}}" 
+{{ end }}
+        command: ["/bin/bash","-c","{{ if not .Values.galaxy_backend_postgres }}mkdir -p /opt/galaxy_data/database-sqlite && {{ end }}./ansible/run_galaxy_config.sh > config_db.log && ./run.sh --daemon && tail -f paster.log"]
         lifecycle: 
           preStop:
             exec:
@@ -80,8 +112,40 @@ spec:
         volumeMounts:
           - mountPath: "/opt/galaxy_data"
             name: galaxy-pvc
+{{ if .Values.development_folder }}
+          - mountPath: "/galaxy/config/galaxy.ini.injected"
+            name: galaxy-ini 
+          - mountPath: "/galaxy/config/job_conf.xml"
+            name: galaxy-job-conf 
+          - mountPath: "/galaxy/config/tool_conf.xml"
+            name: galaxy-tool-conf
+          - mountPath: "/galaxy/tools/phenomenal"
+            name: phenomenal-tools           
+{{ end }}
+{{ if or .Values.k8s_supp_groups .Values.k8s_fs_group }}
+      securityContext:
+{{ if .Values.k8s_supp_groups }}
+        supplementalGroups: [{{.Values.k8s_supp_groups}}]
+{{ end }}
+{{ if .Values.k8s_fs_group }}
+        fsGroup: {{.Values.k8s_fs_group}}
+{{ end }}
+{{ end }}
       volumes:
         - name: galaxy-pvc
           persistentVolumeClaim:
               claimName: {{.Values.galaxy_pvc}}
-
+{{ if .Values.development_folder }}
+        - name: galaxy-ini
+          hostPath:
+            path: {{ .Values.development_folder }}/config/galaxy.ini
+        - name: galaxy-job-conf
+          hostPath:
+            path: {{ .Values.development_folder }}/config/job_conf.xml
+        - name: galaxy-tool-conf
+          hostPath:
+            path: {{ .Values.development_folder }}/config/tool_conf.xml
+        - name: phenomenal-tools
+          hostPath:
+            path: {{ .Values.development_folder }}/tools/phenomenal
+{{ end }}

@@ -110,7 +110,7 @@ metadata:
   name: galaxy-ingress
 spec:
   rules:
-  - host: galaxy.{{ .Values.domain }}
+  - host: {{.Values.hostname}}.{{.Values.domain}}
     http:
       paths:
       - path: /

@@ -77,6 +77,7 @@ k8s_supp_groups: ""
 
 # Ingress
 domain: "mydomain.dev"
+hostname: "galaxy"
 
 postgres_for_galaxy:
         db_password: "mypassword"

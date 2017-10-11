@@ -56,7 +56,9 @@ spec:
 {{ end }}
 {{ if .Values.galaxy_tools_dest }}
             - name: "TOOLS_DEST_PVC"
-              value: "{{.Values.galaxy_tools_dest}}"      
+              value: "{{.Values.galaxy_tools_dest}}"
+            - name: "GALAXY_CONFIG_TOOL_PATH"
+              value: "{{.Values.galaxy_tools_dest}}"   
 {{ end }}
 {{ if .Values.k8s_supp_groups }}
             - name: "SUPP_GROUPS"

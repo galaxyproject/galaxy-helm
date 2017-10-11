@@ -51,6 +51,10 @@
 #
 # helm install --set smtp_server="your-server:port",smtp_username="your-user",smtp_password="your-pass",email_from="email-from@smtp-domain",instance_resource_url="https://your-galaxy-url",smtp_ssl=True
 #
+# To setup a subpath for postgres within the PVC
+#
+# helm install --set postgres_for_galaxy.subpath="otherDirectory/inside/pvc" ....
+#
 # Above instructions can be used together, just concatenate with a comma.
 # 
 # 
@@ -82,6 +86,7 @@ hostname: "galaxy"
 postgres_for_galaxy:
         db_password: "mypassword"
         postgres_pvc: "galaxy-pvc" 
+        subpath: ""
 
 smtp_ssl: "False"
 

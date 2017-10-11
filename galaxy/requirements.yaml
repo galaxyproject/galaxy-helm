@@ -1,5 +1,5 @@
 dependencies:
       - name: postgres_for_galaxy
         repository: https://pcm32.github.io/galaxy-helm-charts
-        version: 0.1.1
+        version: 0.1.2
         condition: galaxy_backend_postgres

@@ -36,6 +36,9 @@ spec:
         volumeMounts:
           - mountPath: {{.Values.postgres_mount_point_PGDATA}}
             name: postgres-pvc
+{{ if .Values.subpath }}
+            subPath: {{.Values.subpath}}
+{{ end }}
       volumes:
         - name: postgres-pvc
           persistentVolumeClaim:

@@ -51,6 +51,8 @@ spec:
                 configMapKeyRef:
                       name: db-connection
                       key: db.name
+            - name: "GALAXY_CONFIG_DATABASE_CONNECTION"
+              value: "$GALAXY_SEC_DB_ENGINE://$GALAXY_SEC_DB_HOST/$GALAXY_SEC_DB_NAME?client_encoding=utf8"
 {{ end }}
 {{ if .Values.galaxy_tools_dest }}
             - name: "TOOLS_DEST_PVC"

@@ -72,6 +72,11 @@ spec:
                 configMapKeyRef:
                       name: galaxy-admin-user
                       key: email
+            - name: "GALAXY_CONFIG_ADMIN_USERS"
+              valueFrom:
+                configMapKeyRef:
+                      name: galaxy-admin-user
+                      key: email
             - name: "GALAXY_ADMIN_USER"
               valueFrom:
                 configMapKeyRef:
@@ -87,6 +92,12 @@ spec:
                 secretKeyRef:
                       name: galaxy-admin-secret
                       key: api-key
+            - name: "GALAXY_CONFIG_MASTER_API_KEY"
+              valueFrom:
+                secretKeyRef:
+                      name: galaxy-admin-secret
+                      key: api-key
+
 {{ end }}
 {{ if and .Values.smtp_server (and .Values.smtp_username .Values.smtp_password) }}
             - name: "GALAXY_SMTP_SERVER"

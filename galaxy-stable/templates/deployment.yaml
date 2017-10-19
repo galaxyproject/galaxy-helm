@@ -1,0 +1,214 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        release: {{ .Release.Name }}
+{{ if .Values.galaxy.backend.postgres }}
+      annotations:
+        pod.beta.kubernetes.io/init-containers: |-
+          [
+            {
+              "name": "postgres-listener",
+              "image": "alpine",
+              "imagePullPolicy": "IfNotPresent",
+              "command": [
+                "sh", "-c",
+                "for i in $(seq 1 200); do nc -z -w3 postgresql-for-galaxy 5432 && exit 0 || sleep 3; done; exit 1"
+              ]
+            }
+          ]
+{{ end }}
+    spec:
+      containers:
+        - name: galaxy-k8s
+          image: "{{.Values.galaxy.image.repository}}:{{.Values.galaxy.image.tag}}"
+          imagePullPolicy: {{.Values.galaxy.image.pullPolicy}}
+          env:
+              - name: "GALAXY_TOOLS_PULL_POLICY"
+                value: {{.Values.galaxy.image.pullPolicy}} 
+              {{ if .Values.galaxy.backend.postgres }}
+              - name: "GALAXY_SEC_DB_ENGINE"
+                value: "postgresql"
+              - name: "GALAXY_SEC_DB_USER"
+                valueFrom:
+                  configMapKeyRef:
+                        name: db-connection
+                        key: db.user
+              - name: "GALAXY_SEC_DB_PASS"
+                valueFrom:
+                  secretKeyRef:
+                        name: galaxy-postgres-secret
+                        key: password
+              - name: "GALAXY_SEC_DB_HOST"
+                value: "postgresql-for-galaxy"
+              - name: "GALAXY_SEC_DB_NAME"
+                valueFrom:
+                  configMapKeyRef:
+                        name: db-connection
+                        key: db.name
+              - name: "GALAXY_CONFIG_DATABASE_CONNECTION"
+                value: "$GALAXY_SEC_DB_ENGINE://$GALAXY_SEC_DB_HOST/$GALAXY_SEC_DB_NAME?client_encoding=utf8"
+              {{ end }}
+              {{ if .Values.galaxy.tools.destination }}
+              - name: "TOOLS_DEST_PVC"
+                value: "{{.Values.galaxy.tools.destination}}"
+              - name: "GALAXY_CONFIG_TOOL_PATH"
+                value: "{{.Values.galaxy.tools.destination}}"   
+              {{ end }}
+              {{ if .Values.galaxy.k8s.supp_groups }}
+              - name: "SUPP_GROUPS"
+                value: "{{.Values.galaxy.k8s.supp_groups}}"
+              {{ end }}
+              {{ if .Values.galaxy.k8s.fs_group }}
+              - name: "FS_GROUP"
+                value: "{{.Values.galaxy.k8s.fs_group}}"
+              {{ end }}
+              {{ if and .Values.galaxy.admin.email (and .Values.galaxy.admin.password .Values.galaxy.admin.api_key) }}
+              - name: "GALAXY_ADMIN_EMAIL"
+                valueFrom:
+                  configMapKeyRef:
+                        name: galaxy-admin-user
+                        key: email
+              - name: "GALAXY_CONFIG_ADMIN_USERS"
+                valueFrom:
+                  configMapKeyRef:
+                        name: galaxy-admin-user
+                        key: email
+              - name: "GALAXY_ADMIN_USER"
+                valueFrom:
+                  configMapKeyRef:
+                        name: galaxy-admin-user
+                        key: user
+              - name: "GALAXY_ADMIN_PASSWORD"
+                valueFrom:
+                  secretKeyRef:
+                        name: galaxy-admin-secret
+                        key: password
+              - name: "GALAXY_API_KEY"
+                valueFrom:
+                  secretKeyRef:
+                        name: galaxy-admin-secret
+                        key: api-key
+              - name: "GALAXY_CONFIG_MASTER_API_KEY"
+                valueFrom:
+                  secretKeyRef:
+                        name: galaxy-admin-secret
+                        key: api-key
+              - name: "GALAXY_CONFIG_ALLOW_USER_DELETION"
+                value: "True"
+              {{ end }}
+              {{ if and .Values.galaxy.smtp.server (and .Values.galaxy.smtp.username .Values.galaxy.smtp.password) }}
+              - name: "GALAXY_SMTP_SERVER"
+                value: "{{.Values.galaxy.smtp.server}}"
+              - name: "GALAXY_CONFIG_SMTP_SERVER"
+                value: "{{.Values.galaxy.smtp.server}}"
+              - name: "GALAXY_SMTP_USERNAME"
+                value: "{{.Values.galaxy.smtp.username}}"
+              - name: "GALAXY_CONFIG_SMTP_USERNAME"
+                value: "{{.Values.galaxy.smtp.username}}"
+              - name: "GALAXY_SMTP_PASSWORD"
+                value: "{{.Values.galaxy.smtp.password}}"
+              - name: "GALAXY_CONFIG_SMTP_PASSWORD"
+                value: "{{.Values.galaxy.smtp.password}}"
+              - name: "GALAXY_EMAIL_FROM"
+                value: "{{.Values.galaxy.smtp.email_from}}"
+              - name: "GALAXY_CONFIG_EMAIL_FROM"
+                value: "{{.Values.galaxy.smtp.email_from}}"
+              - name: "GALAXY_URL"
+                value: "{{.Values.galaxy.instance_resource_url}}"
+              - name: "GALAXY_CONFIG_URL"
+                value: "{{.Values.galaxy.instance_resource_url}}"
+              - name: "GALAXY_SMTP_SSL"
+                value: "{{.Values.galaxy.smtp.ssl}}" 
+              - name: "GALAXY_CONFIG_SMTP_SSL"
+                value: "{{.Values.galaxy.smtp.ssl}}"
+              {{ end }}
+          command: ["/bin/bash","-c","{{ if not .Values.galaxy.backend.postgres }}mkdir -p /export/database-sqlite && {{ end }}./ansible/run_galaxy_config.sh > config_db.log && /usr/bin/startup"]
+          lifecycle: 
+            preStop:
+              exec:
+                 command:
+                     - "./run.sh"
+                     - "--stop" 
+          ports:
+            - containerPort: {{.Values.galaxy.internal_port}}
+          volumeMounts:
+            - mountPath: "/export"
+              name: {{.Values.galaxy.pvc.name}}
+              {{ if .Values.galaxy.pvc.subPath }}
+              subPath: {{.Values.galaxy.pvc.subPath}}
+              {{ end }}
+            {{ if .Values.development_folder }}
+            - mountPath: "/galaxy/config/galaxy.ini.injected"
+              name: galaxy-ini 
+            - mountPath: "/galaxy/config/job_conf.xml"
+              name: galaxy-job-conf 
+            - mountPath: "/galaxy/config/tool_conf.xml"
+              name: galaxy-tool-conf
+            - mountPath: "/galaxy/tools/phenomenal"
+              name: phenomenal-tools           
+            {{ end }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.galaxy.internalPort }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.galaxy.internalPort }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+
+        - name: galaxy-init
+          image: "{{ .Values.galaxy.init.image.repository }}:{{ .Values.galaxy.init.image.tag }}"
+          imagePullPolicy: {{ .Values.galaxy.init.image.pullPolicy }}
+          volumeMounts:
+            - mountPath: "/export"
+              name: {{.Values.galaxy.pvc.name}}
+              {{ if .Values.galaxy.pvc.subPath }}
+              subPath: {{.Values.galaxy.pvc.subPath}}
+              {{ end }}
+          resources:
+{{ toYaml .Values.galaxy.init.resources | indent 12 }}
+    {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+    {{- end }}
+{{ if or .Values.galaxy.k8s.supp_groups .Values.galaxy.k8s.fs_group }}
+      securityContext:
+{{ if .Values.galaxy.k8s.supp_groups }}
+        supplementalGroups: [{{.Values.galaxy.k8s.supp_groups}}]
+{{ end }}
+{{ if .Values.galaxy.k8s.fs_group }}
+        fsGroup: {{.Values.galaxy.k8s.fs_group}}
+{{ end }}
+{{ end }}
+      volumes:
+        - name: {{.Values.galaxy.pvc.name}}
+          persistentVolumeClaim:
+              claimName: {{.Values.galaxy.pvc.name}}
+        {{ if .Values.development_folder }}
+        - name: galaxy-ini
+          hostPath:
+            path: {{ .Values.development_folder }}/config/galaxy.ini
+        - name: galaxy-job-conf
+          hostPath:
+            path: {{ .Values.development_folder }}/config/job_conf.xml
+        - name: galaxy-tool-conf
+          hostPath:
+            path: {{ .Values.development_folder }}/config/tool_conf.xml
+        - name: phenomenal-tools
+          hostPath:
+            path: {{ .Values.development_folder }}/tools/phenomenal
+        {{ end }}

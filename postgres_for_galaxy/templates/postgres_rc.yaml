@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
       - name: postgresql-server
-        image: postgres{{.Values.postgres_image_tag}}
+        image: {{.Values.postgres_image}}{{.Values.postgres_image_tag}}
         env:
           - name: "PGDATA"
             value: {{.Values.postgres_mount_point_PGDATA}}/{{.Values.postgres_PGDATA}}

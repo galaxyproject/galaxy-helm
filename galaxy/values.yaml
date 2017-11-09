@@ -79,6 +79,7 @@ galaxy_backend_postgres: false
 
 legacy:
    pre_k8s_16: false
+rbac_needed: false
 
 k8s_supp_groups: ""
 

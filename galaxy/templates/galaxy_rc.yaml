@@ -8,7 +8,7 @@ spec:
     metadata:
       labels:
          app: {{.Values.galaxy_label_app}}
-{{ if .Values.galaxy_backend_postgres }}
+{{ if and .Values.galaxy_backend_postgres .Values.legacy_pre_k8s_16}}
       annotations:
         pod.beta.kubernetes.io/init-containers: |-
           [
@@ -24,6 +24,13 @@ spec:
           ]
 {{ end }}
     spec:
+      initContainers:
+        {{ if and .Values.galaxy_backend_postgres (not .Values.legacy.pre_k8s_16) }}
+        - name: postgres-listener-v2
+          image: alpine
+          imagePullPolicy: IfNotPresent
+          command: [ "sh", "-c", "for i in $(seq 1 200); do nc -z -w3 postgresql-for-galaxy 5432 && exit 0 || sleep 3; done; exit 1"]
+        {{ end }}
       containers:
       - name: galaxy-k8s
         image: {{.Values.galaxy_image_registry}}{{.Values.galaxy_image}}{{.Values.galaxy_image_tag}}

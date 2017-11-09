@@ -77,6 +77,9 @@ galaxy_api_key: ""
 galaxy_tools_dest: "/opt/galaxy_data"
 galaxy_backend_postgres: false
 
+legacy:
+   pre_k8s_16: false
+
 k8s_supp_groups: ""
 
 # Ingress

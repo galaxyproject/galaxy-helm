@@ -38,7 +38,7 @@ spec:
             - name: "DISABLE_SLEEPLOCK"
               value: "yes" 
           volumeMounts:
-            - mountPath: "/export"
+            - mountPath: {{.Values.export_dir}}
               name: {{.Values.galaxy.pvc.name}}
               {{ if .Values.galaxy.pvc.subPath }}
               subPath: {{.Values.galaxy.pvc.subPath}}
@@ -134,9 +134,11 @@ spec:
                 value: "{{.Values.galaxy.instance_resource_url}}"
               - name: "GALAXY_CONFIG_SMTP_SSL"
                 value: "{{.Values.galaxy.smtp.ssl}}"
+              - name: "GALAXY_RUNNERS_K8S_PERSISTENT_VOLUME_CLAIM_MOUNT_PATH"
+                value: "{{.Values.export_dir}}" 
               {{ end }}
-          command: ["/bin/bash","-c","{{ if not .Values.galaxy.backend.postgres }}mkdir -p /export/database-sqlite && {{ end }}export GALAXY_CONFIG_DATABASE_CONNECTION=${GALAXY_SEC_DB_ENGINE}://${GALAXY_SEC_DB_USER}:${GALAXY_SEC_DB_PASS}@${GALAXY_SEC_DB_HOST}/${GALAXY_SEC_DB_NAME}?client_encoding=utf8 && /usr/bin/startup"]
-          workingDir: "/export"
+          command: ["/bin/bash","-c","{{ if not .Values.galaxy.backend.postgres }}mkdir -p {{.Values.export_dir}}/database-sqlite && {{ end }}export GALAXY_CONFIG_DATABASE_CONNECTION=${GALAXY_SEC_DB_ENGINE}://${GALAXY_SEC_DB_USER}:${GALAXY_SEC_DB_PASS}@${GALAXY_SEC_DB_HOST}/${GALAXY_SEC_DB_NAME}?client_encoding=utf8 && /usr/bin/startup"]
+          workingDir: {{.Values.export_dir}}
           lifecycle: 
             preStop:
               exec:
@@ -146,19 +148,19 @@ spec:
           ports:
             - containerPort: {{.Values.galaxy.internal_port}}
           volumeMounts:
-            - mountPath: "/export"
+            - mountPath: {{.Values.export_dir}}
               name: {{.Values.galaxy.pvc.name}}
               {{ if .Values.galaxy.pvc.subPath }}
               subPath: {{.Values.galaxy.pvc.subPath}}
               {{ end }}
             {{ if .Values.development_folder }}
-            - mountPath: "/export/config/galaxy.ini.injected"
+            - mountPath: "{{.Values.export_dir}}/config/galaxy.ini.injected"
               name: galaxy-ini 
-            - mountPath: "/export/config/job_conf.xml"
+            - mountPath: "{{.Values.export_dir}}/config/job_conf.xml"
               name: galaxy-job-conf 
-            - mountPath: "/export/config/tool_conf.xml"
+            - mountPath: "{{.Values.export_dir}}/config/tool_conf.xml"
               name: galaxy-tool-conf
-            - mountPath: "/export/tools"
+            - mountPath: "{{.Values.export_dir}}/tools"
               name: tools           
             {{ end }}
           #livenessProbe:

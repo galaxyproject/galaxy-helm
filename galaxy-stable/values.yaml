@@ -78,3 +78,20 @@ postgres_for_galaxy:
   subpath: ""
 legacy:
   pre_k8s_16: false
+
+use_proftpd: true
+
+proftpd:
+  image: 
+    repository: "abhikghosh41/galaxy-proftpd"
+    tag: "latest"
+  passive_port:
+    low: 30000
+    high: 30010
+  use_sftp: true
+  service:
+    name: "proftpd-svc"
+  generate_ssh_key: false
+  node_port_exposed: 30722
+
+

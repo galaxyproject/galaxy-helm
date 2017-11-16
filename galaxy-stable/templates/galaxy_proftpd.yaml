@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: {{ .Release.Name }}-proftpd
   labels:
-    app: {{ template "name" . }}
+    app: {{ .Release.Name }}-proftpd
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}

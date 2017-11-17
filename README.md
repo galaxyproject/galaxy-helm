@@ -123,7 +123,7 @@ Provided that the tools have mappings to docker containers via normal Galaxy mec
 helm install -f example_configs/simple-config-galaxy-stable.yaml galaxy-helm-repo/galaxy-stable
 ```
 
-Please not the use of **galaxy-stable** at the end of the call, instead of **galaxy**. In time the **galaxy** chart used in previous examples will be deprecated in favour of **galaxy-stable**.
+Please note the use of **galaxy-stable** at the end of the call, instead of **galaxy**. In time the **galaxy** chart used in previous examples will be deprecated in favour of **galaxy-stable**.
 
 This will generate a galaxy instance available on any of the IPs of the Kubernetes clusters on port `30700`.
 
@@ -132,7 +132,7 @@ This will generate a galaxy instance available on any of the IPs of the Kubernet
 Since the PhenoMeNal Galaxy instance was the precursor in the use of Galaxy within Kubernetes, this example has been tested more.
 
 ```
-helm install -f example_configs/phenomenal-simple-config-galaxy-stable.yaml galaxy-helm-repo/galaxy-stable
+helm install -f example_configs/simple-config-stable-phenomenal.yaml galaxy-helm-repo/galaxy-stable
 ```
 
 This will generate a galaxy instance available on any of the IPs of the Kubernetes clusters on port `30700`.

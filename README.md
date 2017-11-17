@@ -103,6 +103,40 @@ More functionality in terms of variables that can be set can be found documented
 $ helm inspect galaxy-helm-repo/galaxy
 ```
 
+# Experimental: using docker-galaxy-stable/compose images
+
+## Simplest setup
+
+**Currently not working** due to [this issue](https://github.com/bgruening/docker-galaxy-stable/issues/402) (or poor image pick for init when trying).
+
+The minimal requirement to be able to use the docker-galaxy-stable is changing one of the compose image to install some Kubernetes software requirements. An image containing this is available on docker hub at `pcm32/galaxy-web:k8s`. This image was created through:
+
+```
+$ git clone https://github.com/bgruening/docker-galaxy-stable
+$ cd docker-galaxy-stable/compose/galaxy-web
+$ docker build --build-arg GALAXY_ANSIBLE_TAGS=supervisor,startup,scripts,nginx,k8 -t pcm32/galaxy-web:k8s .
+```
+
+Provided that the tools have mappings to docker containers via normal Galaxy mechanisms, after checking out this repo, running (in a machine configured to communicate with a Kubernetes cluster running helm):
+
+```
+helm install -f example_configs/simple-config-galaxy-stable.yaml galaxy-helm-repo/galaxy-stable
+```
+
+Please not the use of **galaxy-stable** at the end of the call, instead of **galaxy**. In time the **galaxy** chart used in previous examples will be deprecated in favour of **galaxy-stable**.
+
+This will generate a galaxy instance available on any of the IPs of the Kubernetes clusters on port `30700`.
+
+## Running PhenoMeNal using the compose images
+
+Since the PhenoMeNal Galaxy instance was the precursor in the use of Galaxy within Kubernetes, this example has been tested more.
+
+```
+helm install -f example_configs/phenomenal-simple-config-galaxy-stable.yaml galaxy-helm-repo/galaxy-stable
+```
+
+This will generate a galaxy instance available on any of the IPs of the Kubernetes clusters on port `30700`.
+
 
 # Funding
 

@@ -127,6 +127,18 @@ Please note the use of **galaxy-stable** at the end of the call, instead of **ga
 
 This will generate a galaxy instance available on any of the IPs of the Kubernetes clusters on port `30700`.
 
+## With your own galaxy-ini image
+
+Most probably you have a set of tools that you want to use, which means that you might need (or already have) your own flavour of the [compose/galaxy-ini](https://github.com/bgruening/docker-galaxy-stable/tree/master/compose/galaxy-init) image.
+
+If you don't have such init container, you could build yours like this:
+
+```
+```
+
+
+
+
 ## Running PhenoMeNal using the compose images
 
 Since the PhenoMeNal Galaxy instance was the precursor in the use of Galaxy within Kubernetes, this example has been tested more.

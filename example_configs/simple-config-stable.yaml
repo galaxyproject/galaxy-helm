@@ -5,20 +5,24 @@ replicaCount: 1
 galaxy:
   init:
     image:
-      repository: quay.io/bgruening/galaxy-init 
-      tag: latest
-      pullPolicy: IfNotPresent
+      #repository: pcm32/galaxy-init
+      repository: quay.io/bgruening/galaxy-init
+      #tag: dev
+      tag: dev 
+      pullPolicy: Always 
     resources: {}
   backend:
     postgres: true
   image:
     repository: pcm32/galaxy-web
     tag: k8s
-    pullPolicy: IfNotPresent
+    #repository: quay.io/bgruening/galaxy-web
+    #tag: latest 
+    pullPolicy: Always
 # Probably not needed as all on /export
   tools:
     destination: "/export/tools"
-  destinations_default: "k8s"
+  destinations_default: "k8s_default"
   k8s:
     supp_groups: 0
     fs_group: 0

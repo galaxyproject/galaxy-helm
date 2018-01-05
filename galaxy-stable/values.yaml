@@ -78,6 +78,7 @@ postgres_for_galaxy:
   subpath: ""
 legacy:
   pre_k8s_16: false
+rbac_needed: false
 
 use_proftpd: true
 

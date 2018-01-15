@@ -83,6 +83,12 @@ rbac_needed: false
 
 k8s_supp_groups: ""
 
+galaxy:
+  config:
+    auto_migrate: false
+
+# tool2container_mapping_file: "phenomenal_tools2container.yaml"
+
 # Ingress
 domain: "mydomain.dev"
 hostname: "galaxy"

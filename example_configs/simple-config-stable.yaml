@@ -50,6 +50,9 @@ service:
   name: galaxy-svc
   type: NodePort
 pv_minikube: true
+pv:
+  minikube:
+      hostPath: "/data/galaxy-stable-data"
 use_ingress: false
 external_ingress_controller: false 
 ingress:

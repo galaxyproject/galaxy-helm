@@ -11,5 +11,5 @@ spec:
   accessModes:
     - ReadWriteMany
   hostPath:
-          path: "/data/galaxy-data"
+          path: "{{ .Values.pv.minikube.hostPath }}" 
 {{ end }}

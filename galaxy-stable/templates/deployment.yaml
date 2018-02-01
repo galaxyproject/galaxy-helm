@@ -98,6 +98,11 @@ spec:
                 value: "{{.Values.galaxy.k8s.fs_group}}"
               {{ end }}
               {{ if and .Values.galaxy.admin.email (and .Values.galaxy.admin.password .Values.galaxy.admin.api_key) }}
+              - name: "GALAXY_DEFAULT_ADMIN_USER"
+                valueFrom:
+                  configMapKeyRef:
+                        name: galaxy-admin-user
+                        key: user 
               - name: "GALAXY_ADMIN_EMAIL"
                 valueFrom:
                   configMapKeyRef:
@@ -113,7 +118,17 @@ spec:
                   secretKeyRef:
                         name: galaxy-admin-secret
                         key: password
+              - name: "GALAXY_DEFAULT_ADMIN_PASSWORD"
+                valueFrom:
+                  secretKeyRef:
+                        name: galaxy-admin-secret
+                        key: password
               - name: "GALAXY_CONFIG_MASTER_API_KEY"
+                valueFrom:
+                  secretKeyRef:
+                        name: galaxy-admin-secret
+                        key: api-key
+              - name: "GALAXY_DEFAULT_ADMIN_KEY"
                 valueFrom:
                   secretKeyRef:
                         name: galaxy-admin-secret

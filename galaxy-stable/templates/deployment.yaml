@@ -57,7 +57,7 @@ spec:
           imagePullPolicy: {{.Values.galaxy.image.pullPolicy}}
           env:
               - name: "NONUSE"
-                value: "sleeplock" 
+                value: "sleeplock{{ if not .Values.use_condor }},condor{{ end }}" 
               - name: "GALAXY_TOOLS_PULL_POLICY"
                 value: {{.Values.galaxy.image.pullPolicy}} 
               {{ if .Values.galaxy.backend.postgres }}

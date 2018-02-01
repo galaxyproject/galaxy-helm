@@ -81,6 +81,7 @@ legacy:
 rbac_needed: false
 
 use_proftpd: true
+use_condor: false
 
 proftpd:
   image: 

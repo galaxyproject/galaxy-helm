@@ -102,7 +102,12 @@ spec:
                 valueFrom:
                   configMapKeyRef:
                         name: galaxy-admin-user
-                        key: user 
+                        key: user
+              - name: "GALAXY_DEFAULT_ADMIN_EMAIL"
+                valueFrom:
+                  configMapKeyRef:
+                        name: galaxy-admin-user
+                        key: email 
               - name: "GALAXY_ADMIN_EMAIL"
                 valueFrom:
                   configMapKeyRef:
@@ -123,11 +128,6 @@ spec:
                   secretKeyRef:
                         name: galaxy-admin-secret
                         key: password
-              - name: "GALAXY_CONFIG_MASTER_API_KEY"
-                valueFrom:
-                  secretKeyRef:
-                        name: galaxy-admin-secret
-                        key: api-key
               - name: "GALAXY_DEFAULT_ADMIN_KEY"
                 valueFrom:
                   secretKeyRef:

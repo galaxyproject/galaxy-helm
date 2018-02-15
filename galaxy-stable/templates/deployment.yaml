@@ -36,7 +36,11 @@ spec:
           imagePullPolicy: {{ .Values.galaxy.init.image.pullPolicy }}
           env:
             - name: "DISABLE_SLEEPLOCK"
-              value: "yes" 
+              value: "yes"
+            {{ if .Values.galaxy.init.force_copy }}
+            - name: "GALAXY_INIT_FORCE_COPY"
+              value: {{ .Values.galaxy.init.force_copy }}
+            {{ end }}
           volumeMounts:
             - mountPath: {{.Values.export_dir}}
               name: {{.Values.galaxy.pvc.name}}

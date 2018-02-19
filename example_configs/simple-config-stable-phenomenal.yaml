@@ -5,15 +5,15 @@ replicaCount: 1
 galaxy:
   init:
     image:
-      repository: pcm32/galaxy-init
-      tag: pheno-flavoured
+      repository: pcm32/galaxy-init-pheno-flavoured
+      tag: v17.09_cerebellin
       pullPolicy: IfNotPresent
     resources: {}
   backend:
     postgres: true
   image:
-    repository: pcm32/galaxy-web
-    tag: k8s
+    repository: pcm32/galaxy-web-k8s
+    tag: v17.09_cerebellin
     pullPolicy: IfNotPresent
 # Probably not needed as all on /export
   tools:

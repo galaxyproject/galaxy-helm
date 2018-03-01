@@ -63,7 +63,9 @@ spec:
               - name: "NONUSE"
                 value: "sleeplock{{ if not .Values.use_condor }},condor{{ end }}" 
               - name: "GALAXY_TOOLS_PULL_POLICY"
-                value: {{.Values.galaxy.image.pullPolicy}} 
+                value: {{.Values.galaxy.image.pullPolicy}}
+              - name: "GALAXY_CONFIG_BRAND"
+                value: "{{ .Values.galaxy.brand }}" 
               {{ if .Values.galaxy.backend.postgres }}
               - name: "GALAXY_SEC_DB_ENGINE"
                 value: "postgresql"

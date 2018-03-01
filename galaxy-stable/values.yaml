@@ -4,6 +4,7 @@
 replicaCount: 1
 export_dir: "/export"
 galaxy:
+  brand: "k8s"
   init:
     image:
       repository: pcm32/galaxy-stable-k8s-init

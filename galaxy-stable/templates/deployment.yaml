@@ -139,6 +139,8 @@ spec:
                         key: api-key
               - name: "GALAXY_CONFIG_ALLOW_USER_DELETION"
                 value: "True"
+              - name: "GALAXY_CONFIG_ALLOW_USER_CREATION"
+                value: "{{ .Values.galaxy.admin.allow_user_creation }}" 
               {{ end }}
               {{ if and .Values.galaxy.smtp.server (and .Values.galaxy.smtp.username .Values.galaxy.smtp.password) }}
               - name: "GALAXY_CONFIG_SMTP_SERVER"

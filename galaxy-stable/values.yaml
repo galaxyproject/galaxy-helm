@@ -27,6 +27,7 @@ galaxy:
     password:
     api_key:
     username: admin
+    allow_user_creation: "True"
   smtp:
     server:
     username:

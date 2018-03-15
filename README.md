@@ -2,12 +2,14 @@
 
 This repo contains [Helm charts]() for easily deploying Galaxy on top of Kubernetes, in a number of scenarios, as described below. The two minimal requirements to be able to use them are:
 - Helm installed
-- Access to a Kubernetes cluster
+- Access to a Kubernetes cluster (with shared file system accessible through a Persistent Volume or equivalent).
   - For development purposes or local tests, the local Minikube environment can be used.
   
 ## Available Helm Charts
 
 Previously functionality was split in two charts, they have now been unified into the `galaxy` chart, which merges all functionality available on `galaxy-simple` and `galaxy-postgres-chart`, which are deprecated now. Newer features, such as privileged file system support, are only supported on the `galaxy` chart. The new `galaxy` chart can be used for development, testing and production environments and is highly configurable.
+
+To make use of the docker-stable compose Galaxy images, a new chart named `galaxy-stable` was created. This one in turn will probably superseed the `galaxy` chart.
 
 ## Helm for the first time
 
@@ -105,9 +107,69 @@ $ helm inspect galaxy-helm-repo/galaxy
 
 # Experimental: using docker-galaxy-stable/compose images
 
-## Simplest setup
+## Variables
 
-**Currently not working** due to [this issue](https://github.com/bgruening/docker-galaxy-stable/issues/402) (or poor image pick for init when trying).
+| Variable | Description | Type |
+| -------- | ----------- | ---- |
+| `export_dir` | Export directory for Galaxy compose | |
+| `galaxy.brand` | Branding text displayed on Galaxy | |
+| `galaxy.init.image.repository` | Repository for the docker image: `<server>/<owner>/<image-name>` for Galaxy init. | |
+| `galaxy.init.image.tag` | Image tag for Galaxy init image. | |
+| `galaxy.init.image.pullPolicy` | Pull policy for the Galaxy init image | |
+| `galaxy.init.resources` | k8s resources map for the init process | |
+| `galaxy.backend.postgres` | This is probably not being used, or left for legacy purposes |
+| `galaxy.image.repository` | Repository for the docker image: `<server>/<owner>/<image-name>` for Galaxy main process. | |
+| `galaxy.image.tag` | Image tag for Galaxy image. | |
+| `galaxy.image.pullPolicy` | Pull policy for the Galaxy image. | |
+| `galaxy.tools.destination` | Directory where tools are stored, possibly not needed and should be removed. | |
+| `galaxy.k8s.supp_groups` | Kubernetes supplemental group (this is probably a list), used for writing with adequate privileges to certain shared file systems | |
+| `galaxy.k8s.fs_group` | Kubernetes file system group (this is probably a list), used for writing with adequate privileges to certain shared file systems | |
+| `galaxy.admin.email` | Admin email to setup Galaxy with. | |
+| `galaxy.admin.password` | Admin password to setup Galaxy with. | |
+| `galaxy.admin.api_key` | Admin api_key to setup Galaxy with. | |
+| `galaxy.admin.username` | Admin username to setup Galaxy with. | |
+| `galaxy.admin.allow_user_creation` | Configures `allow_user_creation` Galaxy config environment variable. | `boolean` | |
+| `galaxy.smtp.server` | SMTP server for Galaxy password reset functionality ||
+| `galaxy.smtp.username` | SMTP username for Galaxy password reset functionality ||
+| `galaxy.smtp.password` | SMTP password for Galaxy password reset functionality ||
+| `galaxy.smtp.email_from` | SMTP email_from for Galaxy password reset functionality ||
+| `galaxy.smtp.ssl` | SMTP ssl for Galaxy password reset functionality ||
+| `galaxy.instance_resource_url` | Incoming URL label for Galaxy password reset functionality, shown on reset email to identify instance. ||
+| `galaxy.internal_port` | Internal port where the Galaxy container serves content (normally 80). | |
+| `galaxy.create_pvc` | Whether to create or not a PVC for Galaxy, defaults to true. | `boolean` |
+| `galaxy.pvc.name` | Name for the PVC that Galaxy and scheduled jobs will use. | |
+| `galaxy.pvc.capacity` | Amount of this that the PVC requests, such as "15Gi" | |
+| `service.name` | Name to use for the k8s service exposing Galaxy | |
+| `service.type` | Defaults to 'NodePort' | |
+| `pv_minikube` | Whether to create a Persistent Volume in minikube or not. | |
+| `use_ingress` | Whether to use k8s ingress or not | |
+| `external_ingress_controller` | Whether to use an external ingress controller or the chart's provided one, when using ingresses. | |
+| `ingress.enabled` | Whether to enable ingress or not... seems redundant, should be fixed. | |
+| `ingress.hosts` | List of hosts to use for the ingresses | |
+| `ingress.annotations` | | |
+| `ingress.tls` | | |
+| `resources` | | |
+| `postgres_for_galaxy.db_password` | Password to use for postgres setup | |
+| `postgres_for_galaxy.postgres_pvc` | Name of the Persistent Volume Claim to use with postgres, by default the same as Galaxy | |
+| `postgres_for_galaxy.subpath` | A subpath in the PV where the postgres mount will be done | |
+| `legacy.pre_k8s_16` | Whether we are running on a Kubernetes setup below 1.6 | |
+| `rbac_needed` | Whether RBAC setups for the chart should be activated. | |
+| `use_proftpd` | Use proftpd or not | `boolean` |
+| `use_condor` | Use condor or not | |
+| `proftpd.image.repository` | docker image for proftpd | |
+| `proftpd.image.tag` | tag for the proftpd image set above | |
+| `proftpd.passive_port.low` | Passive port minimum for proftpd | |
+| `proftpd.passive_port.high` | Passive port maximum for proftpd | |
+| `proftpd.use_sftp` | If set to true, use sftp instead of ftp | |
+| `proftpd.service.name` | Name to be given for the proftpd k8s service | |
+| `proftpd.generate_ssh_key` |  Whether to generate the ssh key for sftp access | |
+| `proftpd.node_port_exposed` | Port opened on k8s nodes for exposing proftpd | |
+
+
+
+
+
+## Simplest setup
 
 The minimal requirement to be able to use the docker-galaxy-stable is changing one of the compose image to install some Kubernetes software requirements. An image containing this is available on docker hub at `pcm32/galaxy-web:k8s`. This image was created through:
 

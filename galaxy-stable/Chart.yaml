@@ -1,4 +1,4 @@
 apiVersion: v1
 description: Galaxy workflows deployment
 name: galaxy-stable
-version: 0.4.3
+version: 0.4.4

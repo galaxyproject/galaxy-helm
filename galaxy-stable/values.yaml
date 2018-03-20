@@ -87,8 +87,8 @@ use_condor: false
 
 proftpd:
   image: 
-    repository: "abhikghosh41/galaxy-proftpd"
-    tag: "latest"
+    repository: "bgruening/galaxy-proftpd"
+    tag: "17.09"
   passive_port:
     low: 30000
     high: 30010

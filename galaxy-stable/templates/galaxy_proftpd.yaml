@@ -8,12 +8,11 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-        #name: galaxy-proftpd
 spec:
   template:
     metadata:
       labels:
-        app: {{ template "name" . }}
+        app: {{ .Release.Name }}-proftpd
         release: {{ .Release.Name }}
     spec:
       containers:

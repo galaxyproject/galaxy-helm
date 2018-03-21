@@ -166,6 +166,10 @@ spec:
               - name: "GALAXY_DESTINATIONS_DEFAULT" 
                 value: "{{.Values.galaxy.destinations_default}}"
               {{ end }}
+              {{ if and .Values.galaxy.ftp .Values.galaxy.ftp.url }}
+              - name: "GALAXY_CONFIG_FTP_UPLOAD_SITE"
+                value: "{{.Values.galaxy.ftp.url}}"
+              {{ end }} 
           command: ["/bin/bash","-c","{{ if not .Values.galaxy.backend.postgres }}mkdir -p {{.Values.export_dir}}/database-sqlite && {{ end }}export GALAXY_CONFIG_DATABASE_CONNECTION=${GALAXY_SEC_DB_ENGINE}://${GALAXY_SEC_DB_USER}:${GALAXY_SEC_DB_PASS}@${GALAXY_SEC_DB_HOST}/${GALAXY_SEC_DB_NAME}?client_encoding=utf8 && /usr/bin/startup"]
           workingDir: {{.Values.export_dir}}
           lifecycle: 

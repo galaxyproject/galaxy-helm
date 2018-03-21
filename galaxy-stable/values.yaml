@@ -35,6 +35,8 @@ galaxy:
     password:
     email_from:
     ssl:
+  ftp:
+    url:
   instance_resource_url:
   internal_port: 80
   node_port_exposed: 30700

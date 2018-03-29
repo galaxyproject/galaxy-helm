@@ -47,16 +47,14 @@ galaxy:
     # subPath:
 # development_folder:
 service:
-  name: galaxy-svc
   type: NodePort
 pv_minikube: false
-use_ingress: false
 external_ingress_controller: false 
 ingress:
   enabled: false
+  hostname: "galaxy"
+  domain: "local"
   # Used to create Ingress record (should used with service.type: ClusterIP).
-  hosts:
-  #  - chart-example.local
   annotations:
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
@@ -89,14 +87,12 @@ use_condor: false
 
 proftpd:
   image: 
-    repository: "bgruening/galaxy-proftpd"
-    tag: "17.09"
+    repository: "container-registry.phenomenal-h2020.eu/phnmnl/galaxy-proftpd"
+    tag: "for_galaxy_v17.09"
   passive_port:
     low: 30000
     high: 30010
   use_sftp: true
-  service:
-    name: "proftpd-svc"
   generate_ssh_key: false
   node_port_exposed: 30722
 

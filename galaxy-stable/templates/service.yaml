@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.service.name }}
+  name: {{ .Release.Name }}-galaxy-svc
   labels:
     app: {{ template "name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
@@ -11,10 +11,10 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.galaxy.internal_port }}
-      {{ if not .Values.use_ingress }}
+      {{ if not .Values.ingress.enabled }}
       nodePort: {{.Values.galaxy.node_port_exposed}}
       {{ end }}
       protocol: TCP
-      name: {{ .Values.service.name }}
+      name: http
   selector:
     app: {{ .Release.Name }}-galaxy

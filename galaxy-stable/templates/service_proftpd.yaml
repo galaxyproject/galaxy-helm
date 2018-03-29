@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-{{ .Values.proftpd.service.name }}
+  name: "{{ .Release.Name }}-proftpd-svc"
   labels:
     app: {{ .Release.Name }}-proftpd 
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
@@ -11,9 +11,7 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: 22
-      {{ if not .Values.use_ingress }}
       nodePort: {{.Values.proftpd.node_port_exposed}}
-      {{ end }}
       protocol: TCP
       name: sftp
   selector:

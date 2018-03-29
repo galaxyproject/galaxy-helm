@@ -143,10 +143,10 @@ $ helm inspect galaxy-helm-repo/galaxy
 | `service.name` | Name to use for the k8s service exposing Galaxy | `galaxy-svc` |
 | `service.type` | Type of k8s service for Galaxy | `NodePort` |
 | `pv_minikube` | Whether to create a Persistent Volume in minikube or not. | `false` |
-| `use_ingress` | Whether to use k8s ingress or not | `false` |
 | `external_ingress_controller` | Whether to use an external ingress controller or the chart's provided one, when using ingresses. | `false` |
 | `ingress.enabled` | Whether to enable ingress or not... seems redundant, should be fixed. | `false` |
-| `ingress.hosts` | List of hosts to use for the ingresses | |
+| `ingress.hostname` | Hostname to construct ingress URL to respond to (hostname.domain). | `galaxy` |
+| `ingress.domain` | Domain to construct ingress URL to respond to (hostname.domain). | `local` |
 | `ingress.annotations` | | |
 | `ingress.tls` | | |
 | `resources` | Resources requests and limits (k8s) for the Galaxy container when running. | |

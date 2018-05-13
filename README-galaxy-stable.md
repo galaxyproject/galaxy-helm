@@ -2,7 +2,6 @@
 
 Using the docker-stable compose images with Kubernetes on this setup requires building those images with certain options being passed to the images, as done [here](https://github.com/phnmnl/container-galaxy-k8s-runtime/blob/develop/simplified_galaxy_stable_container_creation.sh). Please note that you will want to have your own version of `Docker_init` (like the one [here](https://github.com/phnmnl/container-galaxy-k8s-runtime/blob/develop/Dockerfile_init)). where you can setup your flavouring, tools and other settings to personalize the Galaxy instance that you will be deploying.
 
-To use the `galaxy` chart, you need to create a container with your own tools following the PhenoMeNal Galaxy [container model](https://github.com/phnmnl/container-galaxy-k8s-runtime/blob/develop/Dockerfile).
 
 ## Variables
 

@@ -1,0 +1,21 @@
+{{ if .Values.galaxy.create_pvc }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{.Values.galaxy.pvc.name}}
+  {{ if .Values.pv_minikube }}
+  annotations:
+      volume.beta.kubernetes.io/storage-class: ""
+  {{ end }}
+spec:
+  {{ if .Values.pv_minikube }}
+  selector:
+    matchLabels:
+      app: {{ template "name" . }}
+  {{ end }}
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: {{.Values.galaxy.pvc.capacity}} 
+{{ end }}

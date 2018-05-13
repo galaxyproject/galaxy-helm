@@ -1,0 +1,11 @@
+{{ if and .Values.galaxy.admin.email (and .Values.galaxy.admin.password .Values.galaxy.admin.api_key) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: galaxy-admin-user
+  annotations:
+     "helm.sh/hook": pre-install
+data:
+  email: {{ quote .Values.galaxy.admin.email }}
+  user: {{ quote .Values.galaxy.admin.username }}
+{{ end }}

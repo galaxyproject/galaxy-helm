@@ -1,0 +1,239 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ .Release.Name }}-galaxy
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-galaxy
+        release: {{ .Release.Name }}
+{{ if and .Values.galaxy.backend.postgres .Values.legacy.pre_k8s_16 }}
+      annotations:
+        pod.beta.kubernetes.io/init-containers: |-
+          [
+            {
+              "name": "postgres-listener",
+              "image": "alpine",
+              "imagePullPolicy": "IfNotPresent",
+              "command": [
+                "sh", "-c",
+                "for i in $(seq 1 200); do nc -z -w3 postgresql-for-galaxy 5432 && exit 0 || sleep 3; done; exit 1"
+              ]
+            }
+          ]
+{{ end }}
+    spec:
+      initContainers:
+        - name: galaxy-init
+          image: "{{ .Values.galaxy.init.image.repository }}:{{ .Values.galaxy.init.image.tag }}"
+          imagePullPolicy: {{ .Values.galaxy.init.image.pullPolicy }}
+          env:
+            - name: "DISABLE_SLEEPLOCK"
+              value: "yes"
+            {{ if .Values.galaxy.init.force_copy }}
+            - name: "GALAXY_INIT_FORCE_COPY"
+              value: {{ .Values.galaxy.init.force_copy }}
+            {{ end }}
+          volumeMounts:
+            - mountPath: {{.Values.export_dir}}
+              name: {{.Values.galaxy.pvc.name}}
+              {{ if .Values.galaxy.pvc.subPath }}
+              subPath: {{.Values.galaxy.pvc.subPath}}
+              {{ end }}
+          resources:
+{{ toYaml .Values.galaxy.init.resources | indent 12 }}
+        {{ if and .Values.galaxy.backend.postgres (not .Values.legacy.pre_k8s_16) }}
+        - name: postgres-listener
+          image: alpine
+          imagePullPolicy: IfNotPresent
+          command: [ "sh", "-c", "for i in $(seq 1 200); do nc -z -w3 postgresql-for-galaxy 5432 && exit 0 || sleep 3; done; exit 1"]
+        {{ end }}
+      containers:
+        - name: galaxy-k8s
+          image: "{{.Values.galaxy.image.repository}}:{{.Values.galaxy.image.tag}}"
+          imagePullPolicy: {{.Values.galaxy.image.pullPolicy}}
+          env:
+              - name: "NONUSE"
+                value: "sleeplock{{ if not .Values.use_condor }},condor{{ end }}" 
+              - name: "GALAXY_TOOLS_PULL_POLICY"
+                value: {{.Values.galaxy.image.pullPolicy}}
+              - name: "GALAXY_CONFIG_BRAND"
+                value: "{{ .Values.galaxy.brand }}" 
+              {{ if .Values.galaxy.backend.postgres }}
+              - name: "GALAXY_SEC_DB_ENGINE"
+                value: "postgresql"
+              - name: "GALAXY_SEC_DB_USER"
+                valueFrom:
+                  configMapKeyRef:
+                        name: db-connection
+                        key: db.user
+              - name: "GALAXY_SEC_DB_PASS"
+                valueFrom:
+                  secretKeyRef:
+                        name: galaxy-postgres-secret
+                        key: password
+              - name: "GALAXY_SEC_DB_HOST"
+                value: "postgresql-for-galaxy"
+              - name: "GALAXY_SEC_DB_NAME"
+                valueFrom:
+                  configMapKeyRef:
+                        name: db-connection
+                        key: db.name
+              #- name: "GALAXY_CONFIG_DATABASE_CONNECTION"
+              #  value: ${GALAXY_SEC_DB_ENGINE}://${GALAXY_SEC_DB_USER}:${GALAXY_SEC_DB_PASS}@${GALAXY_SEC_DB_HOST}/${GALAXY_SEC_DB_NAME}?client_encoding=utf8
+              {{ end }}
+              {{ if .Values.galaxy.tools.destination }}
+              - name: "TOOLS_DEST_PVC"
+                value: "{{.Values.galaxy.tools.destination}}"
+              - name: "GALAXY_CONFIG_TOOL_PATH"
+                value: "{{.Values.galaxy.tools.destination}}"   
+              {{ end }}
+              {{ if .Values.galaxy.k8s.supp_groups }}
+              - name: "SUPP_GROUPS"
+                value: "{{.Values.galaxy.k8s.supp_groups}}"
+              {{ end }}
+              {{ if .Values.galaxy.k8s.fs_group }}
+              - name: "FS_GROUP"
+                value: "{{.Values.galaxy.k8s.fs_group}}"
+              {{ end }}
+              {{ if and .Values.galaxy.admin.email (and .Values.galaxy.admin.password .Values.galaxy.admin.api_key) }}
+              - name: "GALAXY_DEFAULT_ADMIN_USER"
+                valueFrom:
+                  configMapKeyRef:
+                        name: galaxy-admin-user
+                        key: user
+              - name: "GALAXY_DEFAULT_ADMIN_EMAIL"
+                valueFrom:
+                  configMapKeyRef:
+                        name: galaxy-admin-user
+                        key: email 
+              - name: "GALAXY_ADMIN_EMAIL"
+                valueFrom:
+                  configMapKeyRef:
+                        name: galaxy-admin-user
+                        key: email
+              - name: "GALAXY_CONFIG_ADMIN_USERS"
+                valueFrom:
+                  configMapKeyRef:
+                        name: galaxy-admin-user
+                        key: email
+              - name: "GALAXY_ADMIN_PASSWORD"
+                valueFrom:
+                  secretKeyRef:
+                        name: galaxy-admin-secret
+                        key: password
+              - name: "GALAXY_DEFAULT_ADMIN_PASSWORD"
+                valueFrom:
+                  secretKeyRef:
+                        name: galaxy-admin-secret
+                        key: password
+              - name: "GALAXY_DEFAULT_ADMIN_KEY"
+                valueFrom:
+                  secretKeyRef:
+                        name: galaxy-admin-secret
+                        key: api-key
+              - name: "GALAXY_CONFIG_ALLOW_USER_DELETION"
+                value: "True"
+              - name: "GALAXY_CONFIG_ALLOW_USER_CREATION"
+                value: "{{ .Values.galaxy.admin.allow_user_creation }}" 
+              {{ end }}
+              {{ if and .Values.galaxy.smtp.server (and .Values.galaxy.smtp.username .Values.galaxy.smtp.password) }}
+              - name: "GALAXY_CONFIG_SMTP_SERVER"
+                value: "{{.Values.galaxy.smtp.server}}"
+              - name: "GALAXY_CONFIG_SMTP_USERNAME"
+                value: "{{.Values.galaxy.smtp.username}}"
+              - name: "GALAXY_CONFIG_SMTP_PASSWORD"
+                value: "{{.Values.galaxy.smtp.password}}"
+              - name: "GALAXY_CONFIG_EMAIL_FROM"
+                value: "{{.Values.galaxy.smtp.email_from}}"
+              - name: "GALAXY_CONFIG_URL"
+                value: "{{.Values.galaxy.instance_resource_url}}"
+              - name: "GALAXY_CONFIG_SMTP_SSL"
+                value: "{{.Values.galaxy.smtp.ssl}}" 
+              {{ end }}
+              - name: "GALAXY_RUNNERS_K8S_PERSISTENT_VOLUME_CLAIM_MOUNT_PATH"
+                value: "{{.Values.export_dir}}"
+              - name: "PYKUBE_KUBERNETES_SERVICE_HOST"
+                value: "kubernetes"
+              {{ if .Values.galaxy.destinations_default }}
+              - name: "GALAXY_DESTINATIONS_DEFAULT" 
+                value: "{{.Values.galaxy.destinations_default}}"
+              {{ end }}
+              {{ if and .Values.galaxy.ftp .Values.galaxy.ftp.url }}
+              - name: "GALAXY_CONFIG_FTP_UPLOAD_SITE"
+                value: "{{.Values.galaxy.ftp.url}}"
+              {{ end }} 
+          command: ["/bin/bash","-c","{{ if not .Values.galaxy.backend.postgres }}mkdir -p {{.Values.export_dir}}/database-sqlite && {{ end }}export GALAXY_CONFIG_DATABASE_CONNECTION=${GALAXY_SEC_DB_ENGINE}://${GALAXY_SEC_DB_USER}:${GALAXY_SEC_DB_PASS}@${GALAXY_SEC_DB_HOST}/${GALAXY_SEC_DB_NAME}?client_encoding=utf8 && /usr/bin/startup"]
+          workingDir: {{.Values.export_dir}}
+          lifecycle: 
+            preStop:
+              exec:
+                 command:
+                     - "./run.sh"
+                     - "--stop" 
+          ports:
+            - containerPort: {{.Values.galaxy.internal_port}}
+          volumeMounts:
+            - mountPath: {{.Values.export_dir}}
+              name: {{.Values.galaxy.pvc.name}}
+              {{ if .Values.galaxy.pvc.subPath }}
+              subPath: {{.Values.galaxy.pvc.subPath}}
+              {{ end }}
+            {{ if .Values.development_folder }}
+            - mountPath: "{{.Values.export_dir}}/config/galaxy.ini.injected"
+              name: galaxy-ini 
+            - mountPath: "{{.Values.export_dir}}/config/job_conf.xml"
+              name: galaxy-job-conf 
+            - mountPath: "{{.Values.export_dir}}/config/tool_conf.xml"
+              name: galaxy-tool-conf
+            - mountPath: "{{.Values.export_dir}}/tools"
+              name: tools           
+            {{ end }}
+          #livenessProbe:
+          #  httpGet:
+          #    path: /
+          #    port: {{ .Values.galaxy.internal_port }}
+          #readinessProbe:
+          #  httpGet:
+          #    path: /
+          #    port: {{ .Values.galaxy.internal_port }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+{{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+    {{- end }}
+{{ if or .Values.galaxy.k8s.supp_groups .Values.galaxy.k8s.fs_group }}
+      securityContext:
+{{ if .Values.galaxy.k8s.supp_groups }}
+        supplementalGroups: [{{.Values.galaxy.k8s.supp_groups}}]
+{{ end }}
+{{ if .Values.galaxy.k8s.fs_group }}
+        fsGroup: {{.Values.galaxy.k8s.fs_group}}
+{{ end }}
+{{ end }}
+      volumes:
+        - name: {{.Values.galaxy.pvc.name}}
+          persistentVolumeClaim:
+              claimName: {{.Values.galaxy.pvc.name}}
+        {{ if .Values.development_folder }}
+        - name: galaxy-ini
+          hostPath:
+            path: {{ .Values.development_folder }}/config/galaxy.ini
+        - name: galaxy-job-conf
+          hostPath:
+            path: {{ .Values.development_folder }}/config/job_conf.xml
+        - name: galaxy-tool-conf
+          hostPath:
+            path: {{ .Values.development_folder }}/config/tool_conf.xml
+        - name: tools
+          hostPath:
+            path: {{ .Values.development_folder }}/tools
+        {{ end }}

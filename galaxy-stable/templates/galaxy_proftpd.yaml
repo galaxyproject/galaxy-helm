@@ -1,0 +1,83 @@
+{{ if and .Values.use_proftpd .Values.galaxy.backend.postgres }}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-proftpd
+  labels:
+    app: {{ .Release.Name }}-proftpd
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-proftpd
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: galaxy-proftpd 
+        image: "{{ .Values.proftpd.image.repository }}:{{ .Values.proftpd.image.tag }}"
+        command: ["/bin/bash","-c","export proftpd_db_connection=${galaxy_db_name}@postgresql-for-galaxy && /usr/bin/run.sh"]
+        volumeMounts:
+        - name: {{.Values.galaxy.pvc.name}}
+          mountPath: {{.Values.export_dir}}
+          {{ if .Values.galaxy.pvc.subPath }}
+          subPath: {{ .Values.galaxy.pvc.subPath }}
+          {{ end }}
+        ports:
+        - containerPort: 30000
+        - containerPort: 30001
+        - containerPort: 30002
+        - containerPort: 30003
+        - containerPort: 30004
+        - containerPort: 30005
+        - containerPort: 30006
+        - containerPort: 30007
+        - containerPort: 30008
+        - containerPort: 30009
+        - containerPort: 30010
+        - containerPort: 21
+        - containerPort: 22 
+        env:  
+        - name: galaxy_db_name
+          valueFrom:
+              configMapKeyRef:
+                name: db-connection
+                key: db.name
+        - name: proftpd_db_username
+          valueFrom:
+              configMapKeyRef:
+                name: db-connection
+                key: db.user
+        - name: proftpd_db_password
+          valueFrom:
+              secretKeyRef:
+                name: galaxy-postgres-secret
+                key: password
+        - name: proftpd_files_dir
+          value: {{.Values.export_dir}}/ftp/
+        - name: proftpd_use_sftp
+          value: "{{.Values.proftpd.use_sftp}}"
+        - name: proftpd_generate_ssh_key
+          value: "{{.Values.proftpd.generate_ssh_key}}"
+        - name: proftpd_passive_port_low
+          value: "30000" 
+        - name: proftpd_passive_port_high
+          value: "30010"
+{{ if or .Values.galaxy.k8s.supp_groups .Values.galaxy.k8s.fs_group }}
+      securityContext:
+{{ if .Values.galaxy.k8s.supp_groups }}
+        supplementalGroups: [{{.Values.galaxy.k8s.supp_groups}}]
+{{ end }}
+{{ if .Values.galaxy.k8s.fs_group }}
+        fsGroup: {{.Values.galaxy.k8s.fs_group}}
+{{ end }}
+{{ end }}
+      volumes:
+         - name: {{.Values.galaxy.pvc.name}}
+           persistentVolumeClaim:
+              claimName: {{.Values.galaxy.pvc.name}}  
+{{ end }}
+
+

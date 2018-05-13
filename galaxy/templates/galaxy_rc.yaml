@@ -60,10 +60,14 @@ spec:
                 configMapKeyRef:
                       name: db-connection
                       key: db.name
+            - name: "GALAXY_CONFIG_DATABASE_CONNECTION"
+              value: "$GALAXY_SEC_DB_ENGINE://$GALAXY_SEC_DB_HOST/$GALAXY_SEC_DB_NAME?client_encoding=utf8"
 {{ end }}
 {{ if .Values.galaxy_tools_dest }}
             - name: "TOOLS_DEST_PVC"
-              value: "{{.Values.galaxy_tools_dest}}"      
+              value: "{{.Values.galaxy_tools_dest}}"
+            - name: "GALAXY_CONFIG_TOOL_PATH"
+              value: "{{.Values.galaxy_tools_dest}}"   
 {{ end }}
 {{ if .Values.k8s_supp_groups }}
             - name: "SUPP_GROUPS"
@@ -75,6 +79,11 @@ spec:
 {{ end }}
 {{ if and .Values.galaxy_admin_email (and .Values.galaxy_admin_password .Values.galaxy_api_key) }}
             - name: "GALAXY_ADMIN_EMAIL"
+              valueFrom:
+                configMapKeyRef:
+                      name: galaxy-admin-user
+                      key: email
+            - name: "GALAXY_CONFIG_ADMIN_USERS"
               valueFrom:
                 configMapKeyRef:
                       name: galaxy-admin-user
@@ -94,22 +103,41 @@ spec:
                 secretKeyRef:
                       name: galaxy-admin-secret
                       key: api-key
+            - name: "GALAXY_CONFIG_MASTER_API_KEY"
+              valueFrom:
+                secretKeyRef:
+                      name: galaxy-admin-secret
+                      key: api-key
+            - name: "GALAXY_CONFIG_ALLOW_USER_DELETION"
+              value: "True"
 {{ end }}
 {{ if and .Values.smtp_server (and .Values.smtp_username .Values.smtp_password) }}
             - name: "GALAXY_SMTP_SERVER"
               value: "{{.Values.smtp_server}}"
+            - name: "GALAXY_CONFIG_SMTP_SERVER"
+              value: "{{.Values.smtp_server}}"
             - name: "GALAXY_SMTP_USERNAME"
+              value: "{{.Values.smtp_username}}"
+            - name: "GALAXY_CONFIG_SMTP_USERNAME"
               value: "{{.Values.smtp_username}}"
             - name: "GALAXY_SMTP_PASSWORD"
               value: "{{.Values.smtp_password}}"
+            - name: "GALAXY_CONFIG_SMTP_PASSWORD"
+              value: "{{.Values.smtp_password}}"
             - name: "GALAXY_EMAIL_FROM"
+              value: "{{.Values.email_from}}"
+            - name: "GALAXY_CONFIG_EMAIL_FROM"
               value: "{{.Values.email_from}}"
             - name: "GALAXY_URL"
               value: "{{.Values.instance_resource_url}}"
+            - name: "GALAXY_CONFIG_URL"
+              value: "{{.Values.instance_resource_url}}"
             - name: "GALAXY_SMTP_SSL"
               value: "{{.Values.smtp_ssl}}" 
+            - name: "GALAXY_CONFIG_SMTP_SSL"
+              value: "{{.Values.smtp_ssl}}"
 {{ end }}
-        command: ["/bin/bash","-c","{{ if not .Values.galaxy_backend_postgres }}mkdir -p /opt/galaxy_data/database-sqlite && {{ end }}./ansible/run_galaxy_config.sh > config_db.log && ./run.sh --daemon && tail -f paster.log"]
+        command: ["/bin/bash","-c","{{ if not .Values.galaxy_backend_postgres }}mkdir -p /opt/galaxy_data/database-sqlite && {{ end }}./ansible/run_galaxy_config.sh > config_db.log && ./run.sh --daemon && tail -f {{.Values.log_file_to_track}}"]
         lifecycle: 
           preStop:
             exec:

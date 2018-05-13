@@ -100,3 +100,7 @@ postgres_for_galaxy:
 
 smtp_ssl: "False"
 
+# For Galaxy < 18.01, paster.log should be used.
+# For Galaxy >= 18.01, file changes to galaxy.log
+log_file_to_track: "paster.log"
+

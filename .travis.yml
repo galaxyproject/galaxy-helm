@@ -23,7 +23,7 @@ script:
   # Check charts format
   - >
      for dir in galaxy galaxy-stable postgres_for_galaxy; do
-      helm lint ${REPO_DIR}/$dir
+      helm lint $dir
       if [ $? != 0 ]; then
        travis_terminate 1
       fi

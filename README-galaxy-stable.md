@@ -1,6 +1,6 @@
 # TL;DR
 
-To run a vanilla docker-galaxy-stable setup on Kubernetes using this chart on minikube:
+To run a vanilla docker-galaxy-stable setup on Kubernetes using this chart on **minikube**:
 
 ```
 helm install -f example_configs/galaxy-stable-18.01-minikube.yaml galaxy-helm-repo/galaxy-stable

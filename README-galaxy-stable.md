@@ -1,7 +1,18 @@
+# TL;DR
+
+To run a vanilla docker-galaxy-stable setup on Kubernetes using this chart on minikube:
+
+```
+helm install -f example_configs/galaxy-stable-18.01-minikube.yaml galaxy-helm-repo/galaxy-stable
+```
+
+This assumes that you at least followed the [Helm for the first time](README.md#galaxy-helm-charts) part and that you have checked out this repo (where the config file is available). Please note that this setup won't send jobs to the Kubernetes cluster, as it is not configured like that on the stock docker-galaxy-stable compose galaxy images. This feature requires changes in the `config/job_conf.xml`, which would mean that you need your own `galaxy-init` container flavour (like the [one built for PhenoMeNal](https://github.com/phnmnl/container-galaxy-k8s-runtime/blob/develop/Dockerfile_init) for instance).
+
+
+
 # Using docker-galaxy-stable compose images
 
-Using the docker-stable compose images with Kubernetes on this setup requires building those images with certain options being passed to the images, as done [here](https://github.com/phnmnl/container-galaxy-k8s-runtime/blob/develop/simplified_galaxy_stable_container_creation.sh). Please note that you will want to have your own version of `Docker_init` (like the one [here](https://github.com/phnmnl/container-galaxy-k8s-runtime/blob/develop/Dockerfile_init)). where you can setup your flavouring, tools and other settings to personalize the Galaxy instance that you will be deploying.
-
+Using the docker-stable compose images with Kubernetes on this setup requires building those images with certain options being passed to the images, as done [here](https://github.com/phnmnl/container-galaxy-k8s-runtime/blob/develop/simplified_galaxy_stable_container_creation.sh). Please note that you will want to have your own version of `Docker_init` (like the one [here](https://github.com/phnmnl/container-galaxy-k8s-runtime/blob/develop/Dockerfile_init)), where you can setup your flavouring, tools and other settings to personalize the Galaxy instance that you will be deploying.
 
 ## Variables
 

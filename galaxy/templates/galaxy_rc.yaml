@@ -111,6 +111,10 @@ spec:
             - name: "GALAXY_CONFIG_ALLOW_USER_DELETION"
               value: "True"
 {{ end }}
+{{ if .Values.log_file_to_track }}
+            - name: "GALAXY_PROCESS_LOG_FILE"
+              value: "{{.Values.log_file_to_track}}"
+{{ end }}
 {{ if and .Values.smtp_server (and .Values.smtp_username .Values.smtp_password) }}
             - name: "GALAXY_SMTP_SERVER"
               value: "{{.Values.smtp_server}}"

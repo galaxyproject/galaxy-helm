@@ -1,0 +1,3 @@
+[submodule "docker-galaxy-stable"]
+	path = docker-galaxy-stable
+	url = https://github.com/bgruening/docker-galaxy-stable

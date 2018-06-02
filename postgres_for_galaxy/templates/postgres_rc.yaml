@@ -16,15 +16,9 @@ spec:
           - name: "PGDATA"
             value: {{.Values.postgres_mount_point_PGDATA}}/{{.Values.postgres_PGDATA}}
           - name: "POSTGRES_DB"
-            valueFrom:
-              configMapKeyRef:
-                      name: db-connection
-                      key: db.name
+            value: {{ .Values.postgresql.postgresDatabase }}
           - name: "POSTGRES_USER"
-            valueFrom:
-              configMapKeyRef:
-                      name: db-connection
-                      key: db.user
+            value: {{ .Values.postgresql.postgresUser }}
           - name: "POSTGRES_PASSWORD"
             valueFrom:
               secretKeyRef:

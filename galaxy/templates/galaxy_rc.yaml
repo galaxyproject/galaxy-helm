@@ -18,7 +18,7 @@ spec:
               "imagePullPolicy": "IfNotPresent",
               "command": [
                 "sh", "-c",
-                "for i in $(seq 1 200); do nc -z -w3 postgresql-for-galaxy 5432 && exit 0 || sleep 3; done; exit 1"
+                "for i in $(seq 1 200); do nc -z -w3 {{ template 'postgresql.fullname' . }} 5432 && exit 0 || sleep 3; done; exit 1"
               ]
             }
           ]
@@ -29,7 +29,7 @@ spec:
         - name: postgres-listener-v2
           image: alpine
           imagePullPolicy: IfNotPresent
-          command: [ "sh", "-c", "for i in $(seq 1 200); do nc -z -w3 postgresql-for-galaxy 5432 && exit 0 || sleep 3; done; exit 1"]
+          command: [ "sh", "-c", "for i in $(seq 1 200); do nc -z -w3 {{ template 'postgresql.fullname' . }} 5432 && exit 0 || sleep 3; done; exit 1"]
       {{ end }}
       containers:
       - name: galaxy-k8s
@@ -44,22 +44,16 @@ spec:
             - name: "GALAXY_SEC_DB_ENGINE"
               value: "postgresql"
             - name: "GALAXY_SEC_DB_USER"
-              valueFrom:
-                configMapKeyRef:
-                      name: db-connection
-                      key: db.user
+              value: {{ .Values.postgresql.postgresUser }}
             - name: "GALAXY_SEC_DB_PASS"
               valueFrom:
                 secretKeyRef:
-                      name: galaxy-postgres-secret
-                      key: password
+                      name: galaxy-admin-secret
+                      key: database_password
             - name: "GALAXY_SEC_DB_HOST"
-              value: "postgresql-for-galaxy"
+              value: {{ template "postgresql.fullname" . }}
             - name: "GALAXY_SEC_DB_NAME"
-              valueFrom:
-                configMapKeyRef:
-                      name: db-connection
-                      key: db.name
+              value: {{ .Values.postgresql.postgresDatabase }}
             - name: "GALAXY_CONFIG_DATABASE_CONNECTION"
               value: "$GALAXY_SEC_DB_ENGINE://$GALAXY_SEC_DB_HOST/$GALAXY_SEC_DB_NAME?client_encoding=utf8"
 {{ end }}

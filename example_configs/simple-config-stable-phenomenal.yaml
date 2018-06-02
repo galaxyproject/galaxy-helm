@@ -76,11 +76,14 @@ resources: {}
   #  cpu: 100m
   #  memory: 128Mi
 use_condor: false
-postgres_for_galaxy:
-  db_password: "change-me"
-  postgres_pvc: "galaxy-pvc"
-  subpath: "postgres"
-  postgres_image: "pcm32/galaxy-postgres"
-  postgres_image_tag: ":latest"
+postgresql:
+    enabled: true
+    image: "pcm32/galaxy-postgres"
+    imageTag: "9.6.5_for_18.01"
+    postgresDatabase: "galaxydb"
+    postgresUser: "galaxy"
+    postgresPassword: "change-me"
+    existingClaim: "galaxy-pvc"
+    subPath: "postgres"
 legacy:
   pre_k8s_16: false

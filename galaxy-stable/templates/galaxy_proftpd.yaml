@@ -18,7 +18,7 @@ spec:
       containers:
       - name: galaxy-proftpd 
         image: "{{ .Values.proftpd.image.repository }}:{{ .Values.proftpd.image.tag }}"
-        command: ["/bin/bash","-c","export proftpd_db_connection=${galaxy_db_name}@postgresql-for-galaxy && /usr/bin/run.sh"]
+        command: ["/bin/bash", "-c", "export proftpd_db_connection=${galaxy_db_name}@{{ template "postgresql.fullname" . }} && /usr/bin/run.sh"]
         volumeMounts:
         - name: {{.Values.galaxy.pvc.name}}
           mountPath: {{.Values.export_dir}}
@@ -41,20 +41,14 @@ spec:
         - containerPort: 22 
         env:  
         - name: galaxy_db_name
-          valueFrom:
-              configMapKeyRef:
-                name: db-connection
-                key: db.name
+          value: {{ .Values.postgresql.postgresDatabase }}
         - name: proftpd_db_username
-          valueFrom:
-              configMapKeyRef:
-                name: db-connection
-                key: db.user
+          value: {{ .Values.postgresql.postgresUser }}
         - name: proftpd_db_password
           valueFrom:
               secretKeyRef:
-                name: galaxy-postgres-secret
-                key: password
+                    name: galaxy-admin-secret
+                    key: database_password
         - name: proftpd_files_dir
           value: {{.Values.export_dir}}/ftp/
         - name: proftpd_use_sftp

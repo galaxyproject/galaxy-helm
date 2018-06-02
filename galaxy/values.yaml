@@ -10,7 +10,7 @@
 # To set postgresql password for the galaxy user 
 # (note that if the deployment will use an existing postgre database folder, the same password needs to be used as originally).
 # 
-# helm install --set postgres.db_password="new-password"
+# helm install --set postgresql.postgresPassword="new-password"
 #
 # For using an ingress to galaxy.mydomain.dev use
 #
@@ -30,7 +30,7 @@
 #
 # To avoid altogether using a PVC for postgres (files are written inside the container, pod dies, Galaxy state is lost)
 #
-# helm install --set postgres.postgres_pvc=false
+# helm install --set postgresql.existingClaim=false
 #
 # To set a new destination for the tools directory. This is by default set to a location inside the PVC
 #
@@ -53,7 +53,7 @@
 #
 # To setup a subpath for postgres within the PVC
 #
-# helm install --set postgres_for_galaxy.subpath="otherDirectory/inside/pvc" ....
+# helm install --set postgresql.subpath="otherDirectory/inside/pvc" ....
 #
 # Above instructions can be used together, just concatenate with a comma.
 # 
@@ -93,10 +93,15 @@ galaxy:
 domain: "mydomain.dev"
 hostname: "galaxy"
 
-postgres_for_galaxy:
-        db_password: "mypassword"
-        postgres_pvc: "galaxy-pvc" 
-        subpath: ""
+postgresql:
+    enabled: true
+    image: "pcm32/galaxy-postgres"
+    imageTag: "9.6.5_for_18.01"
+    postgresDatabase: "galaxydb"
+    postgresUser: "galaxy"
+    postgresPassword: "mypassword"
+    existingClaim: "galaxy-pvc"
+    subPath: "postgres"
 
 smtp_ssl: "False"
 

@@ -18,7 +18,7 @@ spec:
               "imagePullPolicy": "IfNotPresent",
               "command": [
                 "sh", "-c",
-                "for i in $(seq 1 200); do nc -z -w3 {{ template 'postgresql.fullname' . }} 5432 && exit 0 || sleep 3; done; exit 1"
+                "for i in $(seq 1 200); do nc -z -w3 {{ template "postgresql.fullname" . }} 5432 && exit 0 || sleep 3; done; exit 1"
               ]
             }
           ]
@@ -29,7 +29,7 @@ spec:
         - name: postgres-listener-v2
           image: alpine
           imagePullPolicy: IfNotPresent
-          command: [ "sh", "-c", "for i in $(seq 1 200); do nc -z -w3 {{ template 'postgresql.fullname' . }} 5432 && exit 0 || sleep 3; done; exit 1"]
+          command: [ "sh", "-c", "for i in $(seq 1 200); do nc -z -w3 {{ template "postgresql.fullname" . }} 5432 && exit 0 || sleep 3; done; exit 1"]
       {{ end }}
       containers:
       - name: galaxy-k8s

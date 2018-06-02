@@ -2,4 +2,4 @@ dependencies:
     - name: postgresql
       repository: https://kubernetes-charts.storage.googleapis.com/
       version: 0.10.0
-      condition: galaxy.backend.postgres
+      condition: galaxy_backend_postgres

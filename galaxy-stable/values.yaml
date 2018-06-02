@@ -78,7 +78,7 @@ resources: {}
 postgresql:
     enabled: true
     image: "pcm32/galaxy-postgres"
-    imageTag: ":9.6.5_for_18.01"
+    imageTag: "9.6.5_for_18.01"
     postgresDatabase: "galaxydb"
     postgresUser: "galaxy"
     postgresPassword: "change-me"

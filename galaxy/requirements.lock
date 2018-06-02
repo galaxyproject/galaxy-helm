@@ -1,9 +1,6 @@
 dependencies:
-- condition: ""
-  enabled: false
-  name: postgres_for_galaxy
-  repository: https://pcm32.github.io/galaxy-helm-charts
-  tags: null
-  version: 0.1.1
-digest: sha256:25933ca2e064ecfa3aaea3b3979d7e37236af82cc679ce69738e07f12e2c89bb
-generated: 2017-04-21T12:28:20.832459522+01:00
+- name: postgresql
+  repository: https://kubernetes-charts.storage.googleapis.com/
+  version: 0.10.0
+digest: sha256:57f634ece168f868dbe88bca1adda886cec1055e0f2d774854c69340a1a7bc44
+generated: 2018-06-02T23:50:32.804409717+05:30

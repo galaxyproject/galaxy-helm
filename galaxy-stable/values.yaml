@@ -68,8 +68,11 @@ persistence:
   # annotations: {}
 
 service:
-  type: NodePort
-  port: 30700
+  type: ClusterIP
+  port: 80
+  # Only effective if service.type is NodePort
+  node_port_exposed: 30700
+
 pv_minikube: false
 external_ingress_controller: false 
 ingress:
@@ -133,11 +136,12 @@ proftpd:
     high: 30010
   use_sftp: true
   generate_ssh_key: false
-  node_port_exposed: 30722
   resources: {}
   nodeSelector: {}
   tolerations: []
   affinity: {}
   service:
     type: NodePort
-    port: 30722
+    port: 22
+    # Only effective if service.type is NodePort
+    node_port_exposed: 30722

@@ -178,7 +178,7 @@ spec:
                      - "--stop" 
           ports:
             - name: http
-              containerPort: {{ .Values.galaxy.internal_port }}
+              containerPort: {{ .Values.service.port }}
               protocol: TCP
           #livenessProbe:
           #  httpGet:

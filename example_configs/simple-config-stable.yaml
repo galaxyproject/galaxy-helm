@@ -86,7 +86,8 @@ postgresql:
     postgresDatabase: "galaxydb"
     postgresUser: "galaxy"
     postgresPassword: "change-me"
-    existingClaim: "galaxy-pvc"
-    subPath: "postgres"
+      persistence:
+        existingClaim: "galaxy-pvc"
+        subPath: "postgres"
 legacy:
   pre_k8s_16: false

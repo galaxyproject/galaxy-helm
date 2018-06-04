@@ -89,8 +89,9 @@ postgresql:
     postgresDatabase: "galaxydb"
     postgresUser: "galaxy"
     postgresPassword: "change-me"
-    existingClaim: "galaxy-pvc"
-    subPath: "postgres"
+    persistence:
+        existingClaim: "galaxy-pvc"
+        subPath: "postgres"
 proftpd:
   generate_ssh_key: true
   image:

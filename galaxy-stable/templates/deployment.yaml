@@ -47,9 +47,9 @@ spec:
             {{ end }}
           volumeMounts:
             - mountPath: {{ .Values.export_dir }}
-              name: {{ .Values.galaxy.pvc.name }}
-              {{ if .Values.galaxy.pvc.subPath }}
-              subPath: {{ .Values.galaxy.pvc.subPath }}
+              name: {{ .Values.persistence.name }}
+              {{ if .Values.persistence.subPath }}
+              subPath: {{ .Values.persistence.subPath }}
               {{ end }}
           resources:
 {{ toYaml .Values.galaxy.init.resources | indent 12 }}
@@ -67,7 +67,7 @@ spec:
               - name: "NONUSE"
                 value: "sleeplock{{ if not .Values.use_condor }},condor{{ end }}" 
               - name: "GALAXY_TOOLS_PULL_POLICY"
-                value: {{.Values.galaxy.image.pullPolicy}}
+                value: {{ .Values.galaxy.image.pullPolicy }}
               - name: "GALAXY_CONFIG_BRAND"
                 value: "{{ .Values.galaxy.brand }}" 
               {{ if .Values.galaxy.backend.postgres }}
@@ -89,17 +89,17 @@ spec:
               {{ end }}
               {{ if .Values.galaxy.tools.destination }}
               - name: "TOOLS_DEST_PVC"
-                value: "{{.Values.galaxy.tools.destination}}"
+                value: "{{ .Values.galaxy.tools.destination }}"
               - name: "GALAXY_CONFIG_TOOL_PATH"
-                value: "{{.Values.galaxy.tools.destination}}"   
+                value: "{{ .Values.galaxy.tools.destination }}"
               {{ end }}
               {{ if .Values.galaxy.k8s.supp_groups }}
               - name: "SUPP_GROUPS"
-                value: "{{.Values.galaxy.k8s.supp_groups}}"
+                value: "{{ .Values.galaxy.k8s.supp_groups }}"
               {{ end }}
               {{ if .Values.galaxy.k8s.fs_group }}
               - name: "FS_GROUP"
-                value: "{{.Values.galaxy.k8s.fs_group}}"
+                value: "{{ .Values.galaxy.k8s.fs_group }}"
               {{ end }}
               {{ if and .Values.galaxy.admin.email (and .Values.galaxy.admin.password .Values.galaxy.admin.api_key) }}
               - name: "GALAXY_DEFAULT_ADMIN_USER"
@@ -144,29 +144,29 @@ spec:
               {{ end }}
               {{ if and .Values.galaxy.smtp.server (and .Values.galaxy.smtp.username .Values.galaxy.smtp.password) }}
               - name: "GALAXY_CONFIG_SMTP_SERVER"
-                value: "{{.Values.galaxy.smtp.server}}"
+                value: "{{ .Values.galaxy.smtp.server }}"
               - name: "GALAXY_CONFIG_SMTP_USERNAME"
-                value: "{{.Values.galaxy.smtp.username}}"
+                value: "{{ .Values.galaxy.smtp.username }}"
               - name: "GALAXY_CONFIG_SMTP_PASSWORD"
-                value: "{{.Values.galaxy.smtp.password}}"
+                value: "{{ .Values.galaxy.smtp.password }}"
               - name: "GALAXY_CONFIG_EMAIL_FROM"
-                value: "{{.Values.galaxy.smtp.email_from}}"
+                value: "{{ .Values.galaxy.smtp.email_from }}"
               - name: "GALAXY_CONFIG_URL"
-                value: "{{.Values.galaxy.instance_resource_url}}"
+                value: "{{ .Values.galaxy.instance_resource_url }}"
               - name: "GALAXY_CONFIG_SMTP_SSL"
-                value: "{{.Values.galaxy.smtp.ssl}}" 
+                value: "{{ .Values.galaxy.smtp.ssl }}"
               {{ end }}
               - name: "GALAXY_RUNNERS_K8S_PERSISTENT_VOLUME_CLAIM_MOUNT_PATH"
-                value: "{{.Values.export_dir}}"
+                value: "{{ .Values.export_dir }}"
               - name: "PYKUBE_KUBERNETES_SERVICE_HOST"
                 value: "kubernetes"
               {{ if .Values.galaxy.destinations_default }}
               - name: "GALAXY_DESTINATIONS_DEFAULT" 
-                value: "{{.Values.galaxy.destinations_default}}"
+                value: "{{ .Values.galaxy.destinations_default }}"
               {{ end }}
               {{ if and .Values.galaxy.ftp .Values.galaxy.ftp.url }}
               - name: "GALAXY_CONFIG_FTP_UPLOAD_SITE"
-                value: "{{.Values.galaxy.ftp.url}}"
+                value: "{{ .Values.galaxy.ftp.url }}"
               {{ end }} 
           command: ["/bin/bash","-c","{{ if not .Values.galaxy.backend.postgres }}mkdir -p {{ .Values.export_dir }}/database-sqlite && {{ end }}export GALAXY_CONFIG_DATABASE_CONNECTION=${GALAXY_SEC_DB_ENGINE}://${GALAXY_SEC_DB_USER}:${GALAXY_SEC_DB_PASS}@${GALAXY_SEC_DB_HOST}/${GALAXY_SEC_DB_NAME}?client_encoding=utf8 && /usr/bin/startup"]
           workingDir: {{ .Values.export_dir }}
@@ -190,18 +190,18 @@ spec:
           #    port: http
           volumeMounts:
             - mountPath: {{ .Values.export_dir }}
-              name: {{ .Values.galaxy.pvc.name }}
-              {{ if .Values.galaxy.pvc.subPath }}
-              subPath: {{ .Values.galaxy.pvc.subPath }}
+              name: {{ .Values.persistence.name }}
+              {{ if .Values.persistence.subPath }}
+              subPath: {{ .Values.persistence.subPath }}
               {{ end }}
             {{ if .Values.development_folder }}
-            - mountPath: "{{.Values.export_dir}}/config/galaxy.ini.injected"
+            - mountPath: "{{ .Values.export_dir }}/config/galaxy.ini.injected"
               name: galaxy-ini 
-            - mountPath: "{{.Values.export_dir}}/config/job_conf.xml"
+            - mountPath: "{{ .Values.export_dir }}/config/job_conf.xml"
               name: galaxy-job-conf 
-            - mountPath: "{{.Values.export_dir}}/config/tool_conf.xml"
+            - mountPath: "{{ .Values.export_dir }}/config/tool_conf.xml"
               name: galaxy-tool-conf
-            - mountPath: "{{.Values.export_dir}}/tools"
+            - mountPath: "{{ .Values.export_dir }}/tools"
               name: tools           
             {{ end }}
           resources:
@@ -221,16 +221,16 @@ spec:
 {{ if or .Values.galaxy.k8s.supp_groups .Values.galaxy.k8s.fs_group }}
       securityContext:
 {{ if .Values.galaxy.k8s.supp_groups }}
-        supplementalGroups: [{{.Values.galaxy.k8s.supp_groups}}]
+        supplementalGroups: [{{ .Values.galaxy.k8s.supp_groups }}]
 {{ end }}
 {{ if .Values.galaxy.k8s.fs_group }}
-        fsGroup: {{.Values.galaxy.k8s.fs_group}}
+        fsGroup: {{ .Values.galaxy.k8s.fs_group }}
 {{ end }}
 {{ end }}
       volumes:
-        - name: {{ .Values.galaxy.pvc.name }}
+        - name: {{ .Values.persistence.name }}
           persistentVolumeClaim:
-              claimName: {{ .Values.galaxy.pvc.name }}
+              claimName: {{ .Values.persistence.existingClaim | default .Values.persistence.name }}
         {{ if .Values.development_folder }}
         - name: galaxy-ini
           hostPath:

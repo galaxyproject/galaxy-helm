@@ -25,10 +25,10 @@ spec:
         image: "{{ .Values.proftpd.image.repository }}:{{ .Values.proftpd.image.tag }}"
         command: ["/bin/bash", "-c", 'export proftpd_db_connection=${galaxy_db_name}@{{ template "postgresql.fullname" . }} && /usr/bin/run.sh']
         volumeMounts:
-        - name: {{ .Values.galaxy.pvc.name }}
+        - name: {{ .Values.persistence.name }}
           mountPath: {{ .Values.export_dir }}
-          {{ if .Values.galaxy.pvc.subPath }}
-          subPath: {{ .Values.galaxy.pvc.subPath }}
+          {{ if .Values.persistence.subPath }}
+          subPath: {{ .Values.persistence.subPath }}
           {{ end }}
         ports:
         - containerPort: 30000
@@ -88,9 +88,9 @@ spec:
 {{ end }}
 {{ end }}
       volumes:
-         - name: {{ .Values.galaxy.pvc.name }}
+         - name: {{ .Values.persistence.name }}
            persistentVolumeClaim:
-              claimName: {{ .Values.galaxy.pvc.name }}  
+              claimName: {{ .Values.persistence.existingClaim | default .Values.persistence.name }}
 {{ end }}
 
 

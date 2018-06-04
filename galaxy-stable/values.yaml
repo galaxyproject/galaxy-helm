@@ -40,12 +40,33 @@ galaxy:
   instance_resource_url:
   internal_port: 80
   node_port_exposed: 30700
-  create_pvc: true
-  pvc:
-    name: galaxy-pvc
-    capacity: "15Gi"
-    # subPath:
 # development_folder:
+
+## Persist data to a persistent volume
+persistence:
+  enabled: true
+  name: &pvcname galaxy-pvc
+
+  ## A manually managed Persistent Volume and Claim
+  ## Requires persistence.enabled: true
+
+  ## If defined, PVC must be created manually before volume will be bound
+  # existingClaim:
+
+  ## database data Persistent Volume Storage Class
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  # storageClass: "-"
+  accessMode: ReadWriteMany
+  size: 15Gi
+  subPath: ""
+
+  # annotations: {}
+
 service:
   type: NodePort
   port: 30700
@@ -92,7 +113,7 @@ postgresql:
     postgresUser: "galaxy"
     postgresPassword: "change-me"
     persistence:
-        existingClaim: "galaxy-pvc"
+        existingClaim: *pvcname
         subPath: "postgres"
 
 legacy:

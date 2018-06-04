@@ -40,11 +40,6 @@ galaxy:
   instance_resource_url: "localhost" 
   internal_port: 80
   node_port_exposed: 30700
-  create_pvc: true
-  pvc:
-    name: galaxy-pvc
-    capacity: "15Gi"
-    # subPath:
 # development_folder:
 service:
   name: galaxy-svc
@@ -53,6 +48,16 @@ pv_minikube: true
 pv:
   minikube:
       hostPath: "/data/galaxy-stable-data"
+
+## Persist data to a persistent volume
+persistence:
+  enabled: true
+  name: &pvcname galaxy-pvc
+  storageClass: "-"
+  accessMode: ReadWriteMany
+  size: 15Gi
+  subPath: ""
+
 use_ingress: false
 external_ingress_controller: false 
 ingress:
@@ -60,7 +65,7 @@ ingress:
   # Used to create Ingress record (should used with service.type: ClusterIP).
   hosts:
     - chart-example.local
-  annotations:
+  annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   tls:
@@ -87,7 +92,7 @@ postgresql:
     postgresUser: "galaxy"
     postgresPassword: "change-me"
       persistence:
-        existingClaim: "galaxy-pvc"
+        existingClaim: *pvcname
         subPath: "postgres"
 legacy:
   pre_k8s_16: false

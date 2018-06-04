@@ -48,17 +48,20 @@ galaxy:
 # development_folder:
 service:
   type: NodePort
+  port: 30700
 pv_minikube: false
 external_ingress_controller: false 
 ingress:
   enabled: false
-  hostname: "galaxy"
   domain: "local"
+  path: /
   # Used to create Ingress record (should used with service.type: ClusterIP).
-  annotations:
+  annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-  tls:
+  hosts:
+    - galaxy
+  tls: []
     # Secrets must be manually created in the namespace.
     # - secretName: chart-example-tls
     #   hosts:
@@ -74,6 +77,12 @@ resources: {}
   #requests:
   #  cpu: 100m
   #  memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
 
 postgresql:
     enabled: true
@@ -94,6 +103,7 @@ use_proftpd: true
 use_condor: false
 
 proftpd:
+  replicaCount: 1
   image: 
     repository: "container-registry.phenomenal-h2020.eu/phnmnl/galaxy-proftpd"
     tag: "for_galaxy_v17.09"
@@ -103,5 +113,10 @@ proftpd:
   use_sftp: true
   generate_ssh_key: false
   node_port_exposed: 30722
-
-
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  service:
+    type: NodePort
+    port: 30722

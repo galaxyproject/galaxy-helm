@@ -4,7 +4,7 @@ kind: PersistentVolume
 metadata:
   name: galaxy-pv
   labels:
-     app: {{ template "name" . }} 
+     app: {{ template "galaxy.name" . }} 
 spec:
   capacity:
     storage: 20Gi

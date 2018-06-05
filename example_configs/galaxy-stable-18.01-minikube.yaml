@@ -8,36 +8,40 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 replicaCount: 1
-galaxy:
-  init:
-    image:
-      repository: pcm32/galaxy-init
-      tag: v18.01
-      pullPolicy: Always
-    resources: {}
+
+# Settings for the init image
+init:
   image:
-    repository: pcm32/galaxy-web-k8s
+    repository: pcm32/galaxy-init
     tag: v18.01
     pullPolicy: Always
+  resources: {}
+
+image:
+  repository: pcm32/galaxy-web-k8s
+  tag: v18.01
+  pullPolicy: Always
+
 # Probably not needed as all on /export
-  tools:
-    destination: "/export/tools"
-  # destinations_default: "k8s" # currently this doesn't work with community images
-  k8s:
-    supp_groups: 0
-    fs_group: 0
-  admin:
-    email: "admin@email.do"
-    password: "admin-pass"
-    api_key: "qwertyqweqwe"
-    username: admin
-  #smtp:
-  #  server: "email.server.do"
-  #  username: "email-user"
-  #  password: "email-pass"
-  #  email_from: "user@server.do"
-  #  ssl: 'False'
-  instance_resource_url: "localhost"
+tools:
+  destination: "/export/tools"
+
+# Settings for k8s job runner
+k8s:
+  supp_groups:
+  fs_group:
+
+# Admin user settings
+admin:
+  email: "admin@email.do"
+  password: "admin-pass"
+  api_key: "qwertyqweqwe"
+  username: admin
+
+galaxy_yml:
+  brand: "k8s"
+  url: "localhost"
+
 # development_folder:
 service:
   type: NodePort
@@ -57,7 +61,6 @@ persistence:
   size: 15Gi
   subPath: ""
 
-use_ingress: false
 external_ingress_controller: false
 ingress:
   enabled: false

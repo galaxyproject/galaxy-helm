@@ -21,92 +21,47 @@ spec:
     spec:
       initContainers:
         - name: galaxy-init
-          image: "{{ .Values.galaxy.init.image.repository }}:{{ .Values.galaxy.init.image.tag }}"
-          imagePullPolicy: {{ .Values.galaxy.init.image.pullPolicy }}
+          image: "{{ .Values.init.image.repository }}:{{ .Values.init.image.tag }}"
+          imagePullPolicy: {{ .Values.init.image.pullPolicy }}
           env:
             - name: "DISABLE_SLEEPLOCK"
               value: "yes"
-            {{ if .Values.galaxy.init.force_copy }}
+            {{- if .Values.init.force_copy }}
             - name: "GALAXY_INIT_FORCE_COPY"
-              value: {{ .Values.galaxy.init.force_copy }}
-            {{ end }}
+              value: {{ .Values.init.force_copy }}
+            {{- end }}
           volumeMounts:
             - mountPath: {{ .Values.export_dir }}
               name: {{ .Values.persistence.name }}
-              {{ if .Values.persistence.subPath }}
+              {{- if .Values.persistence.subPath }}
               subPath: {{ .Values.persistence.subPath }}
-              {{ end }}
+              {{- end }}
           resources:
-{{ toYaml .Values.galaxy.init.resources | indent 12 }}
-        {{ if .Values.postgresql.enabled }}
+{{ toYaml .Values.init.resources | indent 12 }}
+        {{- if .Values.postgresql.enabled }}
         - name: postgres-listener
           image: alpine
           imagePullPolicy: IfNotPresent
           command: [ "sh", "-c", "for i in $(seq 1 200); do nc -z -w3 {{ template "postgresql.fullname" . }} 5432 && exit 0 || sleep 3; done; exit 1"]
-        {{ end }}
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.galaxy.image.repository }}:{{ .Values.galaxy.image.tag }}"
-          imagePullPolicy: {{ .Values.galaxy.image.pullPolicy }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+          - configMapRef:
+              name: {{ template "galaxy.fullname" . }}-galaxy-yml
+          - configMapRef:
+              name: {{ template "galaxy.fullname" . }}-container-cfgmap
           env:
-              - name: "NONUSE"
-                value: "sleeplock{{ if not .Values.condor.enabled }},condor{{ end }}"
-              - name: "GALAXY_TOOLS_PULL_POLICY"
-                value: {{ .Values.galaxy.image.pullPolicy }}
-              - name: "GALAXY_CONFIG_BRAND"
-                value: "{{ .Values.galaxy.brand }}" 
-              {{ if .Values.postgresql.enabled }}
-              - name: "GALAXY_SEC_DB_ENGINE"
-                value: "postgresql"
-              - name: "GALAXY_SEC_DB_USER"
-                value: {{ .Values.postgresql.postgresUser }}
+              {{- if .Values.postgresql.enabled }}
               - name: "GALAXY_SEC_DB_PASS"
                 valueFrom:
                   secretKeyRef:
                       name: {{ template "galaxy.fullname" . }}-admin-secret
                       key: database_password
-              - name: "GALAXY_SEC_DB_HOST"
-                value: {{ template "postgresql.fullname" . }}
-              - name: "GALAXY_SEC_DB_NAME"
-                value: {{ .Values.postgresql.postgresDatabase }}
-              #- name: "GALAXY_CONFIG_DATABASE_CONNECTION"
-              #  value: ${GALAXY_SEC_DB_ENGINE}://${GALAXY_SEC_DB_USER}:${GALAXY_SEC_DB_PASS}@${GALAXY_SEC_DB_HOST}/${GALAXY_SEC_DB_NAME}?client_encoding=utf8
-              {{ end }}
-              {{ if .Values.galaxy.tools.destination }}
-              - name: "TOOLS_DEST_PVC"
-                value: "{{ .Values.galaxy.tools.destination }}"
-              - name: "GALAXY_CONFIG_TOOL_PATH"
-                value: "{{ .Values.galaxy.tools.destination }}"
-              {{ end }}
-              {{ if .Values.galaxy.k8s.supp_groups }}
-              - name: "SUPP_GROUPS"
-                value: "{{ .Values.galaxy.k8s.supp_groups }}"
-              {{ end }}
-              {{ if .Values.galaxy.k8s.fs_group }}
-              - name: "FS_GROUP"
-                value: "{{ .Values.galaxy.k8s.fs_group }}"
-              {{ end }}
-              {{ if and .Values.galaxy.admin.email (and .Values.galaxy.admin.password .Values.galaxy.admin.api_key) }}
-              - name: "GALAXY_DEFAULT_ADMIN_USER"
-                valueFrom:
-                  configMapKeyRef:
-                        name: {{ template "galaxy.fullname" . }}-admin-user
-                        key: user
-              - name: "GALAXY_DEFAULT_ADMIN_EMAIL"
-                valueFrom:
-                  configMapKeyRef:
-                        name: {{ template "galaxy.fullname" . }}-admin-user
-                        key: email 
-              - name: "GALAXY_ADMIN_EMAIL"
-                valueFrom:
-                  configMapKeyRef:
-                        name: {{ template "galaxy.fullname" . }}-admin-user
-                        key: email
-              - name: "GALAXY_CONFIG_ADMIN_USERS"
-                valueFrom:
-                  configMapKeyRef:
-                        name: {{ template "galaxy.fullname" . }}-admin-user
-                        key: email
+              {{- end }}
+              {{- if and .Values.admin.email (and .Values.admin.password .Values.admin.api_key) }}
               - name: "GALAXY_ADMIN_PASSWORD"
                 valueFrom:
                   secretKeyRef:
@@ -122,38 +77,8 @@ spec:
                   secretKeyRef:
                         name: {{ template "galaxy.fullname" . }}-admin-secret
                         key: api-key
-              - name: "GALAXY_CONFIG_ALLOW_USER_DELETION"
-                value: "True"
-              - name: "GALAXY_CONFIG_ALLOW_USER_CREATION"
-                value: "{{ .Values.galaxy.admin.allow_user_creation }}" 
-              {{ end }}
-              {{ if and .Values.galaxy.smtp.server (and .Values.galaxy.smtp.username .Values.galaxy.smtp.password) }}
-              - name: "GALAXY_CONFIG_SMTP_SERVER"
-                value: "{{ .Values.galaxy.smtp.server }}"
-              - name: "GALAXY_CONFIG_SMTP_USERNAME"
-                value: "{{ .Values.galaxy.smtp.username }}"
-              - name: "GALAXY_CONFIG_SMTP_PASSWORD"
-                value: "{{ .Values.galaxy.smtp.password }}"
-              - name: "GALAXY_CONFIG_EMAIL_FROM"
-                value: "{{ .Values.galaxy.smtp.email_from }}"
-              - name: "GALAXY_CONFIG_URL"
-                value: "{{ .Values.galaxy.instance_resource_url }}"
-              - name: "GALAXY_CONFIG_SMTP_SSL"
-                value: "{{ .Values.galaxy.smtp.ssl }}"
-              {{ end }}
-              - name: "GALAXY_RUNNERS_K8S_PERSISTENT_VOLUME_CLAIM_MOUNT_PATH"
-                value: "{{ .Values.export_dir }}"
-              - name: "PYKUBE_KUBERNETES_SERVICE_HOST"
-                value: "kubernetes"
-              {{ if .Values.galaxy.destinations_default }}
-              - name: "GALAXY_DESTINATIONS_DEFAULT" 
-                value: "{{ .Values.galaxy.destinations_default }}"
-              {{ end }}
-              {{ if and .Values.galaxy.ftp .Values.galaxy.ftp.url }}
-              - name: "GALAXY_CONFIG_FTP_UPLOAD_SITE"
-                value: "{{ .Values.galaxy.ftp.url }}"
-              {{ end }} 
-          command: ["/bin/bash","-c","{{ if not .Values.galaxy.backend.postgres }}mkdir -p {{ .Values.export_dir }}/database-sqlite && {{ end }}export GALAXY_CONFIG_DATABASE_CONNECTION=${GALAXY_SEC_DB_ENGINE}://${GALAXY_SEC_DB_USER}:${GALAXY_SEC_DB_PASS}@${GALAXY_SEC_DB_HOST}/${GALAXY_SEC_DB_NAME}?client_encoding=utf8 && /usr/bin/startup"]
+              {{- end }}
+          command: ["/bin/bash","-c","{{ if not .Values.postgresql.enabled }}mkdir -p {{ .Values.export_dir }}/database-sqlite && {{ end }}export GALAXY_CONFIG_DATABASE_CONNECTION=${GALAXY_SEC_DB_ENGINE}://${GALAXY_SEC_DB_USER}:${GALAXY_SEC_DB_PASS}@${GALAXY_SEC_DB_HOST}/${GALAXY_SEC_DB_NAME}?client_encoding=utf8 && /usr/bin/startup"]
           workingDir: {{ .Values.export_dir }}
           lifecycle: 
             preStop:
@@ -176,10 +101,10 @@ spec:
           volumeMounts:
             - mountPath: {{ .Values.export_dir }}
               name: {{ .Values.persistence.name }}
-              {{ if .Values.persistence.subPath }}
+              {{- if .Values.persistence.subPath }}
               subPath: {{ .Values.persistence.subPath }}
-              {{ end }}
-            {{ if .Values.development_folder }}
+              {{- end }}
+            {{- if .Values.development_folder }}
             - mountPath: "{{ .Values.export_dir }}/config/galaxy.ini.injected"
               name: galaxy-ini 
             - mountPath: "{{ .Values.export_dir }}/config/job_conf.xml"
@@ -188,7 +113,7 @@ spec:
               name: galaxy-tool-conf
             - mountPath: "{{ .Values.export_dir }}/tools"
               name: tools           
-            {{ end }}
+            {{- end }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
 {{- if .Values.nodeSelector }}
@@ -203,20 +128,20 @@ spec:
       tolerations:
 {{ toYaml . | indent 8 }}
     {{- end }}
-{{ if or .Values.galaxy.k8s.supp_groups .Values.galaxy.k8s.fs_group }}
+{{- if or .Values.k8s.supp_groups .Values.k8s.fs_group }}
       securityContext:
-{{ if .Values.galaxy.k8s.supp_groups }}
-        supplementalGroups: [{{ .Values.galaxy.k8s.supp_groups }}]
-{{ end }}
-{{ if .Values.galaxy.k8s.fs_group }}
-        fsGroup: {{ .Values.galaxy.k8s.fs_group }}
-{{ end }}
-{{ end }}
+{{- if .Values.k8s.supp_groups }}
+        supplementalGroups: [{{ .Values.k8s.supp_groups }}]
+{{- end }}
+{{- if .Values.k8s.fs_group }}
+        fsGroup: {{ .Values.k8s.fs_group }}
+{{- end }}
+{{- end }}
       volumes:
         - name: {{ .Values.persistence.name }}
           persistentVolumeClaim:
               claimName: {{ .Values.persistence.existingClaim | default .Values.persistence.name }}
-        {{ if .Values.development_folder }}
+        {{- if .Values.development_folder }}
         - name: galaxy-ini
           hostPath:
             path: {{ .Values.development_folder }}/config/galaxy.ini
@@ -229,4 +154,4 @@ spec:
         - name: tools
           hostPath:
             path: {{ .Values.development_folder }}/tools
-        {{ end }}
+        {{- end }}

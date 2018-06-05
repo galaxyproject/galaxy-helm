@@ -1,4 +1,4 @@
-{{ if and .Values.proftpd.enabled .Values.galaxy.backend.postgres }}
+{{- if and .Values.proftpd.enabled .Values.postgresql.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -73,25 +73,23 @@ spec:
     {{- end }}
     {{- with .Values.proftpd.affinity }}
       affinity:
-{ toYaml . | indent 8 }}
+{{ toYaml . | indent 8 }}
     {{- end }}
     {{- with .Values.proftpd.tolerations }}
       tolerations:
 {{ toYaml . | indent 8 }}
     {{- end }}
-{{ if or .Values.galaxy.k8s.supp_groups .Values.galaxy.k8s.fs_group }}
+{{- if or .Values.k8s.supp_groups .Values.k8s.fs_group }}
       securityContext:
-{{ if .Values.galaxy.k8s.supp_groups }}
-        supplementalGroups: [{{.Values.galaxy.k8s.supp_groups}}]
-{{ end }}
-{{ if .Values.galaxy.k8s.fs_group }}
-        fsGroup: {{.Values.galaxy.k8s.fs_group}}
-{{ end }}
-{{ end }}
+{{- if .Values.k8s.supp_groups }}
+        supplementalGroups: [{{.Values.k8s.supp_groups}}]
+{{- end }}
+{{- if .Values.k8s.fs_group }}
+        fsGroup: {{.Values.k8s.fs_group}}
+{{- end }}
+{{- end }}
       volumes:
          - name: {{ .Values.persistence.name }}
            persistentVolumeClaim:
               claimName: {{ .Values.persistence.existingClaim | default .Values.persistence.name }}
 {{ end }}
-
-

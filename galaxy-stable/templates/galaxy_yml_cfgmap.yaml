@@ -1,0 +1,18 @@
+# This configmap corresponds.to settings in the galaxy.yml file. They are sent in
+# to the container as env vars. The setting is converted to uppercase and prefixed
+# with GALAXY_CONFIG_ to override the default galaxy.yml config value.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "galaxy.fullname" . }}-galaxy-yml
+  labels:
+    app: {{ template "galaxy.name" . }}
+    chart: {{ template "galaxy.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  {{- range $key, $val := .Values.galaxy_yml }}
+  {{- if $val }}
+  GALAXY_CONFIG_{{ $key | upper }}: {{ quote $val }}
+  {{- end }}
+  {{- end }}

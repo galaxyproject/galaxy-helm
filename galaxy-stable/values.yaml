@@ -6,53 +6,51 @@ replicaCount: 1
 # The data folder used by the galaxy and proftpd containers
 export_dir: "/export"
 
-galaxy:
-    # brand name displayed in Galaxy header
-    brand: "k8s"
+# Settings for the init image
+init:
+  image:
+    repository: pcm32/galaxy-stable-k8s-init
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources: {}
 
-    # Settings for the init image
-    init:
-      image:
-        repository: pcm32/galaxy-stable-k8s-init
-        tag: latest
-        pullPolicy: IfNotPresent
-      resources: {}
+image:
+  repository: pcm32/galaxy-stable-k8s
+  tag: latest
+  pullPolicy: IfNotPresent
 
-    image:
-      repository: pcm32/galaxy-stable-k8s
-      tag: latest
-      pullPolicy: IfNotPresent
+# Probably not needed as all on /export
+tools:
+  destination: "/export/tools"
 
-    # Probably not needed as all on /export
-    tools:
-      destination: "/export/tools"
+# Settings for k8s job runner
+k8s:
+  supp_groups:
+  fs_group:
 
-    # Settings for k8s job runner
-    k8s:
-      supp_groups:
-      fs_group:
+# Admin user settings
+admin:
+  email:
+  password:
+  api_key:
+  username: admin
 
-    # Admin user settings
-    admin:
-      email:
-      password:
-      api_key:
-      username: admin
-      allow_user_creation: "True"
+# development_folder:
 
-    # Email settings
-    smtp:
-      server:
-      username:
-      password:
-      email_from:
-      ssl:
-
-    # Ftp server settings
-    ftp:
-      url:
-    instance_resource_url:
-    # development_folder:
+# Galaxy config settings to pass to the container. These will be sent in as env vars
+# prefixed by GALAXY_CONFIG_, which will override the corresponding setting in galaxy.yml
+galaxy_yml:
+  brand: "k8s"
+  admin_users:
+  allow_user_deletion:
+  allow_user_creation:
+  # smtp_server:
+  # smtp_username:
+  # smtp_password:
+  # email_from:
+  # smtp_ssl:
+  # url:
+  # ftp_upload_site:
 
 ## Persist data to a persistent volume
 persistence:

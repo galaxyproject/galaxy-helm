@@ -1,4 +1,4 @@
-{{ if and .Values.use_proftpd .Values.galaxy.backend.postgres }}
+{{ if and .Values.proftpd.enabled .Values.galaxy.backend.postgres }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -23,6 +23,7 @@ spec:
       containers:
       - name: galaxy-proftpd 
         image: "{{ .Values.proftpd.image.repository }}:{{ .Values.proftpd.image.tag }}"
+        imagePullPolicy: {{ .Values.proftpd.image.pullPolicy }}
         command: ["/bin/bash", "-c", 'export proftpd_db_connection=${galaxy_db_name}@{{ template "postgresql.fullname" . }} && /usr/bin/run.sh']
         volumeMounts:
         - name: {{ .Values.persistence.name }}

@@ -15,8 +15,6 @@ galaxy:
       tag: v18.01
       pullPolicy: Always
     resources: {}
-  backend:
-    postgres: true
   image:
     repository: pcm32/galaxy-web-k8s
     tag: v18.01
@@ -85,7 +83,10 @@ resources: {}
   #requests:
   #  cpu: 100m
   #  memory: 128Mi
-use_condor: false
+
+condor:
+    enabled: false
+
 postgresql:
     enabled: true
     image: "pcm32/galaxy-postgres"
@@ -97,6 +98,7 @@ postgresql:
         existingClaim: *pvcname
         subPath: "postgres"
 proftpd:
+  enabled: true
   generate_ssh_key: true
   image:
     repository: "pcm32/galaxy-proftpd"

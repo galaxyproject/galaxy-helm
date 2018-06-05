@@ -2,45 +2,57 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 replicaCount: 1
+
+# The data folder used by the galaxy and proftpd containers
 export_dir: "/export"
+
 galaxy:
-  brand: "k8s"
-  init:
+    # brand name displayed in Galaxy header
+    brand: "k8s"
+
+    # Settings for the init image
+    init:
+      image:
+        repository: pcm32/galaxy-stable-k8s-init
+        tag: latest
+        pullPolicy: IfNotPresent
+      resources: {}
+
     image:
-      repository: pcm32/galaxy-stable-k8s-init
-      tag: latest 
+      repository: pcm32/galaxy-stable-k8s
+      tag: latest
       pullPolicy: IfNotPresent
-    resources: {}
-  backend:
-    postgres: true
-  image:
-    repository: pcm32/galaxy-stable-k8s
-    tag: latest
-    pullPolicy: IfNotPresent
-# Probably not needed as all on /export
-  tools:
-    destination: "/export/tools"
-  k8s:
-    supp_groups:
-    fs_group:
-  admin:
-    email:
-    password:
-    api_key:
-    username: admin
-    allow_user_creation: "True"
-  smtp:
-    server:
-    username:
-    password:
-    email_from:
-    ssl:
-  ftp:
-    url:
-  instance_resource_url:
-  internal_port: 80
-  node_port_exposed: 30700
-# development_folder:
+
+    # Probably not needed as all on /export
+    tools:
+      destination: "/export/tools"
+
+    # Settings for k8s job runner
+    k8s:
+      supp_groups:
+      fs_group:
+
+    # Admin user settings
+    admin:
+      email:
+      password:
+      api_key:
+      username: admin
+      allow_user_creation: "True"
+
+    # Email settings
+    smtp:
+      server:
+      username:
+      password:
+      email_from:
+      ssl:
+
+    # Ftp server settings
+    ftp:
+      url:
+    instance_resource_url:
+    # development_folder:
 
 ## Persist data to a persistent volume
 persistence:
@@ -109,28 +121,30 @@ tolerations: []
 affinity: {}
 
 postgresql:
-    enabled: true
-    image: "pcm32/galaxy-postgres"
-    imageTag: "9.6.5_for_18.01"
-    postgresDatabase: "galaxydb"
-    postgresUser: "galaxy"
-    postgresPassword: "change-me"
-    persistence:
-        existingClaim: *pvcname
-        subPath: "postgres"
+  enabled: true
+  image: "pcm32/galaxy-postgres"
+  imageTag: "9.6.5_for_18.01"
+  postgresDatabase: "galaxydb"
+  postgresUser: "galaxy"
+  postgresPassword: "change-me"
+  persistence:
+    existingClaim: *pvcname
+    subPath: "postgres"
 
 legacy:
   pre_k8s_16: false
 rbac_needed: false
 
-use_proftpd: true
-use_condor: false
+condor:
+  enabled: false
 
 proftpd:
+  enabled: true
   replicaCount: 1
   image: 
     repository: "container-registry.phenomenal-h2020.eu/phnmnl/galaxy-proftpd"
     tag: "for_galaxy_v17.09"
+    pullPolicy: IfNotPresent
   passive_port:
     low: 30000
     high: 30010

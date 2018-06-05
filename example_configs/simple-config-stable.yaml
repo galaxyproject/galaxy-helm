@@ -11,8 +11,6 @@ galaxy:
       tag: dev 
       pullPolicy: Always 
     resources: {}
-  backend:
-    postgres: true
   image:
     repository: pcm32/galaxy-web
     tag: k8s

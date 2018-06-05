@@ -18,7 +18,7 @@ spec:
       labels:
         app: {{ template "galaxy.name" . }}
         release: {{ .Release.Name }}
-{{ if and .Values.galaxy.backend.postgres .Values.legacy.pre_k8s_16 }}
+{{ if and .Values.postgresql.enabled .Values.legacy.pre_k8s_16 }}
       annotations:
         pod.beta.kubernetes.io/init-containers: |-
           [
@@ -53,7 +53,7 @@ spec:
               {{ end }}
           resources:
 {{ toYaml .Values.galaxy.init.resources | indent 12 }}
-        {{ if and .Values.galaxy.backend.postgres (not .Values.legacy.pre_k8s_16) }}
+        {{ if and .Values.postgresql.enabled (not .Values.legacy.pre_k8s_16) }}
         - name: postgres-listener
           image: alpine
           imagePullPolicy: IfNotPresent
@@ -62,15 +62,15 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.galaxy.image.repository }}:{{ .Values.galaxy.image.tag }}"
-          imagePullPolicy: {{.Values.galaxy.image.pullPolicy}}
+          imagePullPolicy: {{ .Values.galaxy.image.pullPolicy }}
           env:
               - name: "NONUSE"
-                value: "sleeplock{{ if not .Values.use_condor }},condor{{ end }}" 
+                value: "sleeplock{{ if not .Values.condor.enabled }},condor{{ end }}"
               - name: "GALAXY_TOOLS_PULL_POLICY"
                 value: {{ .Values.galaxy.image.pullPolicy }}
               - name: "GALAXY_CONFIG_BRAND"
                 value: "{{ .Values.galaxy.brand }}" 
-              {{ if .Values.galaxy.backend.postgres }}
+              {{ if .Values.postgresql.enabled }}
               - name: "GALAXY_SEC_DB_ENGINE"
                 value: "postgresql"
               - name: "GALAXY_SEC_DB_USER"

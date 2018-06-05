@@ -39,7 +39,6 @@ galaxy:
   #  email_from: "user@server.do"
   #  ssl: 'False'
   instance_resource_url: "localhost" 
-  internal_port: 80
   node_port_exposed: 30700
   create_pvc: true
   pvc:

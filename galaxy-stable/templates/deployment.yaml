@@ -18,21 +18,6 @@ spec:
       labels:
         app: {{ template "galaxy.name" . }}
         release: {{ .Release.Name }}
-{{ if and .Values.postgresql.enabled .Values.legacy.pre_k8s_16 }}
-      annotations:
-        pod.beta.kubernetes.io/init-containers: |-
-          [
-            {
-              "name": "postgres-listener",
-              "image": "alpine",
-              "imagePullPolicy": "IfNotPresent",
-              "command": [
-                "sh", "-c",
-                "for i in $(seq 1 200); do nc -z -w3 {{ template "postgresql.fullname" . }} 5432 && exit 0 || sleep 3; done; exit 1"
-              ]
-            }
-          ]
-{{ end }}
     spec:
       initContainers:
         - name: galaxy-init
@@ -53,7 +38,7 @@ spec:
               {{ end }}
           resources:
 {{ toYaml .Values.galaxy.init.resources | indent 12 }}
-        {{ if and .Values.postgresql.enabled (not .Values.legacy.pre_k8s_16) }}
+        {{ if .Values.postgresql.enabled }}
         - name: postgres-listener
           image: alpine
           imagePullPolicy: IfNotPresent

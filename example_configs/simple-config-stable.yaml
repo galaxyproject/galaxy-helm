@@ -92,5 +92,3 @@ postgresql:
       persistence:
         existingClaim: *pvcname
         subPath: "postgres"
-legacy:
-  pre_k8s_16: false

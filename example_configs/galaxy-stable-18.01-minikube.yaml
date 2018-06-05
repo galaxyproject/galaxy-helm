@@ -103,5 +103,3 @@ proftpd:
   image:
     repository: "pcm32/galaxy-proftpd"
     tag: "for_galaxy_v18.01"
-legacy:
-  pre_k8s_16: false

@@ -131,8 +131,6 @@ postgresql:
     existingClaim: *pvcname
     subPath: "postgres"
 
-legacy:
-  pre_k8s_16: false
 rbac_needed: false
 
 condor:

@@ -1,0 +1,33 @@
+# This file is used by Rancher to render the UI in the app catalog.
+categories:
+- dashboards
+
+questions:
+- variable: admin.username
+  label: Galaxy admin username
+  description: "Galaxy admin user login username"
+  default: "admin"
+  type: string
+  group: "Galaxy Admin"
+
+- variable: admin.email
+  label: Galaxy admin email
+  description: "Galaxy admin user email address"
+  default: "admin@galaxy.me"
+  type: string
+  required: true
+  group: "Galaxy Admin"
+
+- variable: admin.password
+  label: Galaxy admin password
+  description: "Galaxy admin user login password"
+  default: ""
+  type: password
+  required: true
+  group: "Galaxy Admin"
+
+- variable: persistence.size
+  label: Storage size for Galaxy
+  description: Amount of persistent storage for Galaxy data
+  default: 15Gi
+  type: string

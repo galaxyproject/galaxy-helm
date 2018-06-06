@@ -134,6 +134,12 @@ spec:
   {{- end }}
 {{- end }}
   rules:
+    - http:
+        paths:
+          - path: {{ $ingressPath }}
+            backend:
+              serviceName: {{ $fullName }}
+              servicePort: http
   {{- range .Values.ingress.hosts }}
     - host: {{ . }}
       http:

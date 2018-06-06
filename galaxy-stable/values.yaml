@@ -42,7 +42,7 @@ admin:
 # prefixed by GALAXY_CONFIG_, which will override the corresponding setting in galaxy.yml
 galaxy_conf:
   brand: "k8s"
-  admin_users:
+  admin_users: "admin@galaxyproject.org"
   allow_user_deletion:
   allow_user_creation:
   # smtp_server:

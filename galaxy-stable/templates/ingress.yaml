@@ -1,5 +1,5 @@
 {{ if .Values.ingress.enabled }}
-{{ if not .Values.external_ingress_controller }}
+{{ if .Values.ingress.self_managed }}
 ---
 apiVersion: v1
 kind: ReplicationController

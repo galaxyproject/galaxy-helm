@@ -46,11 +46,7 @@ galaxy_conf:
 service:
   type: NodePort
   port: 80
-  node_port_exposed: 30700
-pv_minikube: true
-pv:
-  minikube:
-      hostPath: "/data/galaxy-stable-18.01"
+  nodePortExposed: 30700
 
 ## Persist data to a persistent volume
 persistence:
@@ -61,10 +57,16 @@ persistence:
   size: 15Gi
   subPath: ""
 
-external_ingress_controller: false
+  # optional settings to enable minikube PV
+  minikube:
+    enabled: true
+    hostPath: "/data/galaxy-stable-18.01"
+
 ingress:
   enabled: false
-  # Used to create Ingress record (should used with service.type: ClusterIP).
+  # enable to add a custom nginx replication controller for nginx.
+  # Leave diabled and enable nginx annotation to use kube provider managed ingress controller.
+  self_managed: false
   hosts:
     - chart-example.local
   annotations: {}
@@ -106,3 +108,13 @@ proftpd:
   image:
     repository: "pcm32/galaxy-proftpd"
     tag: "for_galaxy_v18.01"
+  passive_port:
+    low: 30000
+    high: 30010
+  use_sftp: true
+  generate_ssh_key: false
+  service:
+    type: NodePort
+    port: 22
+    # Only effective if service.type is NodePort
+    nodePortExposed: 30722

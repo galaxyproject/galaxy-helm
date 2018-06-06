@@ -11,8 +11,8 @@ spec:
   type: {{ .Values.proftpd.service.type }}
   ports:
     - port: {{ .Values.proftpd.service.port }}
-      {{- if and (eq .Values.proftpd.service.type "NodePort") .Values.proftpd.service.node_port_exposed }}
-      nodePort: {{ .Values.proftpd.service.node_port_exposed }}
+      {{- if and (eq .Values.proftpd.service.type "NodePort") .Values.proftpd.service.nodePortExposed }}
+      nodePort: {{ .Values.proftpd.service.nodePortExposed }}
       {{- end }}
       targetPort: 22
       protocol: TCP

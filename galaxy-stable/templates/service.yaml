@@ -11,8 +11,8 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      {{- if and (eq .Values.service.type "NodePort") .Values.service.node_port_exposed }}
-      nodePort: {{ .Values.service.node_port_exposed }}
+      {{- if and (eq .Values.service.type "NodePort") .Values.service.nodePortExposed }}
+      nodePort: {{ .Values.service.nodePortExposed }}
       {{- end }}
       targetPort: 80
       protocol: TCP

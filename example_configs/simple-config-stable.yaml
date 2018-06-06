@@ -43,11 +43,7 @@ service:
   name: galaxy-svc
   type: NodePort
   port: 80
-  node_port_exposed: 30700
-pv_minikube: true
-pv:
-  minikube:
-      hostPath: "/data/galaxy-stable-data"
+  nodePortExposed: 30700
 
 ## Persist data to a persistent volume
 persistence:
@@ -58,11 +54,14 @@ persistence:
   size: 15Gi
   subPath: ""
 
-use_ingress: false
-external_ingress_controller: false 
+  # optional settings to enable minikube PV
+  minikube:
+    enabled: true
+    hostPath: "/data/galaxy-stable-18.01"
+
 ingress:
   enabled: false
-  # Used to create Ingress record (should used with service.type: ClusterIP).
+  self_managed: false
   hosts:
     - chart-example.local
   annotations: {}

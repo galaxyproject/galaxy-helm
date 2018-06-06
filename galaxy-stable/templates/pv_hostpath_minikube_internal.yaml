@@ -1,4 +1,4 @@
-{{ if .Values.pv_minikube }}
+{{ if .Values.persistence.minikube.enabled }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -11,5 +11,5 @@ spec:
   accessModes:
     - ReadWriteMany
   hostPath:
-          path: "{{ .Values.pv.minikube.hostPath }}" 
+          path: "{{ .Values.persistence.minikube.hostPath }}"
 {{ end }}

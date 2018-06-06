@@ -19,7 +19,7 @@ spec:
         app: {{ template "galaxy.name" . }}
         release: {{ .Release.Name }}
       annotations:
-        checksum/config1: {{ include (print $.Template.BasePath "/galaxy_yml_cfgmap.yaml") . | sha256sum }}
+        checksum/config1: {{ include (print $.Template.BasePath "/galaxy_conf_cfgmap.yaml") . | sha256sum }}
         checksum/config2: {{ include (print $.Template.BasePath "/galaxy_container_cfgmap.yaml") . | sha256sum }}
     spec:
       initContainers:
@@ -53,7 +53,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
           - configMapRef:
-              name: {{ template "galaxy.fullname" . }}-galaxy-yml
+              name: {{ template "galaxy.fullname" . }}-galaxy-conf
           - configMapRef:
               name: {{ template "galaxy.fullname" . }}-container-cfgmap
           env:

@@ -34,7 +34,7 @@ admin:
   api_key: "qwertyqweqwe"
   username: admin
 
-galaxy_yml:
+galaxy_conf:
   brand: "k8s"
   url: "localhost"
 

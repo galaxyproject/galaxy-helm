@@ -39,7 +39,7 @@ admin:
 
 # Galaxy config settings to pass to the container. These will be sent in as env vars
 # prefixed by GALAXY_CONFIG_, which will override the corresponding setting in galaxy.yml
-galaxy_yml:
+galaxy_conf:
   brand: "k8s"
   admin_users:
   allow_user_deletion:

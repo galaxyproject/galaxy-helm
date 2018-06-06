@@ -4,7 +4,7 @@
 replicaCount: 1
 
 # The data folder used by the galaxy and proftpd containers
-export_dir: "/export"
+export_dir: &export_anchor "/export"
 
 # Settings for the init image
 init:
@@ -52,6 +52,27 @@ galaxy_conf:
   # smtp_ssl:
   # url:
   # ftp_upload_site:
+  containers_resolvers_config_file: "/export/config/container_resolvers_conf.xml"
+
+# settings which affect job_conf.xml
+job_conf:
+  runners:
+    enable_local: "true"
+    enable_condor: "false"
+    enable_slurm: "false"
+    enable_k8: "true"
+    # k8s_use_service_account:
+    # k8s_persistent_volume_claim_name:
+    k8s_persistent_volume_claim_mount_path: *export_anchor
+    # k8s_namespace:
+    # k8s_supplemental_group_id:
+    # k8s_fs_group_id:
+    # k8s_pull_policy:
+    # k8s_pod_retrials:
+  destinations:
+    default: "docker_dispatch"
+    docker_default: "k8s_default"
+    no_docker_default: "local_no_container"
 
 ## Persist data to a persistent volume
 persistence:

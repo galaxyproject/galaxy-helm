@@ -33,11 +33,19 @@ data:
   "GALAXY_DEFAULT_ADMIN_EMAIL": {{ quote .Values.admin.email }}
   "GALAXY_ADMIN_EMAIL": {{ quote .Values.admin.email }}
   {{- end }}
-  "GALAXY_RUNNERS_K8S_PERSISTENT_VOLUME_CLAIM_MOUNT_PATH": "{{ .Values.export_dir }}"
   "PYKUBE_KUBERNETES_SERVICE_HOST": "kubernetes"
-  {{- if .Values.destinations_default }}
-  "GALAXY_DESTINATIONS_DEFAULT": "{{ .Values.destinations_default }}"
-  {{- end }}
   {{- if not (eq .Values.ingress.path "/") }}
   "PROXY_PREFIX": "{{ .Values.ingress.path }}"
+  {{- end }}
+
+  {{- range $key, $val := .Values.job_conf.runners }}
+  {{- if $val }}
+  GALAXY_RUNNERS_{{ $key | upper }}: {{ quote $val }}
+  {{- end }}
+  {{- end }}
+
+  {{- range $key, $val := .Values.job_conf.destinations }}
+  {{- if $val }}
+  GALAXY_DESTINATIONS_{{ $key | upper }}: {{ quote $val }}
+  {{- end }}
   {{- end }}

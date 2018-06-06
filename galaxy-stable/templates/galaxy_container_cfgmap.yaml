@@ -38,3 +38,6 @@ data:
   {{- if .Values.destinations_default }}
   "GALAXY_DESTINATIONS_DEFAULT": "{{ .Values.destinations_default }}"
   {{- end }}
+  {{- if not (eq .Values.ingress.path "/") }}
+  "PROXY_PREFIX": "{{ .Values.ingress.path }}"
+  {{- end }}

@@ -4,6 +4,11 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   namespace: default
   name: galaxy-role-pods-jobs
+  labels:
+    app: {{ template "galaxy.name" . }}
+    chart: {{ template "galaxy.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 rules:
 - apiGroups: [""]
   resources: ["pods", "pods/log"]

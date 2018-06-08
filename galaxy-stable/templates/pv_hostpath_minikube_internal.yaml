@@ -15,4 +15,5 @@ spec:
     - ReadWriteMany
   hostPath:
           path: "{{ .Values.persistence.minikube.hostPath }}"
+          type: DirectoryOrCreate
 {{ end }}

@@ -141,8 +141,9 @@ spec:
             - name: "GALAXY_CONFIG_SMTP_SSL"
               value: "{{.Values.smtp_ssl}}"
 {{ end }}
-        command: ["/bin/bash","-c","{{ if not .Values.galaxy_backend_postgres }}mkdir -p /opt/galaxy_data/database-sqlite && {{ end }}./ansible/run_galaxy_config.sh > config_db.log && ./run.sh --daemon && tail -f {{.Values.log_file_to_track}}"]
-        lifecycle: 
+        command: ["/bin/bash","-c",
+          "./ansible/run_galaxy_config.sh && ./run.sh --daemon && tail -f {{.Values.log_file_to_track}}"]
+        lifecycle:
           preStop:
             exec:
                command:

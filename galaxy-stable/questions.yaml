@@ -8,6 +8,7 @@ questions:
   description: "Galaxy admin user login username"
   default: "admin"
   type: string
+  required: true
   group: "Galaxy Admin"
 
 - variable: admin.email

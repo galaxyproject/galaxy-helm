@@ -9,13 +9,13 @@ export_dir: &export_anchor "/export"
 # Settings for the init image
 init:
   image:
-    repository: pcm32/galaxy-init
+    repository: galaxy/galaxy-init
     tag: v18.01
     pullPolicy: IfNotPresent
   resources: {}
 
 image:
-  repository: pcm32/galaxy-web-k8s
+  repository: galaxy/galaxy-stable
   tag: v18.01
   pullPolicy: IfNotPresent
 
@@ -116,7 +116,7 @@ ingress:
   # enable to add a custom nginx replication controller for nginx.
   # Leave diabled and enable nginx annotation to use kube provider managed ingress controller.
   self_managed: false
-  path: /
+  path: /galaxy
   # Used to create Ingress record (should used with service.type: ClusterIP).
   annotations:
     kubernetes.io/ingress.class: nginx

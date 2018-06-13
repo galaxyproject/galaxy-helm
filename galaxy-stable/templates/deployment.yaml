@@ -19,8 +19,8 @@ spec:
         app: {{ template "galaxy.name" . }}
         release: {{ .Release.Name }}
       annotations:
-        checksum/config1: {{ include (print $.Template.BasePath "/galaxy_conf_cfgmap.yaml") . | sha256sum }}
-        checksum/config2: {{ include (print $.Template.BasePath "/galaxy_container_cfgmap.yaml") . | sha256sum }}
+        checksum/galaxy_conf: {{ include (print $.Template.BasePath "/galaxy_conf_cfgmap.yaml") . | sha256sum }}
+        checksum/container_conf: {{ include (print $.Template.BasePath "/galaxy_container_cfgmap.yaml") . | sha256sum }}
     spec:
       initContainers:
         - name: galaxy-init

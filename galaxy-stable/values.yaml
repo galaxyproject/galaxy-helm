@@ -99,7 +99,7 @@ persistence:
 
   # optional settings to enable minikube PV
   minikube:
-    enabled: false
+    enabled: true
     hostPath: "/data/galaxy-stable-18.01"
 
   # annotations: {}

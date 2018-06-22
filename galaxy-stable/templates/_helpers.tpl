@@ -38,3 +38,15 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- define "postgresql.fullname" -}}
 {{- printf "%s-%s" .Release.Name "postgresql" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+
+{{/*
+Add a trailing slash to a given path, if missing
+*/}}
+{{- define "galaxy.add_trailing_slash" -}}
+{{- if hasSuffix "/" . -}}
+{{- printf "%s" . -}}
+{{- else -}}
+{{- printf "%s/" . -}}
+{{- end -}}
+{{- end -}}

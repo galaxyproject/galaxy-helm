@@ -93,14 +93,19 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
-          #livenessProbe:
-          #  httpGet:
-          #    path: /
-          #    port: http
-          #readinessProbe:
-          #  httpGet:
-          #    path: /
-          #    port: http
+          readinessProbe:
+            httpGet:
+              path: /galaxy
+              port: 80
+            initialDelaySeconds: 120
+            periodSeconds: 6
+          livenessProbe:
+            httpGet:
+              path: /galaxy
+              port: 80
+            initialDelaySeconds: 240
+            periodSeconds: 60
+            failureThreshold: 10
           volumeMounts:
             - mountPath: {{ .Values.export_dir }}
               name: {{ .Values.persistence.name }}

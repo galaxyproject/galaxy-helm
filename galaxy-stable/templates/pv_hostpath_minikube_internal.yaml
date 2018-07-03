@@ -4,12 +4,13 @@ kind: PersistentVolume
 metadata:
   name: galaxy-pv
   labels:
-     app: {{ template "name" . }} 
+     app: {{ template "name" . }}
 spec:
   capacity:
     storage: 20Gi
   accessModes:
     - ReadWriteMany
   hostPath:
-          path: "{{ .Values.pv.minikube.hostPath }}" 
+    path: "{{ .Values.pv.minikube.hostPath }}"
+    type: DirectoryOrCreate
 {{ end }}

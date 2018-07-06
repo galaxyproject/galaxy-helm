@@ -20,7 +20,7 @@ spec:
           [
             {
               "name": "postgres-listener",
-              "image": "alpine:3.8",
+              "image": "alpine:3.7",
               "imagePullPolicy": "IfNotPresent",
               "command": [
                 "sh", "-c",
@@ -51,7 +51,7 @@ spec:
 {{ toYaml .Values.galaxy.init.resources | indent 12 }}
         {{ if and .Values.galaxy.backend.postgres (not .Values.legacy.pre_k8s_16) }}
         - name: postgres-listener
-          image: alpine:3.8
+          image: "alpine:3.7"
           imagePullPolicy: IfNotPresent
           command: [ "sh", "-c", "for i in $(seq 1 200); do nc -z -w3 postgresql-for-galaxy 5432 && exit 0 || sleep 3; done; exit 1"]
         {{ end }}

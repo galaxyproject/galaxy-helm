@@ -43,7 +43,7 @@ spec:
 {{ toYaml .Values.init.resources | indent 12 }}
         {{- if .Values.postgresql.enabled }}
         - name: postgres-listener
-          image: alpine
+          image: "alpine:3.7"
           imagePullPolicy: IfNotPresent
           command: [ "sh", "-c", "for i in $(seq 1 200); do nc -z -w3 {{ template "postgresql.fullname" . }} 5432 && exit 0 || sleep 3; done; exit 1"]
         {{- end }}

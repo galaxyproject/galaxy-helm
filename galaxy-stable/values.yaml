@@ -74,10 +74,18 @@ resources: {}
   #requests:
   #  cpu: 100m
   #  memory: 128Mi
-postgres_for_galaxy:
-  db_password: "change-me"
-  postgres_pvc: "galaxy-pvc"
-  subpath: ""
+
+postgresql:
+    enabled: true
+    image: "pcm32/galaxy-postgres"
+    imageTag: "9.6.5_for_18.01"
+    postgresDatabase: "galaxydb"
+    postgresUser: "galaxy"
+    postgresPassword: "change-me"
+    persistence:
+        existingClaim: "galaxy-pvc"
+        subPath: "postgres"
+
 legacy:
   pre_k8s_16: false
 rbac_needed: false

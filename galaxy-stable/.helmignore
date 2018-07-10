@@ -19,3 +19,6 @@
 .project
 .idea/
 *.tmproj
+
+# Omit self when packing
+galaxy-stable-*.tgz

@@ -19,59 +19,72 @@ Using the docker-stable compose images with Kubernetes on this setup requires bu
 | Parameter | Description | Default |
 | -------- | ----------- | ---- |
 | `export_dir` | Export directory for Galaxy compose | `/export` |
-| `galaxy.brand` | Branding text displayed on Galaxy | `k8s` |
-| `galaxy.init.image.repository` | Repository for the docker image: `<server>/<owner>/<image-name>` for Galaxy init. | `pcm32/galaxy-stable-k8s-init` |
-| `galaxy.init.image.tag` | Image tag for Galaxy init image. | `pcm32/galaxy-stable-k8s` |
-| `galaxy.init.image.pullPolicy` | Pull policy for the Galaxy init image | `IfNotPresent` |
-| `galaxy.init.resources` | k8s resources map for the init process | |
-| `galaxy.backend.postgres` | This is probably not being used, or left for legacy purposes | `true` |
-| `galaxy.image.repository` | Repository for the docker image: `<server>/<owner>/<image-name>` for Galaxy main process. | `pcm32/galaxy-stable-k8s` |
-| `galaxy.image.tag` | Image tag for Galaxy image. | `latest` |
-| `galaxy.image.pullPolicy` | Pull policy for the Galaxy image. | `IfNotPresent` |
-| `galaxy.tools.destination` | Directory where tools are stored, possibly not needed and should be removed. | `/export/tools` |
-| `galaxy.k8s.supp_groups` | Kubernetes supplemental group (this is probably a list), used for writing with adequate privileges to certain shared file systems | |
-| `galaxy.k8s.fs_group` | Kubernetes file system group (this is probably a list), used for writing with adequate privileges to certain shared file systems | |
-| `galaxy.admin.email` | Admin email to setup Galaxy with. | |
-| `galaxy.admin.password` | Admin password to setup Galaxy with. | |
-| `galaxy.admin.api_key` | Admin api_key to setup Galaxy with. | |
-| `galaxy.admin.username` | Admin username to setup Galaxy with. | |
-| `galaxy.admin.allow_user_creation` | Configures `allow_user_creation` Galaxy config environment variable. | `"True"` |
-| `galaxy.smtp.server` | SMTP server for Galaxy password reset functionality ||
-| `galaxy.smtp.username` | SMTP username for Galaxy password reset functionality ||
-| `galaxy.smtp.password` | SMTP password for Galaxy password reset functionality ||
-| `galaxy.smtp.email_from` | SMTP email_from for Galaxy password reset functionality ||
-| `galaxy.smtp.ssl` | SMTP ssl for Galaxy password reset functionality ||
-| `galaxy.instance_resource_url` | Incoming URL label for Galaxy password reset functionality, shown on reset email to identify instance. ||
-| `galaxy.internal_port` | Internal port where the Galaxy container serves content. | `80` |
-| `galaxy.node_port_exposed` | Internal port where the Galaxy container serves content. | `30700` |
-| `galaxy.create_pvc` | Whether to create or not a PVC for Galaxy, defaults to true. | `true` |
-| `galaxy.pvc.name` | Name for the PVC that Galaxy and scheduled jobs will use. | `galaxy-pvc` |
-| `galaxy.pvc.capacity` | Amount of this that the PVC requests, such as "15Gi" | `15Gi` |
+| `galaxy_conf.brand` | Branding text displayed on Galaxy | `k8s` |
+| `init.image.repository` | Repository for the docker image: `<server>/<owner>/<image-name>` for Galaxy init. | `pcm32/galaxy-stable-k8s-init` |
+| `init.image.tag` | Image tag for Galaxy init image. | `pcm32/galaxy-stable-k8s` |
+| `init.image.pullPolicy` | Pull policy for the Galaxy init image | `IfNotPresent` |
+| `init.resources` | k8s resources map for the init process | |
+| `image.repository` | Repository for the docker image: `<server>/<owner>/<image-name>` for Galaxy main process. | `pcm32/galaxy-stable-k8s` |
+| `image.tag` | Image tag for Galaxy image. | `latest` |
+| `image.pullPolicy` | Pull policy for the Galaxy image. | `IfNotPresent` |
+| `tools.destination` | Directory where tools are stored, possibly not needed and should be removed. | `/export/tools` |
+| `k8s.supp_groups` | Kubernetes supplemental group (this is probably a list), used for writing with adequate privileges to certain shared file systems | |
+| `k8s.fs_group` | Kubernetes file system group (this is probably a list), used for writing with adequate privileges to certain shared file systems | |
+| `admin.email` | Admin email to setup Galaxy with. | |
+| `admin.password` | Admin password to setup Galaxy with. | |
+| `admin.api_key` | Admin api_key to setup Galaxy with. | |
+| `admin.username` | Admin username to setup Galaxy with. | |
+| `admin.allow_user_creation` | Configures `allow_user_creation` Galaxy config environment variable. | `"True"` |
+| `galaxy_conf.smtp_server` | SMTP server for Galaxy password reset functionality ||
+| `galaxy_conf.smtp_username` | SMTP username for Galaxy password reset functionality ||
+| `galaxy_conf.smtp_password` | SMTP password for Galaxy password reset functionality ||
+| `galaxy_conf.email_from` | SMTP email_from for Galaxy password reset functionality ||
+| `galaxy_conf.smtp_ssl` | SMTP ssl for Galaxy password reset functionality ||
+| `galaxy_conf.url` | Incoming URL label for Galaxy password reset functionality, shown on reset email to identify instance. ||
+| `galaxy_conf.allow_user_deletion` | Allows the admin to delete users | |
+| `galaxy_conf.allow_user_creation` | Allows the admin to delete users | |
+| `galaxy_conf.containers_resolvers_config_file` | Config file path for resolving containers | `"/export/config/container_resolvers_conf.xml"` |
+| `galaxy_conf.ftp_upload_site` | Incoming URL for sftp uploads. ||
+| `service.port` | Internal port where the Galaxy container serves content. | `80` |
+| `service.nodePortExposed` | Internal port where the Galaxy container serves content. | `30700` |
 | `service.name` | Name to use for the k8s service exposing Galaxy | `galaxy-svc` |
-| `service.type` | Type of k8s service for Galaxy | `NodePort` |
-| `pv_minikube` | Whether to create a Persistent Volume in minikube or not. | `false` |
-| `external_ingress_controller` | Whether to use an external ingress controller or the chart's provided one, when using ingresses. | `false` |
+| `service.type` | Type of k8s service for Galaxy | `ClusterIP` |
+| `persistence.enabled` | Whether to create or not a PVC for Galaxy, defaults to true. | `true` |
+| `persistence.name` | Name for the PVC that Galaxy and scheduled jobs will use. | `galaxy-pvc` |
+| `persistence.size` | Amount of this that the PVC requests, such as "15Gi" | `15Gi` |
+| `persistence.subPath` | Subpath within the PV where the PVC should reside. | |
+| `minikube.enabled` | Whether to create a Persistent Volume in minikube or not. | `false` |
+| `minikube.hostPath` | Path in the minikube VM for galaxy data directory (where PV gets created). | `false` |
+| `ingress.self_managed` | Whether to use an external ingress controller or the chart's provided one, when using ingresses. | `false` |
 | `ingress.enabled` | Whether to enable ingress or not... seems redundant, should be fixed. | `false` |
-| `ingress.hostname` | Hostname to construct ingress URL to respond to (hostname.domain). | `galaxy` |
+| `ingress.hosts` | Hostname array to construct ingress URLs to respond to (hostname.domain). | `galaxy` |
 | `ingress.domain` | Domain to construct ingress URL to respond to (hostname.domain). | `local` |
+| `ingress.path` | URL path for Galaxy |  |
 | `ingress.annotations` | | |
 | `ingress.tls` | | |
 | `resources` | Resources requests and limits (k8s) for the Galaxy container when running. | |
-| `postgres_for_galaxy.db_password` | Password to use for postgres setup | `change_me` |
-| `postgres_for_galaxy.postgres_pvc` | Name of the Persistent Volume Claim to use with postgres, by default the same as Galaxy | `galaxy-pvc` |
-| `postgres_for_galaxy.subpath` | A subpath in the PV where the postgres mount will be done | |
+| `postgresql.enabled` | Whether Galaxy should use postgres or not. | `true` |
+| `postgresql.postgresPassword` | Password to use for postgres setup | `change_me` |
+| `postgresql.postgresUser` | User for postgresql |  |
+| `postgresql.postgresDatabase` | Name for the galaxy database |  |
+| `postgresql.persistence.existingClaim` | Name of the Persistent Volume Claim to use with postgres, by default the same as Galaxy | `galaxy-pvc` |
+| `postgresql.persistence.subPath` | A subpath in the PV where the postgres mount will be done | |
+| `postgresql.fullname` | ?? | |
 | `legacy.pre_k8s_16` | Whether we are running on a Kubernetes setup below 1.6 | `false` |
-| `rbac_needed` | Whether RBAC setups for the chart should be activated. | `false` |
-| `use_proftpd` | Use proftpd or not | `true` |
-| `use_condor` | Use condor or not | `false` |
+| `rbac.enabled` | Whether RBAC setups for the chart should be activated. | `false` |
+| `condor.enabled` | Use condor or not | `false` |
+| `proftpd.enabled` | Use proftpd or not | `true` |
+| `proftpd.replicaCount` | Number of instances for proftpd. It is not clear whether >1 would work due to keys generation. | `1` |
 | `proftpd.image.repository` | docker image for proftpd | |
 | `proftpd.image.tag` | tag for the proftpd image set above | |
 | `proftpd.passive_port.low` | Passive port minimum for proftpd | |
 | `proftpd.passive_port.high` | Passive port maximum for proftpd | |
-| `proftpd.use_sftp` | If set to true, use sftp instead of ftp | |
+| `proftpd.use_sftp` | If set to true, use sftp instead of ftp | `"true"` |
 | `proftpd.service.name` | Name to be given for the proftpd k8s service | |
-| `proftpd.generate_ssh_key` |  Whether to generate the ssh key for sftp access | |
-| `proftpd.node_port_exposed` | Port opened on k8s nodes for exposing proftpd | |
+| `proftpd.service.type` | Type of service for proftpd | `ClusterIP` |
+| `proftpd.service.nodePortExposed` | Port opened on k8s nodes for exposing proftpd, when using service type `NodePort` | `30722` |
+| `proftpd.generate_ssh_key` |  Whether to generate the ssh key for sftp access | "`false`" |
+
 
 
 

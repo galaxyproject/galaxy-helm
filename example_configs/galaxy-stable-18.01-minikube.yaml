@@ -8,61 +8,68 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 replicaCount: 1
-galaxy:
-  init:
-    image:
-      repository: pcm32/galaxy-init
-      tag: v18.01
-      pullPolicy: Always
-    resources: {}
-  backend:
-    postgres: true
+
+# Settings for the init image
+init:
   image:
-    repository: pcm32/galaxy-web-k8s
+    repository: pcm32/galaxy-init
     tag: v18.01
     pullPolicy: Always
+  resources: {}
+
+image:
+  repository: pcm32/galaxy-web-k8s
+  tag: v18.01
+  pullPolicy: Always
+
 # Probably not needed as all on /export
-  tools:
-    destination: "/export/tools"
-  # destinations_default: "k8s" # currently this doesn't work with community images
-  k8s:
-    supp_groups: 0
-    fs_group: 0
-  admin:
-    email: "admin@email.do"
-    password: "admin-pass"
-    api_key: "qwertyqweqwe"
-    username: admin
-  #smtp:
-  #  server: "email.server.do"
-  #  username: "email-user"
-  #  password: "email-pass"
-  #  email_from: "user@server.do"
-  #  ssl: 'False'
-  instance_resource_url: "localhost"
-  internal_port: 80
-  node_port_exposed: 30700
-  create_pvc: true
-  pvc:
-    name: galaxy-pvc
-    capacity: "15Gi"
-    # subPath:
+tools:
+  destination: "/export/tools"
+
+# Settings for k8s job runner
+k8s:
+  supp_groups:
+  fs_group:
+
+# Admin user settings
+admin:
+  email: "admin@email.do"
+  password: "admin-pass"
+  api_key: "qwertyqweqwe"
+  username: admin
+
+galaxy_conf:
+  brand: "k8s"
+  url: "localhost"
+
 # development_folder:
 service:
-  name: galaxy-svc
   type: NodePort
-pv_minikube: true
-pv:
+  port: 80
+  nodePortExposed: 30700
+
+## Persist data to a persistent volume
+persistence:
+  enabled: true
+  name: &pvcname galaxy-pvc
+  storageClass: "-"
+  accessMode: ReadWriteMany
+  size: 15Gi
+  subPath: ""
+
+  # optional settings to enable minikube PV
   minikube:
-      hostPath: "/data/galaxy-stable-18.01"
-use_ingress: false
-external_ingress_controller: false
+    enabled: true
+    hostPath: "/data/galaxy-stable-18.01"
+
 ingress:
   enabled: false
-  # Used to create Ingress record (should used with service.type: ClusterIP).
+  # enable to add a custom nginx replication controller for nginx.
+  # Leave diabled and enable nginx annotation to use kube provider managed ingress controller.
+  self_managed: false
   hosts:
     - chart-example.local
-  annotations:
+  annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   tls:
@@ -81,17 +88,33 @@ resources: {}
   #requests:
   #  cpu: 100m
   #  memory: 128Mi
-use_condor: false
-postgres_for_galaxy:
-  db_password: "change-me"
-  postgres_pvc: "galaxy-pvc"
-  subpath: "postgres"
-  postgres_image: "pcm32/galaxy-postgres"
-  postgres_image_tag: ":9.6.5_for_18.01"
+
+condor:
+    enabled: false
+
+postgresql:
+    enabled: true
+    image: "pcm32/galaxy-postgres"
+    imageTag: "9.6.5_for_18.01"
+    postgresDatabase: "galaxydb"
+    postgresUser: "galaxy"
+    postgresPassword: "change-me"
+    persistence:
+        existingClaim: *pvcname
+        subPath: "postgres"
 proftpd:
+  enabled: true
   generate_ssh_key: true
   image:
     repository: "pcm32/galaxy-proftpd"
     tag: "for_galaxy_v18.01"
-legacy:
-  pre_k8s_16: false
+  passive_port:
+    low: 30000
+    high: 30010
+  use_sftp: true
+  generate_ssh_key: false
+  service:
+    type: NodePort
+    port: 22
+    # Only effective if service.type is NodePort
+    nodePortExposed: 30722

@@ -1,10 +1,15 @@
 {{ if .Values.ingress.enabled }}
-{{ if not .Values.external_ingress_controller }}
+{{ if .Values.ingress.self_managed }}
 ---
 apiVersion: v1
 kind: ReplicationController
 metadata:
   name: default-http-backend
+  labels:
+    app: {{ template "galaxy.name" . }}
+    chart: {{ template "galaxy.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
   replicas: 1
   selector:
@@ -43,7 +48,10 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: default-http-backend
+    app: {{ template "galaxy.name" . }}-default-http-backend
+    chart: {{ template "galaxy.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
   name: default-http-backend
 spec:
   ports:
@@ -62,6 +70,10 @@ metadata:
   name: nginx-ingress-controller
   labels:
     k8s-app: nginx-ingress-lb
+    app: {{ template "galaxy.name" . }}
+    chart: {{ template "galaxy.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
   replicas: 1
   selector:
@@ -103,32 +115,44 @@ spec:
         - /nginx-ingress-controller
         - --default-backend-service=default/default-http-backend
 {{ end }}
-{{- $serviceName := .Values.service.name -}}
+{{ end }}
 ---
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include "galaxy.fullname" . -}}
+{{- $servicePort := .Values.service.port -}}
+{{- $ingressPath := .Values.ingress.path -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: {{ .Release.Name }}-galaxy-ingress
+  name: {{ $fullName }}
   labels:
-    app: {{ template "name" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    app: {{ template "galaxy.name" . }}
+    chart: {{ template "galaxy.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+{{- with .Values.ingress.annotations }}
   annotations:
-    {{- range $key, $value := .Values.ingress.annotations }}
-      {{ $key }}: {{ $value | quote }}
-    {{- end }}
+{{ toYaml . | indent 4 }}
+{{- end }}
 spec:
-  rules:
-  - host: {{.Values.ingress.hostname}}.{{.Values.ingress.domain}}
-    http:
-      paths:
-      - path: /
-        backend:
-          serviceName: {{ .Release.Name }}-galaxy-svc
-          servicePort: http
 {{- if .Values.ingress.tls }}
   tls:
-{{ toYaml .Values.ingress.tls | indent 4 }}
-{{- end -}}
-{{ end }}
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+    - host: {{ . }}
+      http:
+        paths:
+          - path: {{ $ingressPath }}
+            backend:
+              serviceName: {{ $fullName }}
+              servicePort: http
+  {{- end }}
+{{- end }}

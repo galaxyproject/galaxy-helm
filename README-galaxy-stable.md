@@ -53,8 +53,8 @@ Using the docker-stable compose images with Kubernetes on this setup requires bu
 | `persistence.name` | Name for the PVC that Galaxy and scheduled jobs will use. | `galaxy-pvc` |
 | `persistence.size` | Amount of this that the PVC requests, such as "15Gi" | `15Gi` |
 | `persistence.subPath` | Subpath within the PV where the PVC should reside. | |
-| `minikube.enabled` | Whether to create a Persistent Volume in minikube or not. | `false` |
-| `minikube.hostPath` | Path in the minikube VM for galaxy data directory (where PV gets created). | `false` |
+| `persistence.minikube.enabled` | Whether to create a Persistent Volume in minikube or not. | `true` |
+| `persistence.minikube.hostPath` | Path in the minikube VM for galaxy data directory (where PV gets created). |  |
 | `ingress.self_managed` | Whether to use an external ingress controller or the chart's provided one, when using ingresses. | `false` |
 | `ingress.enabled` | Whether to enable ingress or not... seems redundant, should be fixed. | `false` |
 | `ingress.hosts` | Hostname array to construct ingress URLs to respond to (hostname.domain). | `galaxy` |

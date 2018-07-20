@@ -1,11 +1,15 @@
 # Galaxy Helm Charts
 
-This repo contains [Helm charts]() for easily deploying Galaxy on top of Kubernetes, in a number of scenarios, as described below. The two minimal requirements to be able to use them are:
-- Helm installed
-- Access to a Kubernetes cluster (with shared file system accessible through a Persistent Volume or equivalent).
-  - For development purposes or local tests, the local Minikube environment can be used.
+This repo contains [Helm charts](https://helm.sh/) for easily deploying Galaxy on top of Kubernetes, in a number of scenarios, as described below.
 
-## Helm for the first time
+## Requirements
+
+- Helm installed: Please follow official instructions from [here] (https://github.com/helm/helm/blob/master/docs/install.md#installing-the-helm-client).
+- Access to a Kubernetes cluster (with shared file system accessible through a Persistent Volume or equivalent).
+  - For development purposes or local tests, the local Minikube environment can be used. Install minikube following [official instructions](https://kubernetes.io/docs/tasks/tools/install-minikube/).
+- kubectl cli: The command line argument for connection to a Kubernetes instance (remote cluster or local minikube). If not installed as part of Minikube steps, follow ONLY the installation steps (not the configuration ones) from [here]( https://kubernetes.io/docs/tasks/tools/install-kubectl/).
+
+## First time installation
 
 If using helm for the first time, you will need to initialize the helm on the cluster and add the helm repo to the local helm directories:
 
@@ -23,9 +27,7 @@ $ helm repo update
   
 ## Available Helm Charts
 
-Previously functionality was split in two charts, they have now been unified into the `galaxy` chart, which merges all functionality available on `galaxy-simple` and `galaxy-postgres-chart`, which are deprecated now. Newer features, such as privileged file system support, are only supported on the `galaxy` chart. The new `galaxy` chart can be used for development, testing and production environments and is highly configurable.
-
-To make use of the docker-stable compose Galaxy images, a new chart named `galaxy-stable` was created. This one in turn will probably superseed the `galaxy` chart. 
+The main Galaxy chart is `galaxy-stable`, where the `galaxy` chart will be soon deprecated. The `galaxy-stable` chart follows the production installation of Galaxy and relies as much as possible on the Galaxy docker-stable community images. You should be using version 2.0 and above of the `galaxy-stable` chart.
 
 While the `galaxy` chart tends to use a much simpler and lightweight container setup, the `galaxy-stable` chart uses a more robust setup for the web part which allows the Galaxy web part to scale better. It also provides ftp upload support not available on the `galaxy` chart. The `galaxy-stable` chart also aims to use main Galaxy community images.
 

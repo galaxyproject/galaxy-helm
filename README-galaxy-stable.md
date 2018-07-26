@@ -6,7 +6,7 @@ To run a vanilla docker-galaxy-stable setup on Kubernetes using this chart on **
 helm install -f example_configs/galaxy-stable-18.01-minikube.yaml galaxy-helm-repo/galaxy-stable
 ```
 
-This assumes that you at least followed the [Helm for the first time](README.md#galaxy-helm-charts) part and that you have checked out this repo (where the config file is available). Please note that this setup won't send jobs to the Kubernetes cluster, as it is not configured like that on the stock docker-galaxy-stable compose galaxy images. This feature requires changes in the `config/job_conf.xml`, which would mean that you need your own `galaxy-init` container flavour (like the [one built for PhenoMeNal](https://github.com/phnmnl/container-galaxy-k8s-runtime/blob/develop/Dockerfile_init) for instance).
+This assumes that you at least followed the [First time installation](README.md#first-time-installation) part and that you have checked out this repo (where the config file is available). Please note that this setup won't send jobs to the Kubernetes cluster, as it is not configured like that on the stock docker-galaxy-stable compose galaxy images. This feature requires changes in the `config/job_conf.xml`, which would mean that you need to create your own `galaxy-init` container flavour (like the [one built for PhenoMeNal](https://github.com/phnmnl/container-galaxy-k8s-runtime/blob/develop/Dockerfile_init) for instance).
 
 
 
@@ -53,8 +53,8 @@ Using the docker-stable compose images with Kubernetes on this setup requires bu
 | `persistence.name` | Name for the PVC that Galaxy and scheduled jobs will use. | `galaxy-pvc` |
 | `persistence.size` | Amount of this that the PVC requests, such as "15Gi" | `15Gi` |
 | `persistence.subPath` | Subpath within the PV where the PVC should reside. | |
-| `minikube.enabled` | Whether to create a Persistent Volume in minikube or not. | `false` |
-| `minikube.hostPath` | Path in the minikube VM for galaxy data directory (where PV gets created). | `false` |
+| `persistence.minikube.enabled` | Whether to create a Persistent Volume in minikube or not. | `true` |
+| `persistence.minikube.hostPath` | Path in the minikube VM for galaxy data directory (where PV gets created). |  |
 | `ingress.self_managed` | Whether to use an external ingress controller or the chart's provided one, when using ingresses. | `false` |
 | `ingress.enabled` | Whether to enable ingress or not... seems redundant, should be fixed. | `false` |
 | `ingress.hosts` | Hostname array to construct ingress URLs to respond to (hostname.domain). | `galaxy` |

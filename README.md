@@ -9,6 +9,10 @@ This repo contains [Helm charts](https://helm.sh/) for easily deploying Galaxy o
   - For development purposes or local tests, the local Minikube environment can be used. Install minikube following [official instructions](https://kubernetes.io/docs/tasks/tools/install-minikube/).
 - kubectl cli: The command line argument for connection to a Kubernetes instance (remote cluster or local minikube). If not installed as part of Minikube steps, follow ONLY the installation steps (not the configuration ones) from [here]( https://kubernetes.io/docs/tasks/tools/install-kubectl/).
 
+## Minikube
+
+If using minikube, you need to make sure that it is running. If you just installed it, you need to execute `minikube start`. In general you can check the status of minikube through `minikube status`.
+
 ## First time installation
 
 If using helm for the first time, you will need to initialize the helm on the cluster and add the helm repo to the local helm directories:

@@ -45,6 +45,9 @@ galaxy_conf:
   admin_users: "admin@galaxyproject.org"
   allow_user_deletion:
   allow_user_creation:
+  # Sets prefix to / as default. Check container setup, uwsgi.mount and
+  # ingress.path values when changing this. 
+  filter-with: /
   # smtp_server:
   # smtp_username:
   # smtp_password:
@@ -53,6 +56,20 @@ galaxy_conf:
   # url:
   # ftp_upload_site:
   containers_resolvers_config_file: "/export/config/container_resolvers_conf.xml"
+
+# settings that affect uwsgi, variable my_var within uwsgi will be transformed
+# to UWSGI_MY_VAR inside the container.
+uwsgi:
+  # We are setting / as the default instead of /galaxy since the default of the
+  # docker-galaxy-stable compose containers is to configure NGINX to be using
+  # / instead of /galaxy. This unfortunately happens at build time of the
+  # container and is not easy to change through environment variables once
+  # the galaxy-web container has been built. In other words, in order to used
+  # a different prefix, this currently needs to be configured as well on
+  # container build time.
+  # Also, if making changes here, make sure that ingress.path and
+  # galaxy_conf.filter-with variables are set accordingly.
+  mount: "/=galaxy.webapps.galaxy.buildapp:uwsgi_app()"
 
 # settings which affect job_conf.xml
 job_conf:
@@ -116,7 +133,14 @@ ingress:
   # enable to add a custom nginx replication controller for nginx.
   # Leave diabled and enable nginx annotation to use kube provider managed ingress controller.
   self_managed: false
-  path: /galaxy
+  # For using a URL prefix, like /galaxy, change path: from / to /galaxy
+  # Please note that you need to be using a container where nginx is adequately
+  # configured to use such a prefix (in docker-galaxy-stable this currently
+  # happens on build time unfortunately, and / is the default).
+  # Also make sure that value uwsgi.mount is coherent with this setting,
+  # otherwise UWSGI and NGINX will operate differently and you will get all sort
+  # of HTTP errors, problems upload, etc.
+  path: /
   # Used to create Ingress record (should used with service.type: ClusterIP).
   annotations:
     kubernetes.io/ingress.class: nginx
@@ -129,9 +153,9 @@ ingress:
     #   hosts:
     #     - chart-example.local
 resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious 
-  # choice for the user. This also increases chances charts run on environments with little 
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following 
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   # limits:
   #  cpu: 100m
@@ -166,7 +190,7 @@ condor:
 proftpd:
   enabled: true
   replicaCount: 1
-  image: 
+  image:
     repository: "container-registry.phenomenal-h2020.eu/phnmnl/galaxy-proftpd"
     tag: "for_galaxy_v17.09"
     pullPolicy: IfNotPresent

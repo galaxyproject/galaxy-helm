@@ -38,6 +38,12 @@ data:
   "PROXY_PREFIX": "{{ .Values.ingress.path }}"
   {{- end }}
 
+  {{- range $key, $val := .Values.uwsgi}}
+  {{- if $val }}
+  UWSGI_{{ $key | upper }}: {{ quote $val }}
+  {{- end }}
+  {{- end }}
+
   {{- range $key, $val := .Values.job_conf.runners }}
   {{- if $val }}
   GALAXY_RUNNERS_{{ $key | upper }}: {{ quote $val }}

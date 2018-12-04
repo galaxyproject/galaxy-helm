@@ -2,6 +2,8 @@
 
 This repo contains [Helm charts](https://helm.sh/) for easily deploying Galaxy on top of Kubernetes, in a number of scenarios, as described below.
 
+If you are reading this from a PDF, the most up-to-date version of this document will be [here](https://github.com/galaxyproject/galaxy-kubernetes/blob/develop/README.md).
+
 ## Requirements
 
 - Helm installed: Please follow official instructions from [here](https://github.com/helm/helm/blob/master/docs/install.md#installing-the-helm-client).

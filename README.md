@@ -109,6 +109,7 @@ The following table includes all the variables that can be set up using the gala
 | `service.name` | Name to use for the k8s service exposing Galaxy | `galaxy-svc` |
 | `service.type` | Type of k8s service for Galaxy | `ClusterIP` |
 | `persistence.enabled` | Whether to create or not a PVC for Galaxy, defaults to true. | `true` |
+| `persistence.existingClaim` | Name of an existing read-write-many PVC to use. If it is given, no PVC is created. | |
 | `persistence.name` | Name for the PVC that Galaxy and scheduled jobs will use. | `galaxy-pvc` |
 | `persistence.size` | Amount of this that the PVC requests, such as "15Gi" | `15Gi` |
 | `persistence.subPath` | Subpath within the PV where the PVC should reside. | |

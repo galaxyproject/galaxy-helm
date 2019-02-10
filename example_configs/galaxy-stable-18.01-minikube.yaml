@@ -41,6 +41,9 @@ admin:
 galaxy_conf:
   brand: "k8s"
   url: "localhost"
+  admin_users= "admin@email.do"
+  conda_auto_install: false
+  enable_beta_mulled_containers: true
 
 # development_folder:
 service:

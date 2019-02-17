@@ -9,7 +9,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 data:
-  "NONUSE": "sleeplock{{ if not .Values.condor.enabled }},condor{{ end }}"
+  "NONUSE": "sleeplock{{ if not .Values.condor.enabled }},condor{{ end }}{{ if not .Values.slurm.enabled }},slurmctld,slurmd{{ end }}"
   "GALAXY_TOOLS_PULL_POLICY": {{ .Values.image.pullPolicy }}
   {{- if .Values.postgresql.enabled }}
   "GALAXY_SEC_DB_ENGINE": "postgresql"

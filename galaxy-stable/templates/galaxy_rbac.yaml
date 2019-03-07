@@ -3,7 +3,7 @@ kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   namespace: default
-  name: galaxy-role-pods-jobs
+  name: {{ template "galaxy.fullname" . }}-role-pods-jobs
   labels:
     app: {{ template "galaxy.name" . }}
     chart: {{ template "galaxy.chart" . }}
@@ -20,13 +20,13 @@ rules:
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: galaxy-operations
+  name: {{ template "galaxy.fullname" . }}-operations
 subjects:
 - kind: ServiceAccount
   name: default
   namespace: default
 roleRef:
   kind: Role
-  name: galaxy-role-pods-jobs
+  name: {{ template "galaxy.fullname" . }}-role-pods-jobs
   apiGroup: rbac.authorization.k8s.io
 {{ end }}

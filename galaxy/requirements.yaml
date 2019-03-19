@@ -1,5 +1,6 @@
 dependencies:
-      - name: postgres_for_galaxy
-        repository: https://pcm32.github.io/galaxy-helm-charts
-        version: 0.1.2
-        condition: galaxy_backend_postgres
+    - name: postgresql
+      repository: https://kubernetes-charts.storage.googleapis.com/
+      version: 3.14.2
+      condition: postgresql.enabled
+    

@@ -1,106 +1,82 @@
-# Default values for galaxy-chart.
+# Default values for galaxy.
 # This is a YAML-formatted file.
-# Declare name/value pairs to be passed into your templates.
-# name: value
+# Declare variables to be passed into your templates.
 
-# To run within minikube using a created persistent volume on /data
-#
-# helm install --set pv_minikube="yes"
-#
-# To set postgresql password for the galaxy user 
-# (note that if the deployment will use an existing postgre database folder, the same password needs to be used as originally).
-# 
-# helm install --set postgres.db_password="new-password"
-#
-# For using an ingress to galaxy.mydomain.dev use
-#
-# helm install --set use_ingress="yes",domain="mydomain.dev"
-#
-# For using an ingress to galaxy.mydomain.dev using an external ingress controller, use:
-#
-# helm install --set use_ingress="yes",domain="mydomain.dev",external_ingress_controller="yes"
-#
-# For setting the admin user
-#
-# helm install --set galaxy_admin_email="user@host.domain",galaxy_admin_password="mypasswd",galaxy_api_key="aksjdhas"
-#
-# To avoid creating the PVC (because is already there or created by another chart
-#
-# helm install --set galaxy_create_pvc=false
-#
-# To avoid altogether using a PVC for postgres (files are written inside the container, pod dies, Galaxy state is lost)
-#
-# helm install --set postgres.postgres_pvc=false
-#
-# To set a new destination for the tools directory. This is by default set to a location inside the PVC
-#
-# helm install --set galaxy_tools_dest="/path/to/tools"
-#
-# Set up supplementalGroups to GID 1000 for Kubernetes pods to write on privileged NFS. Needs to be an integer.
-#
-# helm install --set k8s_supp_group=1000
-#
-# Set up fsGroups to GID 2300 for Kubernetes to write on privileged file system. Needs to be an integer
-#
-# helm install --set ks8_fs_group=2300
-#
-# For development mode, having config, tools and tools galaxy folders on <your_folder>, run with 
-# helm install --set development_folder=<your_folder> galaxy-simple
-#
-# For setting up an SMTP server for sending mail
-#
-# helm install --set smtp_server="your-server:port",smtp_username="your-user",smtp_password="your-pass",email_from="email-from@smtp-domain",instance_resource_url="https://your-galaxy-url",smtp_ssl=True
-#
-# To setup a subpath for postgres within the PVC
-#
-# helm install --set postgres_for_galaxy.subpath="otherDirectory/inside/pvc" ....
-#
-# Above instructions can be used together, just concatenate with a comma.
-# 
-# 
-# Galaxy RC
-galaxy_image_registry: "container-registry.phenomenal-h2020.eu/"
-galaxy_image: "phnmnl/galaxy-k8s-runtime"
-galaxy_image_tag: ":latest"
-galaxy_pull_policy: "IfNotPresent"
-galaxy_pvc: "galaxy-pvc"
-galaxy_create_pvc: true
-galaxy_pvc_capacity: "15Gi"
-galaxy_metadata_name: "galaxy-k8s"
-galaxy_label_app: "galaxy-k8s"
-galaxy_internal_port: 8080
-galaxy_node_port_exposed: 30700
-galaxy_admin_email: ""
-galaxy_admin_username: "admin"
-galaxy_admin_password: ""
-galaxy_api_key: ""
-galaxy_tools_dest: "/opt/galaxy_data"
-galaxy_backend_postgres: false
+webHandlers:
+  replicaCount: 1
 
-legacy:
-   pre_k8s_16: false
-rbac_needed: false
+jobHandlers:
+  replicaCount: 1
 
-k8s_supp_groups: ""
+image:
+  repository: galaxy/galaxy
+  tag: minimal
+  pullPolicy: IfNotPresent
 
-galaxy:
-  config:
-    auto_migrate: false
+nameOverride: ""
+fullnameOverride: ""
 
-# tool2container_mapping_file: "phenomenal_tools2container.yaml"
+service:
+  type: NodePort
+  port: 8090
 
-# Ingress
-domain: "mydomain.dev"
-hostname: "galaxy"
+persistence:
+  enabled: true
+  name: &pvcname galaxy-pvc
+  # annotations: {}
+  storageClass: manual
+  accessMode: ReadWriteMany
+  size: 10Gi
+  pv:
+    name: galaxy-pv
+    enabled: true
+    hostPath: "/tmp/k8s/volumes/galaxy/data"
 
-postgres_for_galaxy:
-        db_password: "mypassword"
-        postgres_pvc: "galaxy-pvc" 
-        subpath: ""
+ingress:
+  enabled: true
+  # annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  path: /
+  hosts:
+    - ~
+    # - host: ~
+    #   paths: ["/"]
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
 
-smtp_ssl: "False"
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
 
-# For Galaxy < 18.01, paster.log should be used.
-# For Galaxy >= 18.01, file changes to galaxy.log
-log_file_to_track: "paster.log"
+nodeSelector: {}
 
+tolerations: []
+
+affinity: {}
+
+# postgresql:
+gpsql:  
+  enabled: true
+  image:
+    repository: hub.docker.com
+    repository: postgres
+    tag: "10.6"
+    pullPolicy: IfNotPresent
+  postgresqlDatabase: galaxy
+  postgresqlPassword: ""
+  postgresqlDataDir: /var/lib/postgresql/data
+  persistence:
+    enabled: true
+    existingClaim: postgres-pv-claim
+    storageClass: manual

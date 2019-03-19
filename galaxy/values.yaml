@@ -65,8 +65,8 @@ tolerations: []
 
 affinity: {}
 
-# postgresql:
-gpsql:  
+postgresql:
+  fullnameOverride: gpsql
   enabled: true
   image:
     repository: hub.docker.com
@@ -75,8 +75,9 @@ gpsql:
     pullPolicy: IfNotPresent
   postgresqlDatabase: galaxy
   postgresqlPassword: ""
-  postgresqlDataDir: /var/lib/postgresql/data
+  postgresqlDataDir: "/var/lib/postgresql/data"
   persistence:
     enabled: true
     existingClaim: postgres-pv-claim
     storageClass: manual
+    mountPath: "/var/lib/postgresql"

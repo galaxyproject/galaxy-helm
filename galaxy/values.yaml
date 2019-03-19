@@ -65,8 +65,7 @@ tolerations: []
 
 affinity: {}
 
-# postgresql:
-gpsql:  
+postgresql:
   enabled: true
   image:
     repository: hub.docker.com

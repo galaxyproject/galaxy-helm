@@ -69,15 +69,15 @@ postgresql:
   fullnameOverride: gpsql
   enabled: true
   image:
-    repository: hub.docker.com
     repository: postgres
     tag: "10.6"
     pullPolicy: IfNotPresent
   postgresqlDatabase: galaxy
+  # TODO change empty password
   postgresqlPassword: ""
   postgresqlDataDir: "/var/lib/postgresql/data"
   persistence:
     enabled: true
     existingClaim: postgres-pv-claim
     storageClass: manual
-    mountPath: "/var/lib/postgresql"
+    mountPath: "/var/lib/postgresql/data"

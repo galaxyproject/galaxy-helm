@@ -1,0 +1,1 @@
+helm install --name galaxy-postgres -f values.yaml stable/postgresql

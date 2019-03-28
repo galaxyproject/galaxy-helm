@@ -1,6 +1,6 @@
 # PostgreSQL Helm Chart Helper
 
-*The following is intended for use in development mode only*
+*The following is intended for use in* ***development mode only***
 
 This helper installs the [Bitnami PostgreSQL helm
 chart](https://github.com/helm/charts/tree/master/stable/postgresql) 
@@ -31,3 +31,9 @@ To delete the chart with the release name `galaxy-postgres` and the provided `va
 helm delete --purge galaxy-postgres
 ```
 Both commands are available as `install` and `delete` shell scripts.
+
+## Notes
+
+The preloaded `galaxy` database should have a user `galaxydbuser` with read/write privileges to all
+tables and sequences within the `galaxy` database. Password authentication mode should be enabled
+for this user/database.

@@ -13,7 +13,7 @@ Galaxy database.
    `postgres-pv.yaml` (at `.spec.hostPath.path`). 
    The default value is `/tmp/docker/volumes/galaxy_postgres`.
 
-   The galaxy database must be preloaded. (archive available at ...). 
+   The galaxy database must be preloaded. [Archive available here](https://s3.amazonaws.com/galaxy-helm-dev/galaxy-db.tar.gz). 
 
 2. Create a persistent volume `galaxy-postgres-pv` and persistent volume claim `galaxy-postgres-pvc`:
 ```

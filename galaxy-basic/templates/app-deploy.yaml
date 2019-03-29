@@ -1,0 +1,38 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: galaxy-web-deploy
+  labels:
+    app: galaxy
+    tier: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: galaxy
+      tier: web
+  template:
+    metadata:
+      labels:
+        app: galaxy
+        tier: web
+    spec:
+      volumes: 
+      - name: galaxy-data
+        persistentVolumeClaim:
+          claimName: galaxy-pvc
+      # initContainers:
+      # - name: init-tpsql
+      #   image: busybox:1.28
+      #   command: ['sh', '-c', 'until nslookup gpsql; do echo waiting for myservice; sleep 3; done;']
+      containers:
+      - name: galaxy-web-container
+        image: "galaxy:dbpass"
+        imagePullPolicy: "IfNotPresent"
+        ports:
+        - containerPort: 8080
+        command: ["/galaxy/server/.venv/bin/uwsgi"]
+        args: ["--yaml", "/galaxy/server/config/galaxy.yml"]
+        volumeMounts:
+        - name: galaxy-data
+          mountPath: "/galaxy/server/database/"

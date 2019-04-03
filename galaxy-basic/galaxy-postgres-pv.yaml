@@ -1,0 +1,31 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: galaxy-postgres-pv
+  labels:
+    app: galaxy
+    tier: db
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 10Gi
+  accessModes:
+  - ReadWriteOnce
+  hostPath:
+    path: "/tmp/docker/volumes/galaxy_postgres"
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: galaxy-postgres-pvc
+  labels:
+    app: galaxy
+    tier: db
+spec:
+  storageClassName: manual
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

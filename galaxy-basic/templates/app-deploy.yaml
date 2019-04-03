@@ -21,10 +21,10 @@ spec:
       - name: galaxy-data
         persistentVolumeClaim:
           claimName: galaxy-pvc
-      # initContainers:
-      # - name: init-tpsql
-      #   image: busybox:1.28
-      #   command: ['sh', '-c', 'until nslookup gpsql; do echo waiting for myservice; sleep 3; done;']
+      initContainers:
+      - name: init-gpsql
+        image: alpine:3.7
+        command: ['sh', '-c', 'until nc -z -w3 gpsql 5432; do echo waiting for gpsql service; sleep 1; done;']
       containers:
       - name: galaxy-web-container
         image: "galaxy:dbpass"

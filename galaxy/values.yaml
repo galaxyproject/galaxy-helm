@@ -9,8 +9,8 @@ jobHandlers:
   replicaCount: 1
 
 image:
-  repository: galaxy
-  tag: dbpass
+  repository: galaxy/galaxy
+  tag: minimal
   pullPolicy: IfNotPresent
 
 nameOverride: ""
@@ -64,3 +64,20 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+postgresql:
+  fullnameOverride: gpsql
+  enabled: true
+  image:
+    repository: postgres
+    tag: "10.6"
+    pullPolicy: IfNotPresent
+  postgresqlDatabase: galaxy
+  # TODO change empty password
+  postgresqlPassword: ""
+  postgresqlDataDir: "/var/lib/postgresql/data"
+  persistence:
+    enabled: true
+    existingClaim: postgres-pv-claim
+    storageClass: manual
+    mountPath: "/var/lib/postgresql/data"

@@ -24,8 +24,8 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
+            - name: galaxy-http
+              containerPort: 8080
           command: ["/galaxy/server/.venv/bin/uwsgi"]
           args: ["--yaml", "/galaxy/server/config/galaxy.yml"]
           volumeMounts:

@@ -19,6 +19,10 @@ spec:
         app: {{ template "galaxy.fullname" . }}
         release: {{ .Release.Name }}
     spec:
+      initContainers:
+        - name: init-gpsql
+          image: alpine:3.7
+          command: ['sh', '-c', 'until nc -z -w3 gpsql 5432; do echo waiting for gpsql service; sleep 1; done;']
       containers:
         - name: galaxy-web
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

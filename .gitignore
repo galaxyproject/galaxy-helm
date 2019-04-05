@@ -93,3 +93,5 @@ ENV/
 *.swo
 
 galaxy-stable/charts/
+galaxy/charts/
+galaxy-orig/

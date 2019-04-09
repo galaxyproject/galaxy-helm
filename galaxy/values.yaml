@@ -78,7 +78,6 @@ postgresql:
   postgresqlDataDir: "/var/lib/postgresql/data"
   persistence:
     enabled: true
-    #existingClaim: postgres-pv-claim
-    existingClaim: galaxy-postgres-pvc
+    existingClaim: postgres-pv-claim
     storageClass: manual
     mountPath: "/var/lib/postgresql/data"

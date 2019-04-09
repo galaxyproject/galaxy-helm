@@ -1,0 +1,49 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ template "galaxy.fullname" . }}-web
+  labels:
+    app: {{ template "galaxy.name" . }}
+    chart: {{ template "galaxy.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.webHandlers.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "galaxy.fullname" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "galaxy.fullname" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: galaxy-web
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+          command: ["/galaxy/server/.venv/bin/uwsgi"]
+          args: ["--yaml", "/galaxy/server/config/galaxy.yml"]
+          volumeMounts:
+            - name: galaxy-job-conf-file
+              mountPath: /galaxy/server/config/job_conf.xml
+              subPath: job_conf.xml
+            - name: galaxy-data
+              mountPath: /galaxy/server/database/
+        # - name: nginx
+        #   image: nginx
+        #   lifecycle:
+        #     preStop:
+        #       exec:
+        #         command: ["/usr/sbin/nginx","-s","quit"]
+      volumes:
+        - name: galaxy-job-conf-file
+          configMap:
+            name: {{ template "galaxy.fullname" . }}-config-map
+        - name: galaxy-data
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.name }}

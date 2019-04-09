@@ -1,0 +1,45 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ template "galaxy.fullname" . }}-job
+  labels:
+    app: {{ template "galaxy.name" . }}
+    chart: {{ template "galaxy.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.jobHandlers.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "galaxy.fullname" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "galaxy.fullname" . }}
+        release: {{ .Release.Name }}  
+    spec:
+      containers:
+        - name: galaxy-job
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          command: ["python", "/galaxy/server/scripts/galaxy-main"]
+          args: ["-c", "/galaxy/server/config/galaxy.yml", "--server-name", "$(POD_NAME)", "--attach-to-pool", "job-handlers"]
+          volumeMounts:
+            - name: galaxy-job-conf-file
+              mountPath: /galaxy/server/config/job_conf.xml
+              subPath: job_conf.xml
+            - name: galaxy-data
+              mountPath: /galaxy/server/database/
+      volumes:
+        - name: galaxy-job-conf-file
+          configMap:
+            name: {{ template "galaxy.fullname" . }}-config-map
+        - name: galaxy-data
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.name }}

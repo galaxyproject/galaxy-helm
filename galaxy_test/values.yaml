@@ -9,8 +9,8 @@ jobHandlers:
   replicaCount: 1
 
 image:
-  repository: galaxy/galaxy
-  tag: minimal
+  repository: galaxy
+  tag: dbpass
   pullPolicy: IfNotPresent
 
 nameOverride: ""
@@ -67,18 +67,17 @@ affinity: {}
 
 postgresql:
   fullnameOverride: gpsql
-  enabled: true
   image:
     repository: postgres
     tag: "10.6"
     pullPolicy: IfNotPresent
   postgresqlDatabase: galaxy
-  # TODO change empty password
-  postgresqlPassword: ""
-  postgresqlDataDir: "/var/lib/postgresql/data"
+  postgresqlUsername: galaxydbuser
+  postgresqlPassword: "42"
+  postgresqlDataDir: "/var/lib/postgresql/data/"
   persistence:
     enabled: true
-    #existingClaim: postgres-pv-claim
     existingClaim: galaxy-postgres-pvc
     storageClass: manual
-    mountPath: "/var/lib/postgresql/data"
+    mountPath: "/var/lib/postgresql/data/"
+

@@ -1,0 +1,18 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ template "galaxy.fullname" . }}
+  labels:
+    app: {{ template "galaxy.name" . }}
+    chart: {{ template "galaxy.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    app: {{ template "galaxy.fullname" . }}
+    release: {{ .Release.Name }}
+  ports:
+  - protocol: TCP
+    port: {{ .Values.service.port }}
+    targetPort: http

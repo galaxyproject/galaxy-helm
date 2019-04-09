@@ -4,12 +4,14 @@ postgresql:
     repository: postgres
     tag: "10.6"
     pullPolicy: IfNotPresent
-  postgresqlDatabase: galaxy
-  postgresqlUsername: galaxydbuser
-  postgresqlPassword: "42"
-  postgresqlDataDir: "/var/lib/postgresql/data/"
+    #postgresqlDatabase: galaxy
+    #postgresqlUsername: galaxydbuser
+    #postgresqlPassword: "42"
+  postgresqlDataDir: "/var/lib/postgresql/data/pgdata"
+  #postgresqlDataDir: "/var/lib/postgresql/data/"
   persistence:
     enabled: true
     existingClaim: galaxy-postgres-pvc
     storageClass: manual
     mountPath: "/var/lib/postgresql/data/"
+  initdbScriptsConfigMap: galaxy-initdb

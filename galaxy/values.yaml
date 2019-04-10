@@ -9,8 +9,8 @@ jobHandlers:
   replicaCount: 1
 
 image:
-  repository: galaxy/galaxy
-  tag: minimal
+  repository: galaxy
+  tag: dbpass
   pullPolicy: IfNotPresent
 
 nameOverride: ""
@@ -72,12 +72,10 @@ postgresql:
     repository: postgres
     tag: "10.6"
     pullPolicy: IfNotPresent
-  postgresqlDatabase: galaxy
-  # TODO change empty password
-  postgresqlPassword: ""
-  postgresqlDataDir: "/var/lib/postgresql/data"
+  postgresqlDataDir: "/var/lib/postgresql/data/pgdata"
   persistence:
     enabled: true
     existingClaim: postgres-pv-claim
     storageClass: manual
     mountPath: "/var/lib/postgresql/data"
+  initdbScriptsConfigMap: galaxy-initdb

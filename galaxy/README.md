@@ -1,26 +1,32 @@
-# Galaxy Helm Chart
+# Galaxy Helm Chart (draft)
 
-## Setup
+*The following is intended for use in* ***development mode only***
 
-1. Install the required dependency charts:
+This is an initial draft of a galaxy helm chart.
+
+## Usage
+
+1. Install the [PostgreSQL chart](postgres)
 ```
 helm dependency update
 ```
 
-2. Download a pre-built Postgres database, place it in a persistent
-location on the host, and create a corresponding persistent volume & claim:
+2. Create persistent volumes (+ claims)  `galaxy-pv`, `galaxy-pvc`, `galaxy-postgres-pv`, `galaxy-postgres-pvc`:
 ```
-mkdir -p /tmp/k8s/volumes/ && cd "$_"
-curl https://galaxy-helm-dev.s3.amazonaws.com/galaxy-db.tar.gz | tar -xz - && cd - && \
-kubectl create -f postgres-pv.yaml
+kubectl create -f volumes
 ```
 
-3. Install the chart, naming it `galaxy`:
+3. Create configmap for initdb scripts:
+```
+kubectl create configmap galaxy-initdb --from-file=configmaps/initdb
+```
+
+4. To install the chart with the release name `galaxy`:
 ```
 helm install --name galaxy .
 ```
-
-In about 20 seconds, Galaxy will be available at https://localhost/.
+In about 50 seconds, Galaxy will be available at https://localhost/. (Subsequent startup times are
+about 25 seconds)
 
 To delete the deployment, run:
 ```

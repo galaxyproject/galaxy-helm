@@ -5,9 +5,11 @@ cvmfs-csi:
   data:
     pvc:
       storage: 1Gi
+    mountPath: /cvmfs/data.galaxyproject.org
   main:
     pvc:
       storage: 1Gi
+    mountPath: /cvmfs/main.galaxyproject.org
 
 webHandlers:
   replicaCount: 1

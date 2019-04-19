@@ -1,6 +1,13 @@
 # Default values for galaxy.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+cvmfs-csi:
+  data:
+    pvc:
+      storage: 1Gi
+  main:
+    pvc:
+      storage: 1Gi
 
 webHandlers:
   replicaCount: 1

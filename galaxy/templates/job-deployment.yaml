@@ -40,6 +40,10 @@ spec:
               subPath: job_conf.xml
             - name: galaxy-data
               mountPath: /galaxy/server/database/
+            - name: cvmfs-gxy-main
+              mountPath: /cvmfs/main.galaxyproject.org
+            - name: cvmfs-gxy-data
+              mountPath: /cvmfs/data.galaxyproject.org
       volumes:
         - name: galaxy-job-conf-file
           configMap:
@@ -47,3 +51,9 @@ spec:
         - name: galaxy-data
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.name }}
+       - name: cvmfs-gxy-main
+         persistentVolumeClaim:
+           claimName: {{ template "galaxy.fullname" . }}-cvmfs-gxy-main-pvc
+       - name: cvmfs-gxy-data
+         persistentVolumeClaim:
+           claimName: {{ template "galaxy.fullname" . }}-cvmfs-gxy-data-pvc

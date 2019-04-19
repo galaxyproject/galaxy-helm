@@ -1,0 +1,7 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ template "galaxy.fullname" . }}-cvmfs-gxy-data
+provisioner: csi-cvmfsplugin
+parameters:
+  repository: data.galaxyproject.org

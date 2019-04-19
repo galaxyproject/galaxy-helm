@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ template "galaxy.fullname" . }}-cvmfs-gxy-main-pvc
+spec:
+  accessModes:
+  - ReadOnlyMany
+  resources:
+    requests:
+      storage: {{ .Values.cvmfs-csi.main.pvc.storage }}
+  storageClassName: {{ template "galaxy.fullname" . }}-cvmfs-gxy-main

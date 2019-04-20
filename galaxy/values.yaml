@@ -1,7 +1,7 @@
 # Default values for galaxy.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-cvmfs-csi:
+cvmfsCsi:
   data:
     pvc:
       storage: 1Gi

@@ -7,5 +7,5 @@ spec:
   - ReadOnlyMany
   resources:
     requests:
-      storage: {{ .Values.cvmfs-csi.data.pvc.storage }}
+      storage: {{ .Values.cvmfsCsi.data.pvc.storage }}
   storageClassName: {{ template "galaxy.fullname" . }}-cvmfs-gxy-data

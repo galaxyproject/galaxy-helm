@@ -17,7 +17,7 @@ spec:
     metadata:
       labels:
         app: {{ template "galaxy.fullname" . }}
-        release: {{ .Release.Name }}  
+        release: {{ .Release.Name }}
     spec:
       initContainers:
         - name: init-gpsql
@@ -41,9 +41,9 @@ spec:
             - name: galaxy-data
               mountPath: /galaxy/server/database/
             - name: cvmfs-gxy-main
-              mountPath: {{ .Values.cvmfs-csi.main.mountPath }}
+              mountPath: {{ .Values.cvmfsCsi.main.mountPath }}
             - name: cvmfs-gxy-data
-              mountPath: {{ .Values.cvmfs-csi.data.mountPath }}
+              mountPath: {{ .Values.cvmfsCsi.data.mountPath }}
       volumes:
         - name: galaxy-job-conf-file
           configMap:

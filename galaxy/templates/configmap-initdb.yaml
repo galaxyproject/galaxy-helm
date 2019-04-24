@@ -1,0 +1,15 @@
+{{- $fullName := include "galaxy.fullname" . -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullName }}-initdb
+  labels:
+    app: {{ template "galaxy.name" . }}
+    chart: {{ template "galaxy.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  {{- $root := . }}
+  {{ range $path, $bytes := .Files.Glob "files/conf.d/*" }}
+    {{- base $path }}: {{ $root.Files.Get $path | quote }}
+  {{ end }}

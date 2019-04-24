@@ -18,8 +18,8 @@ jobHandlers:
   replicaCount: 1
 
 image:
-  repository: galaxy
-  tag: dbpass
+  repository: galaxy/galaxy
+  tag: minimal
   pullPolicy: IfNotPresent
 
 nameOverride: ""

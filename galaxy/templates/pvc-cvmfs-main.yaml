@@ -1,3 +1,4 @@
+{{- if .Values.cvmfsCsi.enabled }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -9,3 +10,4 @@ spec:
     requests:
       storage: {{ .Values.cvmfsCsi.main.pvc.storage }}
   storageClassName: {{ template "galaxy.fullname" . }}-cvmfs-gxy-main
+{{- end }}

@@ -38,10 +38,12 @@ spec:
               subPath: job_conf.xml
             - name: galaxy-data
               mountPath: /galaxy/server/database/
+            {{- if .Values.cvmfsCsi.enabled }}
             - name: cvmfs-gxy-main
               mountPath: {{ .Values.cvmfsCsi.main.mountPath }}
             - name: cvmfs-gxy-data
               mountPath: {{ .Values.cvmfsCsi.data.mountPath }}
+            {{- end }}
         # - name: nginx
         #   image: nginx
         #   lifecycle:
@@ -55,9 +57,11 @@ spec:
         - name: galaxy-data
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.name }}
+        {{- if .Values.cvmfsCsi.enabled }}
         - name: cvmfs-gxy-main
           persistentVolumeClaim:
             claimName: {{ template "galaxy.fullname" . }}-cvmfs-gxy-main-pvc
         - name: cvmfs-gxy-data
           persistentVolumeClaim:
             claimName: {{ template "galaxy.fullname" . }}-cvmfs-gxy-data-pvc
+        {{- end }}

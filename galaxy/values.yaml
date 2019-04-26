@@ -19,7 +19,7 @@ jobHandlers:
   replicaCount: 1
 
 image:
-  repository: ic4f/galaxy
+  repository: galaxy/galaxy
   tag: minimal
   pullPolicy: IfNotPresent
 

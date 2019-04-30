@@ -35,9 +35,11 @@ spec:
           command: ["python", "/galaxy/server/scripts/galaxy-main"]
           args: ["-c", "/galaxy/server/config/galaxy.yml", "--server-name", "$(POD_NAME)", "--attach-to-pool", "job-handlers"]
           volumeMounts:
-            - name: galaxy-job-conf-file
-              mountPath: /galaxy/server/config/job_conf.xml
-              subPath: job_conf.xml
+            {{- range $num, $entry := .Values.galaxyConfig }}
+            - name: galaxy-conf-files
+              mountPath: {{ $entry.mountPath }}
+              subPath: {{ $entry.name }}
+            {{- end }}
             - name: galaxy-data
               mountPath: /galaxy/server/database/
             {{- if .Values.cvmfsCsi.enabled }}
@@ -47,7 +49,7 @@ spec:
               mountPath: {{ .Values.cvmfsCsi.data.mountPath }}
             {{- end }}
       volumes:
-        - name: galaxy-job-conf-file
+        - name: galaxy-conf-files
           configMap:
             name: {{ template "galaxy.fullname" . }}-config-map
         - name: galaxy-data

@@ -1,0 +1,17 @@
+{{- $fullName := include "galaxy.fullname" . -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullName }}-config-map
+  labels:
+    app: {{ template "galaxy.name" . }}
+    chart: {{ template "galaxy.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  {{- range $num, $entry := .Values.galaxyConf }}
+  {{ $entry.name }}: |
+    {{- if $entry.rawContents }}
+    {{- $entry.rawContents | nindent 4 -}}
+    {{- end }}
+  {{- end }}

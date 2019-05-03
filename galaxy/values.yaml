@@ -21,43 +21,43 @@ jobHandlers:
 configs:
   jobConf:
     mountPath: /galaxy/config/job_conf.xml
-    contents: |
-      <job_conf>
-          <plugins>
-              <plugin id="local" type="runner" load="galaxy.jobs.runners.local:LocalJobRunner" workers="4"/>
-          </plugins>
-          <handlers assign_with="db-skip-locked" />
-          <destinations>
-              <destination id="local" runner="local"/>
-          </destinations>
-      </job_conf>
+    contents: 
+      raw: |
+        <job_conf>
+            <plugins>
+                <plugin id="local" type="runner" load="galaxy.jobs.runners.local:LocalJobRunner" workers="4"/>
+            </plugins>
+            <handlers assign_with="db-skip-locked" />
+            <destinations>
+                <destination id="local" runner="local"/>
+            </destinations>
+        </job_conf>
   galaxyYaml:
     mountPath: /galaxy/config/galaxy.yaml
     contents:
-      uwsgi:
-        virtualenv: /galaxy/server/.venv
-        processes: 1
-        http: 0.0.0.0:8080
-        static-map: /static/style=/galaxy/server/static/style/blue
-        static-map: /static=/galaxy/server/static
-        pythonpath: /galaxy/server/lib
-        thunder-lock: true
-        module: galaxy.webapps.galaxy.buildapp:uwsgi_app()
-        buffer-size: 16384
-        offload-threads: 2
-        threads: 4
-        die-on-term: true
-        master: true
-        hook-master-start: unix_signal:2 gracefully_kill_them_all
-        hook-master-start: unix_signal:15 gracefully_kill_them_all
-        enable-threads: true
-        py-call-osafterfork: true
-      galaxy:
-        database_connection: "postgresql://{{ .Values.postgres.username }}:{{ .Values.postgres.password }}@gpsql/galaxy"
-        integrated_tool_panel_config: /galaxy/server/config/integrated_tool_panel.xml
-        tool_config_file: "{{ .Values.cvmfs.main.mountPath }}/config/tool_conf.xml.sample,{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_conf.xml"
-        tool_data_table_config_path: "{{ .Values.cvmfs.main.mountPath }}/config/tool_data_table_conf.xml.sample"
-        tool_dependency_dir: "{{ .Values.cvmfs.main.mountPath }}/database/dependencies"
+      yaml:
+        uwsgi:
+          virtualenv: /galaxy/server/.venv
+          processes: 1
+          http: 0.0.0.0:8080
+          static-map: /static/style=/galaxy/server/static/style/blue
+          pythonpath: /galaxy/server/lib
+          thunder-lock: true
+          module: galaxy.webapps.galaxy.buildapp:uwsgi_app()
+          buffer-size: 16384
+          offload-threads: 2
+          threads: 4
+          die-on-term: true
+          master: true
+          hook-master-start: "unix_signal:2 gracefully_kill_them_all"
+          enable-threads: true
+          py-call-osafterfork: true
+        galaxy:
+          database_connection: "{{ .Values.postgresql.username }}:{{ .Values.postgresql.password }}@gpsql/galaxy"
+          integrated_tool_panel_config: /galaxy/server/config/integrated_tool_panel.xml
+          tool_config_file: "{{ .Values.cvmfs.main.mountPath }}/config/tool_conf.xml.sample,{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_conf.xml"
+          tool_data_table_config_path: "{{ .Values.cvmfs.main.mountPath }}/config/tool_data_table_conf.xml.sample"
+          tool_dependency_dir: "{{ .Values.cvmfs.main.mountPath }}/database/dependencies"
 
 image:
   repository: galaxy/galaxy

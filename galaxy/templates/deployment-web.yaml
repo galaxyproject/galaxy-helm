@@ -33,16 +33,18 @@ spec:
           command: ["/galaxy/server/.venv/bin/uwsgi"]
           args: ["--yaml", "/galaxy/server/config/galaxy.yml"]
           volumeMounts:
-            - name: galaxy-job-conf-file
-              mountPath: /galaxy/server/config/job_conf.xml
-              subPath: job_conf.xml
+            {{- range $key,$entry := .Values.configs }}
+            - name: galaxy-conf-files
+              mountPath: {{ $entry.mountPath }}
+              subPath: {{ $key }}
+            {{- end }}
             - name: galaxy-data
               mountPath: /galaxy/server/database/
-            {{- if .Values.cvmfsCsi.enabled }}
+            {{- if .Values.cvmfs.enabled }}
             - name: cvmfs-gxy-main
-              mountPath: {{ .Values.cvmfsCsi.main.mountPath }}
+              mountPath: {{ .Values.cvmfs.main.mountPath }}
             - name: cvmfs-gxy-data
-              mountPath: {{ .Values.cvmfsCsi.data.mountPath }}
+              mountPath: {{ .Values.cvmfs.data.mountPath }}
             {{- end }}
         # - name: nginx
         #   image: nginx
@@ -51,13 +53,13 @@ spec:
         #       exec:
         #         command: ["/usr/sbin/nginx","-s","quit"]
       volumes:
-        - name: galaxy-job-conf-file
+        - name: galaxy-conf-files
           configMap:
             name: {{ template "galaxy.fullname" . }}-config-map
         - name: galaxy-data
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.name }}
-        {{- if .Values.cvmfsCsi.enabled }}
+        {{- if .Values.cvmfs.enabled }}
         - name: cvmfs-gxy-main
           persistentVolumeClaim:
             claimName: {{ template "galaxy.fullname" . }}-cvmfs-gxy-main-pvc

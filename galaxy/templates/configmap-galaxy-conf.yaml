@@ -9,9 +9,32 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 data:
-  {{- range $num, $entry := .Values.galaxyConf }}
-  {{ $entry.name }}: |
-    {{- if $entry.rawContents }}
-    {{- $entry.rawContents | nindent 4 -}}
+  {{- range $key, $entry := .Values.configs }}
+  {{ $key -}}:
+    {{- if $entry.contents -}}
+    {{- range $param1, $value1 := $entry.contents }}
+    {{- range $param2, $value2 := $value1 }}
+    {{- if $param2 -}}
+    {{ $param1 }}:
+      {{- range $param3, $value3 := $value2 }}
+      {{- if $param3 -}}
+      {{ $param2 }}:
+        {{- range $param4, $value4 := $value3 }}
+        {{- if $param4 -}}
+        {{ $param3 }}: 
+          {{ $param4 }}: {{ tpl $value4 . }}
+        {{- else -}}
+        {{ $param3 }}: {{ tpl $value3 . }}
+        {{- end -}}
+        {{- end -}}
+      {{- else -}}
+      {{ $param2 }}: {{ tpl $value2 . }}
+      {{- end -}}
+      {{- end -}}
+    {{- else -}}
+    {{ $param1 }}: {{ tpl $value1 . }}
+    {{- end -}}
+    {{- end -}}
+    {{- end -}}
     {{- end }}
   {{- end }}

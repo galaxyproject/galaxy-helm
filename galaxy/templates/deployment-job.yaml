@@ -35,18 +35,18 @@ spec:
           command: ["python", "/galaxy/server/scripts/galaxy-main"]
           args: ["-c", "/galaxy/server/config/galaxy.yml", "--server-name", "$(POD_NAME)", "--attach-to-pool", "job-handlers"]
           volumeMounts:
-            {{- range $num, $entry := .Values.galaxyConfig }}
+            {{- range $key,$entry := .Values.configs }}
             - name: galaxy-conf-files
               mountPath: {{ $entry.mountPath }}
-              subPath: {{ $entry.name }}
+              subPath: {{ $key }}
             {{- end }}
             - name: galaxy-data
               mountPath: /galaxy/server/database/
-            {{- if .Values.cvmfsCsi.enabled }}
+            {{- if .Values.cvmfs.enabled }}
             - name: cvmfs-gxy-main
-              mountPath: {{ .Values.cvmfsCsi.main.mountPath }}
+              mountPath: {{ .Values.cvmfs.main.mountPath }}
             - name: cvmfs-gxy-data
-              mountPath: {{ .Values.cvmfsCsi.data.mountPath }}
+              mountPath: {{ .Values.cvmfs.data.mountPath }}
             {{- end }}
       volumes:
         - name: galaxy-conf-files
@@ -55,7 +55,7 @@ spec:
         - name: galaxy-data
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.name }}
-        {{- if .Values.cvmfsCsi.enabled }}
+        {{- if .Values.cvmfs.enabled }}
         - name: cvmfs-gxy-main
           persistentVolumeClaim:
             claimName: {{ template "galaxy.fullname" . }}-cvmfs-gxy-main-pvc

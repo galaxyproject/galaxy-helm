@@ -10,8 +10,8 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   {{- range $key, $entry := .Values.configs }}
+  {{- if $entry.contents -}}
   {{ $key }}: |
-    {{- if $entry.contents -}}
     {{ tpl ($entry.contents | toYaml | replace "{{\n" "{{" | replace "|" "") $ | nindent 4 }}
     {{- end }}
   {{- end }}

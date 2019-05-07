@@ -18,8 +18,8 @@ webHandlers:
 jobHandlers:
   replicaCount: 1
 
+# All mountPaths will be relative to /galaxy
 configs:
-  # All mountPaths will be relative to /galaxy
   jobConf:
     mountPath: config/job_conf.xml
     contents: |

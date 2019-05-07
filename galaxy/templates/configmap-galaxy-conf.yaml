@@ -10,39 +10,8 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   {{- range $key, $entry := .Values.configs }}
-  {{ $key -}}: |
-    {{- if $entry.contents.raw -}}
-    {{- $entry.contents.raw | nindent 4 -}}
-    {{- else if $entry.contents.yaml -}}
-    {{- range $param, $value := $entry.contents.yaml }}
-    {{ $param -}}:
-      {{- if eq ($value | quote) (toYaml $value | trim | replace "\n " "" | replace "'" "" | quote) }}
-      {{- if eq (replace "{{" "" (quote $value)) (quote $value) }}
-      {{- $value | quote | indent 1 | replace "\"" "" }}
-      {{- else }}
-      {{ tpl $value $ | quote | indent 1 | replace "\"" "" }}
-      {{- end }}
-      {{- else -}}
-      {{- range $param2, $value2 := $value }}
-      {{ $param2 -}}:
-        {{- if eq ($value2 | quote) (toYaml $value2 | trim | replace "\n " "" | replace "'" "" | quote) }}
-        {{- if eq (replace "{{" "" (quote $value2)) (quote $value2) }}
-        {{- $value2 | quote | indent 1 | replace "\"" ""  }}
-        {{- else }}
-        {{- tpl $value2 $ | quote | indent 1 | replace "\"" "" }}
-        {{- end -}}
-        {{- else }}
-        {{- range $param3, $value3 := $value2 }}
-        {{ $param3 -}}:
-          {{- if eq (replace "{{" "" (quote $value3)) (quote $value3) }}
-          {{- $value3 | quote | indent 1 | replace "\"" "" }}
-          {{- else }}
-          {{- tpl $value3 $ | quote | indent 1 | replace "\"" "" }}
-          {{- end -}}
-        {{- end }}
-        {{- end }}
-      {{- end }}
-      {{- end }}
-    {{- end }}
+  {{ $key }}: |
+    {{- if $entry.contents -}}
+    {{ tpl ($entry.contents | toYaml | replace "{{\n" "{{" | replace "|" "") $ | nindent 4 }}
     {{- end }}
   {{- end }}

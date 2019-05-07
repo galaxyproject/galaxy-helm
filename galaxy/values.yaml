@@ -19,8 +19,9 @@ jobHandlers:
   replicaCount: 1
 
 configs:
+  # All mountPaths will be relative to /galaxy
   jobConf:
-    mountPath: /galaxy/config/job_conf.xml
+    mountPath: config/job_conf.xml
     contents: |
       <job_conf>
           <plugins>
@@ -32,7 +33,7 @@ configs:
           </destinations>
       </job_conf>
   galaxyYaml:
-    mountPath: /galaxy/config/galaxy.yaml
+    mountPath: config/galaxy.yaml
     contents:
       uwsgi:
         virtualenv: /galaxy/server/.venv

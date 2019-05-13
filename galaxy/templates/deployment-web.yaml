@@ -20,9 +20,9 @@ spec:
         release: {{ .Release.Name }}
     spec:
       initContainers:
-        - name: init-gpsql
+        - name: init-galaxy-postgres
           image: alpine:3.7
-          command: ['sh', '-c', 'until nc -z -w3 gpsql 5432; do echo waiting for gpsql service; sleep 1; done;']
+          command: ['sh', '-c', 'until nc -z -w3 {{ template "galaxy-postgresql.fullname" $ }} 5432; do echo waiting for galaxy-postgres service; sleep 1; done;']
       containers:
         - name: galaxy-web
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

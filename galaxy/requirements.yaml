@@ -1,12 +1,12 @@
-## Here, helm keeps track of what dependencies that are required for the
+## Here, helm keeps track of the dependencies that are required for the
 ## application. Dependencies should be listed here, then the dependencies
 ## updated with:
 ##
 ##    helm dep update
 ##
-## and the requirements.lock file commited.
+## and the requirements.lock file committed.
 dependencies:
     - name: postgresql
-      repository: https://kubernetes-charts.storage.googleapis.com/
-      version: 3.14.2
+      repository: https://raw.githubusercontent.com/CloudVE/helm-charts/master
+      version: 4.0.0
       condition: postgresql.enabled

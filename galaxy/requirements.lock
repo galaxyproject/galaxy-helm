@@ -1,6 +1,6 @@
 dependencies:
 - name: postgresql
-  repository: https://kubernetes-charts.storage.googleapis.com/
-  version: 3.14.2
-digest: sha256:463d49c860f0e7e36b2b04671ecd20a1edd5fe15459ecb9d63fd0091ab297600
-generated: 2019-04-09T15:04:07.154551-04:00
+  repository: https://raw.githubusercontent.com/CloudVE/helm-charts/master
+  version: 4.0.0
+digest: sha256:3b17f225f4cc0b097bbe18b055d4dc65766747f094b84f7400ccc9b25ae293eb
+generated: 2019-05-09T17:43:01.180501+05:30

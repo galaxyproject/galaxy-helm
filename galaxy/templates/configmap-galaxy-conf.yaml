@@ -9,9 +9,9 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 data:
-  {{ range $key, $entry := .Values.configs }}
+  {{- range $key, $entry := .Values.configs -}}
   {{- if $entry.contents -}}
-  {{ $key }}: |
-    {{ tpl ($entry.contents | toYaml | replace "{{\n" "{{" | replace "|" "") $ | nindent 4 }}
+  {{- $key | nindent 2 }}: |
+    {{- tpl ($entry.contents | toYaml | replace "{{\n" "{{" | replace "|" "") $ | nindent 4 -}}
     {{- end }}
   {{- end }}

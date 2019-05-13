@@ -33,7 +33,7 @@ configs:
           </destinations>
       </job_conf>
   galaxyYaml:
-    mountPath: config/galaxy.yaml
+    mountPath: config/galaxy.yml
     contents:
       uwsgi:
         virtualenv: /galaxy/server/.venv
@@ -52,7 +52,7 @@ configs:
         enable-threads: true
         py-call-osafterfork: true
       galaxy:
-        database_connection: '{{.Values.postgresql.username}}:{{.Values.postgresql.password}}@{{ template "galaxy-postgresql.fullname" . }}/galaxy'
+        database_connection: 'postgresql://{{.Values.postgresql.username}}:{{.Values.postgresql.password}}@{{ template "galaxy-postgresql.fullname" . }}/galaxy'
         integrated_tool_panel_config: /galaxy/server/config/integrated_tool_panel.xml
         tool_config_file: "{{ .Values.cvmfs.main.mountPath }}/config/tool_conf.xml.sample,{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_conf.xml"
         tool_data_table_config_path: "{{ .Values.cvmfs.main.mountPath }}/config/tool_data_table_conf.xml.sample"

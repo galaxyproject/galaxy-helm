@@ -2,7 +2,7 @@
 
 set -e
 
-psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" galaxy <<-EOSQL
+psql -v ON_ERROR_STOP=1 --username "$POSTGRESQL_USERNAME" galaxy <<-EOSQL
 
 --
 -- PostgreSQL database dump

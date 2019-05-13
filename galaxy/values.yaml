@@ -116,18 +116,8 @@ tolerations: []
 affinity: {}
 
 postgresql:
+  enabled: true
   username: galaxydbuser
   password: 42
-  fullnameOverride: gpsql
-  enabled: true
-  image:
-    repository: postgres
-    tag: "10.6"
-    pullPolicy: IfNotPresent
-  postgresqlDataDir: "/var/lib/postgresql/data/pgdata"
-  persistence:
-    enabled: true
-    existingClaim: postgres-pv-claim
-    storageClass: manual
-    mountPath: "/var/lib/postgresql/data"
-  initdbScriptsConfigMap: galaxy-initdb
+  nameOverride: galaxy-postgres
+  initdbScriptsConfigMap: "galaxy-initdb"

@@ -1,8 +1,7 @@
-{{- $fullName := include "galaxy.fullname" . -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ $fullName }}-config-map
+  name: {{ template "galaxy.fullname" . }}-config-map
   labels:
     app: {{ template "galaxy.name" . }}
     chart: {{ template "galaxy.chart" . }}

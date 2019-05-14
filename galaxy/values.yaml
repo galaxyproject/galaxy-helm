@@ -1,16 +1,18 @@
 # Default values for galaxy.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-cvmfs:
-  enabled: true
-  data:
-    pvc:
-      storage: 1Gi
-    mountPath: /cvmfs/data.galaxyproject.org
-  main:
-    pvc:
-      storage: 1Gi
-    mountPath: /cvmfs/main.galaxyproject.org
+
+image:
+  repository: galaxy/galaxy
+  tag: minimal
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: NodePort
+  port: 8090
 
 webHandlers:
   replicaCount: 1
@@ -58,18 +60,6 @@ configs:
         tool_data_table_config_path: "{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_data_table_conf.xml"
         tool_dependency_dir: "{{ .Values.cvmfs.main.mountPath }}/deps"
 
-image:
-  repository: galaxy/galaxy
-  tag: minimal
-  pullPolicy: IfNotPresent
-
-nameOverride: ""
-fullnameOverride: ""
-
-service:
-  type: NodePort
-  port: 8090
-
 persistence:
   enabled: true
   name: &pvcname galaxy-pvc
@@ -84,7 +74,7 @@ persistence:
 
 ingress:
   enabled: true
-  # annotations: {}
+  annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   path: /
@@ -121,3 +111,14 @@ postgresql:
   password: 42
   nameOverride: galaxy-postgres
   initdbScriptsConfigMap: "{{ .Release.Name }}-galaxy-initdb"
+
+cvmfs:
+  enabled: true
+  data:
+    pvc:
+      storage: 1Gi
+    mountPath: /cvmfs/data.galaxyproject.org
+  main:
+    pvc:
+      storage: 1Gi
+    mountPath: /cvmfs/main.galaxyproject.org

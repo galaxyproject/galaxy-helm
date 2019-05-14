@@ -2,7 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 cvmfs:
-  enabled: false
+  enabled: true
   data:
     pvc:
       storage: 1Gi
@@ -74,7 +74,7 @@ persistence:
   enabled: true
   name: &pvcname galaxy-pvc
   # annotations: {}
-  storageClass: manual
+  storageClass: standard
   accessMode: ReadWriteMany
   size: 10Gi
   pv:

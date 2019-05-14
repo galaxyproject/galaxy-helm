@@ -9,7 +9,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  storageClassName: manual
+  storageClassName: "{{ .Values.persistence.storageClass }}"
   capacity:
     storage: {{ .Values.persistence.size | quote }}
   accessModes:

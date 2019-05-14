@@ -9,5 +9,5 @@ spec:
   resources:
     requests:
       storage: {{ .Values.cvmfs.main.pvc.storage }}
-  storageClassName: {{ template "galaxy.fullname" . }}-cvmfs-gxy-main
+  storageClassName: cvmfs-gxy-main
 {{- end }}

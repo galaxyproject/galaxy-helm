@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "galaxy.fullname" . }}-initdb
+  name: {{ .Release.Name }}-galaxy-initdb
   labels:
     app: {{ template "galaxy.name" . }}
     chart: {{ template "galaxy.chart" . }}

@@ -20,11 +20,9 @@ webHandlers:
 jobHandlers:
   replicaCount: 1
 
-# All mountPaths will be relative to /galaxy/server
+# All files will be relative to `/galaxy/server/config/` directory
 configs:
-  jobConf:
-    mountPath: config/job_conf.xml
-    contents: |
+  job_conf.xml: |
       <job_conf>
           <plugins>
               <plugin id="local" type="runner" load="galaxy.jobs.runners.local:LocalJobRunner" workers="4"/>
@@ -34,9 +32,7 @@ configs:
               <destination id="local" runner="local"/>
           </destinations>
       </job_conf>
-  galaxyYaml:
-    mountPath: config/galaxy.yml
-    contents:
+  galaxy.yml:
       uwsgi:
         virtualenv: /galaxy/server/.venv
         processes: 1

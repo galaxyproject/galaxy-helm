@@ -9,8 +9,8 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 data:
   {{- range $key, $entry := .Values.configs -}}
-  {{- if $entry.contents -}}
+  {{- if $entry -}}
   {{- $key | nindent 2 }}: |
-    {{- tpl ($entry.contents | toYaml | replace "{{\n" "{{" | replace "\n    }}" " }}" | replace "|" "") $ | nindent 4 -}}
+    {{- tpl ($entry | toYaml | replace "{{\n" "{{" | replace "\n    }}" " }}" | replace "|" "") $ | nindent 4 -}}
     {{- end }}
   {{- end }}

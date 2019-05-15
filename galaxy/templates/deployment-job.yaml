@@ -45,7 +45,7 @@ spec:
           volumeMounts:
             {{- range $key,$entry := .Values.configs }}
             - name: galaxy-conf-files
-              mountPath: /galaxy/server/{{ $entry.mountPath }}
+              mountPath: /galaxy/server/config/{{ $key }}
               subPath: {{ $key }}
             {{- end }}
             - name: galaxy-data

@@ -7,6 +7,6 @@
 ## and the requirements.lock file committed.
 dependencies:
     - name: postgresql
-      repository: https://raw.githubusercontent.com/CloudVE/helm-charts/master
-      version: 4.0.0
+      repository: https://kubernetes-charts.storage.googleapis.com/
+      version: 4.2.0
       condition: postgresql.enabled

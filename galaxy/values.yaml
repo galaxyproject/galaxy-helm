@@ -11,7 +11,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 service:
-  type: NodePort
+  type: LoadBalancer
   port: 8090
 
 webHandlers:
@@ -32,12 +32,14 @@ configs:
               <destination id="local" runner="local"/>
           </destinations>
       </job_conf>
-  galaxy.yml:
+  galaxy.yml: |
       uwsgi:
         virtualenv: /galaxy/server/.venv
         processes: 1
         http: 0.0.0.0:8080
         static-map: /static/style=/galaxy/server/static/style/blue
+        static-map: /static=/galaxy/server/static
+        static-map: /favicon.ico=/galaxy/server/static/favicon.ico
         pythonpath: /galaxy/server/lib
         thunder-lock: true
         module: galaxy.webapps.galaxy.buildapp:uwsgi_app()

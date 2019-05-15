@@ -1,13 +1,13 @@
 {{ if .Values.persistence.pv.enabled }}
-kind: PersistentVolume
 apiVersion: v1
+kind: PersistentVolume
 metadata:
   name: {{ .Values.persistence.pv.name }}
   labels:
-    app: {{ template "galaxy.name" . }}
-    chart: {{ template "galaxy.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ include "galaxy.name" . }}
+    helm.sh/chart: {{ include "galaxy.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
   storageClassName: "{{ .Values.persistence.storageClass }}"
   capacity:
@@ -22,15 +22,15 @@ spec:
 ---
 
 {{ if and .Values.persistence.enabled -}}
-kind: PersistentVolumeClaim
 apiVersion: v1
+kind: PersistentVolumeClaim
 metadata:
   name: {{ .Values.persistence.name }}
   labels:
-    app: {{ template "galaxy.name" . }}
-    chart: {{ template "galaxy.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ include "galaxy.name" . }}
+    helm.sh/chart: {{ include "galaxy.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- if .Values.persistence.annotations }}
   annotations:
 {{ toYaml .Values.persistence.annotations | indent 4 }}

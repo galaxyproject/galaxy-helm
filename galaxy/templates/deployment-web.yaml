@@ -45,13 +45,13 @@ spec:
           readinessProbe:
             httpGet:
               path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}
-              port: 80
+              port: 8080
             initialDelaySeconds: 30
             periodSeconds: 6
           livenessProbe:
             httpGet:
               path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}
-              port: 80
+              port: 8080
             initialDelaySeconds: 60
             periodSeconds: 60
             failureThreshold: 10

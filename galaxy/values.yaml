@@ -42,7 +42,8 @@ configs:
         static-map: /favicon.ico=/galaxy/server/static/favicon.ico
         pythonpath: /galaxy/server/lib
         thunder-lock: true
-        module: galaxy.webapps.galaxy.buildapp:uwsgi_app()
+        manage-script-name: true
+        mount: {{.Values.ingress.path}}=galaxy.webapps.galaxy.buildapp:uwsgi_app()
         buffer-size: 16384
         offload-threads: 2
         threads: 4
@@ -75,7 +76,7 @@ ingress:
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-  path: /
+  path: /galaxy
   hosts:
     - ~
     # - host: ~

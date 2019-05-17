@@ -1,9 +1,3 @@
-#!/bin/bash
-
-set -e
-
-psql -v ON_ERROR_STOP=1 --username "$POSTGRESQL_USERNAME" galaxy <<-EOSQL
-
 --
 -- PostgreSQL database dump
 --
@@ -483,8 +477,7 @@ CREATE TABLE public.cloudauthz (
     tokens bytea,
     last_update timestamp without time zone,
     last_activity timestamp without time zone,
-    description text,
-    create_time timestamp without time zone
+    description text
 );
 
 
@@ -510,47 +503,6 @@ ALTER TABLE public.cloudauthz_id_seq OWNER TO galaxydbuser;
 --
 
 ALTER SEQUENCE public.cloudauthz_id_seq OWNED BY public.cloudauthz.id;
-
-
---
--- Name: custos_authnz_token; Type: TABLE; Schema: public; Owner: galaxydbuser
---
-
-CREATE TABLE public.custos_authnz_token (
-    id integer NOT NULL,
-    user_id integer,
-    external_user_id character varying(64),
-    provider character varying(255),
-    access_token text,
-    id_token text,
-    refresh_token text,
-    expiration_time timestamp without time zone,
-    refresh_expiration_time timestamp without time zone
-);
-
-
-ALTER TABLE public.custos_authnz_token OWNER TO galaxydbuser;
-
---
--- Name: custos_authnz_token_id_seq; Type: SEQUENCE; Schema: public; Owner: galaxydbuser
---
-
-CREATE SEQUENCE public.custos_authnz_token_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.custos_authnz_token_id_seq OWNER TO galaxydbuser;
-
---
--- Name: custos_authnz_token_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: galaxydbuser
---
-
-ALTER SEQUENCE public.custos_authnz_token_id_seq OWNED BY public.custos_authnz_token.id;
 
 
 --
@@ -729,43 +681,6 @@ ALTER SEQUENCE public.dataset_collection_id_seq OWNED BY public.dataset_collecti
 
 
 --
--- Name: dataset_hash; Type: TABLE; Schema: public; Owner: galaxydbuser
---
-
-CREATE TABLE public.dataset_hash (
-    id integer NOT NULL,
-    dataset_id integer,
-    hash_function text,
-    hash_value text,
-    extra_files_path text
-);
-
-
-ALTER TABLE public.dataset_hash OWNER TO galaxydbuser;
-
---
--- Name: dataset_hash_id_seq; Type: SEQUENCE; Schema: public; Owner: galaxydbuser
---
-
-CREATE SEQUENCE public.dataset_hash_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.dataset_hash_id_seq OWNER TO galaxydbuser;
-
---
--- Name: dataset_hash_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: galaxydbuser
---
-
-ALTER SEQUENCE public.dataset_hash_id_seq OWNED BY public.dataset_hash.id;
-
-
---
 -- Name: dataset_id_seq; Type: SEQUENCE; Schema: public; Owner: galaxydbuser
 --
 
@@ -823,79 +738,6 @@ ALTER TABLE public.dataset_permissions_id_seq OWNER TO galaxydbuser;
 --
 
 ALTER SEQUENCE public.dataset_permissions_id_seq OWNED BY public.dataset_permissions.id;
-
-
---
--- Name: dataset_source; Type: TABLE; Schema: public; Owner: galaxydbuser
---
-
-CREATE TABLE public.dataset_source (
-    id integer NOT NULL,
-    dataset_id integer,
-    source_uri text,
-    extra_files_path text,
-    transform bytea
-);
-
-
-ALTER TABLE public.dataset_source OWNER TO galaxydbuser;
-
---
--- Name: dataset_source_hash; Type: TABLE; Schema: public; Owner: galaxydbuser
---
-
-CREATE TABLE public.dataset_source_hash (
-    id integer NOT NULL,
-    dataset_source_id integer,
-    hash_function text,
-    hash_value text
-);
-
-
-ALTER TABLE public.dataset_source_hash OWNER TO galaxydbuser;
-
---
--- Name: dataset_source_hash_id_seq; Type: SEQUENCE; Schema: public; Owner: galaxydbuser
---
-
-CREATE SEQUENCE public.dataset_source_hash_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.dataset_source_hash_id_seq OWNER TO galaxydbuser;
-
---
--- Name: dataset_source_hash_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: galaxydbuser
---
-
-ALTER SEQUENCE public.dataset_source_hash_id_seq OWNED BY public.dataset_source_hash.id;
-
-
---
--- Name: dataset_source_id_seq; Type: SEQUENCE; Schema: public; Owner: galaxydbuser
---
-
-CREATE SEQUENCE public.dataset_source_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.dataset_source_id_seq OWNER TO galaxydbuser;
-
---
--- Name: dataset_source_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: galaxydbuser
---
-
-ALTER SEQUENCE public.dataset_source_id_seq OWNED BY public.dataset_source.id;
 
 
 --
@@ -1081,50 +923,6 @@ ALTER TABLE public.deferred_job_id_seq OWNER TO galaxydbuser;
 --
 
 ALTER SEQUENCE public.deferred_job_id_seq OWNED BY public.deferred_job.id;
-
-
---
--- Name: dynamic_tool; Type: TABLE; Schema: public; Owner: galaxydbuser
---
-
-CREATE TABLE public.dynamic_tool (
-    id integer NOT NULL,
-    uuid character(32),
-    create_time timestamp without time zone,
-    update_time timestamp without time zone,
-    tool_id character varying(255),
-    tool_version character varying(255),
-    tool_format character varying(255),
-    tool_path character varying(255),
-    tool_directory character varying(255),
-    hidden boolean,
-    active boolean,
-    value bytea
-);
-
-
-ALTER TABLE public.dynamic_tool OWNER TO galaxydbuser;
-
---
--- Name: dynamic_tool_id_seq; Type: SEQUENCE; Schema: public; Owner: galaxydbuser
---
-
-CREATE SEQUENCE public.dynamic_tool_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.dynamic_tool_id_seq OWNER TO galaxydbuser;
-
---
--- Name: dynamic_tool_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: galaxydbuser
---
-
-ALTER SEQUENCE public.dynamic_tool_id_seq OWNED BY public.dynamic_tool.id;
 
 
 --
@@ -2503,8 +2301,8 @@ CREATE TABLE public.job (
     command_line text,
     param_filename character varying(1024),
     runner_name character varying(255),
-    tool_stdout text,
-    tool_stderr text,
+    stdout text,
+    stderr text,
     traceback text,
     session_id integer,
     job_runner_name character varying(255),
@@ -2519,11 +2317,7 @@ CREATE TABLE public.job (
     destination_id character varying(255),
     destination_params bytea,
     dependencies bytea,
-    copied_from_job_id integer,
-    job_messages bytea,
-    job_stdout text,
-    job_stderr text,
-    dynamic_tool_id integer
+    copied_from_job_id integer
 );
 
 
@@ -3758,8 +3552,7 @@ CREATE TABLE public.metadata_file (
     deleted boolean,
     purged boolean,
     lda_id integer,
-    object_store_id character varying(255),
-    uuid character(32)
+    object_store_id character varying(255)
 );
 
 
@@ -5215,8 +5008,8 @@ CREATE TABLE public.task (
     command_line text,
     param_filename character varying(1024),
     runner_name character varying(255),
-    tool_stdout text,
-    tool_stderr text,
+    stdout text,
+    stderr text,
     traceback text,
     job_id integer NOT NULL,
     task_runner_name character varying(255),
@@ -5224,10 +5017,7 @@ CREATE TABLE public.task (
     prepare_input_files_cmd text,
     working_directory character varying(1024),
     info character varying(255),
-    exit_code integer,
-    job_messages bytea,
-    job_stdout text,
-    job_stderr text
+    exit_code integer
 );
 
 
@@ -6072,42 +5862,6 @@ ALTER SEQUENCE public.visualization_user_share_association_id_seq OWNED BY publi
 
 
 --
--- Name: worker_process; Type: TABLE; Schema: public; Owner: galaxydbuser
---
-
-CREATE TABLE public.worker_process (
-    id integer NOT NULL,
-    server_name character varying(255),
-    hostname character varying(255),
-    update_time timestamp without time zone
-);
-
-
-ALTER TABLE public.worker_process OWNER TO galaxydbuser;
-
---
--- Name: worker_process_id_seq; Type: SEQUENCE; Schema: public; Owner: galaxydbuser
---
-
-CREATE SEQUENCE public.worker_process_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.worker_process_id_seq OWNER TO galaxydbuser;
-
---
--- Name: worker_process_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: galaxydbuser
---
-
-ALTER SEQUENCE public.worker_process_id_seq OWNED BY public.worker_process.id;
-
-
---
 -- Name: workflow; Type: TABLE; Schema: public; Owner: galaxydbuser
 --
 
@@ -6652,8 +6406,7 @@ CREATE TABLE public.workflow_step (
     order_index integer,
     label character varying(255),
     uuid character(32),
-    subworkflow_id integer,
-    dynamic_tool_id integer
+    subworkflow_id integer
 );
 
 
@@ -6966,13 +6719,6 @@ ALTER TABLE ONLY public.cloudauthz ALTER COLUMN id SET DEFAULT nextval('public.c
 
 
 --
--- Name: custos_authnz_token id; Type: DEFAULT; Schema: public; Owner: galaxydbuser
---
-
-ALTER TABLE ONLY public.custos_authnz_token ALTER COLUMN id SET DEFAULT nextval('public.custos_authnz_token_id_seq'::regclass);
-
-
---
 -- Name: data_manager_history_association id; Type: DEFAULT; Schema: public; Owner: galaxydbuser
 --
 
@@ -7008,31 +6754,10 @@ ALTER TABLE ONLY public.dataset_collection_element ALTER COLUMN id SET DEFAULT n
 
 
 --
--- Name: dataset_hash id; Type: DEFAULT; Schema: public; Owner: galaxydbuser
---
-
-ALTER TABLE ONLY public.dataset_hash ALTER COLUMN id SET DEFAULT nextval('public.dataset_hash_id_seq'::regclass);
-
-
---
 -- Name: dataset_permissions id; Type: DEFAULT; Schema: public; Owner: galaxydbuser
 --
 
 ALTER TABLE ONLY public.dataset_permissions ALTER COLUMN id SET DEFAULT nextval('public.dataset_permissions_id_seq'::regclass);
-
-
---
--- Name: dataset_source id; Type: DEFAULT; Schema: public; Owner: galaxydbuser
---
-
-ALTER TABLE ONLY public.dataset_source ALTER COLUMN id SET DEFAULT nextval('public.dataset_source_id_seq'::regclass);
-
-
---
--- Name: dataset_source_hash id; Type: DEFAULT; Schema: public; Owner: galaxydbuser
---
-
-ALTER TABLE ONLY public.dataset_source_hash ALTER COLUMN id SET DEFAULT nextval('public.dataset_source_hash_id_seq'::regclass);
 
 
 --
@@ -7068,13 +6793,6 @@ ALTER TABLE ONLY public.default_user_permissions ALTER COLUMN id SET DEFAULT nex
 --
 
 ALTER TABLE ONLY public.deferred_job ALTER COLUMN id SET DEFAULT nextval('public.deferred_job_id_seq'::regclass);
-
-
---
--- Name: dynamic_tool id; Type: DEFAULT; Schema: public; Owner: galaxydbuser
---
-
-ALTER TABLE ONLY public.dynamic_tool ALTER COLUMN id SET DEFAULT nextval('public.dynamic_tool_id_seq'::regclass);
 
 
 --
@@ -7953,13 +7671,6 @@ ALTER TABLE ONLY public.visualization_user_share_association ALTER COLUMN id SET
 
 
 --
--- Name: worker_process id; Type: DEFAULT; Schema: public; Owner: galaxydbuser
---
-
-ALTER TABLE ONLY public.worker_process ALTER COLUMN id SET DEFAULT nextval('public.worker_process_id_seq'::regclass);
-
-
---
 -- Name: workflow id; Type: DEFAULT; Schema: public; Owner: galaxydbuser
 --
 
@@ -8199,15 +7910,7 @@ COPY public.cleanup_event_user_association (id, create_time, cleanup_event_id, u
 -- Data for Name: cloudauthz; Type: TABLE DATA; Schema: public; Owner: galaxydbuser
 --
 
-COPY public.cloudauthz (id, user_id, provider, config, authn_id, tokens, last_update, last_activity, description, create_time) FROM stdin;
-\.
-
-
---
--- Data for Name: custos_authnz_token; Type: TABLE DATA; Schema: public; Owner: galaxydbuser
---
-
-COPY public.custos_authnz_token (id, user_id, external_user_id, provider, access_token, id_token, refresh_token, expiration_time, refresh_expiration_time) FROM stdin;
+COPY public.cloudauthz (id, user_id, provider, config, authn_id, tokens, last_update, last_activity, description) FROM stdin;
 \.
 
 
@@ -8252,34 +7955,10 @@ COPY public.dataset_collection_element (id, dataset_collection_id, hda_id, ldda_
 
 
 --
--- Data for Name: dataset_hash; Type: TABLE DATA; Schema: public; Owner: galaxydbuser
---
-
-COPY public.dataset_hash (id, dataset_id, hash_function, hash_value, extra_files_path) FROM stdin;
-\.
-
-
---
 -- Data for Name: dataset_permissions; Type: TABLE DATA; Schema: public; Owner: galaxydbuser
 --
 
 COPY public.dataset_permissions (id, create_time, update_time, action, dataset_id, role_id) FROM stdin;
-\.
-
-
---
--- Data for Name: dataset_source; Type: TABLE DATA; Schema: public; Owner: galaxydbuser
---
-
-COPY public.dataset_source (id, dataset_id, source_uri, extra_files_path, transform) FROM stdin;
-\.
-
-
---
--- Data for Name: dataset_source_hash; Type: TABLE DATA; Schema: public; Owner: galaxydbuser
---
-
-COPY public.dataset_source_hash (id, dataset_source_id, hash_function, hash_value) FROM stdin;
 \.
 
 
@@ -8320,14 +7999,6 @@ COPY public.default_user_permissions (id, user_id, action, role_id) FROM stdin;
 --
 
 COPY public.deferred_job (id, create_time, update_time, state, plugin, params) FROM stdin;
-\.
-
-
---
--- Data for Name: dynamic_tool; Type: TABLE DATA; Schema: public; Owner: galaxydbuser
---
-
-COPY public.dynamic_tool (id, uuid, create_time, update_time, tool_id, tool_version, tool_format, tool_path, tool_directory, hidden, active, value) FROM stdin;
 \.
 
 
@@ -8400,7 +8071,7 @@ COPY public.galaxy_group (id, create_time, update_time, name, deleted) FROM stdi
 --
 
 COPY public.galaxy_session (id, create_time, update_time, user_id, remote_host, remote_addr, referer, current_history_id, session_key, is_valid, prev_session_id, disk_usage, last_action) FROM stdin;
-1	2019-05-16 22:32:51.140631	2019-05-16 22:32:52.030694	\N	172.20.0.1	172.20.0.1	\N	1	ff5dc3ff04425068ac567db5cfe5d45e	t	\N	\N	2019-05-16 22:32:51.135358
+1	2019-05-16 22:04:08.525684	2019-05-16 22:04:11.262633	\N	172.20.0.1	172.20.0.1	\N	1	9ab67458a3134373eab7cec78750e55e	t	\N	\N	2019-05-16 22:04:08.521877
 \.
 
 
@@ -8409,7 +8080,7 @@ COPY public.galaxy_session (id, create_time, update_time, user_id, remote_host, 
 --
 
 COPY public.galaxy_session_to_history (id, create_time, session_id, history_id) FROM stdin;
-1	2019-05-16 22:32:52.032429	1	1
+1	2019-05-16 22:04:11.26483	1	1
 \.
 
 
@@ -8458,7 +8129,7 @@ COPY public.group_role_association (id, group_id, role_id, create_time, update_t
 --
 
 COPY public.history (id, create_time, update_time, user_id, name, hid_counter, deleted, purged, genome_build, importable, slug, published, importing) FROM stdin;
-1	2019-05-16 22:32:52.025253	2019-05-16 22:32:52.025262	\N	Unnamed history	1	f	f	?	f	\N	f	f
+1	2019-05-16 22:04:11.259148	2019-05-16 22:04:11.259157	\N	Unnamed history	1	f	f	?	f	\N	f	f
 \.
 
 
@@ -8618,7 +8289,7 @@ COPY public.implicitly_created_dataset_collection_inputs (id, dataset_collection
 -- Data for Name: job; Type: TABLE DATA; Schema: public; Owner: galaxydbuser
 --
 
-COPY public.job (id, create_time, update_time, history_id, tool_id, tool_version, state, info, command_line, param_filename, runner_name, tool_stdout, tool_stderr, traceback, session_id, job_runner_name, job_runner_external_id, library_folder_id, user_id, imported, object_store_id, params, handler, exit_code, destination_id, destination_params, dependencies, copied_from_job_id, job_messages, job_stdout, job_stderr, dynamic_tool_id) FROM stdin;
+COPY public.job (id, create_time, update_time, history_id, tool_id, tool_version, state, info, command_line, param_filename, runner_name, stdout, stderr, traceback, session_id, job_runner_name, job_runner_external_id, library_folder_id, user_id, imported, object_store_id, params, handler, exit_code, destination_id, destination_params, dependencies, copied_from_job_id) FROM stdin;
 \.
 
 
@@ -8747,7 +8418,7 @@ COPY public.kombu_message (id, visible, "timestamp", payload, version, queue_id)
 --
 
 COPY public.kombu_queue (id, name) FROM stdin;
-1	control.main.web.1@5fe1b3a16716
+1	control.main.web.1
 \.
 
 
@@ -8883,7 +8554,7 @@ COPY public.library_permissions (id, create_time, update_time, action, library_i
 -- Data for Name: metadata_file; Type: TABLE DATA; Schema: public; Owner: galaxydbuser
 --
 
-COPY public.metadata_file (id, name, hda_id, create_time, update_time, deleted, purged, lda_id, object_store_id, uuid) FROM stdin;
+COPY public.metadata_file (id, name, hda_id, create_time, update_time, deleted, purged, lda_id, object_store_id) FROM stdin;
 \.
 
 
@@ -8901,7 +8572,7 @@ GalaxyTools	lib/tool_shed/galaxy_install/migrate	1
 --
 
 COPY public.migrate_version (repository_id, repository_path, version) FROM stdin;
-Galaxy	lib/galaxy/model/migrate	153
+Galaxy	lib/galaxy/model/migrate	146
 \.
 
 
@@ -9205,7 +8876,7 @@ COPY public.tag (id, type, parent_id, name) FROM stdin;
 -- Data for Name: task; Type: TABLE DATA; Schema: public; Owner: galaxydbuser
 --
 
-COPY public.task (id, create_time, execution_time, update_time, state, command_line, param_filename, runner_name, tool_stdout, tool_stderr, traceback, job_id, task_runner_name, task_runner_external_id, prepare_input_files_cmd, working_directory, info, exit_code, job_messages, job_stdout, job_stderr) FROM stdin;
+COPY public.task (id, create_time, execution_time, update_time, state, command_line, param_filename, runner_name, stdout, stderr, traceback, job_id, task_runner_name, task_runner_external_id, prepare_input_files_cmd, working_directory, info, exit_code) FROM stdin;
 \.
 
 
@@ -9378,15 +9049,6 @@ COPY public.visualization_user_share_association (id, visualization_id, user_id)
 
 
 --
--- Data for Name: worker_process; Type: TABLE DATA; Schema: public; Owner: galaxydbuser
---
-
-COPY public.worker_process (id, server_name, hostname, update_time) FROM stdin;
-1	main.web.1	5fe1b3a16716	2019-05-16 22:32:39.857394
-\.
-
-
---
 -- Data for Name: workflow; Type: TABLE DATA; Schema: public; Owner: galaxydbuser
 --
 
@@ -9502,7 +9164,7 @@ COPY public.workflow_request_to_input_dataset (id, name, workflow_invocation_id,
 -- Data for Name: workflow_step; Type: TABLE DATA; Schema: public; Owner: galaxydbuser
 --
 
-COPY public.workflow_step (id, create_time, update_time, workflow_id, type, tool_id, tool_version, tool_inputs, tool_errors, "position", config, order_index, label, uuid, subworkflow_id, dynamic_tool_id) FROM stdin;
+COPY public.workflow_step (id, create_time, update_time, workflow_id, type, tool_id, tool_version, tool_inputs, tool_errors, "position", config, order_index, label, uuid, subworkflow_id) FROM stdin;
 \.
 
 
@@ -9638,13 +9300,6 @@ SELECT pg_catalog.setval('public.cloudauthz_id_seq', 1, false);
 
 
 --
--- Name: custos_authnz_token_id_seq; Type: SEQUENCE SET; Schema: public; Owner: galaxydbuser
---
-
-SELECT pg_catalog.setval('public.custos_authnz_token_id_seq', 1, false);
-
-
---
 -- Name: data_manager_history_association_id_seq; Type: SEQUENCE SET; Schema: public; Owner: galaxydbuser
 --
 
@@ -9673,13 +9328,6 @@ SELECT pg_catalog.setval('public.dataset_collection_id_seq', 1, false);
 
 
 --
--- Name: dataset_hash_id_seq; Type: SEQUENCE SET; Schema: public; Owner: galaxydbuser
---
-
-SELECT pg_catalog.setval('public.dataset_hash_id_seq', 1, false);
-
-
---
 -- Name: dataset_id_seq; Type: SEQUENCE SET; Schema: public; Owner: galaxydbuser
 --
 
@@ -9691,20 +9339,6 @@ SELECT pg_catalog.setval('public.dataset_id_seq', 1, false);
 --
 
 SELECT pg_catalog.setval('public.dataset_permissions_id_seq', 1, false);
-
-
---
--- Name: dataset_source_hash_id_seq; Type: SEQUENCE SET; Schema: public; Owner: galaxydbuser
---
-
-SELECT pg_catalog.setval('public.dataset_source_hash_id_seq', 1, false);
-
-
---
--- Name: dataset_source_id_seq; Type: SEQUENCE SET; Schema: public; Owner: galaxydbuser
---
-
-SELECT pg_catalog.setval('public.dataset_source_id_seq', 1, false);
 
 
 --
@@ -9740,13 +9374,6 @@ SELECT pg_catalog.setval('public.default_user_permissions_id_seq', 1, false);
 --
 
 SELECT pg_catalog.setval('public.deferred_job_id_seq', 1, false);
-
-
---
--- Name: dynamic_tool_id_seq; Type: SEQUENCE SET; Schema: public; Owner: galaxydbuser
---
-
-SELECT pg_catalog.setval('public.dynamic_tool_id_seq', 1, false);
 
 
 --
@@ -10639,13 +10266,6 @@ SELECT pg_catalog.setval('public.visualization_user_share_association_id_seq', 1
 
 
 --
--- Name: worker_process_id_seq; Type: SEQUENCE SET; Schema: public; Owner: galaxydbuser
---
-
-SELECT pg_catalog.setval('public.worker_process_id_seq', 1, true);
-
-
---
 -- Name: workflow_id_seq; Type: SEQUENCE SET; Schema: public; Owner: galaxydbuser
 --
 
@@ -10890,30 +10510,6 @@ ALTER TABLE ONLY public.cloudauthz
 
 
 --
--- Name: custos_authnz_token custos_authnz_token_external_user_id_provider_key; Type: CONSTRAINT; Schema: public; Owner: galaxydbuser
---
-
-ALTER TABLE ONLY public.custos_authnz_token
-    ADD CONSTRAINT custos_authnz_token_external_user_id_provider_key UNIQUE (external_user_id, provider);
-
-
---
--- Name: custos_authnz_token custos_authnz_token_pkey; Type: CONSTRAINT; Schema: public; Owner: galaxydbuser
---
-
-ALTER TABLE ONLY public.custos_authnz_token
-    ADD CONSTRAINT custos_authnz_token_pkey PRIMARY KEY (id);
-
-
---
--- Name: custos_authnz_token custos_authnz_token_user_id_external_user_id_provider_key; Type: CONSTRAINT; Schema: public; Owner: galaxydbuser
---
-
-ALTER TABLE ONLY public.custos_authnz_token
-    ADD CONSTRAINT custos_authnz_token_user_id_external_user_id_provider_key UNIQUE (user_id, external_user_id, provider);
-
-
---
 -- Name: data_manager_history_association data_manager_history_association_pkey; Type: CONSTRAINT; Schema: public; Owner: galaxydbuser
 --
 
@@ -10946,14 +10542,6 @@ ALTER TABLE ONLY public.dataset_collection
 
 
 --
--- Name: dataset_hash dataset_hash_pkey; Type: CONSTRAINT; Schema: public; Owner: galaxydbuser
---
-
-ALTER TABLE ONLY public.dataset_hash
-    ADD CONSTRAINT dataset_hash_pkey PRIMARY KEY (id);
-
-
---
 -- Name: dataset_permissions dataset_permissions_pkey; Type: CONSTRAINT; Schema: public; Owner: galaxydbuser
 --
 
@@ -10967,22 +10555,6 @@ ALTER TABLE ONLY public.dataset_permissions
 
 ALTER TABLE ONLY public.dataset
     ADD CONSTRAINT dataset_pkey PRIMARY KEY (id);
-
-
---
--- Name: dataset_source_hash dataset_source_hash_pkey; Type: CONSTRAINT; Schema: public; Owner: galaxydbuser
---
-
-ALTER TABLE ONLY public.dataset_source_hash
-    ADD CONSTRAINT dataset_source_hash_pkey PRIMARY KEY (id);
-
-
---
--- Name: dataset_source dataset_source_pkey; Type: CONSTRAINT; Schema: public; Owner: galaxydbuser
---
-
-ALTER TABLE ONLY public.dataset_source
-    ADD CONSTRAINT dataset_source_pkey PRIMARY KEY (id);
 
 
 --
@@ -11023,14 +10595,6 @@ ALTER TABLE ONLY public.default_user_permissions
 
 ALTER TABLE ONLY public.deferred_job
     ADD CONSTRAINT deferred_job_pkey PRIMARY KEY (id);
-
-
---
--- Name: dynamic_tool dynamic_tool_pkey; Type: CONSTRAINT; Schema: public; Owner: galaxydbuser
---
-
-ALTER TABLE ONLY public.dynamic_tool
-    ADD CONSTRAINT dynamic_tool_pkey PRIMARY KEY (id);
 
 
 --
@@ -12082,22 +11646,6 @@ ALTER TABLE ONLY public.visualization_user_share_association
 
 
 --
--- Name: worker_process worker_process_pkey; Type: CONSTRAINT; Schema: public; Owner: galaxydbuser
---
-
-ALTER TABLE ONLY public.worker_process
-    ADD CONSTRAINT worker_process_pkey PRIMARY KEY (id);
-
-
---
--- Name: worker_process worker_process_server_name_hostname_key; Type: CONSTRAINT; Schema: public; Owner: galaxydbuser
---
-
-ALTER TABLE ONLY public.worker_process
-    ADD CONSTRAINT worker_process_server_name_hostname_key UNIQUE (server_name, hostname);
-
-
---
 -- Name: workflow_invocation_output_dataset_association workflow_invocation_output_dataset_association_pkey; Type: CONSTRAINT; Schema: public; Owner: galaxydbuser
 --
 
@@ -12518,13 +12066,6 @@ CREATE INDEX ix_dataset_deleted ON public.dataset USING btree (deleted);
 
 
 --
--- Name: ix_dataset_hash_dataset_id; Type: INDEX; Schema: public; Owner: galaxydbuser
---
-
-CREATE INDEX ix_dataset_hash_dataset_id ON public.dataset_hash USING btree (dataset_id);
-
-
---
 -- Name: ix_dataset_object_store_id; Type: INDEX; Schema: public; Owner: galaxydbuser
 --
 
@@ -12550,20 +12091,6 @@ CREATE INDEX ix_dataset_permissions_role_id ON public.dataset_permissions USING 
 --
 
 CREATE INDEX ix_dataset_purged ON public.dataset USING btree (purged);
-
-
---
--- Name: ix_dataset_source_dataset_id; Type: INDEX; Schema: public; Owner: galaxydbuser
---
-
-CREATE INDEX ix_dataset_source_dataset_id ON public.dataset_source USING btree (dataset_id);
-
-
---
--- Name: ix_dataset_source_hash_dataset_source_id; Type: INDEX; Schema: public; Owner: galaxydbuser
---
-
-CREATE INDEX ix_dataset_source_hash_dataset_source_id ON public.dataset_source_hash USING btree (dataset_source_id);
 
 
 --
@@ -13705,13 +13232,6 @@ CREATE INDEX ix_job_user_id ON public.job USING btree (user_id);
 --
 
 CREATE INDEX ix_kombu_message_timestamp ON public.kombu_message USING btree ("timestamp");
-
-
---
--- Name: ix_kombu_message_timestamp_id; Type: INDEX; Schema: public; Owner: galaxydbuser
---
-
-CREATE INDEX ix_kombu_message_timestamp_id ON public.kombu_message USING btree ("timestamp", id);
 
 
 --
@@ -15059,6 +14579,20 @@ CREATE INDEX ix_user_address_user_id ON public.user_address USING btree (user_id
 
 
 --
+-- Name: ix_user_deleted; Type: INDEX; Schema: public; Owner: galaxydbuser
+--
+
+CREATE INDEX ix_user_deleted ON public.galaxy_user USING btree (deleted);
+
+
+--
+-- Name: ix_user_form_values_id; Type: INDEX; Schema: public; Owner: galaxydbuser
+--
+
+CREATE INDEX ix_user_form_values_id ON public.galaxy_user USING btree (form_values_id);
+
+
+--
 -- Name: ix_user_group_association_group_id; Type: INDEX; Schema: public; Owner: galaxydbuser
 --
 
@@ -15087,6 +14621,13 @@ CREATE INDEX ix_user_preference_user_id ON public.user_preference USING btree (u
 
 
 --
+-- Name: ix_user_purged; Type: INDEX; Schema: public; Owner: galaxydbuser
+--
+
+CREATE INDEX ix_user_purged ON public.galaxy_user USING btree (purged);
+
+
+--
 -- Name: ix_user_quota_association_quota_id; Type: INDEX; Schema: public; Owner: galaxydbuser
 --
 
@@ -15112,6 +14653,13 @@ CREATE INDEX ix_user_role_association_role_id ON public.user_role_association US
 --
 
 CREATE INDEX ix_user_role_association_user_id ON public.user_role_association USING btree (user_id);
+
+
+--
+-- Name: ix_user_username; Type: INDEX; Schema: public; Owner: galaxydbuser
+--
+
+CREATE INDEX ix_user_username ON public.galaxy_user USING btree (username);
 
 
 --
@@ -15301,13 +14849,6 @@ CREATE INDEX ix_wfinv_swfinv_wfi ON public.workflow_invocation_to_subworkflow_in
 --
 
 CREATE INDEX ix_wfreq_inputstep_wfi ON public.workflow_request_input_step_parameter USING btree (workflow_invocation_id);
-
-
---
--- Name: ix_worker_process_server_name; Type: INDEX; Schema: public; Owner: galaxydbuser
---
-
-CREATE INDEX ix_worker_process_server_name ON public.worker_process USING btree (server_name);
 
 
 --
@@ -15769,14 +15310,6 @@ ALTER TABLE ONLY public.cloudauthz
 
 
 --
--- Name: custos_authnz_token custos_authnz_token_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: galaxydbuser
---
-
-ALTER TABLE ONLY public.custos_authnz_token
-    ADD CONSTRAINT custos_authnz_token_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.galaxy_user(id);
-
-
---
 -- Name: data_manager_history_association data_manager_history_association_history_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: galaxydbuser
 --
 
@@ -15833,14 +15366,6 @@ ALTER TABLE ONLY public.dataset_collection_element
 
 
 --
--- Name: dataset_hash dataset_hash_dataset_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: galaxydbuser
---
-
-ALTER TABLE ONLY public.dataset_hash
-    ADD CONSTRAINT dataset_hash_dataset_id_fkey FOREIGN KEY (dataset_id) REFERENCES public.dataset(id);
-
-
---
 -- Name: dataset_permissions dataset_permissions_dataset_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: galaxydbuser
 --
 
@@ -15854,22 +15379,6 @@ ALTER TABLE ONLY public.dataset_permissions
 
 ALTER TABLE ONLY public.dataset_permissions
     ADD CONSTRAINT dataset_permissions_role_id_fkey FOREIGN KEY (role_id) REFERENCES public.role(id);
-
-
---
--- Name: dataset_source dataset_source_dataset_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: galaxydbuser
---
-
-ALTER TABLE ONLY public.dataset_source
-    ADD CONSTRAINT dataset_source_dataset_id_fkey FOREIGN KEY (dataset_id) REFERENCES public.dataset(id);
-
-
---
--- Name: dataset_source_hash dataset_source_hash_dataset_source_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: galaxydbuser
---
-
-ALTER TABLE ONLY public.dataset_source_hash
-    ADD CONSTRAINT dataset_source_hash_dataset_source_id_fkey FOREIGN KEY (dataset_source_id) REFERENCES public.dataset_source(id);
 
 
 --
@@ -16550,14 +16059,6 @@ ALTER TABLE ONLY public.implicitly_created_dataset_collection_inputs
 
 ALTER TABLE ONLY public.implicitly_created_dataset_collection_inputs
     ADD CONSTRAINT implicitly_created_dataset_collectio_dataset_collection_id_fkey FOREIGN KEY (dataset_collection_id) REFERENCES public.history_dataset_collection_association(id);
-
-
---
--- Name: job job_dynamic_tool_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: galaxydbuser
---
-
-ALTER TABLE ONLY public.job
-    ADD CONSTRAINT job_dynamic_tool_id_fkey FOREIGN KEY (dynamic_tool_id) REFERENCES public.dynamic_tool(id);
 
 
 --
@@ -18153,14 +17654,6 @@ ALTER TABLE ONLY public.workflow_step_connection
 
 
 --
--- Name: workflow_step workflow_step_dynamic_tool_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: galaxydbuser
---
-
-ALTER TABLE ONLY public.workflow_step
-    ADD CONSTRAINT workflow_step_dynamic_tool_id_fkey FOREIGN KEY (dynamic_tool_id) REFERENCES public.dynamic_tool(id);
-
-
---
 -- Name: workflow_step_input workflow_step_input_workflow_step_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: galaxydbuser
 --
 
@@ -18244,4 +17737,3 @@ ALTER TABLE ONLY public.workflow_tag_association
 -- PostgreSQL database dump complete
 --
 
-EOSQL

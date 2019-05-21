@@ -1,1 +1,0 @@
-kubectl create configmap galaxy-initdb --from-file=configmaps/

@@ -67,9 +67,9 @@ persistence:
   accessMode: ReadWriteMany
   size: 10Gi
   pv:
-    name: galaxy-pv
+    name: "galaxy-pv"
     enabled: true
-    hostPath: "/tmp/k8s/volumes/galaxy/data"
+    hostPath: "/mnt/galaxy/data"
 
 ingress:
   enabled: true
@@ -110,6 +110,15 @@ postgresql:
   password: 42
   nameOverride: galaxy-postgres
   initdbScriptsConfigMap: "{{ .Release.Name }}-galaxy-initdb"
+  persistence:
+    existingClaim: "{{ .Release.Name }}-postgres-pv-claim"
+    storageClass: standard
+    accessMode: ReadWriteOnce
+    size: 10Gi
+    pv:
+      name: "postgres-pv"
+      enabled: true
+      hostPath: "/mnt/postgres/galaxy"
 
 cvmfs:
   enabled: true

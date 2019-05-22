@@ -64,7 +64,7 @@ spec:
             name: {{ template "galaxy.fullname" . }}-config-map
         - name: galaxy-data
           persistentVolumeClaim:
-            claimName: {{ .Values.persistence.name }}
+            claimName: {{ .Release.Name }}-{{ .Values.persistence.name }}
         {{- if .Values.cvmfs.enabled }}
         - name: cvmfs-gxy-main
           persistentVolumeClaim:

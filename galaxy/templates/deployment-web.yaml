@@ -19,6 +19,8 @@ spec:
         app.kubernetes.io/name: {{ include "galaxy.fullname" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
         component: galaxy-web-handler
+      annotations:
+        checksum/galaxy_conf: {{ include (print $.Template.BasePath "/configmap-galaxy-conf.yaml") . | sha256sum }}
     spec:
       securityContext:
         fsGroup: 101

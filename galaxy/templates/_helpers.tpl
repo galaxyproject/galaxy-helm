@@ -38,3 +38,14 @@ Expand the name of the chart.
 {{- define "galaxy-postgresql.fullname" -}}
 {{- printf "%s-%s" .Release.Name .Values.postgresql.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{/*
+Add a trailing slash to a given path, if missing
+*/}}
+{{- define "galaxy.add_trailing_slash" -}}
+{{- if hasSuffix "/" . -}}
+{{- printf "%s" . -}}
+{{- else -}}
+{{- printf "%s/" . -}}
+{{- end -}}
+{{- end -}}

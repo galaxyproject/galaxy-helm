@@ -11,7 +11,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 service:
-  type: ClusterIP
+  type: NodePort
   port: 8090
 
 webHandlers:
@@ -54,10 +54,11 @@ configs:
         py-call-osafterfork: true
       galaxy:
         database_connection: 'postgresql://{{.Values.postgresql.username}}:{{.Values.postgresql.password}}@{{ template "galaxy-postgresql.fullname" . }}/galaxy'
-        integrated_tool_panel_config: /galaxy/server/config/integrated_tool_panel.xml
+        integrated_tool_panel_config: "/galaxy/server/config/integrated_tool_panel.xml"
         tool_config_file: "{{ .Values.cvmfs.main.mountPath }}/config/tool_conf.xml,{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_conf.xml"
-        tool_data_table_config_path: "{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_data_table_conf.xml"
+        tool_data_table_config_path: "{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/managed/location/tool_data_table_conf.xml"
         tool_dependency_dir: "{{ .Values.cvmfs.main.mountPath }}/deps"
+        builds_file_path: "{{.Values.cvmfs.data.mountPath}}/managed/location/builds.txt"
 
 persistence:
   enabled: true
@@ -69,7 +70,7 @@ persistence:
   pv:
     name: "galaxy-pv"
     enabled: true
-    hostPath: "/mnt/galaxy/data"
+    hostPath: "/tmp/galaxy/data"
 
 ingress:
   enabled: true
@@ -118,7 +119,7 @@ postgresql:
     pv:
       name: "postgres-pv"
       enabled: true
-      hostPath: "/mnt/postgres/galaxy"
+      hostPath: "/tmp/postgres/galaxy"
 
 cvmfs:
   enabled: true

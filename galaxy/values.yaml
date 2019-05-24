@@ -54,7 +54,7 @@ configs:
         py-call-osafterfork: true
       galaxy:
         database_connection: 'postgresql://{{.Values.postgresql.username}}:{{.Values.postgresql.password}}@{{ template "galaxy-postgresql.fullname" . }}/galaxy'
-        integrated_tool_panel_config: "/galaxy/server/config/integrated_tool_panel.xml"
+        integrated_tool_panel_config: "/galaxy/server/database/integrated_tool_panel.xml"
         tool_config_file: "{{ .Values.cvmfs.main.mountPath }}/config/tool_conf.xml,{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_conf.xml"
         tool_data_table_config_path: "{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/managed/location/tool_data_table_conf.xml"
         tool_dependency_dir: "{{ .Values.cvmfs.main.mountPath }}/deps"

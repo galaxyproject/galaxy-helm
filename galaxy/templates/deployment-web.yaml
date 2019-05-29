@@ -28,10 +28,17 @@ spec:
         - name: {{ .Chart.Name }}-init-postgres
           image: alpine:3.7
           command: ['sh', '-c', 'until nc -z -w3 {{ template "galaxy-postgresql.fullname" $ }} 5432; do echo waiting for galaxy-postgres service; sleep 1; done;']
-        - name: {{ .Chart.Name }}-init-chown
+        - name: {{ .Chart.Name }}-init-mounts
           image: alpine:3.7
-          command: ['sh', '-c', 'chown -R 101:101 /galaxy/server/database && wget -O /galaxy/server/database/integrated_tool_panel.xml https://raw.githubusercontent.com/galaxyproject/usegalaxy-playbook/master/env/main/files/galaxy/var/integrated_tool_panel.xml']
+          command: ['sh', '-c', 'chown -R 101:101 /galaxy/server/database && cp /galaxy/server/config/integrated_tool_panel.xml /galaxy/server/config/editable/integrated_tool_panel.xml']
           volumeMounts:
+            {{- range $key,$entry := .Values.configs }}
+            - name: galaxy-conf-files
+              mountPath: /galaxy/server/config/{{ $key }}
+              subPath: {{ $key }}
+            {{- end }}
+            - name: editable-configs
+              mountPath: /galaxy/server/config/editable/
             - name: galaxy-data
               mountPath: /galaxy/server/database/
             {{- if .Values.cvmfs.enabled }}
@@ -54,6 +61,8 @@ spec:
               mountPath: /galaxy/server/config/{{ $key }}
               subPath: {{ $key }}
             {{- end }}
+            - name: editable-configs
+              mountPath: /galaxy/server/config/editable/
             - name: galaxy-data
               mountPath: /galaxy/server/database/
             {{- if .Values.cvmfs.enabled }}
@@ -85,6 +94,8 @@ spec:
           persistentVolumeClaim:
             claimName: {{ template "galaxy.fullname" . }}-cvmfs-gxy-data-pvc
         {{- end }}
+        - name: editable-configs
+          emptyDir: {}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

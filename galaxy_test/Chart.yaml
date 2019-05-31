@@ -1,5 +1,0 @@
-apiVersion: v1
-version: 3.0.0
-name: galaxy
-description: Chart for Galaxy, an open, web-based platform for accessible, reproducible, and transparent computational biomedical research.
-appVersion: "v19.1"

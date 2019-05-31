@@ -1,5 +1,0 @@
-apiVersion: v1
-version: 3.0.0
-name: galaxy test
-description: chart for galaxy
-appVersion: "v99"

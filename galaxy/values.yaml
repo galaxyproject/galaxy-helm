@@ -20,17 +20,31 @@ webHandlers:
 jobHandlers:
   replicaCount: 1
 
-# All files will be relative to `/galaxy/server/config/` directory
+# All config files will be relative to `/galaxy/server/config/` directory
 configs:
   job_conf.xml: |
       <job_conf>
           <plugins>
-              <plugin id="local" type="runner" load="galaxy.jobs.runners.local:LocalJobRunner" workers="4"/>
+              <plugin id="local" type="runner" load="galaxy.jobs.runners.local:LocalJobRunner" workers="4" />
+              <plugin id="k8s" type="runner" load="galaxy.jobs.runners.kubernetes:KubernetesJobRunner">
+                <param id="k8s_use_service_account">true</param>
+                <param id="k8s_persistent_volume_claims">
+                    {{ .Release.Name }}-{{ .Values.persistence.name }}:/galaxy/server/database/files,
+                    {{ .Release.Name }}-{{ .Values.persistence.name }}:/galaxy/server/database/job_working_directory
+                </param>
+              </plugin>
           </plugins>
           <handlers assign_with="db-skip-locked" />
-          <destinations>
-              <destination id="local" runner="local"/>
+          <destinations default="local_k8s">
+              <destination id="local" runner="local" />
+              <destination id="local_k8s" runner="k8s">
+                <param id="docker_enabled">true</param>
+              </destination>
           </destinations>
+          <tools>
+              <!-- Should not be needed in the long run. -->
+              <tool id="upload1" destination="local" />
+          </tools>
       </job_conf>
   integrated_tool_panel.xml: |
     <?xml version="1.0"?>
@@ -2184,6 +2198,7 @@ configs:
         py-call-osafterfork: true
       galaxy:
         database_connection: 'postgresql://{{.Values.postgresql.username}}:{{.Values.postgresql.password}}@{{ template "galaxy-postgresql.fullname" . }}/galaxy'
+        cleanup_job: onsuccess
         integrated_tool_panel_config: "/galaxy/server/config/editable/integrated_tool_panel.xml"
         tool_config_file: "{{ .Values.cvmfs.main.mountPath }}/config/tool_conf.xml,{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_conf.xml"
         tool_data_table_config_path: "{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/managed/location/tool_data_table_conf.xml"

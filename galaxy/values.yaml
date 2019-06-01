@@ -20,6 +20,9 @@ webHandlers:
 jobHandlers:
   replicaCount: 1
 
+rbac:
+  enabled: true
+
 persistence:
   enabled: true
   name: &pvcname galaxy-pvc
@@ -89,17 +92,25 @@ configs:
               <plugin id="local" type="runner" load="galaxy.jobs.runners.local:LocalJobRunner" workers="4" />
               <plugin id="k8s" type="runner" load="galaxy.jobs.runners.kubernetes:KubernetesJobRunner">
                 <param id="k8s_use_service_account">true</param>
-                <param id="k8s_persistent_volume_claims">
-                  {{ .Release.Name }}-{{ .Values.persistence.name }}:/galaxy/server/database/files,
-                  {{ .Release.Name }}-{{ .Values.persistence.name }}:/galaxy/server/database/job_working_directory
-                </param>
+                <param id="k8s_persistent_volume_claims">{{ .Release.Name }}-{{ .Values.persistence.name }}:/galaxy/server/database</param>
+                <param id="k8s_namespace">{{ .Release.Namespace }}</param>
+                <!-- Must be DNS friendly and less than 20 characters -->
+                <param id="k8s_galaxy_instance_id">{{ .Release.Namespace }}</param>
+                <param id="k8s_supplemental_group_id">101</param>
+                <param id="k8s_pull_policy">IfNotPresent</param>
               </plugin>
           </plugins>
           <handlers assign_with="db-skip-locked" />
           <destinations default="local_k8s">
               <destination id="local" runner="local"/>
               <destination id="local_k8s" runner="k8s">
+                <param id="enabled">true</param>
                 <param id="docker_enabled">true</param>
+                <param id="docker_sudo">False</param>
+                <!-- For a stock Galaxy instance and traditional job runner $defaults will expand out
+                     as: $galaxy_root:ro,$tool_directory:ro,$working_directory:rw,$default_file_path:rw -->
+                <param id="docker_volumes">$defaults</param>
+                <param id="docker_default_container_id">busybox:ubuntu-14.04</param>
               </destination>
           </destinations>
           <tools>
@@ -135,6 +146,12 @@ configs:
         tool_data_table_config_path: "{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/managed/location/tool_data_table_conf.xml"
         tool_dependency_dir: "{{ .Values.cvmfs.main.mountPath }}/deps"
         builds_file_path: "{{.Values.cvmfs.data.mountPath}}/managed/location/builds.txt"
+        containers_resolvers_config_file: "/galaxy/server/config/container_resolvers_conf.xml"
+  container_resolvers_conf.xml: |
+      <containers_resolvers>
+        <explicit />
+        <mulled />
+      </containers_resolvers>
   # This is the last entry in the file given its length
   integrated_tool_panel.xml: |
       <?xml version="1.0"?>

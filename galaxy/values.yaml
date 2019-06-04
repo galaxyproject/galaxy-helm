@@ -153,5 +153,7 @@ configs:
       <explicit />
       <mulled />
     </containers_resolvers>
+  # Although this is only one line, the multi-line entry allows us to avoid wrapping 
+  # the entire expression in quotes, which would need to be removed in the configmap
   integrated_tool_panel.xml: |
     {{- (.Files.Get "files/configs/integrated_tool_panel.xml") }}

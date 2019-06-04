@@ -96,6 +96,9 @@ configs:
                 <param id="k8s_namespace">{{ .Release.Namespace }}</param>
                 <!-- Must be DNS friendly and less than 20 characters -->
                 <param id="k8s_galaxy_instance_id">{{ .Release.Namespace }}</param>
+                <param id="k8s_run_as_user_id">101</param>
+                <param id="k8s_run_as_group_id">101</param>
+                <param id="k8s_fs_group_id">101</param>
                 <param id="k8s_supplemental_group_id">101</param>
                 <param id="k8s_pull_policy">IfNotPresent</param>
               </plugin>
@@ -140,7 +143,6 @@ configs:
         py-call-osafterfork: true
       galaxy:
         database_connection: 'postgresql://{{.Values.postgresql.username}}:{{.Values.postgresql.password}}@{{ template "galaxy-postgresql.fullname" . }}/galaxy'
-        cleanup_job: onsuccess
         integrated_tool_panel_config: "/galaxy/server/config/editable/integrated_tool_panel.xml"
         tool_config_file: "{{ .Values.cvmfs.main.mountPath }}/config/tool_conf.xml,{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_conf.xml"
         tool_data_table_config_path: "{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/managed/location/tool_data_table_conf.xml"

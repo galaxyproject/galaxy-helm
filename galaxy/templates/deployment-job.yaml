@@ -18,6 +18,8 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "galaxy.fullname" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        checksum/galaxy_conf: {{ include (print $.Template.BasePath "/configmap-galaxy-conf.yaml") . | sha256sum }}
     spec:
       securityContext:
         fsGroup: 101

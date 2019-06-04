@@ -11,6 +11,6 @@ data:
   {{- range $key, $entry := .Values.configs -}}
   {{- if $entry -}}
   {{- $key | nindent 2 }}: |
-    {{- tpl ($entry | toYaml | replace "{{\n" "{{" | replace "\n    }}" " }}" | replace "|" "") $ | nindent 4 -}}
+    {{- tpl ($entry | toYaml | replace "{{\n" "{{" | replace "\n    }}" " }}" | replace "|" "") $ | indent 4 -}}
     {{- end }}
   {{- end }}

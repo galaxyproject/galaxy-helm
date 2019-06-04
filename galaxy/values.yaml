@@ -101,6 +101,7 @@ configs:
                 <param id="k8s_fs_group_id">101</param>
                 <param id="k8s_supplemental_group_id">101</param>
                 <param id="k8s_pull_policy">IfNotPresent</param>
+                <param id="k8s_cleanup_job">always</param>
               </plugin>
           </plugins>
           <handlers assign_with="db-skip-locked" />

@@ -1,0 +1,219 @@
+<?xml version="1.0"?>
+<toolbox>
+    <!--
+    This is Galaxy's integrated tool panel and should be modified directly only for
+    reordering tools inside a section. Each time Galaxy starts up, this file is
+    synchronized with the various tool config files: tools, sections and labels
+    added to one of these files, will be added also here in the appropriate place,
+    while elements removed from the tool config files will be correspondingly
+    deleted from this file.
+    To modify locally managed tools (e.g. from tool_conf.xml) modify that file
+    directly and restart Galaxy. Whenever possible Tool Shed managed tools (e.g.
+    from shed_tool_conf.xml) should be managed from within the Galaxy interface or
+    via its API - but if changes are necessary (such as to hide a tool or re-assign
+    its section) modify that file and restart Galaxy.
+    -->
+    <section id="getext" name="Get Data" version="">
+    </section>
+    <section id="send" name="Send Data" version="">
+    </section>
+    <section id="liftOver" name="Lift-Over" version="">
+    </section>
+    <section id="collection_operations" name="Collection Operations" version="">
+    </section>
+    <section id="textutil" name="Text Manipulation" version="">
+    </section>
+    <section id="datamash" name="Datamash" version="">
+    </section>
+    <section id="convert" name="Convert Formats" version="">
+    </section>
+    <section id="filter" name="Filter and Sort" version="">
+    </section>
+    <section id="group" name="Join, Subtract and Group" version="">
+    </section>
+    <section id="fetchAlignSeq" name="Fetch Alignments/Sequences" version="">
+    </section>
+    <section id="cshl_library_information" name="NGS: QC and manipulation" version="">
+    </section>
+    <section id="ngs:_deeptools" name="NGS: DeepTools" version="">
+    </section>
+    <section id="ngs_mapping" name="NGS: Mapping" version="">
+    </section>
+    <section id="sam_bam" name="SAM/BAM" version="">
+    </section>
+    <section id="bed" name="BED" version="">
+    </section>
+    <section id="vcf_bcf" name="VCF/BCF" version="">
+    </section>
+    <section id="nanopore" name="Nanopore" version="">
+    </section>
+    <section id="rna_seq" name="RNA-seq" version="">
+    </section>
+    <section id="statistics" name="Statistics" version="">
+    </section>
+    <label id="genomics_toolkits_label" text="Genomics Toolkits" version="" />
+    <label id="metagenomics_label" text="Metagenomics" version="" />
+    <label id="deprecated_tools_label" text="Deprecated Tools" version="" />
+    <section id="variant_calling" name="Variant Calling" version="">
+    </section>
+    <section id="ngs-rna-tools" name="NGS: RNA Analysis" version="">
+    </section>
+    <section id="samtools" name="NGS: SAMtools" version="">
+    </section>
+    <section id="cloudmap_deprecated" name="CloudMap (deprecated)" version="">
+    </section>
+    <section id="ngs:_bam_tools" name="NGS: BamTools" version="">
+    </section>
+    <section id="ngs:_picard" name="NGS: Picard" version="">
+    </section>
+    <section id="ngs:_vcf_manipulation" name="NGS: VCF Manipulation" version="">
+    </section>
+    <section id="rna_analysis_deprecated" name="RNA Analysis (deprecated)" version="">
+    </section>
+    <section id="phenotype_association" name="Phenotype Association" version="">
+    </section>
+    <section id="peak_calling" name="NGS: Peak Calling" version="">
+    </section>
+    <section id="operate_on_genomic_intervals" name="Operate on Genomic Intervals" version="">
+    </section>
+    <section id="variant_detection" name="NGS: Variant Analysis" version="">
+    </section>
+    <section id="ngs_rna_structure" name="NGS: RNA Structure" version="">
+    </section>
+    <section id="ngs:_duplexnovo" name="NGS: Du Novo" version="">
+    </section>
+    <section id="ngs:_gemini" name="NGS: Gemini" version="">
+    </section>
+    <section id="ngs:_assembly" name="NGS: Assembly" version="">
+    </section>
+    <section id="ngs:_chromosome_conformation" name="NGS: Chromosome Conformation" version="">
+    </section>
+    <section id="ngs:_mothur" name="NGS: Mothur" version="">
+    </section>
+    <section id="features" name="Extract Features" version="">
+    </section>
+    <section id="fetchSeq" name="Fetch Sequences" version="">
+    </section>
+    <section id="fetchAlign" name="Fetch Alignments" version="">
+    </section>
+    <section id="emboss" name="EMBOSS" version="">
+    </section>
+    <section id="scores" name="Get Genomic Scores" version="">
+    </section>
+    <section id="regional_variation" name="Regional Variation" version="">
+    </section>
+    <section id="bxops" name="Operate on Genomic Intervals" version="">
+    </section>
+    <section id="picard" name="Picard" version="">
+    </section>
+    <section id="fastq_quality_control" name="FASTQ Quality Control" version="">
+    </section>
+    <section id="mapping" name="Mapping" version="">
+    </section>
+    <section id="stats" name="Statistics" version="">
+    </section>
+    <section id="plots" name="Graph/Display Data" version="">
+    </section>
+    <section id="hgv" name="Phenotype Association" version="">
+    </section>
+    <section id="snpeff" name="snpEff" version="">
+    </section>
+    <section id="bedtools" name="BEDTools" version="">
+    </section>
+    <section id="genome_diversity" name="Genome Diversity" version="">
+    </section>
+    <section id="graph_display_data" name="Graph/Display Data" version="">
+    </section>
+    <section id="EMBOSSLite" name="EMBOSS" version="">
+    </section>
+    <section id="regVar" name="Regional Variation" version="">
+    </section>
+    <section id="fasta_manipulation" name="FASTA manipulation" version="">
+    </section>
+    <section id="clustal" name="Multiple Alignments" version="">
+    </section>
+    <section id="metagenomics" name="Metagenomic Analysis" version="">
+    </section>
+    <section id="multiple_regression" name="Multiple regression" version="">
+    </section>
+    <section id="multivariate_analysis" name="Multivariate Analysis" version="">
+    </section>
+    <section id="motifs" name="Motif Tools" version="">
+    </section>
+    <section id="str-fm:_microsatellite_analysis" name="STR-FM: Microsatellite Analysis" version="">
+    </section>
+    <section id="ncbi_sra_tools" name="NCBI SRA Tools" version="">
+    </section>
+    <section id="iwtomics" name="IWTomics" version="">
+    </section>
+    <section id="onp:_poretools" name="ONP: PoreTools" version="">
+    </section>
+    <section id="ncbi_blast+" name="NCBI BLAST+" version="">
+    </section>
+    <section id="rseqc" name="NGS: RSeQC" version="">
+    </section>
+    <section id="mimodd" name="MiModD" version="">
+    </section>
+    <section id="ngs:_presto" name="NGS: pRESTO" version="">
+    </section>
+    <section id="ngs:_seqtk" name="NGS: Seqtk" version="">
+    </section>
+    <section id="planttribes" name="PlantTribes" version="">
+    </section>
+    <section id="gatk" name="NGS: GATK Tools (beta)" version="">
+    </section>
+    <section id="picard_beta" name="NGS: Picard (beta)" version="">
+    </section>
+    <section id="bcf_tools" name="BCF Tools" version="">
+    </section>
+    <section id="deprecated-ngs-rna-tools" name="NGS: RNA Analysis (deprecated)" version="">
+    </section>
+    <section id="cloudmap" name="CloudMap" version="">
+    </section>
+    <section id="tax_manipulation" name="Metagenomic Analysis" version="">
+    </section>
+    <section id="fasta_fastq" name="FASTA/FASTQ" version="">
+    </section>
+    <section id="multiple_alignments" name="Multiple Alignments" version="">
+    </section>
+    <section id="str_fm_microsatellite_analysis" name="STR-FM: Microsatellite Analysis" version="">
+    </section>
+    <section id="chip_seq" name="ChIP-seq" version="">
+    </section>
+    <section id="mothur" name="Mothur" version="">
+    </section>
+    <section id="metagenomic_analysis" name="Metagenomic Analysis" version="">
+    </section>
+    <section id="du_novo" name="Du Novo" version="">
+    </section>
+    <section id="convert_formats" name="Convert Formats" version="">
+    </section>
+    <section id="text_manipulation" name="Text Manipulation" version="">
+    </section>
+    <section id="deeptools" name="deepTools" version="">
+    </section>
+    <section id="assembly" name="Assembly" version="">
+    </section>
+    <section id="chromosome_conformation" name="Chromosome Conformation" version="">
+    </section>
+    <section id="annotation" name="Annotation" version="">
+    </section>
+    <section id="ncbi_blast" name="NCBI BLAST+" version="">
+    </section>
+    <section id="fetch_sequences_alignments" name="Fetch Sequences/Alignments" version="">
+    </section>
+    <section id="presto" name="pRESTO" version="">
+    </section>
+    <section id="seqtk" name="Seqtk" version="">
+    </section>
+    <section id="get_data" name="Get Data" version="">
+    </section>
+    <section id="metagenomic_analysis_deprecated" name="Metagenomic Analysis (deprecated)" version="">
+    </section>
+    <section id="join_subtract_and_group" name="Join, Subtract and Group" version="">
+    </section>
+    <section id="filter_and_sort" name="Filter and Sort" version="">
+    </section>
+    <section id="transit" name="TRANSIT" version="">
+    </section>
+</toolbox>

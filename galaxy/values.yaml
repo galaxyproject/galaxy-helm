@@ -116,7 +116,7 @@ configs:
         </destinations>
         <tools>
           <!-- Should not be needed in the long run. -->
-          <!-- https://github.com/galaxyproject/galaxy/blob/dev/lib/galaxy/tools/__init__.py#L113 -->
+          <!-- https://github.com/galaxyproject/galaxy/blob/1279a2074c566564bf8b9ad90883b2e044adec57/lib/galaxy/tools/__init__.py#L113 -->
           <tool id="upload1" destination="local" />
           <tool id="send_to_cloud" destination="local" />
           <tool id="__DATA_FETCH__" destination="local" />

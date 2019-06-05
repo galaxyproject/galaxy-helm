@@ -4,8 +4,8 @@ set -e
 
 psql -v ON_ERROR_STOP=1 --username "$POSTGRESQL_USERNAME" --dbname "$POSTGRESQL_DATABASE" <<-EOSQL
 		CREATE DATABASE galaxy;
-		CREATE USER galaxydbuser;
-		ALTER ROLE galaxydbuser WITH PASSWORD '42';
-		GRANT ALL PRIVILEGES ON DATABASE galaxy TO galaxydbuser;
-		ALTER DATABASE galaxy OWNER TO galaxydbuser;
+		CREATE USER {{.Values.postgresql.galaxyDatabaseUser}};
+		ALTER ROLE {{.Values.postgresql.galaxyDatabaseUser}} WITH PASSWORD '{{.Values.postgresql.galaxyDatabasePassword}}';
+		GRANT ALL PRIVILEGES ON DATABASE galaxy TO {{.Values.postgresql.galaxyDatabaseUser}};
+		ALTER DATABASE galaxy OWNER TO {{.Values.postgresql.galaxyDatabaseUser}};
 EOSQL

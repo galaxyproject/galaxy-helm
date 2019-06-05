@@ -81,8 +81,8 @@ spec:
         #         command: ["/usr/sbin/nginx","-s","quit"]
       volumes:
         - name: galaxy-conf-files
-          configMap:
-            name: {{ template "galaxy.fullname" . }}-config-map
+          secret:
+            secretName: {{ template "galaxy.fullname" . }}-configs
         - name: galaxy-data
           persistentVolumeClaim:
             claimName: {{ .Release.Name }}-{{ .Values.persistence.name }}

@@ -71,8 +71,8 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: galaxy-conf-files
-          configMap:
-            name: {{ template "galaxy.fullname" . }}-config-map
+          secret:
+            secretName: {{ template "galaxy.fullname" . }}-configs
         - name: galaxy-data
           persistentVolumeClaim:
             claimName: {{ .Release.Name }}-{{ .Values.persistence.name }}

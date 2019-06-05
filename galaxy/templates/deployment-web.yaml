@@ -20,7 +20,7 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
         component: galaxy-web-handler
       annotations:
-        checksum/galaxy_conf: {{ include (print $.Template.BasePath "/configmap-galaxy-conf.yaml") . | sha256sum }}
+        checksum/galaxy_conf: {{ include (print $.Template.BasePath "/secret-galaxy-conf.yaml") . | sha256sum }}
     spec:
       securityContext:
         fsGroup: 101

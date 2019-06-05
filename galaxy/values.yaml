@@ -116,7 +116,60 @@ configs:
         </destinations>
         <tools>
           <!-- Should not be needed in the long run. -->
+          <!-- https://github.com/galaxyproject/galaxy/blob/dev/lib/galaxy/tools/__init__.py#L113 -->
           <tool id="upload1" destination="local" />
+          <tool id="send_to_cloud" destination="local" />
+          <tool id="__DATA_FETCH__" destination="local" />
+          <tool id="vcf_to_maf_customtrack1" destination="local" />
+          <tool id="laj_1" destination="local" />
+          <tool id="meme_fimo" destination="local" />
+          <tool id="secure_hash_message_digest" destination="local" />
+          <tool id="join1" destination="local" />
+          <tool id="gff2bed1" destination="local" />
+          <tool id="gff_filter_by_feature_count" destination="local" />
+          <tool id="aggregate_scores_in_intervals2" destination="local" />
+          <tool id="Interval_Maf_Merged_Fasta2" destination="local" />
+          <tool id="GeneBed_Maf_Fasta2" destination="local" />
+          <tool id="maf_stats1" destination="local" />
+          <tool id="Interval2Maf1" destination="local" />
+          <tool id="Interval2Maf_pairwise1" destination="local" />
+          <tool id="MAF_To_Interval1" destination="local" />
+          <tool id="MAF_filter" destination="local" />
+          <tool id="MAF_To_Fasta1" destination="local" />
+          <tool id="MAF_Reverse_Complement_1" destination="local" />
+          <tool id="MAF_split_blocks_by_species1" destination="local" />
+          <tool id="MAF_Limit_To_Species1" destination="local" />
+          <tool id="maf_by_block_number1" destination="local" />
+          <tool id="wiggle2simple1" destination="local" />
+          <tool id="CONVERTER_bed_to_fli_0" destination="local" />
+          <tool id="CONVERTER_fastq_to_fqtoc0" destination="local" />
+          <tool id="CONVERTER_gff_to_fli_0" destination="local" />
+          <tool id="CONVERTER_gff_to_interval_index_0" destination="local" />
+          <tool id="CONVERTER_maf_to_fasta_0" destination="local" />
+          <tool id="CONVERTER_maf_to_interval_0" destination="local" />
+          <tool id="CONVERTER_wiggle_to_interval_0" destination="local" />
+          <tool id="CONVERTER_tar_to_directory" destination="local" />
+          <tool id="qualityFilter" destination="local" />
+          <tool id="winSplitter" destination="local" />
+          <tool id="pileup_interval" destination="local" />
+          <tool id="count_gff_features" destination="local" />
+          <tool id="Convert characters1" destination="local" />
+          <tool id="lastz_paired_reads_wrapper" destination="local" />
+          <tool id="subRate1" destination="local" />
+          <tool id="substitutions1" destination="local" />
+          <tool id="sam_pileup" destination="local" />
+          <tool id="find_diag_hits" destination="local" />
+          <tool id="cufflinks" destination="local" />
+          <tool id="gops_intersect_1" destination="local" />
+          <tool id="tabular_to_dbnsfp" destination="local" />
+          <tool id="column_join" destination="local" />
+          <tool id="gd_coverage_distributions" destination="local" />
+          <tool id="gd_dpmix" destination="local" />
+          <tool id="gd_pca" destination="local" />
+          <tool id="gd_phylogenetic_tree" destination="local" />
+          <tool id="gd_population_structure" destination="local" />
+          <tool id="gd_prepare_population_structure" destination="local" />
+          <tool id="genomespace_importer" destination="local" />
         </tools>
     </job_conf>
   galaxy.yml: |
@@ -153,7 +206,7 @@ configs:
       <explicit />
       <mulled />
     </containers_resolvers>
-  # Although this is only one line, the multi-line entry allows us to avoid wrapping 
+  # Although this is only one line, the multi-line entry allows us to avoid wrapping
   # the entire expression in quotes, which would need to be removed in the configmap
   integrated_tool_panel.xml: |
     {{- (.Files.Get "files/configs/integrated_tool_panel.xml") }}

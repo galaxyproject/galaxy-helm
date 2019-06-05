@@ -69,7 +69,7 @@ postgresql:
   galaxyDatabaseUser: galaxydbuser
   galaxyDatabasePassword: 42
   nameOverride: galaxy-postgres
-  initdbScriptsConfigMap: "{{ .Release.Name }}-galaxy-initdb"
+  initdbScriptsSecret: "{{ .Release.Name }}-galaxy-initdb"
   persistence:
     enabled: true
 

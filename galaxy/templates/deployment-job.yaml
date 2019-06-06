@@ -29,7 +29,7 @@ spec:
           command: ['sh', '-c', 'until nc -z -w3 {{ template "galaxy-postgresql.fullname" $ }} 5432; do echo waiting for galaxy-postgres service; sleep 1; done;']
         - name: {{ .Chart.Name }}-init-mounts
           image: alpine:3.7
-          command: ['sh', '-c', 'chown -R 101:101 /galaxy/server/database && install -o 101 -g 101 /galaxy/server/config/integrated_tool_panel.xml /galaxy/server/config/editable/integrated_tool_panel.xml && mkdir -p /galaxy/server/database/config && cp -n galaxy/server/config/shed_tool_conf.xml.sample galaxy/server/database/config/shed_tool_conf.xml']
+          command: ['sh', '-c', 'chown -R 101:101 /galaxy/server/database && install -o 101 -g 101 /galaxy/server/config/integrated_tool_panel.xml /galaxy/server/config/editable/integrated_tool_panel.xml']
           volumeMounts:
             {{- range $key,$entry := .Values.configs }}
             - name: galaxy-conf-files

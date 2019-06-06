@@ -84,6 +84,10 @@ cvmfs:
       storage: 1Gi
     mountPath: /cvmfs/main.galaxyproject.org
 
+# When this flag is set to true, all configs will be set in secrets,
+# when it is set to false, all configs will be set in configmaps
+useSecretConfigs: false
+
 # All files will be relative to `/galaxy/server/config/` directory
 configs:
   job_conf.xml: |

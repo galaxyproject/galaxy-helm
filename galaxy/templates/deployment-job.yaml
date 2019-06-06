@@ -57,6 +57,11 @@ spec:
               mountPath: /galaxy/server/config/{{ $key }}
               subPath: {{ $key }}
             {{- end }}
+            {{- range $key,$entry := .Values.jobs.rules }}
+            - name: galaxy-job-rules
+              mountPath: /galaxy/server/lib/galaxy/jobs/rules/{{ $key }}
+              subPath: {{ $key }}
+            {{- end }}
             - name: editable-configs
               mountPath: /galaxy/server/config/editable/
             - name: galaxy-data
@@ -78,6 +83,9 @@ spec:
           configMap:
             name: {{ template "galaxy.fullname" . }}-configs
           {{- end }}
+        - name: galaxy-job-rules
+          configMap:
+            name: {{ template "galaxy.fullname" . }}-job-rules
         - name: galaxy-data
           persistentVolumeClaim:
             claimName: {{ .Release.Name }}-{{ .Values.persistence.name }}

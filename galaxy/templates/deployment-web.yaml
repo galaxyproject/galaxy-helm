@@ -20,7 +20,7 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
         component: galaxy-web-handler
       annotations:
-        checksum/galaxy_conf: {{ include (print $.Template.BasePath "/secret-galaxy-conf.yaml") . | sha256sum }}
+        checksum/galaxy_conf: {{ include (print $.Template.BasePath "/configs-galaxy.yaml") . | sha256sum }}
     spec:
       securityContext:
         fsGroup: 101
@@ -81,8 +81,13 @@ spec:
         #         command: ["/usr/sbin/nginx","-s","quit"]
       volumes:
         - name: galaxy-conf-files
+          {{- if .Values.useSecretConfigs }}
           secret:
             secretName: {{ template "galaxy.fullname" . }}-configs
+          {{- else }}
+          configMap:
+            name: {{ template "galaxy.fullname" . }}-configs
+          {{- end }}
         - name: galaxy-data
           persistentVolumeClaim:
             claimName: {{ .Release.Name }}-{{ .Values.persistence.name }}

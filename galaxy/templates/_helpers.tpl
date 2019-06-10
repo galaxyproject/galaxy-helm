@@ -49,3 +49,21 @@ Add a trailing slash to a given path, if missing
 {{- printf "%s/" . -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Return galaxy database user password
+*/}}
+{{- define "galaxy.galaxyDbPassword" -}}
+{{- if .Values.postgresql.galaxyDatabasePassword }}
+    {{- .Values.postgresql.galaxyDatabasePassword -}}
+{{- else -}}
+    {{- randAlphaNum 10 -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return galaxy database connection string
+*/}}
+{{- define "galaxy.galaxyDbConnectionString" -}}
+postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy
+{{- end -}}

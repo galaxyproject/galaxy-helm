@@ -37,8 +37,8 @@ spec:
               mountPath: /galaxy/server/config/{{ $key }}
               subPath: {{ $key }}
             {{- end }}
-            - name: editable-configs
-              mountPath: /galaxy/server/config/editable/
+            - name: writable-configs
+              mountPath: /galaxy/server/config/writable/
             - name: galaxy-data
               mountPath: {{.Values.persistence.mountPath}}
             {{- if .Values.cvmfs.enabled }}
@@ -66,8 +66,8 @@ spec:
               mountPath: /galaxy/server/lib/galaxy/jobs/rules/{{ $key }}
               subPath: {{ $key }}
             {{- end }}
-            - name: editable-configs
-              mountPath: /galaxy/server/config/editable/
+            - name: writable-configs
+              mountPath: /galaxy/server/config/writable/
             - name: galaxy-data
               mountPath: {{.Values.persistence.mountPath}}
             {{- if .Values.cvmfs.enabled }}
@@ -107,7 +107,7 @@ spec:
           persistentVolumeClaim:
             claimName: {{ template "galaxy.fullname" . }}-cvmfs-gxy-data-pvc
         {{- end }}
-        - name: editable-configs
+        - name: writable-configs
           emptyDir: {}
       {{- with .Values.nodeSelector }}
       nodeSelector:

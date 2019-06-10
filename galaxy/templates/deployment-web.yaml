@@ -53,6 +53,10 @@ spec:
             - name: galaxy-http
               containerPort: 8080
               protocol: TCP
+          env:
+{{- if .Values.extraEnv }}
+{{ tpl (toYaml .Values.extraEnv) . | indent 12 }}
+{{- end }}
           command: ["/galaxy/server/.venv/bin/uwsgi"]
           args: ["--yaml", "/galaxy/server/config/galaxy.yml"]
           volumeMounts:

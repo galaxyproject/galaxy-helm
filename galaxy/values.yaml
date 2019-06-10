@@ -30,6 +30,7 @@ persistence:
   # storageClass:
   accessMode: ReadWriteMany
   size: 10Gi
+  mountPath: /galaxy/data
 
 ingress:
   enabled: true
@@ -96,7 +97,7 @@ configs:
             <plugin id="local" type="runner" load="galaxy.jobs.runners.local:LocalJobRunner" workers="4" />
             <plugin id="k8s" type="runner" load="galaxy.jobs.runners.kubernetes:KubernetesJobRunner">
               <param id="k8s_use_service_account">true</param>
-              <param id="k8s_persistent_volume_claims">{{ .Release.Name }}-{{ .Values.persistence.name }}:/galaxy/server/database,{{ template "galaxy.fullname" . }}-cvmfs-gxy-data-pvc:{{ .Values.cvmfs.data.mountPath }}</param>
+              <param id="k8s_persistent_volume_claims">{{ .Release.Name }}-{{ .Values.persistence.name }}:{{.Values.persistence.mountPath}},{{ template "galaxy.fullname" . }}-cvmfs-gxy-data-pvc:{{ .Values.cvmfs.data.mountPath }}</param>
               <param id="k8s_namespace">{{ .Release.Namespace }}</param>
               <!-- Must be DNS friendly and less than 20 characters -->
               <param id="k8s_galaxy_instance_id">{{ .Release.Name }}</param>
@@ -142,7 +143,7 @@ configs:
     galaxy:
       database_connection: 'postgresql://{{.Values.postgresql.galaxyDatabaseUser}}:{{.Values.postgresql.galaxyDatabasePassword}}@{{ template "galaxy-postgresql.fullname" . }}/galaxy'
       integrated_tool_panel_config: "/galaxy/server/config/editable/integrated_tool_panel.xml"
-      tool_config_file: "/galaxy/server/database/config/editable_shed_tool_conf.xml,/galaxy/server/config/tool_conf.xml,{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_conf.xml"
+      tool_config_file: "{{.Values.persistence.mountPath}}/config/editable_shed_tool_conf.xml,/galaxy/server/config/tool_conf.xml,{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_conf.xml"
       tool_data_table_config_path: "{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/managed/location/tool_data_table_conf.xml"
       tool_dependency_dir: "{{ .Values.cvmfs.main.mountPath }}/deps"
       builds_file_path: "{{.Values.cvmfs.data.mountPath}}/managed/location/builds.txt"

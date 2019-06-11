@@ -1,0 +1,8 @@
+# Usage: helm_package <path_to_packaged_chart>
+set -e
+rm -rf /tmp/galaxy_helm_package/
+mkdir -p /tmp/galaxy_helm_package/galaxy
+cp -r . /tmp/galaxy_helm_package/galaxy/
+cp ./values-production.yaml /tmp/galaxy_helm_package/galaxy/values.yaml
+cd /tmp/galaxy_helm_package/galaxy/
+helm package . -d "$@"

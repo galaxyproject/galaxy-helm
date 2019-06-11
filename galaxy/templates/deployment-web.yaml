@@ -55,6 +55,19 @@ spec:
               protocol: TCP
           command: ["/galaxy/server/.venv/bin/uwsgi"]
           args: ["--yaml", "/galaxy/server/config/galaxy.yml"]
+          readinessProbe:
+            httpGet:
+              path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 6
+          livenessProbe:
+            httpGet:
+              path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            failureThreshold: 10
           volumeMounts:
             {{- range $key,$entry := .Values.configs }}
             - name: galaxy-conf-files

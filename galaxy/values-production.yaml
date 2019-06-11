@@ -12,7 +12,7 @@ fullnameOverride: ""
 
 service:
   type: ClusterIP
-  port: 8090
+  port: 8000
 
 webHandlers:
   replicaCount: 1

@@ -155,7 +155,7 @@ configs:
     </containers_resolvers>
 
 # Additional dynamic rules to map into the container.
-#jobs:
-#  rules:
+jobs:
+  rules:
 #    k8s-container-mapper.py: |
 #      {{- (.Files.Get "files/rules/k8s-container-mapper.py") }}

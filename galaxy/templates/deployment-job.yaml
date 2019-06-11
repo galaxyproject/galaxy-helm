@@ -49,6 +49,9 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
+{{- if .Values.extraEnv }}
+{{ tpl (toYaml .Values.extraEnv) . | indent 12 }}
+{{- end }}
           command: ["python", "/galaxy/server/scripts/galaxy-main"]
           args: ["-c", "/galaxy/server/config/galaxy.yml", "--server-name", "$(POD_NAME)", "--attach-to-pool", "job-handlers"]
           volumeMounts:

@@ -11,7 +11,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 service:
-  type: NodePort
+  type: ClusterIP
   port: 8090
 
 webHandlers:
@@ -30,6 +30,17 @@ persistence:
   # storageClass:
   accessMode: ReadWriteMany
   size: 10Gi
+
+extraEnv:
+# If using an existing secret, the postgresql.extraEnv.GALAXY_DB_USER_PASSWORD's
+# secretKeyRef must also be set to match. Leave defaults to create a new secret.
+  - name: GALAXY_DB_USER_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: "{{ .Release.Name }}-galaxy-db-password"
+        key: galaxy-db-password
+  - name: GALAXY_CONFIG_DATABASE_CONNECTION
+    value: '{{ include "galaxy.galaxyDbConnectionString" $ }}'
 
 ingress:
   enabled: true
@@ -67,11 +78,17 @@ affinity: {}
 postgresql:
   enabled: true
   galaxyDatabaseUser: galaxydbuser
-  galaxyDatabasePassword: 42
+  galaxyDatabasePassword:
   nameOverride: galaxy-postgres
   initdbScriptsSecret: "{{ .Release.Name }}-galaxy-initdb"
   persistence:
     enabled: true
+  extraEnv:
+    - name: GALAXY_DB_USER_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Release.Name }}-galaxy-db-password"
+          key: galaxy-db-password
 
 cvmfs:
   enabled: true
@@ -140,7 +157,6 @@ configs:
       enable-threads: true
       py-call-osafterfork: true
     galaxy:
-      database_connection: 'postgresql://{{.Values.postgresql.galaxyDatabaseUser}}:{{.Values.postgresql.galaxyDatabasePassword}}@{{ template "galaxy-postgresql.fullname" . }}/galaxy'
       integrated_tool_panel_config: "/galaxy/server/config/editable/integrated_tool_panel.xml"
       tool_config_file: "{{ .Values.cvmfs.main.mountPath }}/config/tool_conf.xml,{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_conf.xml"
       tool_data_table_config_path: "{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/byhand/location/tool_data_table_conf.xml"

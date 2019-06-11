@@ -8,5 +8,5 @@
 dependencies:
     - name: postgresql
       repository: https://kubernetes-charts.storage.googleapis.com/
-      version: 5.3.4
+      version: 5.3.6
       condition: postgresql.enabled

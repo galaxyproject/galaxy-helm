@@ -84,3 +84,10 @@ Return galaxy database connection string
 {{- define "galaxy.galaxyDbConnectionString" -}}
 postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy
 {{- end -}}
+
+{{/*
+Creates the bash command for the init containers used to place files and change permissions in the galaxy pods
+*/}}
+{{- define "galaxy.init-container-commands" -}}
+{{- tpl "chown -R 101:101 {{.Values.persistence.mountPath}} && install -o 101 -g 101 /galaxy/server/config/integrated_tool_panel.xml /galaxy/server/config/writable/integrated_tool_panel.xml; if [ ! -f \"{{.Values.persistence.mountPath}}/config/editable_shed_tool_conf.xml\" ]; then mkdir -p {{.Values.persistence.mountPath}}/config && cp /galaxy/server/config/shed_tool_conf.xml.sample {{.Values.persistence.mountPath}}/config/editable_shed_tool_conf.xml; fi" $}}
+{{- end -}}

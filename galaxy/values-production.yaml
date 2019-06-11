@@ -1,4 +1,4 @@
-# A simple values file for galaxy.
+# Default values for galaxy.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -91,7 +91,15 @@ postgresql:
           key: galaxy-db-password
 
 cvmfs:
-  enabled: false
+  enabled: true
+  data:
+    pvc:
+      storage: 1Gi
+    mountPath: /cvmfs/data.galaxyproject.org
+  main:
+    pvc:
+      storage: 1Gi
+    mountPath: /cvmfs/main.galaxyproject.org
 
 # When this flag is set to true, all configs will be set in secrets,
 # when it is set to false, all configs will be set in configmaps
@@ -105,7 +113,7 @@ configs:
             <plugin id="local" type="runner" load="galaxy.jobs.runners.local:LocalJobRunner" workers="4" />
             <plugin id="k8s" type="runner" load="galaxy.jobs.runners.kubernetes:KubernetesJobRunner">
               <param id="k8s_use_service_account">true</param>
-              <param id="k8s_persistent_volume_claims">{{ .Release.Name }}-{{ .Values.persistence.name }}:/galaxy/server/database</param>
+              <param id="k8s_persistent_volume_claims">{{ .Release.Name }}-{{ .Values.persistence.name }}:/galaxy/server/database,{{ template "galaxy.fullname" . }}-cvmfs-gxy-data-pvc:{{ .Values.cvmfs.data.mountPath }}</param>
               <param id="k8s_namespace">{{ .Release.Namespace }}</param>
               <!-- Must be DNS friendly and less than 20 characters -->
               <param id="k8s_galaxy_instance_id">{{ .Release.Name }}</param>
@@ -118,9 +126,11 @@ configs:
             </plugin>
         </plugins>
         <handlers assign_with="db-skip-locked" />
-        <destinations default="static-k8s-dispatcher">
+        <destinations default="dynamic-k8s-dispatcher">
             <destination id="local" runner="local"/>
-            <destination id="static-k8s-dispatcher" runner="k8s">
+            <destination id="dynamic-k8s-dispatcher" runner="dynamic">
+              <param id="type">python</param>
+              <param id="function">k8s_container_mapper</param>
               <param id="docker_default_container_id">{{ .Values.image.repository }}:{{ .Values.image.tag }}</param>
               <param id="docker_enabled">true</param>
             </destination>
@@ -147,15 +157,30 @@ configs:
       enable-threads: true
       py-call-osafterfork: true
     galaxy:
+      integrated_tool_panel_config: "/galaxy/server/config/editable/integrated_tool_panel.xml"
+      tool_config_file: "{{ .Values.cvmfs.main.mountPath }}/config/tool_conf.xml,{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_conf.xml"
+      tool_data_table_config_path: "{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/byhand/location/tool_data_table_conf.xml"
+      tool_dependency_dir: "{{ .Values.cvmfs.main.mountPath }}/deps"
+      builds_file_path: "{{.Values.cvmfs.data.mountPath}}/managed/location/builds.txt"
+      datatypes_config_file: "{{ .Values.cvmfs.main.mountPath }}/config/datatypes_conf.xml"
       containers_resolvers_config_file: "/galaxy/server/config/container_resolvers_conf.xml"
   container_resolvers_conf.xml: |
     <containers_resolvers>
       <explicit />
       <mulled />
     </containers_resolvers>
+  # Although this is only one line, the multi-line entry allows us to avoid wrapping
+  # the entire expression in quotes, which would need to be removed in the configmap
+  integrated_tool_panel.xml: |
+    {{- (.Files.Get "files/configs/integrated_tool_panel.xml") }}
 
-# Additional dynamic rules to map into the container.
-#jobs:
-#  rules:
-#    k8s-container-mapper.py: |
-#      {{- (.Files.Get "files/rules/k8s-container-mapper.py") }}
+jobs:
+  rules:
+    container-mapper-rules.yml: |
+      mappings:
+        - tool_ids:
+            - sort1
+          container:
+            docker_container_id_override: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+    k8s-container-mapper.py: |
+      {{- (.Files.Get "files/rules/k8s-container-mapper.py") }}

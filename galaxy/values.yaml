@@ -32,6 +32,8 @@ persistence:
   size: 10Gi
 
 extraEnv:
+# If using an existing secret, the postgresql.extraEnv.GALAXY_DB_USER_PASSWORD's
+# secretKeyRef must also be set to match. Leave defaults to create a new secret.
   - name: GALAXY_DB_USER_PASSWORD
     valueFrom:
       secretKeyRef:

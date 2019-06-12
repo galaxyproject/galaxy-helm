@@ -30,7 +30,7 @@ persistence:
   # storageClass:
   accessMode: ReadWriteMany
   size: 10Gi
-  mountPath: /galaxy/data
+  mountPath: /galaxy/server/database
 
 extraEnv:
 # If using an existing secret, the postgresql.extraEnv.GALAXY_DB_USER_PASSWORD's
@@ -158,8 +158,8 @@ configs:
       enable-threads: true
       py-call-osafterfork: true
     galaxy:
-      integrated_tool_panel_config: "/galaxy/server/config/editable/integrated_tool_panel.xml"
-      tool_config_file: "{{ .Values.cvmfs.main.mountPath }}/config/tool_conf.xml,{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_conf.xml"
+      integrated_tool_panel_config: "/galaxy/server/config/writable/integrated_tool_panel.xml"
+      tool_config_file: "{{.Values.persistence.mountPath}}/config/editable_shed_tool_conf.xml,/galaxy/server/config/tool_conf.xml,{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_conf.xml"
       tool_data_table_config_path: "{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/byhand/location/tool_data_table_conf.xml"
       tool_dependency_dir: "{{ .Values.cvmfs.main.mountPath }}/deps"
       builds_file_path: "{{.Values.cvmfs.data.mountPath}}/managed/location/builds.txt"

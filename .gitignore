@@ -92,6 +92,4 @@ ENV/
 *.swp
 *.swo
 
-galaxy-stable/charts/
 galaxy/charts/
-galaxy-orig/

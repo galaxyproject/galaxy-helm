@@ -15,10 +15,10 @@ service:
   port: 8000
 
 webHandlers:
-  replicaCount: 1
+  replicaCount: 2
 
 jobHandlers:
-  replicaCount: 1
+  replicaCount: 4
 
 rbac:
   enabled: true
@@ -41,7 +41,7 @@ extraEnv:
         name: "{{ .Release.Name }}-galaxy-db-password"
         key: galaxy-db-password
   - name: GALAXY_CONFIG_DATABASE_CONNECTION
-    value: '{{ include "galaxy.galaxyDbConnectionString" $ }}'
+    value: "{{ include \"galaxy.galaxyDbConnectionString\" $ }}"
 
 ingress:
   enabled: true

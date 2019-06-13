@@ -155,10 +155,17 @@ configs:
     <containers_resolvers>
       <explicit />
       <mulled />
+      <build_mulled />
     </containers_resolvers>
 
 # Additional dynamic rules to map into the container.
 jobs:
   rules:
-#    k8s-container-mapper.py: |
-#      {{- (.Files.Get "files/rules/k8s-container-mapper.py") }}
+    container-mapper-rules.yml: |
+          mappings:
+            - tool_ids:
+                - sort1
+              container:
+                docker_container_id_override: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        k8s-container-mapper.py: |
+          {{- (.Files.Get "files/rules/k8s-container-mapper.py") }}

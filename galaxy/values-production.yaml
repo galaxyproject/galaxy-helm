@@ -1,4 +1,4 @@
-# Production values for galaxy.
+# Deployment values for Galaxy with enabled CVMFS integration.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -15,10 +15,10 @@ service:
   port: 8000
 
 webHandlers:
-  replicaCount: 2
+  replicaCount: 1
 
 jobHandlers:
-  replicaCount: 4
+  replicaCount: 1
 
 rbac:
   enabled: true
@@ -32,16 +32,6 @@ persistence:
   size: 10Gi
   mountPath: /galaxy/server/database
 
-extraEnv:
-# If using an existing secret, the postgresql.extraEnv.GALAXY_DB_USER_PASSWORD's
-# secretKeyRef must also be set to match. Leave defaults to create a new secret.
-  - name: GALAXY_DB_USER_PASSWORD
-    valueFrom:
-      secretKeyRef:
-        name: "{{ .Release.Name }}-galaxy-db-password"
-        key: galaxy-db-password
-  - name: GALAXY_CONFIG_DATABASE_CONNECTION
-    value: "{{ include \"galaxy.galaxyDbConnectionString\" $ }}"
 
 ingress:
   enabled: true
@@ -79,17 +69,17 @@ affinity: {}
 postgresql:
   enabled: true
   galaxyDatabaseUser: galaxydbuser
-  galaxyDatabasePassword:
+  galaxyDatabasePassword: 42
   nameOverride: galaxy-postgres
   initdbScriptsSecret: "{{ .Release.Name }}-galaxy-initdb"
   persistence:
     enabled: true
-  extraEnv:
-    - name: GALAXY_DB_USER_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: "{{ .Release.Name }}-galaxy-db-password"
-          key: galaxy-db-password
+  # extraEnv:
+  #   - name: GALAXY_DB_USER_PASSWORD
+  #     valueFrom:
+  #       secretKeyRef:
+  #         name: "{{ .Release.Name }}-galaxy-db-password"
+  #         key: galaxy-db-password
 
 cvmfs:
   enabled: true
@@ -158,6 +148,7 @@ configs:
       enable-threads: true
       py-call-osafterfork: true
     galaxy:
+      database_connection: 'postgresql://{{.Values.postgresql.galaxyDatabaseUser}}:{{.Values.postgresql.galaxyDatabasePassword}}@{{ template "galaxy-postgresql.fullname" . }}/galaxy'
       integrated_tool_panel_config: "/galaxy/server/config/writable/integrated_tool_panel.xml"
       tool_config_file: "{{.Values.persistence.mountPath}}/config/editable_shed_tool_conf.xml,/galaxy/server/config/tool_conf.xml,{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_conf.xml"
       tool_data_table_config_path: "{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/byhand/location/tool_data_table_conf.xml"
@@ -169,6 +160,7 @@ configs:
     <containers_resolvers>
       <explicit />
       <mulled />
+      <build_mulled />
     </containers_resolvers>
   # Although this is only one line, the multi-line entry allows us to avoid wrapping
   # the entire expression in quotes, which would need to be removed in the configmap

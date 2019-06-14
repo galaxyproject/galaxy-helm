@@ -51,7 +51,7 @@ cd galaxy-kubernetes
 helm dependency update
 ```
 
-2. To install the chart with the release name `galaxy`:
+2. To install the chart with the release name `galaxy` (note the trailing dot):
 ```console
 helm install --name galaxy .
 ```
@@ -106,7 +106,7 @@ The above command sets the Galaxy persistent volume to 50GB.
 
 Setting Galaxy configuration file values requires the key name to be escaped:
 
-```
+```console
 helm install --set configs."galaxy\.yml".uwsgi.processes=2 .
 ```
 

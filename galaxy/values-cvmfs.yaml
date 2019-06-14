@@ -156,6 +156,7 @@ configs:
       builds_file_path: "{{.Values.cvmfs.data.mountPath}}/managed/location/builds.txt"
       datatypes_config_file: "{{ .Values.cvmfs.main.mountPath }}/config/datatypes_conf.xml"
       containers_resolvers_config_file: "/galaxy/server/config/container_resolvers_conf.xml"
+      build_sites_config_file: "/galaxy/server/config/build_sites.yml"
   container_resolvers_conf.xml: |
     <containers_resolvers>
       <explicit />
@@ -164,6 +165,21 @@ configs:
     </containers_resolvers>
   sanitize_whitelist.txt: |
     toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.72
+  build_sites.yml: |
+    - type: ucsc
+      file: "/cvmfs/data.galaxyproject.org/managed/location/ucsc_build_sites.txt"
+      display: [main,archaea,ucla]
+    - type: gbrowse
+      file: "/galaxy/server/tool-data/shared/gbrowse/gbrowse_build_sites.txt"
+      display: [wormbase,tair,modencode_worm,modencode_fly]
+    - type: ensembl
+      file: "/galaxy/server/tool-data/shared/ensembl/ensembl_sites.txt"
+    - type: ensembl_data_url
+      file: "/galaxy/server/tool-data/shared/ensembl/ensembl_sites_data_URL.txt"
+    - type: igv
+      file: "/galaxy/server/tool-data/shared/igv/igv_build_sites.txt.sample"
+    - type: rviewer
+      file: "/galaxy/server/tool-data/shared/rviewer/rviewer_build_sites.txt.sample"
   # Although this is only one line, the multi-line entry allows us to avoid wrapping
   # the entire expression in quotes, which would need to be removed in the configmap
   integrated_tool_panel.xml: |

@@ -107,7 +107,7 @@ The above command sets the Galaxy persistent volume to 50GB.
 Setting Galaxy configuration file values requires the key name to be escaped:
 
 ```console
-helm install --set configs."galaxy\.yml".uwsgi.processes=2 .
+helm install --set-file "configs.galaxy\.yml"=/path/to/local/galaxy.yml
 ```
 
 Alternatively, a YAML file that specifies the values of the parameters can be

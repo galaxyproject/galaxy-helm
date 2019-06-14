@@ -113,7 +113,7 @@ configs:
               <param id="k8s_fs_group_id">101</param>
               <param id="k8s_supplemental_group_id">101</param>
               <param id="k8s_pull_policy">IfNotPresent</param>
-              <param id="k8s_cleanup_job">always</param>
+              <param id="k8s_cleanup_job">onsuccess</param>
             </plugin>
         </plugins>
         <handlers assign_with="db-skip-locked" />
@@ -162,6 +162,8 @@ configs:
       <mulled />
       <build_mulled />
     </containers_resolvers>
+  sanitize_whitelist.txt: |
+    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.72
   # Although this is only one line, the multi-line entry allows us to avoid wrapping
   # the entire expression in quotes, which would need to be removed in the configmap
   integrated_tool_panel.xml: |

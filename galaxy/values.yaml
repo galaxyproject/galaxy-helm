@@ -119,9 +119,11 @@ configs:
             </plugin>
         </plugins>
         <handlers assign_with="db-skip-locked" />
-        <destinations default="static-k8s-dispatcher">
+        <destinations default="dynamic-k8s-dispatcher">
             <destination id="local" runner="local"/>
-            <destination id="static-k8s-dispatcher" runner="k8s">
+            <destination id="dynamic-k8s-dispatcher" runner="dynamic">
+              <param id="type">python</param>
+              <param id="function">k8s_container_mapper</param>
               <param id="docker_default_container_id">{{ .Values.image.repository }}:{{ .Values.image.tag }}</param>
               <param id="docker_enabled">true</param>
             </destination>
@@ -148,7 +150,7 @@ configs:
       enable-threads: true
       py-call-osafterfork: true
     galaxy:
-      integrated_tool_panel_config: "/galaxy/server/config/writable/integrated_tool_panel.xml"
+      integrated_tool_panel_config: "/galaxy/server/config/mutable/integrated_tool_panel.xml"
       containers_resolvers_config_file: "/galaxy/server/config/container_resolvers_conf.xml"
       job_config_file: "/galaxy/server/config/job_conf.xml"
   container_resolvers_conf.xml: |

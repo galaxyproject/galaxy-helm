@@ -26,10 +26,12 @@ spec:
       initContainers:
         - name: {{ .Chart.Name }}-init-postgres
           image: alpine:3.7
-          command: ['sh', '-c', 'until nc -z -w3 {{ template "galaxy-postgresql.fullname" $ }} 5432; do echo waiting for galaxy-postgres service; sleep 1; done;']
+          command: ['sh', '-c', 'chown 101:101 {{.Values.persistence.mountPath}}; until nc -z -w3 {{ template "galaxy-postgresql.fullname" $ }} 5432; do echo waiting for galaxy-postgres service; sleep 1; done;']
+          volumeMounts:
+            - name: galaxy-data
+              mountPath: {{.Values.persistence.mountPath}}
         - name: {{ .Chart.Name }}-init-mounts
-          # image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          image: alpine:3.7
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           command: ['sh', '-c', {{ include "galaxy.init-container-commands" . | squote }}]
           volumeMounts:
             {{- range $key,$entry := .Values.configs }}
@@ -38,7 +40,7 @@ spec:
               subPath: {{ $key }}
             {{- end }}
             - name: galaxy-data
-              mountPath: /galaxy/server/config/writable/
+              mountPath: /galaxy/server/config/mutable/
               subPath: config
             - name: galaxy-data
               mountPath: {{.Values.persistence.mountPath}}
@@ -68,7 +70,7 @@ spec:
               subPath: {{ $key }}
             {{- end }}
             - name: galaxy-data
-              mountPath: /galaxy/server/config/writable/
+              mountPath: /galaxy/server/config/mutable/
               subPath: config
             - name: galaxy-data
               mountPath: {{.Values.persistence.mountPath}}

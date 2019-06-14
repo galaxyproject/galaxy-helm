@@ -14,7 +14,7 @@
     its section) modify that file and restart Galaxy.
     For the Galaxy Helm chart deployment, the config/integrated_tool_panel.xml
     is used as a template for organizing sections while the rendered file can
-    be found as config/writable/integrated_tool_panel.xml.
+    be found as config/mutable/integrated_tool_panel.xml.
     -->
     <section id="get_data" name="Get Data" version="">
     </section>

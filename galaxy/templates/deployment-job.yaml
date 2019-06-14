@@ -56,6 +56,8 @@ spec:
 {{- if .Values.extraEnv }}
 {{ tpl (toYaml .Values.extraEnv) . | indent 12 }}
 {{- end }}
+            - name: GALAXY_CONFIG_DATABASE_CONNECTION
+              value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy
           command: ["python", "/galaxy/server/scripts/galaxy-main"]
           args: ["-c", "/galaxy/server/config/galaxy.yml", "--server-name", "$(POD_NAME)", "--attach-to-pool", "job-handlers"]
           volumeMounts:

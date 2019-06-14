@@ -40,8 +40,6 @@ extraEnv:
       secretKeyRef:
         name: "{{ .Release.Name }}-galaxy-db-password"
         key: galaxy-db-password
-  - name: GALAXY_CONFIG_DATABASE_CONNECTION
-    value: "{{ include \"galaxy.galaxyDbConnectionString\" $ }}"
 
 ingress:
   enabled: true
@@ -79,7 +77,7 @@ affinity: {}
 postgresql:
   enabled: true
   galaxyDatabaseUser: galaxydbuser
-  galaxyDatabasePassword:
+  galaxyDatabasePassword: 42
   nameOverride: galaxy-postgres
   initdbScriptsSecret: "{{ .Release.Name }}-galaxy-initdb"
   persistence:
@@ -150,6 +148,7 @@ configs:
       enable-threads: true
       py-call-osafterfork: true
     galaxy:
+      database_connection: 'postgresql://{{.Values.postgresql.galaxyDatabaseUser}}:{{.Values.postgresql.galaxyDatabasePassword}}@{{ template "galaxy-postgresql.fullname" . }}/galaxy'
       integrated_tool_panel_config: "/galaxy/server/config/mutable/integrated_tool_panel.xml"
       containers_resolvers_config_file: "/galaxy/server/config/container_resolvers_conf.xml"
       job_config_file: "/galaxy/server/config/job_conf.xml"

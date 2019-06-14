@@ -57,6 +57,8 @@ spec:
 {{- if .Values.extraEnv }}
 {{ tpl (toYaml .Values.extraEnv) . | indent 12 }}
 {{- end }}
+            - name: GALAXY_CONFIG_DATABASE_CONNECTION
+              value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy
           command: ["/galaxy/server/.venv/bin/uwsgi"]
           args: ["--yaml", "/galaxy/server/config/galaxy.yml"]
           readinessProbe:

@@ -79,13 +79,6 @@ Return galaxy database user password
 {{- end -}}
 
 {{/*
-Return galaxy database connection string
-*/}}
-{{- define "galaxy.galaxyDbConnectionString" -}}
-postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy
-{{- end -}}
-
-{{/*
 Creates the bash command for the init containers used to place files and change permissions in the galaxy pods
 */}}
 {{- define "galaxy.init-container-commands" -}}

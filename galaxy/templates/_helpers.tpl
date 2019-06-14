@@ -89,5 +89,5 @@ postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWO
 Creates the bash command for the init containers used to place files and change permissions in the galaxy pods
 */}}
 {{- define "galaxy.init-container-commands" -}}
-{{- tpl "chown 101:101 {{.Values.persistence.mountPath}} && install -o 101 -g 101 /galaxy/server/config/integrated_tool_panel.xml /galaxy/server/config/writable/integrated_tool_panel.xml; if [ ! -f \"{{.Values.persistence.mountPath}}/config/editable_shed_tool_conf.xml\" ]; then install -D -o 101 -g 101 /galaxy/server/config/shed_tool_conf.xml.sample {{.Values.persistence.mountPath}}/config/editable_shed_tool_conf.xml; fi" $}}
+{{- tpl "whoami; ls -ld /galaxy/server/database; chown 101:101 {{.Values.persistence.mountPath}}; install -o 101 -g 101 /galaxy/server/config/integrated_tool_panel.xml /galaxy/server/config/writable/integrated_tool_panel.xml; if [ ! -f \"{{.Values.persistence.mountPath}}/config/editable_shed_tool_conf.xml\" ]; then install -D -o 101 -g 101 /galaxy/server/config/shed_tool_conf.xml.sample {{.Values.persistence.mountPath}}/config/editable_shed_tool_conf.xml; fi" $}}
 {{- end -}}

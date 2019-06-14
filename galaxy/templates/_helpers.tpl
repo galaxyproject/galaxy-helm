@@ -82,5 +82,5 @@ Return galaxy database user password
 Creates the bash command for the init containers used to place files and change permissions in the galaxy pods
 */}}
 {{- define "galaxy.init-container-commands" -}}
-{{- tpl "install -o 101 -g 101 /galaxy/server/config/integrated_tool_panel.xml /galaxy/server/config/mutable/integrated_tool_panel.xml; if [ ! -f \"{{.Values.persistence.mountPath}}/config/editable_shed_tool_conf.xml\" ]; then install -D -o 101 -g 101 /galaxy/server/config/shed_tool_conf.xml.sample {{.Values.persistence.mountPath}}/config/editable_shed_tool_conf.xml; fi" $}}
+{{- tpl "install -o 101 -g 101 /galaxy/server/config/integrated_tool_panel.xml /galaxy/server/config/mutable/integrated_tool_panel.xml; install -o 101 -g 101 /galaxy/server/config/sanitize_whitelist.txt /galaxy/server/config/mutable/sanitize_whitelist.txt; if [ ! -f \"{{.Values.persistence.mountPath}}/config/editable_shed_tool_conf.xml\" ]; then install -D -o 101 -g 101 /galaxy/server/config/shed_tool_conf.xml.sample {{.Values.persistence.mountPath}}/config/editable_shed_tool_conf.xml; fi" $}}
 {{- end -}}

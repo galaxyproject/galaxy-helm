@@ -158,6 +158,7 @@ configs:
     galaxy:
       database_connection: 'postgresql://{{.Values.postgresql.galaxyDatabaseUser}}:{{.Values.postgresql.galaxyDatabasePassword}}@{{ template "galaxy-postgresql.fullname" . }}/galaxy'
       integrated_tool_panel_config: "/galaxy/server/config/mutable/integrated_tool_panel.xml"
+      sanitize_whitelist_file: "/galaxy/server/config/mutable/sanitize_whitelist.txt"
       tool_config_file: "{{.Values.persistence.mountPath}}/config/editable_shed_tool_conf.xml,/galaxy/server/config/tool_conf.xml,{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_conf.xml"
       tool_data_table_config_path: "{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/byhand/location/tool_data_table_conf.xml"
       tool_dependency_dir: "{{ .Values.cvmfs.main.mountPath }}/deps"
@@ -172,7 +173,30 @@ configs:
       <build_mulled />
     </containers_resolvers>
   sanitize_whitelist.txt: |
+    toolshed.g2.bx.psu.edu/repos/crs4/taxonomy_krona_chart/taxonomy_krona_chart/2.6.1
+    toolshed.g2.bx.psu.edu/repos/crs4/taxonomy_krona_chart/taxonomy_krona_chart/2.6.1.1
+    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.52
+    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.63
+    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.64
+    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.65
+    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.67
+    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.68
+    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.69
     toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.72
+    toolshed.g2.bx.psu.edu/repos/engineson/multiqc/multiqc/1.0.0.0
+    toolshed.g2.bx.psu.edu/repos/iuc/dexseq/dexseq/1.20.1
+    toolshed.g2.bx.psu.edu/repos/iuc/macs2/macs2_callpeak/2.1.0.20140616.0
+    toolshed.g2.bx.psu.edu/repos/iuc/macs2/macs2_callpeak/2.1.0.20151222.0
+    toolshed.g2.bx.psu.edu/repos/iuc/meme_meme/meme_meme/4.11.0.0
+    toolshed.g2.bx.psu.edu/repos/iuc/meme_meme/meme_meme/4.11.0.1
+    toolshed.g2.bx.psu.edu/repos/iuc/meme_meme/meme_meme/4.11.1.0
+    toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.3.1
+    toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.5.0
+    toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.6
+    toolshed.g2.bx.psu.edu/repos/iuc/prestor_abseq3/prestor_abseq3/0.5.4
+    toolshed.g2.bx.psu.edu/repos/iuc/quast/quast/4.1.1
+    toolshed.g2.bx.psu.edu/repos/iuc/quast/quast/4.6.3
+    toolshed.g2.bx.psu.edu/repos/iuc/snpeff/snpEff/4.3+T.galaxy1
   build_sites.yml: |
     - type: ucsc
       file: "/cvmfs/data.galaxyproject.org/managed/location/ucsc_build_sites.txt"

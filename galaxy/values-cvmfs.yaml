@@ -163,6 +163,7 @@ configs:
       tool_config_file: "{{.Values.persistence.mountPath}}/config/editable_shed_tool_conf.xml,/galaxy/server/config/tool_conf.xml,{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_conf.xml"
       tool_data_table_config_path: "{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/byhand/location/tool_data_table_conf.xml"
       tool_dependency_dir: "{{.Values.persistence.mountPath}}/deps"
+      install_database_connection: "sqlite:///{{.Values.persistence.mountPath}}/universe.sqlite?isolation_level=IMMEDIATE:"
       builds_file_path: "{{.Values.cvmfs.data.mountPath}}/managed/location/builds.txt"
       datatypes_config_file: "{{ .Values.cvmfs.main.mountPath }}/config/datatypes_conf.xml"
       containers_resolvers_config_file: "/galaxy/server/config/container_resolvers_conf.xml"

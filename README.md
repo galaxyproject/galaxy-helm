@@ -83,7 +83,8 @@ current default values can be found in `values.yaml` file.
 | `rbac.enabled`                         | Enable Galaxy job RBAC                                                                                                                        |
 | `persistence.enabled`                  | Enable persistence using PVC                                                                                                                  |
 | `persistence.name`                     | Name of the PVC                                                                                                                               |
-| `persistence.storageClass`             | PVC Storage Class for Galaxy volume                                                                                                           |
+| `persistence.storageClass`             | PVC Storage Class for Galaxy volume (use either this or `existingClaim`)                                                                      |
+| `persistence.existingClaim`            | An existing PVC to be used for the Galaxy volume (use either this or `storageClass`)                                                          |
 | `persistence.accessMode`               | PVC access mode for the Galaxy volume                                                                                                         |
 | `persistence.size`                     | PVC storage request for the Galaxy volume, in GB                                                                                              |
 | `persistence.mountPath`                | Path where to mount the Galaxy volume                                                                                                         |
@@ -121,7 +122,11 @@ helm install --name galaxy -f values-cvmfs.yaml .
 
 The Galaxy Docker image stores all user data under `/galaxy/server/database`
 path of the container. Persistent Volume Claims (PVCs) are used to keep the
-data across deployments.
+data across deployments. It is possible to specify en existing PVC via
+`persistence.existingClaim`. Alternatively, a value for
+`persistence.storageClass` can be supplied to designate a desired storage
+class for dynamic provisioning of the necessary PVCs. If neither value is
+supplied, a default storage class as defined on the K8s cluster will be used.
 
 ## Production Settings
 

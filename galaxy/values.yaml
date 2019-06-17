@@ -117,7 +117,6 @@ configs:
               <param id="k8s_cleanup_job">always</param>
             </plugin>
         </plugins>
-        <handlers assign_with="db-skip-locked" />
         <destinations default="dynamic-k8s-dispatcher">
             <destination id="local" runner="local"/>
             <destination id="dynamic-k8s-dispatcher" runner="dynamic">

@@ -97,8 +97,12 @@ spec:
           configMap:
             name: {{ template "galaxy.fullname" . }}-job-rules
         - name: galaxy-data
+          {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-{{ .Values.persistence.name }}
+            claimName: {{ template "galaxy.pvcname" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
         {{- if .Values.cvmfs.enabled }}
         - name: cvmfs-gxy-main
           persistentVolumeClaim:

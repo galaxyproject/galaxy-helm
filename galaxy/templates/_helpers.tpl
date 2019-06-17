@@ -51,6 +51,17 @@ Add a trailing slash to a given path, if missing
 {{- end -}}
 
 {{/*
+Return which PVC to use
+*/}}
+{{- define "galaxy.pvcname" -}}
+{{- if .Values.persistence.existingClaim -}}
+{{- printf "%s" .Values.persistence.existingClaim -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name .Values.persistence.name -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Decide whether to create a new secret or use an existing secret.
 It creates a new secret if the value is the expected default, and assumes it's an
 existing secret in all other cases.

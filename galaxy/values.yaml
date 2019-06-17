@@ -25,9 +25,10 @@ rbac:
 
 persistence:
   enabled: true
-  name: &pvcname galaxy-pvc
+  name: galaxy-pvc
   # annotations: {}
   # storageClass:
+  # existingClaim:
   accessMode: ReadWriteMany
   size: 10Gi
   mountPath: /galaxy/server/database
@@ -104,7 +105,7 @@ configs:
             <plugin id="local" type="runner" load="galaxy.jobs.runners.local:LocalJobRunner" workers="4" />
             <plugin id="k8s" type="runner" load="galaxy.jobs.runners.kubernetes:KubernetesJobRunner">
               <param id="k8s_use_service_account">true</param>
-              <param id="k8s_persistent_volume_claims">{{ .Release.Name }}-{{ .Values.persistence.name }}:{{.Values.persistence.mountPath}}</param>
+              <param id="k8s_persistent_volume_claims">{{ template "galaxy.pvcname" . }}:{{.Values.persistence.mountPath}}</param>
               <param id="k8s_namespace">{{ .Release.Namespace }}</param>
               <!-- Must be DNS friendly and less than 20 characters -->
               <param id="k8s_galaxy_instance_id">{{ .Release.Name }}</param>

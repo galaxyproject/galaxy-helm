@@ -9,7 +9,7 @@ Galaxy on top of Kubernetes.
 
 ```console
 git clone https://github.com/CloudVE/galaxy-kubernetes.git
-cd galaxy-kubernetes
+cd galaxy-kubernetes/galaxy
 helm dependency update
 helm install .
 ```
@@ -47,7 +47,7 @@ production settings will likely want to enable it.
 1. Clone this repository and install the required dependency charts.
 ```console
 git clone https://github.com/CloudVE/galaxy-kubernetes.git
-cd galaxy-kubernetes
+cd galaxy-kubernetes/galaxy
 helm dependency update
 ```
 

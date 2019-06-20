@@ -5,7 +5,7 @@ accessibility, reproducibility, and transparency of primarily bioinformatics
 data. This repo contains [Helm charts](https://helm.sh/) for easily deploying
 Galaxy on top of Kubernetes.
 
-## TL;DR;
+## TL;DR
 
 ```console
 git clone https://github.com/CloudVE/galaxy-kubernetes.git
@@ -44,16 +44,17 @@ production settings will likely want to enable it.
 
 ## Installing the Chart
 
-1. Clone this repository and install the required dependency charts.
+1. Add cloudve repository to your helm installation. This repository contains
+packaged version of this (and other Galaxy-related) chart. For the most recent,
+dev version of the chart, use the `git clone` method mentioned above.
 ```console
-git clone https://github.com/CloudVE/galaxy-kubernetes.git
-cd galaxy-kubernetes/galaxy
-helm dependency update
+helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/master/
+helm repo update
 ```
 
 2. To install the chart with the release name `galaxy` (note the trailing dot):
 ```console
-helm install --name galaxy .
+helm install --name galaxy cloudve/galaxy
 ```
 In about 50 seconds, Galaxy will be available at https://localhost/galaxy/.
 Subsequent startup times are about 25 seconds.
@@ -135,6 +136,19 @@ called `values-cvmfs.yaml`. This mode of deployment configures Galaxy
 with the data from the CMVFS and replicates the functional capabilities of the
 [Galaxy Main server](usegalaxy.org). Note that this deployment mode does not
 work on a Mac laptop because of the failure to install the CVMFS chart.
+
+To install this version of the chart, we first need to install the Galaxy 
+CVMFS CSI chart, followed by the Galaxy chart. Depending on the setup of
+the cluster you have available, you may also need to supply values for the
+cluster storage classes or PVCs. 
+```console
+helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/master/
+helm repo update
+kubectl create namespace cvmfs
+helm install --name cvmfs --namespace cvmfs cloudve/galaxy-cvmfs-csi
+# Download values-cvmfs.yaml from this repo and update persistence as needed
+helm install --name galaxy -f values-cvmfs.yaml cloudve/galaxy
+```
 
 ## Horizontal Scaling
 

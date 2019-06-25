@@ -44,20 +44,22 @@ production settings will likely want to enable it.
 
 ## Installing the Chart
 
-1. Add cloudve repository to your helm installation. This repository contains
-packaged version of this (and other Galaxy-related) chart. For the most recent,
-dev version of the chart, use the `git clone` method mentioned above.
+1. Clone this repository and install the required dependency charts.
+
 ```console
-helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/master/
-helm repo update
+git clone https://github.com/CloudVE/galaxy-kubernetes.git
+cd galaxy-kubernetes/galaxy
+helm dependency update
 ```
 
 2. To install the chart with the release name `galaxy` (note the trailing dot):
+
 ```console
-helm install --name galaxy cloudve/galaxy
+helm install --name galaxy .
 ```
-In about 50 seconds, Galaxy will be available at https://localhost/galaxy/.
-Subsequent startup times are about 25 seconds.
+
+In about a minute, Galaxy will be available at the root URL of the Kubernetes
+URL format.
 
 ## Uninstalling the Chart
 
@@ -140,7 +142,8 @@ work on a Mac laptop because of the failure to install the CVMFS chart.
 To install this version of the chart, we first need to install the Galaxy 
 CVMFS CSI chart, followed by the Galaxy chart. Depending on the setup of
 the cluster you have available, you may also need to supply values for the
-cluster storage classes or PVCs. 
+cluster storage classes or PVCs.
+
 ```console
 helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/master/
 helm repo update
@@ -149,6 +152,10 @@ helm install --name cvmfs --namespace cvmfs cloudve/galaxy-cvmfs-csi
 # Download values-cvmfs.yaml from this repo and update persistence as needed
 helm install --name galaxy -f values-cvmfs.yaml cloudve/galaxy
 ```
+
+Note that this setup takes several minutes to start due to Galaxy loading all
+the tool definitions. Once started, Galaxy will be available under `/galaxy/`
+(note the trailing `/` as it is required).
 
 ## Horizontal Scaling
 

@@ -44,6 +44,34 @@ spec:
               subPath: config
             - name: galaxy-data
               mountPath: {{.Values.persistence.mountPath}}
+        - name: {{ .Chart.Name }}-initscripts
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command: ['sh', '-c', 'echo "Starting to run init scripts"
+          {{- range $key, $entry := .Values.initScripts -}}
+          {{- if $entry.applyToJob -}}
+           && echo "Running {{$key}}.sh" && sh /galaxy/initscripts/{{$key}}.sh
+          {{- end -}}
+          {{- end -}}
+          ']
+          volumeMounts:
+            {{- range $key, $entry := .Values.initScripts -}}
+            {{- if $entry.applyToJob }}
+            - name: galaxy-initscripts-{{$key}}
+              mountPath: /galaxy/initscripts
+              subPath: {{$key}}.sh
+            - name: galaxy-data
+              mountPath: {{ $.Values.persistence.mountPath }}
+            {{- end }}
+            {{- end }}
+        {{- range $key, $entry := .Values.initContainers -}}
+        {{- if $entry.applyToJob }}
+        - name: {{ $.Chart.Name}}-{{ $key }}
+          image: {{ tpl $entry.image $ }}
+          command: {{ tpl $entry.command $ }}
+          volumeMounts:
+            {{- tpl ($entry.volumeMounts | toYaml) $ | nindent 12 }}
+        {{- end }}
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}-job
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -92,6 +120,18 @@ spec:
           {{- else }}
           configMap:
             name: {{ template "galaxy.fullname" . }}-configs
+          {{- end }}
+          {{- range $key, $entry := .Values.initScripts -}}
+          {{- if $entry.applyToJob }}
+        - name: galaxy-initscripts-{{$key}}
+          {{- if $entry.useSecret }}
+          secret:
+            secretName: {{ include "galaxy.fullname" $ }}-{{$key}}
+          {{- else }}
+          configMap:
+            name: {{ include "galaxy.fullname" $ }}-{{$key}}
+          {{- end }}
+          {{- end }}
           {{- end }}
         - name: galaxy-job-rules
           configMap:

@@ -33,6 +33,40 @@ persistence:
   size: 10Gi
   mountPath: /galaxy/server/database
 
+initContainers:
+  myFirstContainer:
+    applyToJob: true
+    applyToWeb: true
+    image: myrepo/myimage:mytag
+    command: "['sh', '-c', 'cp my-path/to/my/file {{.Values.persistence.mountPath}}/custom-files']"
+    volumeMounts:
+      - name: galaxy-data
+        mountPath: "{{.Values.persistence.mountPath}}"
+  mySecondContainer:
+    applyToJob: true
+    applyToWeb: false
+    image: myrepo/myimage:mytag
+    command: "['sh', '-c', 'cp something {{.Values.persistence.mountPath}}/custom-files ']"
+    volumeMounts:
+      - name: galaxy-data
+        mountPath: "{{.Values.persistence.mountPath}}"
+
+initScripts:
+  myFirstScript:
+    useSecret: false
+    applyToJob: false
+    applyToWeb: true
+    content: |
+      #!/bin/sh
+      echo "Hello world" > {{.Values.persistence.mountPath}}/hello-world.txt
+  mySecondScript:
+    useSecret: true
+    applyToWeb: true
+    applyToJob: true
+    content: |
+      #!/bin/sh
+      chmod 400 {{.Values.persistence.mountPath}}/hello-world.txt
+
 extraEnv:
 # If using an existing secret, the postgresql.extraEnv.GALAXY_DB_USER_PASSWORD's
 # secretKeyRef must also be set to match. Leave defaults to create a new secret.

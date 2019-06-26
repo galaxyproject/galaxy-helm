@@ -36,8 +36,8 @@ with integrated Kubernetes. You will also need to install
 This chart relies on the features of other charts for common functionality.
 Most notably, this includes the Postgres chart for the database. In addition,
 the chart relies on the use of the CVMFS chart for linking the reference data
-to Galaxy and jobs. While technically the CVMFS is an optional dependency,
-production settings will likely want to enable it.
+to Galaxy and jobs. While, technically, CVMFS is an optional dependency,
+production settings will likely want it enabled.
 
 - Postgres
 - CVMFS (optional)
@@ -58,8 +58,8 @@ helm dependency update
 helm install --name galaxy .
 ```
 
-In about a minute, Galaxy will be available at the root URL of the Kubernetes
-URL format.
+In about a minute, Galaxy will be available at the root URL of your kubernetes
+cluster.
 
 ## Uninstalling the Chart
 
@@ -114,12 +114,24 @@ Setting Galaxy configuration file values requires the key name to be escaped:
 helm install --set-file "configs.galaxy\.yml"=/path/to/local/galaxy.yml
 ```
 
+To unset an existing file and revert to the container's default version:
+
+```console
+helm install --set-file "configs.job_conf\.xml"=null
+```
+
 Alternatively, a YAML file that specifies the values of the parameters can be
 provided when installing the chart. For example,
 
 ```console
 helm install --name galaxy -f values-cvmfs.yaml .
 ```
+
+To unset a config file, use the yaml null type:
+```
+configs:
+  job_conf.xml: ~
+ ```
 
 ## Data Persistence
 
@@ -129,18 +141,27 @@ data across deployments. It is possible to specify en existing PVC via
 `persistence.existingClaim`. Alternatively, a value for
 `persistence.storageClass` can be supplied to designate a desired storage
 class for dynamic provisioning of the necessary PVCs. If neither value is
-supplied, a default storage class as defined on the K8s cluster will be used.
+supplied, the default storage class for the K8s cluster will be used.
+
+We recommend a storage class that supports `ReadWriteMany`, such as the
+[nfs-provisioner](https://github.com/helm/charts/tree/master/stable/nfs-server-provisioner)
+as the data must be available to all nodes in the cluster.
+
+In addition, we recommend that you also set `postgresql.persistence.storageClass`
+to a high-speed, durable storage type that is `ReadWriteOnce`, such as an EBS
+volume.
 
 ## Production Settings
 
 This repo contains an additional _values_ file with the production settings,
 called `values-cvmfs.yaml`. This mode of deployment configures Galaxy
-with the data from the CMVFS and replicates the functional capabilities of the
+with the data from CMVFS and replicates the functional capabilities of the
 [Galaxy Main server](usegalaxy.org). Note that this deployment mode does not
-work on a Mac laptop because of the failure to install the CVMFS chart.
+work on a Mac laptop because of an unresolved issue in the CVMFS-CSI docker
+container.
 
 To install this version of the chart, we first need to install the Galaxy 
-CVMFS CSI chart, followed by the Galaxy chart. Depending on the setup of
+CVMFS-CSI chart, followed by the Galaxy chart. Depending on the setup of
 the cluster you have available, you may also need to supply values for the
 cluster storage classes or PVCs.
 

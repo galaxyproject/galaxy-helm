@@ -17,7 +17,8 @@ stringData: |
 kind: ConfigMap
 data: |
 {{- end }}
-  {{- tpl (tpl $entry.content $) $ | nindent 2 }}
+  {{- $key | nindent 2 }}.sh: |
+    {{- tpl (tpl $entry.content $) $ | nindent 4 }}
 ---
 {{- end }}
 {{- end }}

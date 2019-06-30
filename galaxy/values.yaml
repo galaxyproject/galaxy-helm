@@ -1,86 +1,172 @@
-# Default values for galaxy-chart.
+# A simple values file for galaxy.
 # This is a YAML-formatted file.
-# Declare name/value pairs to be passed into your templates.
-# name: value
+# Declare variables to be passed into your templates.
 
-# To run within minikube using a created persistent volume on /data
-#
-# helm install --set pv_minikube="yes"
-#
-# To set postgresql password for the galaxy user 
-# (note that if the deployment will use an existing postgre database folder, the same password needs to be used as originally).
-# 
-# helm install --set postgres.db_password="new-password"
-#
-# For using an ingress to galaxy.mydomain.dev use
-#
-# helm install --set use_ingress="yes",domain="mydomain.dev"
-#
-# For using an ingress to galaxy.mydomain.dev using an external ingress controller, use:
-#
-# helm install --set use_ingress="yes",domain="mydomain.dev",external_ingress_controller="yes"
-#
-# For setting the admin user
-#
-# helm install --set galaxy_admin_email="user@host.domain",galaxy_admin_password="mypasswd",galaxy_api_key="aksjdhas"
-#
-# To avoid creating the PVC (because is already there or created by another chart
-#
-# helm install --set galaxy_create_pvc=false
-#
-# To avoid altogether using a PVC for postgres (files are written inside the container, pod dies, Galaxy state is lost)
-#
-# helm install --set postgres.postgres_pvc=false
-#
-# To set a new destination for the tools directory. This is by default set to a location inside the PVC
-#
-# helm install --set galaxy_tools_dest="/path/to/tools"
-#
-# Set up supplementalGroups to GID 1000 for Kubernetes pods to write on privileged NFS. Needs to be an integer.
-#
-# helm install --set k8s_supp_group=1000
-#
-# Set up fsGroups to GID 2300 for Kubernetes to write on privileged file system. Needs to be an integer
-#
-# helm install --set ks8_fs_group=2300
-#
-# For development mode, having config, tools and tools galaxy folders on <your_folder>, run with 
-# helm install --set development_folder=<your_folder> galaxy-simple
-#
-# For setting up an SMTP server for sending mail
-#
-# helm install --set smtp_server="your-server:port",smtp_username="your-user",smtp_password="your-pass",email_from="email-from@smtp-domain",instance_resource_url="https://your-galaxy-url",smtp_ssl=True
-#
-# Above instructions can be used together, just concatenate with a comma.
-# 
-# 
-# Galaxy RC
-galaxy_image_registry: "container-registry.phenomenal-h2020.eu/"
-galaxy_image: "phnmnl/galaxy-k8s-runtime"
-galaxy_image_tag: ":latest"
-galaxy_pull_policy: "IfNotPresent"
-galaxy_pvc: "galaxy-pvc"
-galaxy_create_pvc: true
-galaxy_pvc_capacity: "15Gi"
-galaxy_metadata_name: "galaxy-k8s"
-galaxy_label_app: "galaxy-k8s"
-galaxy_internal_port: 8080
-galaxy_node_port_exposed: 30700
-galaxy_admin_email: ""
-galaxy_admin_username: "admin"
-galaxy_admin_password: ""
-galaxy_api_key: ""
-galaxy_tools_dest: "/opt/galaxy_data"
-galaxy_backend_postgres: false
+image:
+  repository: galaxy/galaxy
+  tag: 19.05
+  pullPolicy: IfNotPresent
 
-k8s_supp_groups: ""
+nameOverride: ""
+fullnameOverride: ""
 
-# Ingress
-domain: "mydomain.dev"
+service:
+  type: ClusterIP
+  port: 8000
 
-postgres_for_galaxy:
-        db_password: "mypassword"
-        postgres_pvc: "galaxy-pvc" 
+webHandlers:
+  replicaCount: 1
 
-smtp_ssl: "False"
+jobHandlers:
+  replicaCount: 1
 
+rbac:
+  enabled: true
+
+persistence:
+  enabled: true
+  name: galaxy-pvc
+  # annotations: {}
+  # storageClass:
+  # existingClaim:
+  accessMode: ReadWriteMany
+  size: 10Gi
+  mountPath: /galaxy/server/database
+
+extraEnv:
+# If using an existing secret, the postgresql.extraEnv.GALAXY_DB_USER_PASSWORD's
+# secretKeyRef must also be set to match. Leave defaults to create a new secret.
+  - name: GALAXY_DB_USER_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: "{{ .Release.Name }}-galaxy-db-password"
+        key: galaxy-db-password
+
+ingress:
+  enabled: true
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  path: /
+  hosts:
+    - ~
+    # - host: ~
+    #   paths: ["/"]
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+postgresql:
+  enabled: true
+  galaxyDatabaseUser: galaxydbuser
+  galaxyDatabasePassword: 42
+  nameOverride: galaxy-postgres
+  initdbScriptsSecret: "{{ .Release.Name }}-galaxy-initdb"
+  persistence:
+    enabled: true
+  extraEnv:
+    - name: GALAXY_DB_USER_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: "{{ .Release.Name }}-galaxy-db-password"
+          key: galaxy-db-password
+
+cvmfs:
+  enabled: false
+
+# When this flag is set to true, all configs will be set in secrets,
+# when it is set to false, all configs will be set in configmaps
+useSecretConfigs: false
+
+# All files will be relative to `/galaxy/server/config/` directory
+configs:
+  job_conf.xml: |
+    <job_conf>
+        <plugins>
+            <plugin id="local" type="runner" load="galaxy.jobs.runners.local:LocalJobRunner" workers="4" />
+            <plugin id="k8s" type="runner" load="galaxy.jobs.runners.kubernetes:KubernetesJobRunner">
+              <param id="k8s_use_service_account">true</param>
+              <param id="k8s_persistent_volume_claims">{{ template "galaxy.pvcname" . }}:{{.Values.persistence.mountPath}}</param>
+              <param id="k8s_namespace">{{ .Release.Namespace }}</param>
+              <!-- Must be DNS friendly and less than 20 characters -->
+              <param id="k8s_galaxy_instance_id">{{ .Release.Name }}</param>
+              <param id="k8s_run_as_user_id">101</param>
+              <param id="k8s_run_as_group_id">101</param>
+              <param id="k8s_fs_group_id">101</param>
+              <param id="k8s_supplemental_group_id">101</param>
+              <param id="k8s_pull_policy">IfNotPresent</param>
+              <param id="k8s_cleanup_job">always</param>
+            </plugin>
+        </plugins>
+        <destinations default="dynamic-k8s-dispatcher">
+            <destination id="local" runner="local"/>
+            <destination id="dynamic-k8s-dispatcher" runner="dynamic">
+              <param id="type">python</param>
+              <param id="function">k8s_container_mapper</param>
+              <param id="docker_default_container_id">{{ .Values.image.repository }}:{{ .Values.image.tag }}</param>
+              <param id="docker_enabled">true</param>
+            </destination>
+        </destinations>
+    </job_conf>
+  galaxy.yml: |
+    uwsgi:
+      virtualenv: /galaxy/server/.venv
+      processes: 1
+      http: 0.0.0.0:8080
+      static-map: /static/style=/galaxy/server/static/style/blue
+      static-map: /static=/galaxy/server/static
+      static-map: /favicon.ico=/galaxy/server/static/favicon.ico
+      pythonpath: /galaxy/server/lib
+      thunder-lock: true
+      manage-script-name: true
+      mount: {{.Values.ingress.path}}=galaxy.webapps.galaxy.buildapp:uwsgi_app()
+      buffer-size: 16384
+      offload-threads: 2
+      threads: 4
+      die-on-term: true
+      master: true
+      hook-master-start: unix_signal:2 gracefully_kill_them_all
+      enable-threads: true
+      py-call-osafterfork: true
+    galaxy:
+      database_connection: 'postgresql://{{.Values.postgresql.galaxyDatabaseUser}}:{{.Values.postgresql.galaxyDatabasePassword}}@{{ template "galaxy-postgresql.fullname" . }}/galaxy'
+      integrated_tool_panel_config: "/galaxy/server/config/mutable/integrated_tool_panel.xml"
+      containers_resolvers_config_file: "/galaxy/server/config/container_resolvers_conf.xml"
+      job_config_file: "/galaxy/server/config/job_conf.xml"
+  container_resolvers_conf.xml: |
+    <containers_resolvers>
+      <explicit />
+      <mulled />
+      <build_mulled />
+    </containers_resolvers>
+
+# Additional dynamic rules to map into the container.
+jobs:
+  rules:
+    container-mapper-rules.yml: |
+      mappings:
+        - tool_ids:
+            - sort1
+          container:
+            docker_container_id_override: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+    k8s-container-mapper.py: |
+      {{- (.Files.Get "files/rules/k8s-container-mapper.py") }}

@@ -1,5 +1,12 @@
+## Here, helm keeps track of the dependencies that are required for the
+## application. Dependencies should be listed here, then the dependencies
+## updated with:
+##
+##    helm dep update
+##
+## and the requirements.lock file committed.
 dependencies:
-      - name: postgres_for_galaxy
-        repository: https://pcm32.github.io/galaxy-helm-charts
-        version: 0.1.1
-        condition: galaxy_backend_postgres
+    - name: postgresql
+      repository: https://kubernetes-charts.storage.googleapis.com/
+      version: 5.3.6
+      condition: postgresql.enabled

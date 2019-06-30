@@ -1,0 +1,22 @@
+apiVersion: v1
+metadata:
+  name: {{ include "galaxy.fullname" . }}-configs
+  labels:
+    app.kubernetes.io/name: {{ include "galaxy.name" . }}
+    helm.sh/chart: {{ include "galaxy.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- if .Values.useSecretConfigs }}
+kind: Secret
+type: Opaque
+stringData:
+{{- else }}
+kind: ConfigMap
+data:
+{{- end }}
+  {{- range $key, $entry := .Values.configs -}}
+  {{- if $entry -}}
+  {{- $key | nindent 2 }}: |
+    {{- tpl (tpl $entry $) $ | nindent 4 -}}
+  {{- end }}
+  {{- end }}

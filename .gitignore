@@ -91,3 +91,5 @@ ENV/
 # mvim
 *.swp
 *.swo
+
+galaxy/charts/

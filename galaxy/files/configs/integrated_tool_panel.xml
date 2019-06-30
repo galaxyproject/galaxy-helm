@@ -1,0 +1,149 @@
+<?xml version="1.0"?>
+<toolbox>
+    <!--
+    This is Galaxy's integrated tool panel and should be modified directly only for
+    reordering tools inside a section. Each time Galaxy starts up, this file is
+    synchronized with the various tool config files: tools, sections and labels
+    added to one of these files, will be added also here in the appropriate place,
+    while elements removed from the tool config files will be correspondingly
+    deleted from this file.
+    To modify locally managed tools (e.g. from tool_conf.xml) modify that file
+    directly and restart Galaxy. Whenever possible Tool Shed managed tools (e.g.
+    from shed_tool_conf.xml) should be managed from within the Galaxy interface or
+    via its API - but if changes are necessary (such as to hide a tool or re-assign
+    its section) modify that file and restart Galaxy.
+    For the Galaxy Helm chart deployment, the config/integrated_tool_panel.xml
+    is used as a template for organizing sections while the rendered file can
+    be found as config/mutable/integrated_tool_panel.xml.
+    -->
+    <section id="get_data" name="Get Data" version="">
+    </section>
+    <section id="send_data" name="Send Data" version="">
+    </section>
+    <section id="collection_operations" name="Collection Operations" version="">
+    </section>
+    <label id="general_text_label" text="General Text Tools" version="" />
+    <section id="text_manipulation" name="Text Manipulation" version="">
+    </section>
+    <section id="filter_and_sort" name="Filter and Sort" version="">
+        <label id="gff" text="GFF" version="" />
+    </section>
+    <section id="join_subtract_and_group" name="Join, Subtract and Group" version="">
+    </section>
+    <section id="datamash" name="Datamash" version="">
+    </section>
+    <label id="genomic_file_manipulation_label" text="Genomic File Manipulation" version="" />
+    <section id="fasta_fastq" name="FASTA/FASTQ" version="">
+    </section>
+    <section id="fastq_quality_control" name="FASTQ Quality Control" version="">
+    </section>
+    <section id="sam_bam" name="SAM/BAM" version="">
+        <label id="samtools_label" text="SAMTools" version="" />
+        <label id="bamtools_label" text="BAMTools" version="" />
+    </section>
+    <section id="bed" name="BED" version="">
+        <label id="bedtools_label" text="BEDTools" version="" />
+    </section>
+    <section id="vcf_bcf" name="VCF/BCF" version="">
+        <label id="vcflib_label" text="vcflib" version="" />
+        <label id="vcftools_label" text="VCFTools" version="" />
+        <label id="bcftools_label" text="BCFTools" version="" />
+    </section>
+    <section id="nanopore" name="Nanopore" version="">
+        <label id="poretools_label" text="poretools" version="" />
+    </section>
+    <section id="convert_formats" name="Convert Formats" version="">
+    </section>
+    <section id="liftOver" name="Lift-Over" version="">
+    </section>
+    <label id="common_genomics_tools_label" text="Common Genomics Tools" version="" />
+    <section id="operate_on_genomic_intervals" name="Operate on Genomic Intervals" version="">
+    </section>
+    <section id="fetch_sequences_alignments" name="Fetch Sequences/Alignments" version="">
+    </section>
+    <label id="genomics_analysis_label" text="Genomics Analysis" version="" />
+    <section id="assembly" name="Assembly" version="">
+    </section>
+    <section id="annotation" name="Annotation" version="">
+    </section>
+    <section id="mapping" name="Mapping" version="">
+    </section>
+    <section id="variant_calling" name="Variant Calling" version="">
+    </section>
+    <section id="chip_seq" name="ChIP-seq" version="">
+    </section>
+    <section id="rna_seq" name="RNA-seq" version="">
+        <label id="structurefold_label" text="RNA Structure Prediction" version="" />
+    </section>
+    <section id="multiple_alignments" name="Multiple Alignments" version="">
+    </section>
+    <section id="phenotype_association" name="Phenotype Association" version="">
+    </section>
+    <section id="regional_variation" name="Regional Variation" version="">
+    </section>
+    <section id="str_fm_microsatellite_analysis" name="STR-FM: Microsatellite Analysis" version="">
+    </section>
+    <section id="motifs" name="Motif" version="">
+    </section>
+    <section id="chromosome_conformation" name="Chromosome Conformation" version="">
+        <label id="hifive" text="HiFive" version="" />
+    </section>
+    <label id="metagenomics_label" text="Metagenomics" version="" />
+    <section id="metagenomic_analysis" name="Metagenomic Analysis" version="">
+    </section>
+    <section id="mothur" name="Mothur" version="">
+    </section>
+    <label id="genomics_toolkits_label" text="Genomics Toolkits" version="" />
+    <section id="picard" name="Picard" version="">
+    </section>
+    <section id="deeptools" name="deepTools" version="">
+    </section>
+    <section id="emboss" name="EMBOSS" version="">
+    </section>
+    <section id="gatk" name="GATK" version="">
+    </section>
+    <section id="ncbi_blast" name="NCBI BLAST+" version="">
+    </section>
+    <section id="rseqc" name="RSeQC" version="">
+    </section>
+    <section id="mimodd" name="MiModD" version="">
+    </section>
+    <section id="du_novo" name="Du Novo" version="">
+    </section>
+    <section id="seqtk" name="Seqtk" version="">
+    </section>
+    <section id="transit" name="TRANSIT" version="">
+    </section>
+    <label id="miscellaneous_tools_label" text="Miscellaneous Tools" version="" />
+    <section id="genome_diversity" name="Genome Diversity" version="">
+        <label id="gd_init" text="Basic analyses" version="" />
+        <label id="gd_pop" text="Population structure" version="" />
+        <label id="gd_fst_ss" text="FST and selective sweeps" version="" />
+        <label id="gd_kegg" text="KEGG and GO" version="" />
+        <label id="gd_geno" text="Design genotyping studies" version="" />
+        <label id="gd_kin" text="Kinship" version="" />
+        <label id="gd_mito" text="Mitochondria" version="" />
+    </section>
+    <section id="iwtomics" name="IWTomics" version="">
+    </section>
+    <section id="presto" name="pRESTO" version="">
+    </section>
+    <section id="planttribes" name="PlantTribes" version="">
+    </section>
+    <label id="statistics_and_visualization_label" text="Statistics and Visualization" version="" />
+    <section id="statistics" name="Statistics" version="">
+        <label id="multiple_regression_label" text="Multiple Regression" version="" />
+        <label id="multivariate_analysis_label" text="Multivariate Analysis" version="" />
+    </section>
+    <section id="graph_display_data" name="Graph/Display Data" version="">
+    </section>
+    <label id="deprecated_tools_label" text="Deprecated Tools" version="" />
+    <section id="rna_analysis_deprecated" name="RNA Analysis (deprecated)" version="">
+    </section>
+    <section id="cloudmap_deprecated" name="CloudMap (deprecated)" version="">
+    </section>
+    <section id="metagenomic_analysis_deprecated" name="Metagenomic Analysis (deprecated)" version="">
+    </section>
+    <section id="textutil" name="Text Manipulation" version="">
+    </section>
+</toolbox>

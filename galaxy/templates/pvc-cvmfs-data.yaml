@@ -1,0 +1,18 @@
+{{- if .Values.cvmfs.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "galaxy.fullname" . }}-cvmfs-gxy-data-pvc
+  labels:
+    app.kubernetes.io/name: {{ include "galaxy.name" . }}
+    helm.sh/chart: {{ include "galaxy.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  accessModes:
+  - ReadOnlyMany
+  resources:
+    requests:
+      storage: {{ .Values.cvmfs.data.pvc.storage }}
+  storageClassName: cvmfs-gxy-data
+{{- end }}

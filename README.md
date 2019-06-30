@@ -1,109 +1,195 @@
-# Galaxy Helm Charts
+# Galaxy Helm Chart (v3)
 
-This repo contains [Helm charts]() for easily deploying Galaxy on top of Kubernetes, in a number of scenarios, as described below. The two minimal requirements to be able to use them are:
-- Helm installed
-- Access to a Kubernetes cluster
-  - For development purposes or local tests, the local Minikube environment can be used.
-  
-## Available Helm Charts
+[Galaxy](https://galaxyproject.org/) is a data analysis platform focusing on
+accessibility, reproducibility, and transparency of primarily bioinformatics
+data. This repo contains [Helm charts](https://helm.sh/) for easily deploying
+Galaxy on top of Kubernetes.
 
-Previously functionality was split in two charts, they have now been unified into the `galaxy` chart, which merges all functionality available on `galaxy-simple` and `galaxy-postgres-chart`, which are deprecated now. Newer features, such as privileged file system support, are only supported on the `galaxy` chart. The new `galaxy` chart can be used for development, testing and production environments and is highly configurable.
+## TL;DR
 
-## Helm for the first time
-
-If using helm for the first time, you will need to initialize the helm on the cluster and add the helm repo to the local helm directories:
-
-```
-$ helm init
-$ helm list # call a few times until no error is shown, this is to wait for the tiller pod from helm to be running on the cluster.
-$ helm repo add galaxy-helm-repo https://pcm32.github.io/galaxy-helm-charts
+```console
+git clone https://github.com/CloudVE/galaxy-kubernetes.git
+cd galaxy-kubernetes/galaxy
+helm dependency update
+helm install .
 ```
 
-if you have done this once in the past, you might need, from time to time, to update the local repo, by doing:
+## Introduction
 
-```
-$ helm repo update
-```
-  
-## Deployment scenarios
+This [Helm chart]() bootstraps a Galaxy deployment on a
+[Kubernetes](https://kubernetes.io/) cluster. The chart allows application
+configuration changes, updates, upgrades, and rollbacks.
 
-Here we show different examples on how to deploy Galaxy on Kubernetes with these helm charts for Galaxy. Many of the options above can be combined, it only requires the correct settings on the `--set` part.
+## Prerequisites
 
-### SQLite local deploy on Minikube
+- Kubernetes 1.10+
+- Helm 2.13+
 
-```
-$ helm install --set pv_minikube="yes" galaxy-helm-repo/galaxy
-```
+You will need a Kubernetes and Helm installation; the easiest option for
+testing and development purposes is to install
+[Docker Desktop](https://www.docker.com/products/docker-desktop), which comes
+with integrated Kubernetes. You will also need to install
+[Helm](https://github.com/helm/helm#install).
 
-This will produce an instance accessible on the minukube ip (normally 192.168.99.100), port 30700.
+## Dependency Charts
 
-### SQLite local deploy on Minikube for developers
+This chart relies on the features of other charts for common functionality.
+Most notably, this includes the Postgres chart for the database. In addition,
+the chart relies on the use of the CVMFS chart for linking the reference data
+to Galaxy and jobs. While, technically, CVMFS is an optional dependency,
+production settings will likely want it enabled.
 
-If you are developing tools for Galaxy, and want to try them on the local setup shown above, you can override the contents of the tools and config folders used by the Galaxy instance to reflect your own settings:
+- Postgres
+- CVMFS (optional)
 
-```
-$ helm install --set pv_minikube="yes",development_folder="/path/to/your/galaxy-folder-where-config-and-tools-folders-exists" galaxy-helm-repo/galaxy
-```
+## Installing the Chart
 
-There are some variations on how you provide that `development_folder` path based on the OS where you're hosting minikube.
+1. Clone this repository and install the required dependency charts.
 
-On **macOS**, minikube mounts the host `/Users` onto `/Users` on the minikube VM, making all home folders available. This means that as long as the `/path/to/your/galaxy-folder` is within your home, the path to be used is transparently the same.
-
-On **Linux**, minikube mounts the host `/home` onto `/hosthome` on the minikube VM, which means that if your galaxy folder is available somewhere inside your home directory, it will be available to the Kubernetes cluster, yet the path given to Helm needs to reflect what is visible inside the minikube VM. So, if your Galaxy folder (containing config and tools folder) is available at `/home/jdoe/devel/galaxy`, then the path given for `development_folder` should be `/hosthome/jdoe/devel/galaxy` (please notice the replacement of `/home` with `/hosthome`.
-
-On **Windows**, the mount point inside the minikube VM changes from `C:\Users` to `/c/Users` (so files on `C:\Users\jdoe\devel\galaxy` would be visible on minikube and Kubernetes on `/c/Users/jdoe/devel/galaxy`) so the `development_folder` variable needs to be set accordingly.
-
-This will produce an instance accessible on the minukube ip (normally 192.168.99.100), port 30700.
-
-This will deploy an SQLite backend, so your Galaxy config files need to be coherent with that. If your configuration expects a Postgres backend, there are other configurations below that serve this purpose. 
-
-In the current settings, if you do an `minikube ssh` to go inside the VM, you will notice that all the Galaxy operation files are available within `/data/galaxy_data` (for debugging purposes of tools for instance).
-
-### SQLite local on Minikube using a different Galaxy container
-
-```
-$ helm install --set pv_minikube="yes",galaxy_image_registry="",galaxy_image="pcm32/galaxy-k8s-runtime",galaxy_image_tag=":v1" galaxy-helm-repo/galaxy
+```console
+git clone https://github.com/CloudVE/galaxy-kubernetes.git
+cd galaxy-kubernetes/galaxy
+helm dependency update
 ```
 
-This will try to pull the image `pcm32/galaxy-k8s-runtime` from Dockerhub (which needs to be a Galaxy container compliant with our setup). If you are using a locally tagged image which you haven't pushed to Dockerhub, you can add `galaxy_pull_policy="IfNotPresent"` to the set commands. For working with local images, you will probably want to redirect your host's docker client to the minikube VM's docker engine, and use that to build the images. See the minikube documentation for more details on that.
+2. To install the chart with the release name `galaxy` (note the trailing dot):
 
-### Postgresql local deploy on Minikube
-
-```
-$ helm install --debug --set pv_minikube="yes",galaxy_backend_postgres=true galaxy-helm-repo/galaxy
+```console
+helm install --name galaxy .
 ```
 
-This will produce an instance accessible on the minukube ip (normally 192.168.99.100), port 30700. Postgresql will be the backend, running on a separate container. 
+In about a minute, Galaxy will be available at the root URL of your kubernetes
+cluster.
 
-### With DNS set through an Ingress
+## Uninstalling the Chart
 
-If you have a domain name pointing to the IP of your cluster, you can make use of Kubernetes Ingress API object to redirect a particular "hostname" within that domain to your Galaxy running inside the Kubernetes cluster. 
+To uninstall/delete the `galaxy` deployment, run:
 
-```
-$ helm install --set use_ingress="yes",hostname="galaxy",domain="mydomain.dev",galaxy_backend_postgres=true galaxy-helm-repo/galaxy
-```
-
-This will make you Galaxy service available on http://galaxy.mydomain.dev. This setup is using an internally provisioned `nginx` ingress controller/load balancer. If your Kubernetes cluster already has an Ingress controller, you can add the variable `external_ingress_controller="yes"` to avoid using the one included on this chart. While this example is given in the postgre section, it can be used as well with an sqlite backend.
-
-### Securing the admin user
-
-Provisioning instances that are publicly available might require, for security purposes, to set up an admin user for the Galaxy instance. This will also provoke that users can no longer sign up on their own, and it will require the newly set administrator to grant access. If this fits your setup needs, you can invoke the deployment in the following way:
-
-```
-$ helm install --set galaxy_admin_email="user@domain",galaxy_admin_password="six-character-password",galaxy_api_key="qwertyuio" galaxy-helm-repo/galaxy
+```console
+helm del --purge galaxy
 ```
 
-This setup presumes that there is an available Persistent Volume provisioned which is concurrently accessible for read/write from all nodes (basically a shared filesystem, such as NFS or GlusterFS). This will create the instance, insert the API key, create the user with that password and set its email as admin. The injected API key will be removed then. Previously explained variables can be used as well with the ones introduced in this point.
+## Configuration
 
-### Documentation on additional functionality
+The following table lists the configurable parameters of the Galaxy chart. The
+current default values can be found in `values.yaml` file.
 
-More functionality in terms of variables that can be set can be found documented as part of the `values.yaml` file available inside each chart, or by invoking:
+| Parameter                              | Description                                                                                                                                   |
+|----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| `image.repository`                     | The repository and name of the Docker image for Galaxy pointing to Docker Hub.                                                                |
+| `image.tag`                            | Galaxy image tag / version                                                                                                                    |
+| `image.pullPolicy`                     | Galaxy image pull policy                                                                                                                      |
+| `service.type`                         | Kubernetes Service type                                                                                                                       |
+| `service.port`                         | Galaxy service port                                                                                                                           |
+| `webHandlers.replicaCount`             | The number of replicas for the Galaxy web handlers                                                                                            |
+| `jobHandlers.replicaCount`             | The number of replicas for the Galaxy job handlers                                                                                            |
+| `rbac.enabled`                         | Enable Galaxy job RBAC                                                                                                                        |
+| `persistence.enabled`                  | Enable persistence using PVC                                                                                                                  |
+| `persistence.name`                     | Name of the PVC                                                                                                                               |
+| `persistence.storageClass`             | PVC Storage Class for Galaxy volume (use either this or `existingClaim`)                                                                      |
+| `persistence.existingClaim`            | An existing PVC to be used for the Galaxy volume (use either this or `storageClass`)                                                          |
+| `persistence.accessMode`               | PVC access mode for the Galaxy volume                                                                                                         |
+| `persistence.size`                     | PVC storage request for the Galaxy volume, in GB                                                                                              |
+| `persistence.mountPath`                | Path where to mount the Galaxy volume                                                                                                         |
+| `extraEnv     `                        | Any extra environment variables you would like to pass on to the pod                                                                          |
+| `ingress.enabled`                      | Enable Kubernetes ingress                                                                                                                     |
+| `ingress.path`                         | Path where Galaxy application will be hosted                                                                                                  |
+| `ingress.hosts`                        | Cluster hosts where Galaxy will be available                                                                                                  |
+| `useSecretConfigs`                     | Enable Kubernetes Secrets for all config maps                                                                                                 |
+| `configs.*`                            | Galaxy configuration files and values for each of the files. The provided value represent the entire content of the given configuration file. |
+| `jobs.rules`                           | Galaxy dynamic job rules                                                                                                                      |
 
+Specify each parameter using the `--set key=value[,key=value]` argument to
+`helm install`. For example,
+
+```console
+helm install --name galaxy --set persistence.size=50 .
 ```
-$ helm inspect galaxy-helm-repo/galaxy
+
+The above command sets the Galaxy persistent volume to 50GB.
+
+Setting Galaxy configuration file values requires the key name to be escaped:
+
+```console
+helm install --set-file "configs.galaxy\.yml"=/path/to/local/galaxy.yml
 ```
 
+To unset an existing file and revert to the container's default version:
 
-# Funding
+```console
+helm install --set-file "configs.job_conf\.xml"=null
+```
 
-Most of this work, including the Galaxy-Kubernetes integration, has been contributed to the community thanks to the funding of the European Comission (EC), through the PhenoMeNal H2020 Project, grant agreement number 654241.
+Alternatively, a YAML file that specifies the values of the parameters can be
+provided when installing the chart. For example,
+
+```console
+helm install --name galaxy -f values-cvmfs.yaml .
+```
+
+To unset a config file, use the yaml null type:
+```
+configs:
+  job_conf.xml: ~
+ ```
+
+## Data Persistence
+
+The Galaxy Docker image stores all user data under `/galaxy/server/database`
+path of the container. Persistent Volume Claims (PVCs) are used to keep the
+data across deployments. It is possible to specify en existing PVC via
+`persistence.existingClaim`. Alternatively, a value for
+`persistence.storageClass` can be supplied to designate a desired storage
+class for dynamic provisioning of the necessary PVCs. If neither value is
+supplied, the default storage class for the K8s cluster will be used.
+
+We recommend a storage class that supports `ReadWriteMany`, such as the
+[nfs-provisioner](https://github.com/helm/charts/tree/master/stable/nfs-server-provisioner)
+as the data must be available to all nodes in the cluster.
+
+In addition, we recommend that you also set `postgresql.persistence.storageClass`
+to a high-speed, durable storage type that is `ReadWriteOnce`, such as an EBS
+volume.
+
+## Production Settings
+
+This repo contains an additional _values_ file with the production settings,
+called `values-cvmfs.yaml`. This mode of deployment configures Galaxy
+with the data from CMVFS and replicates the functional capabilities of the
+[Galaxy Main server](usegalaxy.org). Note that this deployment mode does not
+work on a Mac laptop because of an unresolved issue in the CVMFS-CSI docker
+container.
+
+To install this version of the chart, we first need to install the Galaxy 
+CVMFS-CSI chart, followed by the Galaxy chart. Depending on the setup of
+the cluster you have available, you may also need to supply values for the
+cluster storage classes or PVCs.
+
+```console
+helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/master/
+helm repo update
+kubectl create namespace cvmfs
+helm install --name cvmfs --namespace cvmfs cloudve/galaxy-cvmfs-csi
+# Download values-cvmfs.yaml from this repo and update persistence as needed
+helm install --name galaxy -f values-cvmfs.yaml cloudve/galaxy
+```
+
+Note that this setup takes several minutes to start due to Galaxy loading all
+the tool definitions. Once started, Galaxy will be available under `/galaxy/`
+(note the trailing `/` as it is required).
+
+## Horizontal Scaling
+
+The Galaxy application can be horizontally scaled for the web and job handlers
+by setting the desired values of the `webHandlers.replicaCount` and
+`jobHandlers.replicaCount` configuration options.
+
+## Funding
+
+- _Version 3_: Galaxy Project, Genomics Virtual Laboratory (GVL)
+
+- _Version 2_: Genomics Virtual Laboratory (GVL), Galaxy Project, and European
+  Commission (EC) H2020 Project PhenoMeNal, grant agreement number 654241.
+
+- _Version 1_: European Commission (EC) H2020 Project PhenoMeNal, grant
+  agreement number 654241.

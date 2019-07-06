@@ -58,8 +58,17 @@ spec:
 {{- end }}
             - name: GALAXY_CONFIG_DATABASE_CONNECTION
               value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy
-          command: ["python", "/galaxy/server/scripts/galaxy-main"]
-          args: ["-c", "/galaxy/server/config/galaxy.yml", "--server-name", "$(POD_NAME)", "--attach-to-pool", "job-handlers"]
+#          command: ["python", "/galaxy/server/scripts/galaxy-main"]
+          command: ["/bin/bash", "-c", "python /galaxy/server/scripts/galaxy-main -c /galaxy/server/config/galaxy.yml --server-name $(POD_NAME) --attach-to-pool job-handlers 2>&1 | tee /tmp/log"]
+#          args: ["-c", "/galaxy/server/config/galaxy.yml", "--server-name", "$(POD_NAME)", "--attach-to-pool", "job-handlers"]
+          readinessProbe:
+            exec:
+              command:
+                - "/bin/bash"
+                - "-c"
+                - "tail -n 10 /tmp/log | grep \"is running\""
+#            initialDelaySeconds: 30
+#            periodSeconds: 15
           volumeMounts:
             {{- range $key,$entry := .Values.configs }}
             - name: galaxy-conf-files

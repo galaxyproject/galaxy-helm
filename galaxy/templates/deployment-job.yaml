@@ -64,7 +64,10 @@ spec:
               command:
                 - "/bin/bash"
                 - "-c"
-                - "tail -n 10 /tmp/log | grep \"is running\""
+                - "grep \"is running\" /tmp/log"
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 70
           volumeMounts:
             {{- range $key,$entry := .Values.configs }}
             - name: galaxy-conf-files

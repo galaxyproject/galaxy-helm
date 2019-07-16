@@ -8,8 +8,8 @@ Galaxy on top of Kubernetes.
 ## TL;DR
 
 ```console
-git clone https://github.com/CloudVE/galaxy-kubernetes.git
-cd galaxy-kubernetes/galaxy
+git clone https://github.com/galaxyproject/galaxy-helm.git
+cd galaxy-helm/galaxy
 helm dependency update
 helm install .
 ```
@@ -47,8 +47,8 @@ production settings will likely want it enabled.
 1. Clone this repository and install the required dependency charts.
 
 ```console
-git clone https://github.com/CloudVE/galaxy-kubernetes.git
-cd galaxy-kubernetes/galaxy
+git clone https://github.com/galaxyproject/galaxy-helm.git
+cd galaxy-helm/galaxy
 helm dependency update
 ```
 

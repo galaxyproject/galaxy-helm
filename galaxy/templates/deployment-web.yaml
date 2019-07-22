@@ -45,13 +45,12 @@ spec:
             - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/
               subPath: config
-        {{- range $key, $entry := .Values.initContainers -}}
-        {{- if $entry.applyToWeb }}
-        - name: {{ $.Chart.Name }}-{{ $key }}
-          image: {{ tpl $entry.image $ }}
-          command: {{ tpl $entry.command $ }}
-          volumeMounts:
-            {{- tpl ($entry.volumeMounts | toYaml) $ | nindent 12 }}
+        {{- if .Values.extraInitContainers -}}
+        {{- range $each := .Values.extraInitContainers -}}
+        {{- if $each.applyToWeb -}}
+        {{- print "- " | nindent 8 -}}
+        {{- tpl ((unset (unset $each "applyToJob") "applyToWeb") | toYaml | indent 10 | trim) $ -}}
+        {{- end }}
         {{- end }}
         {{- end }}
       containers:

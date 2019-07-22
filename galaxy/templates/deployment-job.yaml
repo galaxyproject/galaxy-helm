@@ -44,13 +44,12 @@ spec:
               subPath: config
             - name: galaxy-data
               mountPath: {{ .Values.persistence.mountPath }}
-        {{- range $key, $entry := .Values.initContainers -}}
-        {{- if $entry.applyToJob }}
-        - name: {{ $.Chart.Name}}-{{ $key }}
-          image: {{ tpl $entry.image $ }}
-          command: {{ tpl $entry.command $ }}
-          volumeMounts:
-            {{- tpl ($entry.volumeMounts | toYaml) $ | nindent 12 }}
+        {{- if .Values.extraInitContainers -}}
+        {{- range $each := .Values.extraInitContainers -}}
+        {{- if $each.applyToJob -}}
+        {{- print "- " | nindent 8 -}}
+        {{- tpl ((unset (unset $each "applyToJob") "applyToWeb") | toYaml | indent 10 | trim) $ -}}
+        {{- end }}
         {{- end }}
         {{- end }}
       containers:

@@ -3,7 +3,7 @@
 {{- if $entry }}
 apiVersion: v1
 metadata:
-  name: {{ include "galaxy.fullname" $ }}-{{$key}}
+  name: {{ include "galaxy.fullname" $ }}-{{ $key }}
   labels:
     app.kubernetes.io/name: {{ include "galaxy.name" $ }}
     helm.sh/chart: {{ include "galaxy.chart" $ }}

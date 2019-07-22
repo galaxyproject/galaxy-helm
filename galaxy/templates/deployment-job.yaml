@@ -26,10 +26,10 @@ spec:
       initContainers:
         - name: {{ .Chart.Name }}-init-postgres
           image: alpine:3.7
-          command: ['sh', '-c', 'chown 101:101 {{.Values.persistence.mountPath}}; until nc -z -w3 {{ template "galaxy-postgresql.fullname" $ }} 5432; do echo waiting for galaxy-postgres service; sleep 1; done;']
+          command: ['sh', '-c', 'chown 101:101 {{ .Values.persistence.mountPath }}; until nc -z -w3 {{ template "galaxy-postgresql.fullname" $ }} 5432; do echo waiting for galaxy-postgres service; sleep 1; done;']
           volumeMounts:
             - name: galaxy-data
-              mountPath: {{.Values.persistence.mountPath}}
+              mountPath: {{ .Values.persistence.mountPath }}
         - name: {{ .Chart.Name }}-init-mounts
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           command: ['sh', '-c', {{ include "galaxy.init-container-commands" . | squote }}]
@@ -43,7 +43,7 @@ spec:
               mountPath: /galaxy/server/config/mutable/
               subPath: config
             - name: galaxy-data
-              mountPath: {{.Values.persistence.mountPath}}
+              mountPath: {{ .Values.persistence.mountPath }}
         {{- range $key, $entry := .Values.initContainers -}}
         {{- if $entry.applyToJob }}
         - name: {{ $.Chart.Name}}-{{ $key }}
@@ -81,9 +81,9 @@ spec:
             {{- range $key, $entry := .Values.initScripts -}}
             {{- if (not (eq $key "mountPath")) -}}
             {{- if $entry.applyToJob }}
-            - name: galaxy-initscripts-{{$key}}
+            - name: galaxy-initscripts-{{ $key }}
               mountPath: {{ $.Values.initScripts.mountPath }}
-              subPath: {{$key}}.sh
+              subPath: {{ $key }}.sh
             {{- end }}
             {{- end }}
             {{- end }}
@@ -101,7 +101,7 @@ spec:
               mountPath: /galaxy/server/config/mutable/
               subPath: config
             - name: galaxy-data
-              mountPath: {{.Values.persistence.mountPath}}
+              mountPath: {{ .Values.persistence.mountPath }}
             {{- if .Values.cvmfs.enabled }}
             - name: cvmfs-gxy-main
               mountPath: {{ .Values.cvmfs.main.mountPath }}
@@ -122,13 +122,13 @@ spec:
           {{- range $key, $entry := .Values.initScripts -}}
           {{- if (not (eq $key "mountPath")) -}}
           {{- if $entry.applyToJob }}
-        - name: galaxy-initscripts-{{$key}}
+        - name: galaxy-initscripts-{{ $key }}
           {{- if $entry.useSecret }}
           secret:
-            secretName: {{ include "galaxy.fullname" $ }}-{{$key}}
+            secretName: {{ include "galaxy.fullname" $ }}-{{ $key }}
           {{- else }}
           configMap:
-            name: {{ include "galaxy.fullname" $ }}-{{$key}}
+            name: {{ include "galaxy.fullname" $ }}-{{ $key }}
           {{- end }}
           {{- end }}
           {{- end }}

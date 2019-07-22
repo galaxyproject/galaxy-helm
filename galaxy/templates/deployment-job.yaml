@@ -66,7 +66,7 @@ spec:
 {{- end }}
             - name: GALAXY_CONFIG_DATABASE_CONNECTION
               value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy
-          command: ['
+          command: ['sh', '-c', '
           {{- range $key, $entry := .Values.initScripts -}}
           {{- if (not (eq $key "mountPath")) -}}
           {{- if $entry.applyToJob -}}
@@ -74,8 +74,8 @@ spec:
           {{- end -}}
           {{- end -}}
           {{- end -}}
-          python', '/galaxy/server/scripts/galaxy-main']
-          args: ['-c', '/galaxy/server/config/galaxy.yml', '--server-name', '$(POD_NAME)', '--attach-to-pool', 'job-handlers']
+          python /galaxy/server/scripts/galaxy-main -c /galaxy/server/config/galaxy.yml --server-name $(POD_NAME) --attach-to-pool job-handlers']
+          args: []
           volumeMounts:
             {{- range $key, $entry := .Values.initScripts -}}
             {{- if (not (eq $key "mountPath")) -}}

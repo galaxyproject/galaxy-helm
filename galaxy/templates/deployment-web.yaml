@@ -67,7 +67,7 @@ spec:
 {{- end }}
             - name: GALAXY_CONFIG_DATABASE_CONNECTION
               value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy
-          command: ['
+          command: ['sh', '-c', '
           {{- range $key, $entry := .Values.initScripts -}}
           {{- if (not (eq $key "mountPath")) -}}
           {{- if $entry.applyToWeb -}}
@@ -75,8 +75,8 @@ spec:
           {{- end -}}
           {{- end -}}
           {{- end -}}
-          /galaxy/server/.venv/bin/uwsgi']
-          args: ['--yaml', '/galaxy/server/config/galaxy.yml']
+          /galaxy/server/.venv/bin/uwsgi --yaml /galaxy/server/config/galaxy.yml']
+          args: []
           readinessProbe:
             httpGet:
               path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}

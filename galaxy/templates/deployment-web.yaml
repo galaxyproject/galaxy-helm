@@ -45,28 +45,9 @@ spec:
             - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/
               subPath: config
-        - name: {{ $.Chart.Name }}-initscripts
-          image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
-          command: ['sh', '-c', 'echo "Starting to run init scripts"
-          {{- range $key, $entry := .Values.initScripts -}}
-          {{- if $entry.applyToWeb -}}
-           && echo "Running {{$key}}.sh" && sh /galaxy/initscripts/{{$key}}.sh
-          {{- end -}}
-          {{- end -}}
-          ']
-          volumeMounts:
-            {{- range $key, $entry := .Values.initScripts -}}
-            {{- if $entry.applyToWeb }}
-            - name: galaxy-initscripts-{{$key}}
-              mountPath: /galaxy/initscripts
-              subPath: {{$key}}.sh
-            - name: galaxy-data
-              mountPath: {{ $.Values.persistence.mountPath }}
-            {{- end }}
-            {{- end }}
         {{- range $key, $entry := .Values.initContainers -}}
         {{- if $entry.applyToWeb }}
-        - name: {{ $.Chart.Name}}-{{ $key }}
+        - name: {{ $.Chart.Name }}-{{ $key }}
           image: {{ tpl $entry.image $ }}
           command: {{ tpl $entry.command $ }}
           volumeMounts:
@@ -87,8 +68,16 @@ spec:
 {{- end }}
             - name: GALAXY_CONFIG_DATABASE_CONNECTION
               value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy
-          command: ["/galaxy/server/.venv/bin/uwsgi"]
-          args: ["--yaml", "/galaxy/server/config/galaxy.yml"]
+          command: ['
+          {{- range $key, $entry := .Values.initScripts -}}
+          {{- if (not (eq $key "mountPath")) -}}
+          {{- if $entry.applyToWeb -}}
+          sh {{ $.Values.initScripts.mountPath }}/{{ $key }}{{ ".sh && " }}
+          {{- end -}}
+          {{- end -}}
+          {{- end -}}
+          /galaxy/server/.venv/bin/uwsgi']
+          args: ['--yaml', '/galaxy/server/config/galaxy.yml']
           readinessProbe:
             httpGet:
               path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}
@@ -103,6 +92,15 @@ spec:
             periodSeconds: 60
             failureThreshold: 10
           volumeMounts:
+            {{- range $key, $entry := .Values.initScripts -}}
+            {{- if (not (eq $key "mountPath")) -}}
+            {{- if $entry.applyToWeb }}
+            - name: galaxy-initscripts-{{$key}}
+              mountPath: {{ $.Values.initScripts.mountPath }}
+              subPath: {{$key}}.sh
+            {{- end }}
+            {{- end }}
+            {{- end }}
             {{- range $key,$entry := .Values.configs }}
             - name: galaxy-conf-files
               mountPath: /galaxy/server/config/{{ $key }}
@@ -142,6 +140,7 @@ spec:
             name: {{ template "galaxy.fullname" . }}-configs
           {{- end }}
           {{- range $key, $entry := .Values.initScripts -}}
+          {{- if (not (eq $key "mountPath")) -}}
           {{- if $entry.applyToWeb }}
         - name: galaxy-initscripts-{{$key}}
           {{- if $entry.useSecret }}
@@ -150,6 +149,7 @@ spec:
           {{- else }}
           configMap:
             name: {{ include "galaxy.fullname" $ }}-{{$key}}
+          {{- end }}
           {{- end }}
           {{- end }}
           {{- end }}

@@ -52,6 +52,7 @@ persistence:
 #         mountPath: "{{.Values.persistence.mountPath}}"
 # 
 initScripts:
+  mountPath: /galaxy/server/scripts/initscripts
   myFirstScript:
     useSecret: false
     applyToJob: false

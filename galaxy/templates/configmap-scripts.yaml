@@ -1,4 +1,5 @@
 {{- range $key, $entry := .Values.initScripts -}}
+{{- if (not (eq $key "mountPath")) -}}
 {{- if $entry }}
 apiVersion: v1
 metadata:
@@ -11,13 +12,14 @@ metadata:
 {{- if $entry.useSecret }}
 kind: Secret
 type: Opaque
-stringData: |
+stringData:
 {{- else }}
 kind: ConfigMap
-data: |
+data:
 {{- end }}
   {{- $key | nindent 2 }}.sh: |
     {{- tpl (tpl $entry.content $) $ | nindent 4 }}
 ---
+{{- end }}
 {{- end }}
 {{- end }}

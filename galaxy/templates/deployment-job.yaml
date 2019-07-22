@@ -44,25 +44,6 @@ spec:
               subPath: config
             - name: galaxy-data
               mountPath: {{.Values.persistence.mountPath}}
-        - name: {{ .Chart.Name }}-initscripts
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          command: ['sh', '-c', 'echo "Starting to run init scripts"
-          {{- range $key, $entry := .Values.initScripts -}}
-          {{- if $entry.applyToJob -}}
-           && echo "Running {{$key}}.sh" && sh /galaxy/initscripts/{{$key}}.sh
-          {{- end -}}
-          {{- end -}}
-          ']
-          volumeMounts:
-            {{- range $key, $entry := .Values.initScripts -}}
-            {{- if $entry.applyToJob }}
-            - name: galaxy-initscripts-{{$key}}
-              mountPath: /galaxy/initscripts
-              subPath: {{$key}}.sh
-            - name: galaxy-data
-              mountPath: {{ $.Values.persistence.mountPath }}
-            {{- end }}
-            {{- end }}
         {{- range $key, $entry := .Values.initContainers -}}
         {{- if $entry.applyToJob }}
         - name: {{ $.Chart.Name}}-{{ $key }}
@@ -86,9 +67,26 @@ spec:
 {{- end }}
             - name: GALAXY_CONFIG_DATABASE_CONNECTION
               value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy
-          command: ["python", "/galaxy/server/scripts/galaxy-main"]
-          args: ["-c", "/galaxy/server/config/galaxy.yml", "--server-name", "$(POD_NAME)", "--attach-to-pool", "job-handlers"]
+          command: ['
+          {{- range $key, $entry := .Values.initScripts -}}
+          {{- if (not (eq $key "mountPath")) -}}
+          {{- if $entry.applyToJob -}}
+          sh {{ $.Values.initScripts.mountPath }}/{{ $key }}{{ ".sh && " }}
+          {{- end -}}
+          {{- end -}}
+          {{- end -}}
+          python', '/galaxy/server/scripts/galaxy-main']
+          args: ['-c', '/galaxy/server/config/galaxy.yml', '--server-name', '$(POD_NAME)', '--attach-to-pool', 'job-handlers']
           volumeMounts:
+            {{- range $key, $entry := .Values.initScripts -}}
+            {{- if (not (eq $key "mountPath")) -}}
+            {{- if $entry.applyToJob }}
+            - name: galaxy-initscripts-{{$key}}
+              mountPath: {{ $.Values.initScripts.mountPath }}
+              subPath: {{$key}}.sh
+            {{- end }}
+            {{- end }}
+            {{- end }}
             {{- range $key,$entry := .Values.configs }}
             - name: galaxy-conf-files
               mountPath: /galaxy/server/config/{{ $key }}
@@ -122,6 +120,7 @@ spec:
             name: {{ template "galaxy.fullname" . }}-configs
           {{- end }}
           {{- range $key, $entry := .Values.initScripts -}}
+          {{- if (not (eq $key "mountPath")) -}}
           {{- if $entry.applyToJob }}
         - name: galaxy-initscripts-{{$key}}
           {{- if $entry.useSecret }}
@@ -130,6 +129,7 @@ spec:
           {{- else }}
           configMap:
             name: {{ include "galaxy.fullname" $ }}-{{$key}}
+          {{- end }}
           {{- end }}
           {{- end }}
           {{- end }}

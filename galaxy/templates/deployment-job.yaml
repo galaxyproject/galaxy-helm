@@ -80,7 +80,7 @@ spec:
             {{- range $key, $entry := .Values.initScripts -}}
             {{- if (not (eq $key "mountPath")) -}}
             {{- if $entry.applyToJob }}
-            - name: galaxy-initscripts-{{ $key }}
+            - name: galaxy-initscripts-{{ $key | lower }}
               mountPath: {{ $.Values.initScripts.mountPath }}
               subPath: {{ $key }}.sh
             {{- end }}
@@ -121,13 +121,13 @@ spec:
           {{- range $key, $entry := .Values.initScripts -}}
           {{- if (not (eq $key "mountPath")) -}}
           {{- if $entry.applyToJob }}
-        - name: galaxy-initscripts-{{ $key }}
+        - name: galaxy-initscripts-{{ $key | lower }}
           {{- if $entry.useSecret }}
           secret:
-            secretName: {{ include "galaxy.fullname" $ }}-{{ $key }}
+            secretName: {{ include "galaxy.fullname" $ }}-{{ $key | lower }}
           {{- else }}
           configMap:
-            name: {{ include "galaxy.fullname" $ }}-{{ $key }}
+            name: {{ include "galaxy.fullname" $ }}-{{ $key | lower }}
           {{- end }}
           {{- end }}
           {{- end }}

@@ -1,14 +1,13 @@
-{{- $dot := . -}}
 {{- range $key, $entry := .Values.initScripts -}}
 {{- if $entry }}
 apiVersion: v1
 metadata:
-  name: {{ include "galaxy.fullname" $dot }}-{{$key}}
+  name: {{ include "galaxy.fullname" $ }}-{{$key}}
   labels:
-    app.kubernetes.io/name: {{ include "galaxy.name" $dot }}
-    helm.sh/chart: {{ include "galaxy.chart" $dot }}
-    app.kubernetes.io/instance: {{ $dot.Release.Name }}
-    app.kubernetes.io/managed-by: {{ $dot.Release.Service }}
+    app.kubernetes.io/name: {{ include "galaxy.name" $ }}
+    helm.sh/chart: {{ include "galaxy.chart" $ }}
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
 {{- if $entry.useSecret }}
 kind: Secret
 type: Opaque
@@ -22,4 +21,3 @@ data: |
 ---
 {{- end }}
 {{- end }}
-

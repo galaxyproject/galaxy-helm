@@ -95,7 +95,7 @@ spec:
             {{- if (not (eq $key "mountPath")) -}}
             {{- if $entry.applyToWeb }}
             - name: galaxy-initscripts-{{ $key | lower }}
-              mountPath: {{ $.Values.initScripts.mountPath }}
+              mountPath: {{ $.Values.initScripts.mountPath }}/{{ $key }}.sh
               subPath: {{ $key }}.sh
             {{- end }}
             {{- end }}

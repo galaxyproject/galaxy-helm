@@ -93,8 +93,8 @@ affinity: {}
 #       - name: galaxy-data
 #         mountPath: "{{.Values.persistence.mountPath}}"
 
-# initScripts:
-#   mountPath: /galaxy/server/scripts/initscripts
+# extraInitScripts:
+#   mountPath: /galaxy/server/scripts/extraInitScripts
 #   myFirstScript:
 #     useSecret: false
 #     applyToJob: false

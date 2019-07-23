@@ -1,4 +1,4 @@
-{{- range $key, $entry := .Values.initScripts -}}
+{{- range $key, $entry := .Values.extraInitScripts -}}
 {{- if (not (eq $key "mountPath")) -}}
 {{- if $entry }}
 apiVersion: v1

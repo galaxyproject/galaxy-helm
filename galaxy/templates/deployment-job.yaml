@@ -67,21 +67,21 @@ spec:
             - name: GALAXY_CONFIG_DATABASE_CONNECTION
               value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy
           command: ['sh', '-c', '
-          {{- range $key, $entry := .Values.initScripts -}}
+          {{- range $key, $entry := .Values.extraInitScripts -}}
           {{- if (not (eq $key "mountPath")) -}}
           {{- if $entry.applyToJob -}}
-          sh {{ $.Values.initScripts.mountPath }}/{{ $key }}{{ ".sh && " }}
+          sh {{ $.Values.extraInitScripts.mountPath }}/{{ $key }}{{ ".sh && " }}
           {{- end -}}
           {{- end -}}
           {{- end -}}
           python /galaxy/server/scripts/galaxy-main -c /galaxy/server/config/galaxy.yml --server-name $(POD_NAME) --attach-to-pool job-handlers']
           args: []
           volumeMounts:
-            {{- range $key, $entry := .Values.initScripts -}}
+            {{- range $key, $entry := .Values.extraInitScripts -}}
             {{- if (not (eq $key "mountPath")) -}}
             {{- if $entry.applyToJob }}
-            - name: galaxy-initscripts-{{ $key | lower }}
-              mountPath: {{ $.Values.initScripts.mountPath }}/{{ $key }}.sh
+            - name: galaxy-extraInitScripts-{{ $key | lower }}
+              mountPath: {{ $.Values.extraInitScripts.mountPath }}/{{ $key }}.sh
               subPath: {{ $key }}.sh
             {{- end }}
             {{- end }}
@@ -118,10 +118,10 @@ spec:
           configMap:
             name: {{ template "galaxy.fullname" . }}-configs
           {{- end }}
-          {{- range $key, $entry := .Values.initScripts -}}
+          {{- range $key, $entry := .Values.extraInitScripts -}}
           {{- if (not (eq $key "mountPath")) -}}
           {{- if $entry.applyToJob }}
-        - name: galaxy-initscripts-{{ $key | lower }}
+        - name: galaxy-extraInitScripts-{{ $key | lower }}
           {{- if $entry.useSecret }}
           secret:
             secretName: {{ include "galaxy.fullname" $ }}-{{ $key | lower }}

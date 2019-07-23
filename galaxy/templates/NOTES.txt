@@ -2,7 +2,7 @@
 {{- if .Values.ingress.enabled }}
 {{- $ingressPath := .Values.ingress.path -}}
 {{- range .Values.ingress.hosts }}
-  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}{{ $ingressPath }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ if . }}{{ . }}{{ else }}localhost{{end}}{{ $ingressPath }}
 {{- end }}
 {{- else if contains "NodePort" .Values.service.type }}
   export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "galaxy.fullname" . }})

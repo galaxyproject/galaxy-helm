@@ -22,8 +22,8 @@ configuration changes, updates, upgrades, and rollbacks.
 
 ## Prerequisites
 
-- Kubernetes 1.10+
-- Helm 2.13+
+- Kubernetes 1.13+
+- Helm 2.10+
 
 You will need a Kubernetes and Helm installation; the easiest option for
 testing and development purposes is to install

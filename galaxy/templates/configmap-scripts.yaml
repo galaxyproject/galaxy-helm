@@ -1,0 +1,25 @@
+{{- range $key, $entry := .Values.extraInitScripts -}}
+{{- if (not (eq $key "mountPath")) -}}
+{{- if $entry }}
+apiVersion: v1
+metadata:
+  name: {{ include "galaxy.fullname" $ }}-{{ $key | lower }}
+  labels:
+    app.kubernetes.io/name: {{ include "galaxy.name" $ }}
+    helm.sh/chart: {{ include "galaxy.chart" $ }}
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+{{- if $entry.useSecret }}
+kind: Secret
+type: Opaque
+stringData:
+{{- else }}
+kind: ConfigMap
+data:
+{{- end }}
+  {{- $key | nindent 2 }}.sh: |
+    {{- tpl (tpl $entry.content $) $ | nindent 4 }}
+---
+{{- end }}
+{{- end }}
+{{- end }}

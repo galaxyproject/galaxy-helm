@@ -76,6 +76,41 @@ tolerations: []
 
 affinity: {}
 
+# extraInitContainers:
+#   - name: my-first-container
+#     applyToJob: true
+#     applyToWeb: true
+#     image: "{{.Values.image.repository}}:{{.Values.image.tag}}"
+#     command: ['sh', '-c', 'cp "/galaxy/server/config/job_conf.xml.sample_advanced" {{.Values.persistence.mountPath}}/']
+#     volumeMounts:
+#       - name: galaxy-data
+#         mountPath: "{{.Values.persistence.mountPath}}"
+#   - name: my-second-container
+#     applyToJob: true
+#     applyToWeb: false
+#     image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+#     command: ['sh', '-c', 'cp "/galaxy/server/config/galaxy.yml" {{.Values.persistence.mountPath}}/']
+#     volumeMounts:
+#       - name: galaxy-data
+#         mountPath: "{{.Values.persistence.mountPath}}"
+
+# extraInitScripts:
+#   mountPath: /galaxy/server/scripts/extraInitScripts
+#   myFirstScript:
+#     useSecret: false
+#     applyToJob: false
+#     applyToWeb: true
+#     content: |
+#       #!/bin/sh
+#       echo "Hello web world" > {{.Values.persistence.mountPath}}/hello-web.txt
+#   mySecondScript:
+#     useSecret: true
+#     applyToWeb: true
+#     applyToJob: true
+#     content: |
+#       #!/bin/sh
+#       echo "Hello both job and web worlds" > {{.Values.persistence.mountPath}}/hello-both.txt
+
 postgresql:
   enabled: true
   galaxyDatabaseUser: galaxydbuser

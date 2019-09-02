@@ -22,18 +22,57 @@ def _load_container_mappings():
 CONTAINER_RULE_MAP = _load_container_mappings()
 
 
+def _map_resource_set(resource_set_name):
+    resource_set = CONTAINER_RULE_MAP.get(
+        'resources', {}).get('resource_sets', {}).get(resource_set_name)
+    if resource_set:
+        mapping = {
+            'requests_cpu': resource_set.get(
+                'requests', {}).get('cpu'),
+            'requests_memory': resource_set.get(
+                'requests', {}).get('memory'),
+            'limits_cpu': resource_set.get(
+                'limits', {}).get('cpu'),
+            'limits_memory': resource_set.get(
+                'limits', {}).get('memory')
+        }
+        # trim empty values
+        return {k: v for k, v in mapping.items() if v is not None}
+    else:
+        raise KeyError(
+            "Could not find key for resource set: {}".format(
+                resource_set_name))
+
+
+def _process_tool_mapping(mapping, params):
+    params.update(mapping.get('container'))
+    # Overwrite with user specified limits
+    resource_set = mapping.get('container', {}).get('resource_set')
+    if resource_set:
+        params.update(_map_resource_set(resource_set))
+
+
 def _apply_rule_mappings(tool, params):
     if CONTAINER_RULE_MAP:
         for mapping in CONTAINER_RULE_MAP.get('mappings', {}):
             if tool.id in mapping.get('tool_ids'):
-                params.update(mapping.get('container'))
+                _process_tool_mapping(mapping, params)
                 return True
     return False
+
+
+def _get_default_resource_set_name():
+    return CONTAINER_RULE_MAP.get(
+        'resources', {}).get('default_resource_set', {})
 
 
 def k8s_container_mapper(tool, referrer, k8s_runner_id="k8s"):
     params = dict(referrer.params)
     params['docker_enabled'] = True
+    # Apply default resource limits
+    default_resource_set_name = _get_default_resource_set_name()
+    if default_resource_set_name:
+        params.update(_map_resource_set(default_resource_set_name))
     if not _apply_rule_mappings(tool, params):
         if tool.id in GALAXY_LIB_TOOLS_UNVERSIONED:
             default_container = params.get('docker_default_container_id')

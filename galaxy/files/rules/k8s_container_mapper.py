@@ -8,7 +8,7 @@ from galaxy.jobs import JobDestination
 log = logging.getLogger(__name__)
 
 CONTAINER_RULE_MAPPER_FILE = os.path.join(
-    os.path.dirname(__file__), 'container-mapper-rules.yml')
+    os.path.dirname(__file__), 'container_mapper_rules.yml')
 
 
 def _load_container_mappings():

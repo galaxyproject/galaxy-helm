@@ -397,7 +397,7 @@ configs:
 
 jobs:
   rules:
-    container-mapper-rules.yml: |
+    container_mapper_rules.yml: |
       mappings:
         - tool_ids:
             - sort1
@@ -415,5 +415,5 @@ jobs:
               cpu: 2
               memory: 1G
         default_resource_set: small
-    k8s-container-mapper.py: |
-      {{- (.Files.Get "files/rules/k8s-container-mapper.py") }}
+    k8s_container_mapper.py: |
+      {{- (.Files.Get "files/rules/k8s_container_mapper.py") }}

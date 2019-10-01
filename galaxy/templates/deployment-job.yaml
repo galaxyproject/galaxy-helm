@@ -44,6 +44,8 @@ spec:
               subPath: config
             - name: galaxy-data
               mountPath: {{ .Values.persistence.mountPath }}
+            - name: zipped-configs
+              mountPath: '/cvmfs/zipped/'
         {{- if .Values.extraInitContainers -}}
         {{- range $each := .Values.extraInitContainers -}}
         {{- if $each.applyToJob -}}
@@ -77,6 +79,8 @@ spec:
           python /galaxy/server/scripts/galaxy-main -c /galaxy/server/config/galaxy.yml --server-name $(POD_NAME) --attach-to-pool job-handlers']
           args: []
           volumeMounts:
+            - name: zipped-configs
+              mountPath: '/cvmfs/zipped/'
             {{- range $key, $entry := .Values.extraInitScripts -}}
             {{- if (not (eq $key "mountPath")) -}}
             {{- if $entry.applyToJob }}
@@ -110,6 +114,8 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
+        - name: zipped-configs
+          emptyDir: {}
         - name: galaxy-conf-files
           {{- if .Values.useSecretConfigs }}
           secret:

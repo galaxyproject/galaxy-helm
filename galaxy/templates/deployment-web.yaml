@@ -35,6 +35,8 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           command: ['sh', '-c', {{ include "galaxy.init-container-commands" . | squote }}]
           volumeMounts:
+            - name: zipped-configs
+              mountPath: '/cvmfs/zipped/'
             {{- range $key,$entry := .Values.configs }}
             - name: galaxy-conf-files
               mountPath: /galaxy/server/config/{{ $key }}
@@ -91,6 +93,8 @@ spec:
             periodSeconds: 60
             failureThreshold: 10
           volumeMounts:
+            - name: zipped-configs
+              mountPath: '/cvmfs/zipped/'
             {{- range $key, $entry := .Values.extraInitScripts -}}
             {{- if (not (eq $key "mountPath")) -}}
             {{- if $entry.applyToWeb }}
@@ -130,6 +134,8 @@ spec:
         #       exec:
         #         command: ["/usr/sbin/nginx","-s","quit"]
       volumes:
+        - name: zipped-configs
+          emptyDir: {}
         - name: galaxy-conf-files
           {{- if .Values.useSecretConfigs }}
           secret:

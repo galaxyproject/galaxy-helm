@@ -188,12 +188,55 @@ configs:
       integrated_tool_panel_config: "/galaxy/server/config/mutable/integrated_tool_panel.xml"
       containers_resolvers_config_file: "/galaxy/server/config/container_resolvers_conf.xml"
       job_config_file: "/galaxy/server/config/job_conf.xml"
+      sanitize_whitelist_file: "/galaxy/server/config/mutable/sanitize_whitelist.txt"
+      integrated_tool_panel_config: "/galaxy/server/config/mutable/integrated_tool_panel.xml"
   container_resolvers_conf.xml: |
     <containers_resolvers>
       <explicit />
       <mulled />
       <build_mulled />
     </containers_resolvers>
+  sanitize_whitelist.txt: |
+    toolshed.g2.bx.psu.edu/repos/crs4/taxonomy_krona_chart/taxonomy_krona_chart/2.6.1
+    toolshed.g2.bx.psu.edu/repos/crs4/taxonomy_krona_chart/taxonomy_krona_chart/2.6.1.1
+    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.52
+    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.63
+    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.64
+    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.65
+    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.67
+    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.68
+    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.69
+    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.72
+    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.72+galaxy1
+    toolshed.g2.bx.psu.edu/repos/engineson/multiqc/multiqc/1.0.0.0
+    toolshed.g2.bx.psu.edu/repos/iuc/dexseq/dexseq/1.20.1
+    toolshed.g2.bx.psu.edu/repos/iuc/macs2/macs2_callpeak/2.1.0.20140616.0
+    toolshed.g2.bx.psu.edu/repos/iuc/macs2/macs2_callpeak/2.1.0.20151222.0
+    toolshed.g2.bx.psu.edu/repos/iuc/meme_meme/meme_meme/4.11.0.0
+    toolshed.g2.bx.psu.edu/repos/iuc/meme_meme/meme_meme/4.11.0.1
+    toolshed.g2.bx.psu.edu/repos/iuc/meme_meme/meme_meme/4.11.1.0
+    toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.3.1
+    toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.5.0
+    toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.6
+    toolshed.g2.bx.psu.edu/repos/iuc/prestor_abseq3/prestor_abseq3/0.5.4
+    toolshed.g2.bx.psu.edu/repos/iuc/quast/quast/4.1.1
+    toolshed.g2.bx.psu.edu/repos/iuc/quast/quast/4.6.3
+    toolshed.g2.bx.psu.edu/repos/iuc/snpeff/snpEff/4.3+T.galaxy1
+  build_sites.yml: |
+    - type: ucsc
+      file: "/cvmfs/data.galaxyproject.org/managed/location/ucsc_build_sites.txt"
+      display: [main,archaea,ucla]
+    - type: gbrowse
+      file: "/galaxy/server/tool-data/shared/gbrowse/gbrowse_build_sites.txt"
+      display: [wormbase,tair,modencode_worm,modencode_fly]
+    - type: ensembl
+      file: "/galaxy/server/tool-data/shared/ensembl/ensembl_sites.txt"
+    - type: ensembl_data_url
+      file: "/galaxy/server/tool-data/shared/ensembl/ensembl_sites_data_URL.txt"
+    - type: igv
+      file: "/galaxy/server/tool-data/shared/igv/igv_build_sites.txt.sample"
+    - type: rviewer
+      file: "/galaxy/server/tool-data/shared/rviewer/rviewer_build_sites.txt.sample"
 
 # Additional dynamic rules to map into the container.
 jobs:

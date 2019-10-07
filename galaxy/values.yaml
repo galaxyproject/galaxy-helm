@@ -4,7 +4,7 @@
 
 image:
   repository: galaxy/galaxy
-  tag: 19.05
+  tag: 19.09m
   pullPolicy: IfNotPresent
 
 nameOverride: ""

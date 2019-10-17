@@ -398,12 +398,23 @@ configs:
 
 jobs:
   rules:
-    container-mapper-rules.yml: |
+    container_mapper_rules.yml: |
       mappings:
         - tool_ids:
             - sort1
             - Grouping1
           container:
             docker_container_id_override: {{ .Values.image.repository }}:{{ .Values.image.tag }}
-    k8s-container-mapper.py: |
-      {{- (.Files.Get "files/rules/k8s-container-mapper.py") }}
+            resource_set: small
+      resources:
+        resource_sets:
+          small:
+            requests:
+              cpu: 1
+              memory: 500m
+            limits:
+              cpu: 2
+              memory: 1G
+        default_resource_set: small
+    k8s_container_mapper.py: |
+      {{- (.Files.Get "files/rules/k8s_container_mapper.py") }}

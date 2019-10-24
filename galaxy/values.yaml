@@ -3,8 +3,8 @@
 # Declare variables to be passed into your templates.
 
 image:
-  repository: galaxy/galaxy
-  tag: 19.09-k8s
+  repository: galaxy/galaxy-k8s
+  tag: 19.09
   pullPolicy: IfNotPresent
 
 nameOverride: ""

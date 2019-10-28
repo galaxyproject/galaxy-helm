@@ -3,8 +3,8 @@
 # Declare variables to be passed into your templates.
 
 image:
-  repository: galaxy/galaxy
-  tag: 19.05
+  repository: galaxy/galaxy-k8s
+  tag: 19.09
   pullPolicy: IfNotPresent
 
 nameOverride: ""
@@ -195,7 +195,8 @@ configs:
       database_connection: 'postgresql://{{.Values.postgresql.galaxyDatabaseUser}}:{{.Values.postgresql.galaxyDatabasePassword}}@{{ template "galaxy-postgresql.fullname" . }}/galaxy'
       integrated_tool_panel_config: "/galaxy/server/config/mutable/integrated_tool_panel.xml"
       sanitize_whitelist_file: "/galaxy/server/config/mutable/sanitize_whitelist.txt"
-      tool_config_file: "{{.Values.persistence.mountPath}}/config/editable_shed_tool_conf.xml,/galaxy/server/config/tool_conf.xml,/cvmfs/zipped/cvmfs/main.galaxyproject.org/config/shed_tool_conf.xml"
+      tool_config_file: "/galaxy/server/config/tool_conf.xml,/cvmfs/zipped/cvmfs/main.galaxyproject.org/config/shed_tool_conf.xml"
+      shed_tool_config_file: "{{.Values.persistence.mountPath}}/config/editable_shed_tool_conf.xml"
       tool_data_table_config_path: "/cvmfs/zipped/cvmfs/main.galaxyproject.org/config/shed_tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/byhand/location/tool_data_table_conf.xml"
       tool_dependency_dir: "{{.Values.persistence.mountPath}}/deps"
       builds_file_path: "{{.Values.cvmfs.data.mountPath}}/managed/location/builds.txt"
@@ -397,12 +398,23 @@ configs:
 
 jobs:
   rules:
-    container-mapper-rules.yml: |
+    container_mapper_rules.yml: |
       mappings:
         - tool_ids:
             - sort1
             - Grouping1
           container:
             docker_container_id_override: {{ .Values.image.repository }}:{{ .Values.image.tag }}
-    k8s-container-mapper.py: |
-      {{- (.Files.Get "files/rules/k8s-container-mapper.py") }}
+            resource_set: small
+      resources:
+        resource_sets:
+          small:
+            requests:
+              cpu: 1
+              memory: 500m
+            limits:
+              cpu: 2
+              memory: 1G
+        default_resource_set: small
+    k8s_container_mapper.py: |
+      {{- (.Files.Get "files/rules/k8s_container_mapper.py") }}

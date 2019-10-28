@@ -5,6 +5,11 @@ accessibility, reproducibility, and transparency of primarily bioinformatics
 data. This repo contains [Helm charts](https://helm.sh/) for easily deploying
 Galaxy on top of Kubernetes.
 
+
+You may [follow this documentation](https://galaxyproject.org/cloud/k8s/) on
+how to use this Helm chart to deploy Galaxy on various managed kubernetes 
+services (e.g., Amazon EKS and Google GKE). 
+
 ## TL;DR
 
 ```console

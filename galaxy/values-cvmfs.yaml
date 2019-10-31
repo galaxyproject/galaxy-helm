@@ -79,7 +79,8 @@ extraEnv:
 
 ingress:
   enabled: true
-  annotations: {}
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10G"
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   path: /galaxy

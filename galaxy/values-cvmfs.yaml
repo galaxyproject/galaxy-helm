@@ -412,10 +412,10 @@ jobs:
           small:
             requests:
               cpu: 1
-              memory: 500m
+              memory: 2G
             limits:
               cpu: 2
-              memory: 1G
+              memory: 5G
         default_resource_set: small
     k8s_container_mapper.py: |
       {{- (.Files.Get "files/rules/k8s_container_mapper.py") }}

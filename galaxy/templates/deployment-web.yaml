@@ -62,7 +62,7 @@ spec:
           lifecycle:
             postStart:
               exec:
-                command: ['/bin/sh', '-c', 'find /cvmfs/main.galaxyproject.org/shed_tools -type f -path "*/.hg/*" -exec cp -s --parents \{\} /cvmfs/zipped/ \; && find /cvmfs/main.galaxyproject.org/shed_tools -type f -path "*/test-data/*" -not -path "*/.hg/*" -exec cp -s --parents \{\} /cvmfs/zipped/ \; && find /cvmfs/main.galaxyproject.org/shed_tools -type f -path "*/images/*" -not -path "*/test-data/*" -not -path "*/.hg/*" -exec cp -s --parents \{\} /cvmfs/zipped/ \; ']
+                command: ['/bin/sh', '-c', 'find /cvmfs/main.galaxyproject.org/shed_tools -type f -not -path "*.xml" -not -path -not -path "*/.hg/*" -exec cp -s --parents \{\} /cvmfs/zipped/ \; ']
           ports:
             - name: galaxy-http
               containerPort: 8080

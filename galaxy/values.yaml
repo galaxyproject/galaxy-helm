@@ -164,28 +164,30 @@ configs:
             </destination>
         </destinations>
     </job_conf>
-  galaxy.yml: |
+  galaxy.yml:
     uwsgi:
       virtualenv: /galaxy/server/.venv
       processes: 1
       http: 0.0.0.0:8080
-      static-map: /static/style=/galaxy/server/static/style/blue
-      static-map: /static=/galaxy/server/static
-      static-map: /favicon.ico=/galaxy/server/static/favicon.ico
       pythonpath: /galaxy/server/lib
       thunder-lock: true
       manage-script-name: true
-      mount: {{.Values.ingress.path}}=galaxy.webapps.galaxy.buildapp:uwsgi_app()
       buffer-size: 16384
       offload-threads: 2
       threads: 4
       die-on-term: true
       master: true
-      hook-master-start: unix_signal:2 gracefully_kill_them_all
+      hook-master-start: 'unix_signal:2 gracefully_kill_them_all'
       enable-threads: true
       py-call-osafterfork: true
+      static-map:
+        - /static/style=/galaxy/server/static/style/blue
+        - /static=/galaxy/server/static
+        - /favicon.ico=/galaxy/server/static/favicon.ico
+      mount: '{{.Values.ingress.path}}=galaxy.webapps.galaxy.buildapp:uwsgi_app()'
     galaxy:
-      database_connection: 'postgresql://{{.Values.postgresql.galaxyDatabaseUser}}:{{.Values.postgresql.galaxyDatabasePassword}}@{{ template "galaxy-postgresql.fullname" . }}/galaxy'
+      database_connection: >
+        postgresql://{{.Values.postgresql.galaxyDatabaseUser}}:{{.Values.postgresql.galaxyDatabasePassword}}@{{include "galaxy-postgresql.fullname" .}}/galaxy
       integrated_tool_panel_config: "/galaxy/server/config/mutable/integrated_tool_panel.xml"
       containers_resolvers_config_file: "/galaxy/server/config/container_resolvers_conf.xml"
       job_config_file: "/galaxy/server/config/job_conf.xml"

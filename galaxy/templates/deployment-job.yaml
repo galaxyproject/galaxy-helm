@@ -74,7 +74,7 @@ spec:
           lifecycle:
             postStart:
               exec:
-                command: ['/bin/sh', '-c', 'find /cvmfs/main.galaxyproject.org/shed_tools -type f -not -path "*.xml" -not -path -not -path "*/.hg/*" -exec cp -s --parents \{\} /cvmfs/zipped/ \; ']
+                command: ['/bin/sh', '-c', 'find /cvmfs/main.galaxyproject.org/shed_tools -type f -not -path "*.xml" -not -path "*/.hg/*" -exec cp -s --parents \{\} /cvmfs/zipped/ \; ']
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: POD_NAME

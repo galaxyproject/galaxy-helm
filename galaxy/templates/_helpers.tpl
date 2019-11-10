@@ -95,6 +95,7 @@ Creates the bash command for the init containers used to place files and change 
 {{- define "galaxy.init-container-commands" -}}
 cp -an /galaxy/server/config/integrated_tool_panel.xml /galaxy/server/config/mutable/integrated_tool_panel.xml;
 cp -an /galaxy/server/config/sanitize_whitelist.txt /galaxy/server/config/mutable/sanitize_whitelist.txt;
-cp -an /galaxy/server/config/shed_data_manager_conf.xml.sample /galaxy/server/config/mutable/shed_data_manager_conf.xml;
-cp -an /galaxy/server/config/data_manager_conf.xml.sample /galaxy/server/config/mutable/data_manager_conf.xml;
+cp -an /galaxy/server/config/data_manager_conf.xml.sample /galaxy/server/config/mutable/shed_data_manager_conf.xml;
+cp -an /galaxy/server/config/tool_data_table_conf.xml.sample /galaxy/server/config/mutable/shed_tool_data_table_conf.xml;
+cp -arn /galaxy/server/tool-data /galaxy/server/database/;
 {{- end -}}

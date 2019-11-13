@@ -197,14 +197,18 @@ configs:
       integrated_tool_panel_config: "/galaxy/server/config/mutable/integrated_tool_panel.xml"
       sanitize_whitelist_file: "/galaxy/server/config/mutable/sanitize_whitelist.txt"
       tool_config_file: "/galaxy/server/config/tool_conf.xml,{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_conf.xml"
-      shed_tool_config_file: "{{.Values.persistence.mountPath}}/config/editable_shed_tool_conf.xml"
+      shed_tool_config_file: "/galaxy/server/config/mutable/editable_shed_tool_conf.xml"
       tool_data_table_config_path: "{{ .Values.cvmfs.main.mountPath }}/config/shed_tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/byhand/location/tool_data_table_conf.xml"
       tool_dependency_dir: "{{.Values.persistence.mountPath}}/deps"
+      job_config_file: "/galaxy/server/config/job_conf.xml"
       builds_file_path: "{{.Values.cvmfs.data.mountPath}}/managed/location/builds.txt"
       datatypes_config_file: "{{ .Values.cvmfs.main.mountPath }}/config/datatypes_conf.xml"
       containers_resolvers_config_file: "/galaxy/server/config/container_resolvers_conf.xml"
       workflow_schedulers_config_file: "/galaxy/server/config/workflow_schedulers_conf.xml"
       build_sites_config_file: "/galaxy/server/config/build_sites.yml"
+      shed_data_manager_config_file: "/galaxy/server/config/mutable/shed_data_manager_conf.xml"
+      shed_tool_data_table_config: "/galaxy/server/config/mutable/shed_tool_data_table_conf.xml"
+      enable_data_manager_user_view: true
   container_resolvers_conf.xml: |
     <containers_resolvers>
       <explicit />

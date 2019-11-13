@@ -200,6 +200,7 @@ configs:
       shed_data_manager_config_file: "/galaxy/server/config/mutable/shed_data_manager_conf.xml"
       shed_tool_data_table_config: "/galaxy/server/config/mutable/shed_tool_data_table_conf.xml"
       enable_data_manager_user_view: true
+      tool_data_path: "{{.Values.persistence.mountPath}}/tool-data"
   container_resolvers_conf.xml: |
     <containers_resolvers>
       <explicit />

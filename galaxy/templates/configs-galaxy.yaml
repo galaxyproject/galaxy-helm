@@ -16,7 +16,10 @@ data:
 {{- end }}
   {{- range $key, $entry := .Values.configs -}}
   {{- if $entry -}}
-  {{- $key | nindent 2 }}: |
-    {{- tpl (tpl $entry $) $ | nindent 4 -}}
-  {{- end }}
-  {{- end }}
+  {{- $key | nindent 4 }}: |
+  {{- $original := (toYaml $entry) -}}
+  {{- $nomultiline := (regexReplaceAll "^^\\s*\\|\\n*" $original "") -}}
+  {{- $nowhitespace := (regexReplaceAll "{{\\s*([^}\\s]+)\\s*}}" $nomultiline "{{$1}}") -}}
+  {{- tpl (tpl $nowhitespace $) $ | trim | nindent 8 -}}
+  {{- end -}}
+  {{- end -}}

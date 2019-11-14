@@ -163,6 +163,10 @@ configs:
               <param id="docker_enabled">true</param>
             </destination>
         </destinations>
+        <limits>
+            <limit type="registered_user_concurrent_jobs">5</limit>
+            <limit type="anonymous_user_concurrent_jobs">2</limit>
+        </limits>
     </job_conf>
   uwsgi.yml: |
     uwsgi:

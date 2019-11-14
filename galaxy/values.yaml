@@ -164,8 +164,8 @@ configs:
             </destination>
         </destinations>
     </job_conf>
-  galaxy.yml:
-    uwsgi: |
+  uwsgi.yml: |
+    uwsgi:
       virtualenv: /galaxy/server/.venv
       processes: 1
       http: 0.0.0.0:8080
@@ -184,6 +184,7 @@ configs:
       static-map: /static=/galaxy/server/static
       static-map: /favicon.ico=/galaxy/server/static/favicon.ico
       mount: {{.Values.ingress.path}}=galaxy.webapps.galaxy.buildapp:uwsgi_app()
+  galaxy.yml:
     galaxy:
       database_connection: >
         postgresql://{{.Values.postgresql.galaxyDatabaseUser}}:{{.Values.postgresql.galaxyDatabasePassword}}@{{include "galaxy-postgresql.fullname" .}}/galaxy

@@ -75,7 +75,7 @@ spec:
           {{- end -}}
           {{- end -}}
           {{- end -}}
-          /galaxy/server/.venv/bin/uwsgi --yaml /galaxy/server/config/galaxy.yml']
+          /galaxy/server/.venv/bin/uwsgi --yaml /galaxy/server/config/uwsgi.yml --set galaxy_config_file=/galaxy/server/config/galaxy.yml']
           args: []
           readinessProbe:
             httpGet:

@@ -17,9 +17,35 @@ data:
   {{- range $key, $entry := .Values.configs -}}
   {{- if $entry -}}
   {{- $key | nindent 4 }}: |
+  {{- if not (eq $key "galaxy.yml") -}}
   {{- $original := (toYaml $entry) -}}
   {{- $nomultiline := (regexReplaceAll "^^\\s*\\|\\n*" $original "") -}}
   {{- $nowhitespace := (regexReplaceAll "{{\\s*([^}\\s]+)\\s*}}" $nomultiline "{{$1}}") -}}
   {{- tpl (tpl $nowhitespace $) $ | trim | nindent 8 -}}
+  {{- else -}}
+  {{- range $part, $content := $entry -}}
+  {{- $part | nindent 8 -}}:
+  {{- if not (eq $part "uwsgi") -}}
+  {{- $original := (toYaml $content) -}}
+  {{- $nomultiline := (regexReplaceAll "^^\\s*\\|\\n*" $original "") -}}
+  {{- $nowhitespace := (regexReplaceAll "{{\\s*([^}\\s]+)\\s*}}" $nomultiline "{{$1}}") -}}
+  {{- tpl (tpl $nowhitespace $) $ | trim | nindent 12 -}}
+  {{- else -}}
+  {{- $original := (toYaml (omit $content "static-map")) -}}
+  {{- $nomultiline := (regexReplaceAll "^^\\s*\\|\\n*" $original "") -}}
+  {{- $nowhitespace := (regexReplaceAll "{{\\s*([^}\\s]+)\\s*}}" $nomultiline "{{$1}}") -}}
+  {{- tpl (tpl $nowhitespace $) $ | trim | nindent 12 -}}
+  {{- range $k, $maps := pick $content "static-map" -}}
+  {{- if regexMatch "^^\\[[^]]*\\]$$" (toString $maps) }}
+  {{- range $map := $maps -}}
+  {{- printf "static-map: %s" (tpl $map $) | nindent 12 -}}
+  {{- end -}}
+  {{- else -}}
+  {{- printf "static-map: %s" (tpl $maps $) | nindent 12 -}}
+  {{- end -}}
+  {{- end -}}
+  {{- end -}}
+  {{- end -}}
+  {{- end -}}
   {{- end -}}
   {{- end -}}

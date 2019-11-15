@@ -47,8 +47,6 @@ ingress:
   annotations:
     kubernetes.io/ingress.class: "nginx"
     nginx.ingress.kubernetes.io/proxy-body-size: "10G"
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      rewrite ^({{ .Values.ingress.path }})$ {{ .Values.ingress.path }}/ redirect;
   path: /
   hosts:
     - ~
@@ -237,7 +235,7 @@ configs:
     toolshed.g2.bx.psu.edu/repos/iuc/quast/quast/4.1.1
     toolshed.g2.bx.psu.edu/repos/iuc/quast/quast/4.6.3
     toolshed.g2.bx.psu.edu/repos/iuc/snpeff/snpEff/4.3+T.galaxy1
-  build_sites.yml: |
+  build_sites.yml:
     - type: ucsc
       file: "/cvmfs/data.galaxyproject.org/managed/location/ucsc_build_sites.txt"
       display: [main,archaea,ucla]

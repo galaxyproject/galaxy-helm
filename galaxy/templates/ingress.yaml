@@ -11,10 +11,10 @@ metadata:
     helm.sh/chart: {{ include "galaxy.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-  {{- with .Values.ingress.annotations }}
   annotations:
     nginx.ingress.kubernetes.io/configuration-snippet: |
       rewrite ^({{ .Values.ingress.path }})$ {{ .Values.ingress.path }}/ redirect;
+  {{- with .Values.ingress.annotations }}
     {{- tpl (toYaml .) $ | nindent 4 }}
   {{- end }}
 spec:

@@ -15,9 +15,13 @@ service:
   port: 8000
 
 webHandlers:
+  annotations: {}
+  podAnnotations: {}
   replicaCount: 1
 
 jobHandlers:
+  annotations: {}
+  podAnnotations: {}
   replicaCount: 1
 
 rbac:

@@ -7,6 +7,10 @@ metadata:
     helm.sh/chart: {{ include "galaxy.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- with .Values.jobHandlers.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
 spec:
   replicas: {{ .Values.jobHandlers.replicaCount }}
   selector:
@@ -20,6 +24,9 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
       annotations:
         checksum/galaxy_conf: {{ include (print $.Template.BasePath "/configs-galaxy.yaml") . | sha256sum }}
+        {{- with .Values.jobHandlers.podAnnotations -}}
+        {{ toYaml . | nindent 8 }}
+        {{ end }}
     spec:
       securityContext:
         fsGroup: 101

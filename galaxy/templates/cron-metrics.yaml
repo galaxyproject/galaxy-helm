@@ -9,8 +9,8 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
-  # every 10 minutes
-  schedule: "*/10 * * * *"
+  # every minute
+  schedule: "*/1 * * * *"
   jobTemplate:
     spec:
       template:

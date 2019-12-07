@@ -418,6 +418,16 @@ jobs:
     container_mapper_rules.yml: |
       mappings:
         - tool_ids:
+            - toolshed.g2.bx.psu.edu/repos/devteam/data_manager_sam_fasta_index_builder/sam_fasta_index_builder/0.0.3
+          container:
+            docker_container_id_override: cloudve/sam-fasta-dm:latest
+            resource_set: small
+        - tool_ids:
+            - toolshed.g2.bx.psu.edu/repos/devteam/data_manager_bwa_mem_index_builder/bwa_mem_index_builder_data_manager/0.0.4
+          container:
+            docker_container_id_override: cloudve/bwa-dm:latest
+            resource_set: small
+        - tool_ids:
             - sort1
             - Grouping1
           container:

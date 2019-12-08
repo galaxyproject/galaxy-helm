@@ -262,6 +262,11 @@ jobs:
     container_mapper_rules.yml: |
       mappings:
         - tool_ids:
+            - Summary_Statistics1
+          container:
+            docker_container_id_override: cloudve/gsummary:latest
+            resource_set: small
+        - tool_ids:
             - sort1
             - Grouping1
           container:

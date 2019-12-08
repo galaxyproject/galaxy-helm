@@ -419,6 +419,11 @@ jobs:
     container_mapper_rules.yml: |
       mappings:
         - tool_ids:
+            - Summary_Statistics1
+          container:
+            docker_container_id_override: cloudve/gsummary:latest
+            resource_set: small
+        - tool_ids:
             - toolshed.g2.bx.psu.edu/repos/devteam/data_manager_sam_fasta_index_builder/sam_fasta_index_builder/0.0.3
           container:
             docker_container_id_override: cloudve/sam-fasta-dm:latest

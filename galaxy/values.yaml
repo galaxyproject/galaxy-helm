@@ -285,3 +285,9 @@ jobs:
         default_resource_set: small
     k8s_container_mapper.py: |
       {{- (.Files.Get "files/rules/k8s_container_mapper.py") }}
+
+influxdb:
+  enabled: false
+  url:
+  username: ""
+  password: ""

@@ -1,0 +1,18 @@
+{{- if .Values.influxdb.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-galaxy-dashboard
+  labels:
+    app.kubernetes.io/name: {{ include "galaxy.name" . }}
+    helm.sh/chart: {{ include "galaxy.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    grafana_dashboard: "1"
+data:
+  {{- $root := . }}
+  {{ range $path, $bytes := .Files.Glob "files/dashboards/*" }}
+    {{- base $path }}: |
+{{ (tpl ($root.Files.Get $path) $) | indent 4 }}
+  {{ end }}
+{{- end }}

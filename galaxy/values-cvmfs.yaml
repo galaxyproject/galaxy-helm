@@ -225,7 +225,6 @@ configs:
     <containers_resolvers>
       <explicit />
       <mulled />
-      <build_mulled />
     </containers_resolvers>
   workflow_schedulers_conf.xml: |
     <?xml version="1.0"?>

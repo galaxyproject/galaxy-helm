@@ -282,3 +282,6 @@ jobs:
 
 influxdb:
   enabled: false
+  url:
+  username: ""
+  password: ""

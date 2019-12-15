@@ -99,3 +99,11 @@ cp -anL /galaxy/server/config/data_manager_conf.xml.sample /galaxy/server/config
 cp -anL /galaxy/server/config/tool_data_table_conf.xml.sample /galaxy/server/config/mutable/shed_tool_data_table_conf.xml;
 cp -arnL /galaxy/server/tool-data {{.Values.persistence.mountPath}}/;
 {{- end -}}
+
+
+{{/*
+Extract the filename portion from a file path
+*/}}
+{{- define "galaxy.getFilenameFromPath" -}}
+{{- printf "%s" (. | splitList "/" | last) -}}
+{{- end -}}

@@ -1,0 +1,24 @@
+{{- range $key, $entry := .Values.extraFileMappings -}}
+{{- if $entry }}
+apiVersion: v1
+metadata:
+  # Extract the filename portion only
+  name: {{ include "galaxy.fullname" $ }}-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}
+  labels:
+    app.kubernetes.io/name: {{ include "galaxy.name" $ }}
+    helm.sh/chart: {{ include "galaxy.chart" $ }}
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+{{- if $entry.useSecret }}
+kind: Secret
+type: Opaque
+stringData:
+{{- else }}
+kind: ConfigMap
+data:
+{{- end }}
+  {{- include "galaxy.getFilenameFromPath" $key | nindent 2 }}: |
+    {{- tpl (tpl $entry.content $) $ | nindent 4 }}
+---
+{{- end }}
+{{- end }}

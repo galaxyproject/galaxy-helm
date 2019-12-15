@@ -107,6 +107,13 @@ spec:
             {{- end }}
             {{- end }}
             {{- end }}
+            {{- range $key, $entry := .Values.extraFileMappings -}}
+            {{- if $entry.applyToJob }}
+            - name: extra-files-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}
+              mountPath: {{ $key }}
+              subPath: {{ include "galaxy.getFilenameFromPath" $key }}
+            {{- end }}
+            {{- end }}
             {{- range $key,$entry := .Values.configs }}
             - name: galaxy-conf-files
               mountPath: /galaxy/server/config/{{ $key }}
@@ -139,9 +146,9 @@ spec:
           configMap:
             name: {{ template "galaxy.fullname" . }}-configs
           {{- end }}
-          {{- range $key, $entry := .Values.extraInitScripts -}}
-          {{- if (not (eq $key "mountPath")) -}}
-          {{- if $entry.applyToJob }}
+        {{- range $key, $entry := .Values.extraInitScripts -}}
+        {{- if (not (eq $key "mountPath")) -}}
+        {{- if $entry.applyToJob }}
         - name: galaxy-extraInitScripts-{{ $key | lower }}
           {{- if $entry.useSecret }}
           secret:
@@ -150,9 +157,21 @@ spec:
           configMap:
             name: {{ include "galaxy.fullname" $ }}-{{ $key | lower }}
           {{- end }}
+        {{- end }}
+        {{- end }}
+        {{- end }}
+        {{- range $key, $entry := .Values.extraFileMappings -}}
+        {{- if $entry.applyToJob }}
+        - name: extra-files-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}
+          {{- if $entry.useSecret }}
+          secret:
+            secretName: {{ include "galaxy.fullname" $ }}-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}
+          {{- else }}
+          configMap:
+            name: {{ include "galaxy.fullname" $ }}-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}
           {{- end }}
-          {{- end }}
-          {{- end }}
+        {{- end }}
+        {{- end }}
         - name: galaxy-job-rules
           configMap:
             name: {{ template "galaxy.fullname" . }}-job-rules

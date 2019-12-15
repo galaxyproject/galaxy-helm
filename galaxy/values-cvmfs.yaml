@@ -15,16 +15,13 @@ service:
   port: 8000
 
 webHandlers:
+  replicaCount: 1
   annotations: {}
   podAnnotations: {}
-  replicaCount: 1
 
 jobHandlers:
-  annotations: {}
-  podAnnotations: {}
   replicaCount: 1
-
-workflowHandlers:
+  # Annotations are used for both job and workflow deployments
   annotations: {}
   podAnnotations: {}
 

@@ -98,22 +98,9 @@ affinity: {}
 #       - name: galaxy-data
 #         mountPath: "{{.Values.persistence.mountPath}}"
 
-# extraInitScripts:
-#   mountPath: /galaxy/server/scripts/extraInitScripts
-#   myFirstScript:
-#     useSecret: false
-#     applyToJob: false
-#     applyToWeb: true
-#     content: |
-#       #!/bin/sh
-#       echo "Hello web world" > {{.Values.persistence.mountPath}}/hello-web.txt
-#   mySecondScript:
-#     useSecret: true
-#     applyToWeb: true
-#     applyToJob: true
-#     content: |
-#       #!/bin/sh
-#       echo "Hello both job and web worlds" > {{.Values.persistence.mountPath}}/hello-both.txt
+extraInitCommands: |
+#  echo "Running extra mapped script. Influx enabled = {{ .Values.influxdb.enabled }}";
+#  /galaxy/server/extra/mapped/script.sh
 
 extraFileMappings:
   /galaxy/server/static/welcome.html:

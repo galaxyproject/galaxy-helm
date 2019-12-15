@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "galaxy.fullname" . }}-job
+  name: {{ include "galaxy.fullname" . }}-workflow
   labels:
     app.kubernetes.io/name: {{ include "galaxy.name" . }}
     helm.sh/chart: {{ include "galaxy.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- with .Values.jobHandlers.annotations }}
+{{- with .Values.workflowHandlers.annotations }}
   annotations:
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
-  replicas: {{ .Values.jobHandlers.replicaCount }}
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "galaxy.fullname" . }}
@@ -24,7 +24,7 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
       annotations:
         checksum/galaxy_conf: {{ include (print $.Template.BasePath "/configs-galaxy.yaml") . | sha256sum }}
-        {{- with .Values.jobHandlers.podAnnotations -}}
+        {{- with .Values.workflowHandlers.podAnnotations -}}
         {{ toYaml . | nindent 8 }}
         {{ end }}
     spec:
@@ -51,30 +51,16 @@ spec:
               subPath: config
             - name: galaxy-data
               mountPath: {{ .Values.persistence.mountPath }}
-        - name: {{ .Chart.Name }}-db-migrations
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          command: ['sh', '-c', '/galaxy/server/manage_db.sh upgrade']
-          volumeMounts:
-            {{- range $key,$entry := .Values.configs }}
-            - name: galaxy-conf-files
-              mountPath: /galaxy/server/config/{{ $key }}
-              subPath: {{ $key }}
-            {{- end }}
-            {{- range $key,$entry := .Values.jobs.rules }}
-            - name: galaxy-job-rules
-              mountPath: /galaxy/server/lib/galaxy/jobs/rules/{{ $key }}
-              subPath: {{ $key }}
-            {{- end }}
         {{- if .Values.extraInitContainers -}}
         {{- range $each := .Values.extraInitContainers -}}
-        {{- if $each.applyToJob -}}
+        {{- if $each.applyToWorkflow -}}
         {{- print "- " | nindent 8 -}}
         {{- tpl ((unset (unset (unset $each "applyToJob") "applyToWeb") "applyToWorkflow") | toYaml | indent 10 | trim) $ -}}
         {{- end }}
         {{- end }}
         {{- end }}
       containers:
-        - name: {{ .Chart.Name }}-job
+        - name: {{ .Chart.Name }}-workflow
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
@@ -90,17 +76,17 @@ spec:
           command: ['sh', '-c', '
           {{- range $key, $entry := .Values.extraInitScripts -}}
           {{- if (not (eq $key "mountPath")) -}}
-          {{- if $entry.applyToJob -}}
+          {{- if $entry.applyToWorkflow -}}
           sh {{ $.Values.extraInitScripts.mountPath }}/{{ $key }}{{ ".sh && " }}
           {{- end -}}
           {{- end -}}
           {{- end -}}
-          python /galaxy/server/scripts/galaxy-main -c /galaxy/server/config/galaxy.yml --server-name $(POD_NAME) --attach-to-pool job-handlers']
+          python /galaxy/server/scripts/galaxy-main -c /galaxy/server/config/galaxy.yml --server-name workflow_scheduler0']
           args: []
           volumeMounts:
             {{- range $key, $entry := .Values.extraInitScripts -}}
             {{- if (not (eq $key "mountPath")) -}}
-            {{- if $entry.applyToJob }}
+            {{- if $entry.applyToWorkflow }}
             - name: galaxy-extraInitScripts-{{ $key | lower }}
               mountPath: {{ $.Values.extraInitScripts.mountPath }}/{{ $key }}.sh
               subPath: {{ $key }}.sh
@@ -141,7 +127,7 @@ spec:
           {{- end }}
           {{- range $key, $entry := .Values.extraInitScripts -}}
           {{- if (not (eq $key "mountPath")) -}}
-          {{- if $entry.applyToJob }}
+          {{- if $entry.applyToWorkflow }}
         - name: galaxy-extraInitScripts-{{ $key | lower }}
           {{- if $entry.useSecret }}
           secret:

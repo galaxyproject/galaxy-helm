@@ -24,6 +24,10 @@ jobHandlers:
   podAnnotations: {}
   replicaCount: 1
 
+workflowHandlers:
+  annotations: {}
+  podAnnotations: {}
+
 rbac:
   enabled: true
 
@@ -41,6 +45,7 @@ persistence:
 #   - name: my-first-container
 #     applyToJob: true
 #     applyToWeb: true
+#     applyToWorkflow: true
 #     image: "{{.Values.image.repository}}:{{.Values.image.tag}}"
 #     command: ['sh', '-c', 'cp "/galaxy/server/config/job_conf.xml.sample_advanced" {{.Values.persistence.mountPath}}/']
 #     volumeMounts:
@@ -49,6 +54,7 @@ persistence:
 #   - name: my-second-container
 #     applyToJob: true
 #     applyToWeb: false
+#     applyToWorkflow: false
 #     image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
 #     command: ['sh', '-c', 'cp "/galaxy/server/config/galaxy.yml" {{.Values.persistence.mountPath}}/']
 #     volumeMounts:
@@ -61,6 +67,7 @@ persistence:
 #     useSecret: false
 #     applyToJob: false
 #     applyToWeb: true
+#     applyToWorkflow: true
 #     content: |
 #       #!/bin/sh
 #       echo "Hello web world" > {{.Values.persistence.mountPath}}/hello-web.txt
@@ -68,6 +75,7 @@ persistence:
 #     useSecret: true
 #     applyToWeb: true
 #     applyToJob: true
+#     applyToWorkflow: true
 #     content: |
 #       #!/bin/sh
 #       echo "Hello both job and web worlds" > {{.Values.persistence.mountPath}}/hello-both.txt
@@ -230,7 +238,9 @@ configs:
     <?xml version="1.0"?>
     <workflow_schedulers default="core">
       <core id="core" />
-      <handlers assign_with="db-self" />
+      <handlers default="schedulers">
+          <handler id="workflow_scheduler0" tags="schedulers"/>
+      </handlers>
     </workflow_schedulers>
   sanitize_whitelist.txt: |
     toolshed.g2.bx.psu.edu/repos/crs4/taxonomy_krona_chart/taxonomy_krona_chart/2.6.1

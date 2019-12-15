@@ -190,3 +190,27 @@ class ContainerMapperTest(unittest.TestCase):
             ContainerMapperTest.Referrer())
         assert(destination.params.get(
             'docker_container_id_override') == 'test_container')
+
+    def test_regex_mappings(self):
+        RULE_MAP_REGEX = '''
+          mappings:
+            - tool_ids:
+                - .*data_manager_sam_fasta_index_builder/sam_fasta_index_builder/.*
+              container:
+                docker_container_id_override: test_container
+        '''
+        self.patch_mapper(RULE_MAP_REGEX)
+
+        destination = k8s_container_mapper.k8s_container_mapper(
+            ContainerMapperTest.Tool('toolshed.g2.bx.psu.edu/repos/devteam/data_manager_sam_fasta'
+                '_index_builder/sam_fasta_index_builder/0.0.3'),
+            ContainerMapperTest.Referrer())
+        assert(destination.params.get(
+            'docker_container_id_override') == 'test_container')
+        destination = k8s_container_mapper.k8s_container_mapper(
+            ContainerMapperTest.Tool(
+                'toolshed.g2.bx.psu.edu/repos/devteam/data_manager_sam_fasta'
+                '_index_builder/sam_fasta_index_builder/0.0.4'),
+            ContainerMapperTest.Referrer())
+        assert(destination.params.get(
+            'docker_container_id_override') == 'test_container')

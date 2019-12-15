@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 import yaml
 
 from galaxy.tools import GALAXY_LIB_TOOLS_UNVERSIONED
@@ -55,9 +56,10 @@ def _process_tool_mapping(mapping, params):
 def _apply_rule_mappings(tool, params):
     if CONTAINER_RULE_MAP:
         for mapping in CONTAINER_RULE_MAP.get('mappings', {}):
-            if tool.id in mapping.get('tool_ids'):
-                _process_tool_mapping(mapping, params)
-                return True
+            for mapped_tool_id in mapping.get('tool_ids'):
+                if re.match(mapped_tool_id, tool.id):
+                    _process_tool_mapping(mapping, params)
+                    return True
     return False
 
 

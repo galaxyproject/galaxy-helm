@@ -53,9 +53,9 @@ spec:
               mountPath: {{ .Values.persistence.mountPath }}
         {{- if .Values.extraInitContainers -}}
         {{- range $each := .Values.extraInitContainers -}}
-        {{- if $each.applyToWorkflow -}}
+        {{- if $each.applyToJob -}}
         {{- print "- " | nindent 8 -}}
-        {{- tpl ((unset (unset (unset $each "applyToJob") "applyToWeb") "applyToWorkflow") | toYaml | indent 10 | trim) $ -}}
+        {{- tpl ((unset (unset $each "applyToJob") "applyToWeb") | toYaml | indent 10 | trim) $ -}}
         {{- end }}
         {{- end }}
         {{- end }}
@@ -76,7 +76,7 @@ spec:
           command: ['sh', '-c', '
           {{- range $key, $entry := .Values.extraInitScripts -}}
           {{- if (not (eq $key "mountPath")) -}}
-          {{- if $entry.applyToWorkflow -}}
+          {{- if $entry.applyToJob -}}
           sh {{ $.Values.extraInitScripts.mountPath }}/{{ $key }}{{ ".sh && " }}
           {{- end -}}
           {{- end -}}
@@ -86,7 +86,7 @@ spec:
           volumeMounts:
             {{- range $key, $entry := .Values.extraInitScripts -}}
             {{- if (not (eq $key "mountPath")) -}}
-            {{- if $entry.applyToWorkflow }}
+            {{- if $entry.applyToJob }}
             - name: galaxy-extraInitScripts-{{ $key | lower }}
               mountPath: {{ $.Values.extraInitScripts.mountPath }}/{{ $key }}.sh
               subPath: {{ $key }}.sh
@@ -127,7 +127,7 @@ spec:
           {{- end }}
           {{- range $key, $entry := .Values.extraInitScripts -}}
           {{- if (not (eq $key "mountPath")) -}}
-          {{- if $entry.applyToWorkflow }}
+          {{- if $entry.applyToJob }}
         - name: galaxy-extraInitScripts-{{ $key | lower }}
           {{- if $entry.useSecret }}
           secret:

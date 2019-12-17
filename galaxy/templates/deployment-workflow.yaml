@@ -1,0 +1,171 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "galaxy.fullname" . }}-workflow
+  labels:
+    app.kubernetes.io/name: {{ include "galaxy.name" . }}
+    helm.sh/chart: {{ include "galaxy.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- with .Values.jobHandlers.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "galaxy.fullname" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "galaxy.fullname" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        checksum/galaxy_conf: {{ include (print $.Template.BasePath "/configs-galaxy.yaml") . | sha256sum }}
+        {{- with .Values.jobHandlers.podAnnotations -}}
+        {{ toYaml . | nindent 8 }}
+        {{ end }}
+    spec:
+      securityContext:
+        fsGroup: 101
+      initContainers:
+        - name: {{ .Chart.Name }}-init-postgres
+          image: alpine:3.7
+          command: ['sh', '-c', 'chown 101:101 {{ .Values.persistence.mountPath }}; until nc -z -w3 {{ template "galaxy-postgresql.fullname" $ }} 5432; do echo waiting for galaxy-postgres service; sleep 1; done;']
+          volumeMounts:
+            - name: galaxy-data
+              mountPath: {{ .Values.persistence.mountPath }}
+        - name: {{ .Chart.Name }}-init-mounts
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command: ['sh', '-c', {{ include "galaxy.init-container-commands" . | squote }}]
+          volumeMounts:
+            {{- range $key,$entry := .Values.configs }}
+            - name: galaxy-conf-files
+              mountPath: /galaxy/server/config/{{ $key }}
+              subPath: {{ $key }}
+            {{- end }}
+            - name: galaxy-data
+              mountPath: /galaxy/server/config/mutable/
+              subPath: config
+            - name: galaxy-data
+              mountPath: {{ .Values.persistence.mountPath }}
+        {{- if .Values.extraInitContainers -}}
+        {{- range $each := .Values.extraInitContainers -}}
+        {{- if $each.applyToJob -}}
+        {{- print "- " | nindent 8 -}}
+        {{- tpl ((unset (unset $each "applyToJob") "applyToWeb") | toYaml | indent 10 | trim) $ -}}
+        {{- end }}
+        {{- end }}
+        {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}-workflow
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+{{- if .Values.extraEnv }}
+{{ tpl (toYaml .Values.extraEnv) . | indent 12 }}
+{{- end }}
+            - name: GALAXY_CONFIG_DATABASE_CONNECTION
+              value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy
+          command: ['sh', '-c', '
+          {{- range $key, $entry := .Values.extraInitScripts -}}
+          {{- if (not (eq $key "mountPath")) -}}
+          {{- if $entry.applyToJob -}}
+          sh {{ $.Values.extraInitScripts.mountPath }}/{{ $key }}{{ ".sh && " }}
+          {{- end -}}
+          {{- end -}}
+          {{- end -}}
+          python /galaxy/server/scripts/galaxy-main -c /galaxy/server/config/galaxy.yml --server-name workflow_scheduler0']
+          args: []
+          volumeMounts:
+            {{- range $key, $entry := .Values.extraInitScripts -}}
+            {{- if (not (eq $key "mountPath")) -}}
+            {{- if $entry.applyToJob }}
+            - name: galaxy-extraInitScripts-{{ $key | lower }}
+              mountPath: {{ $.Values.extraInitScripts.mountPath }}/{{ $key }}.sh
+              subPath: {{ $key }}.sh
+            {{- end }}
+            {{- end }}
+            {{- end }}
+            {{- range $key,$entry := .Values.configs }}
+            - name: galaxy-conf-files
+              mountPath: /galaxy/server/config/{{ $key }}
+              subPath: {{ $key }}
+            {{- end }}
+            {{- range $key,$entry := .Values.jobs.rules }}
+            - name: galaxy-job-rules
+              mountPath: /galaxy/server/lib/galaxy/jobs/rules/{{ $key }}
+              subPath: {{ $key }}
+            {{- end }}
+            - name: galaxy-data
+              mountPath: /galaxy/server/config/mutable/
+              subPath: config
+            - name: galaxy-data
+              mountPath: {{ .Values.persistence.mountPath }}
+            {{- if .Values.cvmfs.enabled }}
+            - name: cvmfs-gxy-main
+              mountPath: {{ .Values.cvmfs.main.mountPath }}
+            - name: cvmfs-gxy-data
+              mountPath: {{ .Values.cvmfs.data.mountPath }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: galaxy-conf-files
+          {{- if .Values.useSecretConfigs }}
+          secret:
+            secretName: {{ template "galaxy.fullname" . }}-configs
+          {{- else }}
+          configMap:
+            name: {{ template "galaxy.fullname" . }}-configs
+          {{- end }}
+          {{- range $key, $entry := .Values.extraInitScripts -}}
+          {{- if (not (eq $key "mountPath")) -}}
+          {{- if $entry.applyToJob }}
+        - name: galaxy-extraInitScripts-{{ $key | lower }}
+          {{- if $entry.useSecret }}
+          secret:
+            secretName: {{ include "galaxy.fullname" $ }}-{{ $key | lower }}
+          {{- else }}
+          configMap:
+            name: {{ include "galaxy.fullname" $ }}-{{ $key | lower }}
+          {{- end }}
+          {{- end }}
+          {{- end }}
+          {{- end }}
+        - name: galaxy-job-rules
+          configMap:
+            name: {{ template "galaxy.fullname" . }}-job-rules
+        - name: galaxy-data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ template "galaxy.pvcname" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        {{- if .Values.cvmfs.enabled }}
+        - name: cvmfs-gxy-main
+          persistentVolumeClaim:
+            claimName: {{ template "galaxy.fullname" . }}-cvmfs-gxy-main-pvc
+        - name: cvmfs-gxy-data
+          persistentVolumeClaim:
+            claimName: {{ template "galaxy.fullname" . }}-cvmfs-gxy-data-pvc
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

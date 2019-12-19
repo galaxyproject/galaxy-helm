@@ -1,9 +1,9 @@
-{{- range $key, $entry := .Values.extraInitScripts -}}
-{{- if (not (eq $key "mountPath")) -}}
+{{- range $key, $entry := .Values.extraFileMappings -}}
 {{- if $entry }}
 apiVersion: v1
 metadata:
-  name: {{ include "galaxy.fullname" $ }}-{{ $key | lower }}
+  # Extract the filename portion only
+  name: {{ include "galaxy.fullname" $ }}-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}
   labels:
     app.kubernetes.io/name: {{ include "galaxy.name" $ }}
     helm.sh/chart: {{ include "galaxy.chart" $ }}
@@ -17,9 +17,8 @@ stringData:
 kind: ConfigMap
 data:
 {{- end }}
-  {{- $key | nindent 2 }}.sh: |
+  {{- include "galaxy.getFilenameFromPath" $key | nindent 2 }}: |
     {{- tpl (tpl $entry.content $) $ | nindent 4 }}
 ---
-{{- end }}
 {{- end }}
 {{- end }}

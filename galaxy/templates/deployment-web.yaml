@@ -74,15 +74,12 @@ spec:
 {{- end }}
             - name: GALAXY_CONFIG_DATABASE_CONNECTION
               value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy
-          command: ['sh', '-c', '
-          {{- range $key, $entry := .Values.extraInitScripts -}}
-          {{- if (not (eq $key "mountPath")) -}}
-          {{- if $entry.applyToWeb -}}
-          sh {{ $.Values.extraInitScripts.mountPath }}/{{ $key }}{{ ".sh && " }}
-          {{- end -}}
-          {{- end -}}
-          {{- end -}}
-          /galaxy/server/.venv/bin/uwsgi --yaml /galaxy/server/config/uwsgi.yml --set galaxy_config_file=/galaxy/server/config/galaxy.yml']
+          command: [
+            'sh', '-c',
+            '{{- if .Values.extraInitCommands -}}
+             {{- tpl .Values.extraInitCommands $ | nindent 13 }};
+             {{- end -}}
+             /galaxy/server/.venv/bin/uwsgi --yaml /galaxy/server/config/uwsgi.yml --set galaxy_config_file=/galaxy/server/config/galaxy.yml']
           args: []
           readinessProbe:
             httpGet:
@@ -98,13 +95,11 @@ spec:
             periodSeconds: 60
             failureThreshold: 10
           volumeMounts:
-            {{- range $key, $entry := .Values.extraInitScripts -}}
-            {{- if (not (eq $key "mountPath")) -}}
+            {{- range $key, $entry := .Values.extraFileMappings -}}
             {{- if $entry.applyToWeb }}
-            - name: galaxy-extraInitScripts-{{ $key | lower }}
-              mountPath: {{ $.Values.extraInitScripts.mountPath }}/{{ $key }}.sh
-              subPath: {{ $key }}.sh
-            {{- end }}
+            - name: extra-files-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}
+              mountPath: {{ $key }}
+              subPath: {{ include "galaxy.getFilenameFromPath" $key }}
             {{- end }}
             {{- end }}
             {{- range $key,$entry := .Values.configs }}
@@ -145,20 +140,18 @@ spec:
           configMap:
             name: {{ template "galaxy.fullname" . }}-configs
           {{- end }}
-          {{- range $key, $entry := .Values.extraInitScripts -}}
-          {{- if (not (eq $key "mountPath")) -}}
-          {{- if $entry.applyToWeb }}
-        - name: galaxy-extraInitScripts-{{ $key | lower }}
+        {{- range $key, $entry := .Values.extraFileMappings -}}
+        {{- if $entry.applyToWeb }}
+        - name: extra-files-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}
           {{- if $entry.useSecret }}
           secret:
-            secretName: {{ include "galaxy.fullname" $ }}-{{ $key | lower }}
+            secretName: {{ include "galaxy.fullname" $ }}-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}
           {{- else }}
           configMap:
-            name: {{ include "galaxy.fullname" $ }}-{{ $key | lower }}
+            name: {{ include "galaxy.fullname" $ }}-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}
           {{- end }}
-          {{- end }}
-          {{- end }}
-          {{- end }}
+        {{- end }}
+        {{- end }}
         - name: galaxy-job-rules
           configMap:
             name: {{ template "galaxy.fullname" . }}-job-rules

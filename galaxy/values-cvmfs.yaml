@@ -223,6 +223,7 @@ configs:
       static-map: /static/style=/galaxy/server/static/style/blue
       static-map: /static=/galaxy/server/static
       static-map: /favicon.ico=/galaxy/server/static/favicon.ico
+      static-safe: /galaxy/server/client/galaxy/images
       mount: {{.Values.ingress.path}}=galaxy.webapps.galaxy.buildapp:uwsgi_app()
   galaxy.yml:
     galaxy:

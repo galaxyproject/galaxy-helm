@@ -62,20 +62,15 @@ Return which PVC to use
 {{- end -}}
 
 {{/*
-Decide whether to create a new secret or use an existing secret.
-It creates a new secret if the value is the expected default, and assumes it's an
-existing secret in all other cases.
+Return extra env variables for all deployments
 */}}
-{{- define "galaxy.createGalaxyDbSecret" -}}
-{{- range $key, $entry := .Values.extraEnv -}}
-{{- if eq $entry.name "GALAXY_DB_USER_PASSWORD" -}}
-    {{- if eq $entry.valueFrom.secretKeyRef.name "{{ .Release.Name }}-galaxy-db-password" -}}
-        {{- true -}}
-    {{- else -}}
-    {{- end -}}
-{{- else -}}
-{{- end -}}
-{{- end -}}
+{{- define "galaxy.envVariables" -}}
+{{- defaultName := ({{ .Release.Name }}-galaxy-db-password | quote) }}
+- name: GALAXY_DB_USER_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ default $defaultName .Values.postgresql.galaxyExistingSecret }}
+      key: {{ default "galaxy-db-password" .Values.postgresql.galaxyExistingSecretKeyRef }}
 {{- end -}}
 
 {{/*

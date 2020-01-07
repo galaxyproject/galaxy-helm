@@ -141,17 +141,14 @@ extraFileMappings:
 postgresql:
   enabled: true
   galaxyDatabaseUser: galaxydbuser
-  galaxyDatabasePassword: 42
+  # galaxyDatabasePassword: 42
+  # galaxyExistingSecret:
+  # galaxyExistingSecretKeyRef:
   nameOverride: galaxy-postgres
   initdbScriptsSecret: "{{ .Release.Name }}-galaxy-initdb"
   persistence:
     enabled: true
-  extraEnv:
-    - name: GALAXY_DB_USER_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: "{{ .Release.Name }}-galaxy-db-password"
-          key: galaxy-db-password
+  extraEnv: {}
 
 cvmfs:
   enabled: false
@@ -217,8 +214,6 @@ configs:
       mount: {{.Values.ingress.path}}=galaxy.webapps.galaxy.buildapp:uwsgi_app()
   galaxy.yml:
     galaxy:
-      database_connection: >
-        postgresql://{{.Values.postgresql.galaxyDatabaseUser}}:{{.Values.postgresql.galaxyDatabasePassword}}@{{include "galaxy-postgresql.fullname" .}}/galaxy
       integrated_tool_panel_config: "/galaxy/server/config/mutable/integrated_tool_panel.xml"
       sanitize_whitelist_file: "/galaxy/server/config/mutable/sanitize_whitelist.txt"
       tool_config_file: "/galaxy/server/config/mutable/editable_shed_tool_conf.xml,/galaxy/server/config/tool_conf.xml"

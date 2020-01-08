@@ -9,8 +9,8 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRESQL_USERNAME" galaxy <<-EOSQL
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 11.3 (Debian 11.3-1.pgdg90+1)
--- Dumped by pg_dump version 11.3 (Debian 11.3-1.pgdg90+1)
+-- Dumped from database version 11.6 (Debian 11.6-1.pgdg90+1)
+-- Dumped by pg_dump version 11.6 (Debian 11.6-1.pgdg90+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -4013,7 +4013,8 @@ CREATE TABLE public.page_revision (
     update_time timestamp without time zone,
     page_id integer NOT NULL,
     title text,
-    content text
+    content text,
+    content_format character varying(32) DEFAULT 'html'::character varying NOT NULL
 );
 
 
@@ -4134,7 +4135,7 @@ ALTER TABLE public.password_reset_token OWNER TO galaxydbuser;
 
 CREATE TABLE public.post_job_action (
     id integer NOT NULL,
-    workflow_step_id integer NOT NULL,
+    workflow_step_id integer,
     action_type character varying(255) NOT NULL,
     output_name character varying(255),
     action_arguments bytea
@@ -6065,7 +6066,8 @@ CREATE TABLE public.worker_process (
     id integer NOT NULL,
     server_name character varying(255),
     hostname character varying(255),
-    update_time timestamp without time zone
+    update_time timestamp without time zone,
+    pid integer
 );
 
 
@@ -6248,6 +6250,43 @@ ALTER TABLE public.workflow_invocation_output_dataset_collection_associatio_id_s
 --
 
 ALTER SEQUENCE public.workflow_invocation_output_dataset_collection_associatio_id_seq OWNED BY public.workflow_invocation_output_dataset_collection_association.id;
+
+
+--
+-- Name: workflow_invocation_output_value; Type: TABLE; Schema: public; Owner: galaxydbuser
+--
+
+CREATE TABLE public.workflow_invocation_output_value (
+    id integer NOT NULL,
+    workflow_invocation_id integer,
+    workflow_step_id integer,
+    workflow_output_id integer,
+    value bytea
+);
+
+
+ALTER TABLE public.workflow_invocation_output_value OWNER TO galaxydbuser;
+
+--
+-- Name: workflow_invocation_output_value_id_seq; Type: SEQUENCE; Schema: public; Owner: galaxydbuser
+--
+
+CREATE SEQUENCE public.workflow_invocation_output_value_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.workflow_invocation_output_value_id_seq OWNER TO galaxydbuser;
+
+--
+-- Name: workflow_invocation_output_value_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: galaxydbuser
+--
+
+ALTER SEQUENCE public.workflow_invocation_output_value_id_seq OWNED BY public.workflow_invocation_output_value.id;
 
 
 --
@@ -7982,6 +8021,13 @@ ALTER TABLE ONLY public.workflow_invocation_output_dataset_collection_associatio
 
 
 --
+-- Name: workflow_invocation_output_value id; Type: DEFAULT; Schema: public; Owner: galaxydbuser
+--
+
+ALTER TABLE ONLY public.workflow_invocation_output_value ALTER COLUMN id SET DEFAULT nextval('public.workflow_invocation_output_value_id_seq'::regclass);
+
+
+--
 -- Name: workflow_invocation_step id; Type: DEFAULT; Schema: public; Owner: galaxydbuser
 --
 
@@ -8891,7 +8937,7 @@ GalaxyTools	lib/tool_shed/galaxy_install/migrate	1
 --
 
 COPY public.migrate_version (repository_id, repository_path, version) FROM stdin;
-Galaxy	lib/galaxy/model/migrate	158
+Galaxy	lib/galaxy/model/migrate	164
 \.
 
 
@@ -8931,7 +8977,7 @@ COPY public.page_rating_association (id, page_id, user_id, rating) FROM stdin;
 -- Data for Name: page_revision; Type: TABLE DATA; Schema: public; Owner: galaxydbuser
 --
 
-COPY public.page_revision (id, create_time, update_time, page_id, title, content) FROM stdin;
+COPY public.page_revision (id, create_time, update_time, page_id, title, content, content_format) FROM stdin;
 \.
 
 
@@ -9363,7 +9409,7 @@ COPY public.visualization_user_share_association (id, visualization_id, user_id)
 -- Data for Name: worker_process; Type: TABLE DATA; Schema: public; Owner: galaxydbuser
 --
 
-COPY public.worker_process (id, server_name, hostname, update_time) FROM stdin;
+COPY public.worker_process (id, server_name, hostname, update_time, pid) FROM stdin;
 \.
 
 
@@ -9396,6 +9442,14 @@ COPY public.workflow_invocation_output_dataset_association (id, workflow_invocat
 --
 
 COPY public.workflow_invocation_output_dataset_collection_association (id, workflow_invocation_id, workflow_step_id, dataset_collection_id, workflow_output_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: workflow_invocation_output_value; Type: TABLE DATA; Schema: public; Owner: galaxydbuser
+--
+
+COPY public.workflow_invocation_output_value (id, workflow_invocation_id, workflow_step_id, workflow_output_id, value) FROM stdin;
 \.
 
 
@@ -10645,6 +10699,13 @@ SELECT pg_catalog.setval('public.workflow_invocation_output_dataset_association_
 --
 
 SELECT pg_catalog.setval('public.workflow_invocation_output_dataset_collection_associatio_id_seq', 1, false);
+
+
+--
+-- Name: workflow_invocation_output_value_id_seq; Type: SEQUENCE SET; Schema: public; Owner: galaxydbuser
+--
+
+SELECT pg_catalog.setval('public.workflow_invocation_output_value_id_seq', 1, false);
 
 
 --
@@ -12072,6 +12133,14 @@ ALTER TABLE ONLY public.workflow_invocation_output_dataset_collection_associatio
 
 
 --
+-- Name: workflow_invocation_output_value workflow_invocation_output_value_pkey; Type: CONSTRAINT; Schema: public; Owner: galaxydbuser
+--
+
+ALTER TABLE ONLY public.workflow_invocation_output_value
+    ADD CONSTRAINT workflow_invocation_output_value_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: workflow_invocation workflow_invocation_pkey; Type: CONSTRAINT; Schema: public; Owner: galaxydbuser
 --
 
@@ -13487,6 +13556,13 @@ CREATE INDEX ix_job_import_history_archive_job_id ON public.job_import_history_a
 --
 
 CREATE INDEX ix_job_imported ON public.job USING btree (imported);
+
+
+--
+-- Name: ix_job_job_runner_external_id; Type: INDEX; Schema: public; Owner: galaxydbuser
+--
+
+CREATE INDEX ix_job_job_runner_external_id ON public.job USING btree (job_runner_external_id);
 
 
 --
@@ -15265,6 +15341,20 @@ CREATE INDEX ix_workflow_invocation_output_dataset_collection_associ_ab6c ON pub
 --
 
 CREATE INDEX ix_workflow_invocation_output_dataset_collection_associ_ec97 ON public.workflow_invocation_output_dataset_collection_association USING btree (dataset_collection_id);
+
+
+--
+-- Name: ix_workflow_invocation_output_value_workflow_invocation_id; Type: INDEX; Schema: public; Owner: galaxydbuser
+--
+
+CREATE INDEX ix_workflow_invocation_output_value_workflow_invocation_id ON public.workflow_invocation_output_value USING btree (workflow_invocation_id);
+
+
+--
+-- Name: ix_workflow_invocation_output_value_workflow_output_id; Type: INDEX; Schema: public; Owner: galaxydbuser
+--
+
+CREATE INDEX ix_workflow_invocation_output_value_workflow_output_id ON public.workflow_invocation_output_value USING btree (workflow_output_id);
 
 
 --
@@ -17894,6 +17984,30 @@ ALTER TABLE ONLY public.workflow_invocation_output_dataset_association
 
 ALTER TABLE ONLY public.workflow_invocation_output_dataset_association
     ADD CONSTRAINT workflow_invocation_output_dataset_association_dataset_id_fkey FOREIGN KEY (dataset_id) REFERENCES public.history_dataset_association(id);
+
+
+--
+-- Name: workflow_invocation_output_value workflow_invocation_output_value_workflow_invocation_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: galaxydbuser
+--
+
+ALTER TABLE ONLY public.workflow_invocation_output_value
+    ADD CONSTRAINT workflow_invocation_output_value_workflow_invocation_id_fkey FOREIGN KEY (workflow_invocation_id) REFERENCES public.workflow_invocation(id);
+
+
+--
+-- Name: workflow_invocation_output_value workflow_invocation_output_value_workflow_output_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: galaxydbuser
+--
+
+ALTER TABLE ONLY public.workflow_invocation_output_value
+    ADD CONSTRAINT workflow_invocation_output_value_workflow_output_id_fkey FOREIGN KEY (workflow_output_id) REFERENCES public.workflow_output(id);
+
+
+--
+-- Name: workflow_invocation_output_value workflow_invocation_output_value_workflow_step_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: galaxydbuser
+--
+
+ALTER TABLE ONLY public.workflow_invocation_output_value
+    ADD CONSTRAINT workflow_invocation_output_value_workflow_step_id_fkey FOREIGN KEY (workflow_step_id) REFERENCES public.workflow_step(id);
 
 
 --

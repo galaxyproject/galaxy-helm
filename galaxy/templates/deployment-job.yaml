@@ -82,7 +82,6 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-{{- include "galaxy.envVariables" . | nindent 12 -}}
 {{- if .Values.extraEnv }}
 {{ tpl (toYaml .Values.extraEnv) . | indent 12 }}
 {{- end }}

@@ -69,7 +69,6 @@ spec:
               containerPort: 8080
               protocol: TCP
           env:
-{{- include "galaxy.envVariables" . | nindent 12 -}}
 {{- if .Values.extraEnv }}
 {{ tpl (toYaml .Values.extraEnv) . | indent 12 }}
 {{- end }}

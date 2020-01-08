@@ -62,18 +62,6 @@ Return which PVC to use
 {{- end -}}
 
 {{/*
-Return extra env variables for all deployments
-*/}}
-{{- define "galaxy.envVariables" -}}
-{{- $defaultName := printf "%s-galaxy-db-password" .Release.Name }}
-- name: GALAXY_DB_USER_PASSWORD
-  valueFrom:
-    secretKeyRef:
-      name: {{ default $defaultName .Values.postgresql.galaxyExistingSecret }}
-      key: {{ default "galaxy-db-password" .Values.postgresql.galaxyExistingSecretKeyRef }}
-{{- end -}}
-
-{{/*
 Return galaxy database user password
 */}}
 {{- define "galaxy.galaxyDbPassword" -}}
@@ -94,7 +82,6 @@ cp -anL /galaxy/server/config/data_manager_conf.xml.sample /galaxy/server/config
 cp -anL /galaxy/server/config/tool_data_table_conf.xml.sample /galaxy/server/config/mutable/shed_tool_data_table_conf.xml;
 cp -arnL /galaxy/server/tool-data {{.Values.persistence.mountPath}}/;
 {{- end -}}
-
 
 {{/*
 Extract the filename portion from a file path

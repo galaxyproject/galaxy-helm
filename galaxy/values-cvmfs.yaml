@@ -96,7 +96,12 @@ extraFileMappings:
           </body>
       </html>
 
-extraEnv: {}
+extraEnv:
+- name: GALAXY_DB_USER_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: '{{default (printf "%s-galaxy-db-password" .Release.Name) .Values.postgresql.galaxyExistingSecret}}'
+      key: '{{default "galaxy-db-password" .Values.postgresql.galaxyExistingSecretKeyRef}}'
 
 ingress:
   enabled: true
@@ -143,7 +148,12 @@ postgresql:
   initdbScriptsSecret: "{{ .Release.Name }}-galaxy-initdb"
   persistence:
     enabled: true
-  extraEnv: {{ include "galaxy.envVariables" . | toYaml }}
+  extraEnv:
+  - name: GALAXY_DB_USER_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: '{{default (printf "%s-galaxy-db-password" .Release.Name) .Values.galaxyExistingSecret}}'
+        key: '{{default "galaxy-db-password" .Values.galaxyExistingSecretKeyRef}}'
 
 cvmfs:
   enabled: true

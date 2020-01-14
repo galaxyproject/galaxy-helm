@@ -18,6 +18,7 @@ spec:
           containers:
           - name: galaxy-metrics-scraper
             image: cloudve/galaxy-metrics-scraper:latest
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
             env:
               - name: PGHOST
                 value: {{ include "galaxy-postgresql.fullname" . }}

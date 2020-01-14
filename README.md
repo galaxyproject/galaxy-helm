@@ -79,30 +79,34 @@ helm del --purge galaxy
 The following table lists the configurable parameters of the Galaxy chart. The
 current default values can be found in `values.yaml` file.
 
-| Parameter                              | Description                                                                                                                                   |
-|----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| `image.repository`                     | The repository and name of the Docker image for Galaxy pointing to Docker Hub.                                                                |
-| `image.tag`                            | Galaxy image tag / version                                                                                                                    |
-| `image.pullPolicy`                     | Galaxy image pull policy                                                                                                                      |
-| `service.type`                         | Kubernetes Service type                                                                                                                       |
-| `service.port`                         | Galaxy service port                                                                                                                           |
-| `webHandlers.replicaCount`             | The number of replicas for the Galaxy web handlers                                                                                            |
-| `jobHandlers.replicaCount`             | The number of replicas for the Galaxy job handlers                                                                                            |
-| `rbac.enabled`                         | Enable Galaxy job RBAC                                                                                                                        |
-| `persistence.enabled`                  | Enable persistence using PVC                                                                                                                  |
-| `persistence.name`                     | Name of the PVC                                                                                                                               |
-| `persistence.storageClass`             | PVC Storage Class for Galaxy volume (use either this or `existingClaim`)                                                                      |
-| `persistence.existingClaim`            | An existing PVC to be used for the Galaxy volume (use either this or `storageClass`)                                                          |
-| `persistence.accessMode`               | PVC access mode for the Galaxy volume                                                                                                         |
-| `persistence.size`                     | PVC storage request for the Galaxy volume, in GB                                                                                              |
-| `persistence.mountPath`                | Path where to mount the Galaxy volume                                                                                                         |
-| `extraEnv     `                        | Any extra environment variables you would like to pass on to the pod                                                                          |
-| `ingress.enabled`                      | Enable Kubernetes ingress                                                                                                                     |
-| `ingress.path`                         | Path where Galaxy application will be hosted                                                                                                  |
-| `ingress.hosts`                        | Cluster hosts where Galaxy will be available                                                                                                  |
-| `useSecretConfigs`                     | Enable Kubernetes Secrets for all config maps                                                                                                 |
-| `configs.*`                            | Galaxy configuration files and values for each of the files. The provided value represent the entire content of the given configuration file. |
-| `jobs.rules`                           | Galaxy dynamic job rules                                                                                                                      |
+| Parameter                               | Description                                                                                                                                   |
+|-----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| `image.repository`                      | The repository and name of the Docker image for Galaxy pointing to Docker Hub.                                                                |
+| `image.tag`                             | Galaxy image tag / version                                                                                                                    |
+| `image.pullPolicy`                      | Galaxy image pull policy                                                                                                                      |
+| `service.type`                          | Kubernetes Service type                                                                                                                       |
+| `service.port`                          | Galaxy service port                                                                                                                           |
+| `webHandlers.replicaCount`              | The number of replicas for the Galaxy web handlers                                                                                            |
+| `jobHandlers.replicaCount`              | The number of replicas for the Galaxy job handlers                                                                                            |
+| `rbac.enabled`                          | Enable Galaxy job RBAC                                                                                                                        |
+| `persistence.enabled`                   | Enable persistence using PVC                                                                                                                  |
+| `persistence.name`                      | Name of the PVC                                                                                                                               |
+| `persistence.storageClass`              | PVC Storage Class for Galaxy volume (use either this or `existingClaim`)                                                                      |
+| `persistence.existingClaim`             | An existing PVC to be used for the Galaxy volume (use either this or `storageClass`)                                                          |
+| `persistence.accessMode`                | PVC access mode for the Galaxy volume                                                                                                         |
+| `persistence.size`                      | PVC storage request for the Galaxy volume, in GB                                                                                              |
+| `persistence.mountPath`                 | Path where to mount the Galaxy volume                                                                                                         |
+| `extraEnv     `                         | Any extra environment variables you would like to pass on to the pod                                                                          |
+| `ingress.enabled`                       | Enable Kubernetes ingress                                                                                                                     |
+| `ingress.path`                          | Path where Galaxy application will be hosted                                                                                                  |
+| `ingress.hosts`                         | Cluster hosts where Galaxy will be available                                                                                                  |
+| `useSecretConfigs`                      | Enable Kubernetes Secrets for all config maps                                                                                                 |
+| `configs.*`                             | Galaxy configuration files and values for each of the files. The provided value represent the entire content of the given configuration file  |
+| `jobs.rules`                            | Galaxy dynamic job rules                                                                                                                      |
+| `postgresql.galaxyDatabaseUser`         | Postgresql user for Galaxy database                                                                                                           |
+| `postgresql.galaxyDatabasePassword`     | Password for Galaxy's postgresql user                                                                                                         |
+| `postgresql.galaxyExistingSecret`       | Overrides `galaxyDatabasePassword`. Use password from an exiting secret for Galaxy's postgresql user                                          |
+| `postgresql.galaxyExistingSecretKeyRef` | Key for data portion containing the password from `galaxyExistingSecret`. Defaults to `galaxy-db-password`                                    |
 
 Specify each parameter using the `--set key=value[,key=value]` argument to
 `helm install`. For example,

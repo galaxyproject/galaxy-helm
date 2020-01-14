@@ -62,23 +62,6 @@ Return which PVC to use
 {{- end -}}
 
 {{/*
-Decide whether to create a new secret or use an existing secret.
-It creates a new secret if the value is the expected default, and assumes it's an
-existing secret in all other cases.
-*/}}
-{{- define "galaxy.createGalaxyDbSecret" -}}
-{{- range $key, $entry := .Values.extraEnv -}}
-{{- if eq $entry.name "GALAXY_DB_USER_PASSWORD" -}}
-    {{- if eq $entry.valueFrom.secretKeyRef.name "{{ .Release.Name }}-galaxy-db-password" -}}
-        {{- true -}}
-    {{- else -}}
-    {{- end -}}
-{{- else -}}
-{{- end -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Return galaxy database user password
 */}}
 {{- define "galaxy.galaxyDbPassword" -}}
@@ -99,7 +82,6 @@ cp -anL /galaxy/server/config/data_manager_conf.xml.sample /galaxy/server/config
 cp -anL /galaxy/server/config/tool_data_table_conf.xml.sample /galaxy/server/config/mutable/shed_tool_data_table_conf.xml;
 cp -arnL /galaxy/server/tool-data {{.Values.persistence.mountPath}}/;
 {{- end -}}
-
 
 {{/*
 Extract the filename portion from a file path

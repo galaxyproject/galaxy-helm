@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "galaxy.fullname" . }}-web
+  name: {{ include "galaxy.fullname" . }}-workflow
   labels:
     app.kubernetes.io/name: {{ include "galaxy.name" . }}
     helm.sh/chart: {{ include "galaxy.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- with .Values.webHandlers.annotations }}
+{{- with .Values.jobHandlers.annotations }}
   annotations:
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
-  replicas: {{ .Values.webHandlers.replicaCount }}
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "galaxy.fullname" . }}
@@ -22,12 +22,11 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "galaxy.fullname" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
-        component: galaxy-web-handler
       annotations:
         checksum/galaxy_conf: {{ include (print $.Template.BasePath "/configs-galaxy.yaml") . | sha256sum }}
-        {{- with .Values.webHandlers.podAnnotations -}}
+        {{- with .Values.jobHandlers.podAnnotations -}}
         {{ toYaml . | nindent 8 }}
-        {{- end }}
+        {{ end }}
     spec:
       securityContext:
         fsGroup: 101
@@ -48,27 +47,27 @@ spec:
               subPath: {{ $key }}
             {{- end }}
             - name: galaxy-data
-              mountPath: {{ .Values.persistence.mountPath }}
-            - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/
               subPath: config
+            - name: galaxy-data
+              mountPath: {{ .Values.persistence.mountPath }}
         {{- if .Values.extraInitContainers -}}
         {{- range $each := .Values.extraInitContainers -}}
-        {{- if $each.applyToWeb -}}
+        {{- if $each.applyToJob -}}
         {{- print "- " | nindent 8 -}}
         {{- tpl ((unset (unset $each "applyToJob") "applyToWeb") | toYaml | indent 10 | trim) $ -}}
         {{- end }}
         {{- end }}
         {{- end }}
       containers:
-        - name: {{ .Chart.Name }}-web
+        - name: {{ .Chart.Name }}-workflow
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          ports:
-            - name: galaxy-http
-              containerPort: 8080
-              protocol: TCP
           env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
 {{- if .Values.extraEnv }}
 {{ tpl (toYaml .Values.extraEnv) . | indent 12 }}
 {{- end }}
@@ -77,26 +76,13 @@ spec:
           command: [
             'sh', '-c',
             '{{- if .Values.extraInitCommands -}}
-             {{- tpl .Values.extraInitCommands $ | nindent 13 }};
+             {{- tpl .Values.extraInitCommands $ | nindent 13 -}};
              {{- end -}}
-             /galaxy/server/.venv/bin/uwsgi --yaml /galaxy/server/config/uwsgi.yml --set galaxy_config_file=/galaxy/server/config/galaxy.yml']
+             python /galaxy/server/scripts/galaxy-main -c /galaxy/server/config/galaxy.yml --server-name workflow_scheduler0']
           args: []
-          readinessProbe:
-            httpGet:
-              path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}
-              port: 8080
-            initialDelaySeconds: 30
-            periodSeconds: 15
-          livenessProbe:
-            httpGet:
-              path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}
-              port: 8080
-            initialDelaySeconds: 60
-            periodSeconds: 60
-            failureThreshold: 10
           volumeMounts:
             {{- range $key, $entry := .Values.extraFileMappings -}}
-            {{- if $entry.applyToWeb }}
+            {{- if $entry.applyToJob }}
             - name: extra-files-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}
               mountPath: {{ $key }}
               subPath: {{ include "galaxy.getFilenameFromPath" $key }}
@@ -113,10 +99,10 @@ spec:
               subPath: {{ $key }}
             {{- end }}
             - name: galaxy-data
-              mountPath: {{ .Values.persistence.mountPath }}
-            - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/
               subPath: config
+            - name: galaxy-data
+              mountPath: {{ .Values.persistence.mountPath }}
             {{- if .Values.cvmfs.enabled }}
             - name: cvmfs-gxy-main
               mountPath: {{ .Values.cvmfs.main.mountPath }}
@@ -125,12 +111,6 @@ spec:
             {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-        # - name: nginx
-        #   image: nginx
-        #   lifecycle:
-        #     preStop:
-        #       exec:
-        #         command: ["/usr/sbin/nginx","-s","quit"]
       volumes:
         - name: galaxy-conf-files
           {{- if .Values.useSecretConfigs }}
@@ -141,7 +121,7 @@ spec:
             name: {{ template "galaxy.fullname" . }}-configs
           {{- end }}
         {{- range $key, $entry := .Values.extraFileMappings -}}
-        {{- if $entry.applyToWeb }}
+        {{- if $entry.applyToJob }}
         - name: extra-files-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}
           {{- if $entry.useSecret }}
           secret:

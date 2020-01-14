@@ -16,9 +16,14 @@ service:
 
 webHandlers:
   replicaCount: 1
+  annotations: {}
+  podAnnotations: {}
 
 jobHandlers:
   replicaCount: 1
+  # Annotations are used for both job and workflow deployments
+  annotations: {}
+  podAnnotations: {}
 
 rbac:
   enabled: true
@@ -51,22 +56,45 @@ persistence:
 #       - name: galaxy-data
 #         mountPath: "{{.Values.persistence.mountPath}}"
 
-# extraInitScripts:
-#   mountPath: /galaxy/server/scripts/extraInitScripts
-#   myFirstScript:
-#     useSecret: false
-#     applyToJob: false
-#     applyToWeb: true
-#     content: |
-#       #!/bin/sh
-#       echo "Hello web world" > {{.Values.persistence.mountPath}}/hello-web.txt
-#   mySecondScript:
-#     useSecret: true
-#     applyToWeb: true
-#     applyToJob: true
-#     content: |
-#       #!/bin/sh
-#       echo "Hello both job and web worlds" > {{.Values.persistence.mountPath}}/hello-both.txt
+extraInitCommands: |
+#  echo "Running extra mapped script. Influx enabled = {{ .Values.influxdb.enabled }}";
+#  /galaxy/server/extra/mapped/script.sh
+
+extraFileMappings:
+  /galaxy/server/static/welcome.html:
+    useSecret: false
+    applyToJob: false
+    applyToWeb: true
+    content: |
+      <!DOCTYPE html>
+      <html lang="en">
+          <head>
+              <meta charset="utf-8">
+              <link rel="stylesheet" href="style/base.css" type="text/css" />
+          </head>
+          <body class="m-0">
+              <div class="py-4">
+                  <div class="container">
+                      <h2>Welcome to <strong>Galaxy v{{ .Chart.AppVersion }}</strong></h2>
+                      <br>
+                      <a target="_blank" href="https://docs.galaxyproject.org/en/master/" class="btn btn-primary">Documentation »</a>
+                      <a target="_blank" href="https://galaxyproject.org" class="btn btn-primary">Community Hub »</a>
+                  </div>
+                  <br>
+                  {{- if .Values.influxdb.enabled }}
+                  <div class="container">
+                      <iframe width="100%" height="1300px" frameborder="0" marginheight="0" marginwidth="0"
+                          src="/grafana/d/gxy_general_stats_{{ .Release.Name }}/galaxy-overview?refresh=60s&orgId=1&kiosk&theme=light"></iframe>
+                  </div>
+                  {{- end }}
+              </div>
+              <div class="container">
+                  <footer class="text-center">
+                      <p>Galaxy v{{ .Chart.AppVersion }}, Helm Chart v{{ .Chart.Version }}</p>
+                  </footer>
+              </div>
+          </body>
+      </html>
 
 extraEnv:
 # If using an existing secret, the postgresql.extraEnv.GALAXY_DB_USER_PASSWORD's
@@ -198,6 +226,7 @@ configs:
       static-map: /static/style=/galaxy/server/static/style/blue
       static-map: /static=/galaxy/server/static
       static-map: /favicon.ico=/galaxy/server/static/favicon.ico
+      static-safe: /galaxy/server/client/galaxy/images
       mount: {{.Values.ingress.path}}=galaxy.webapps.galaxy.buildapp:uwsgi_app()
   galaxy.yml:
     galaxy:
@@ -211,7 +240,6 @@ configs:
       tool_dependency_dir: "{{.Values.persistence.mountPath}}/deps"
       job_config_file: "/galaxy/server/config/job_conf.xml"
       builds_file_path: "{{.Values.cvmfs.data.mountPath}}/managed/location/builds.txt"
-      datatypes_config_file: "{{ .Values.cvmfs.main.mountPath }}/config/datatypes_conf.xml"
       containers_resolvers_config_file: "/galaxy/server/config/container_resolvers_conf.xml"
       workflow_schedulers_config_file: "/galaxy/server/config/workflow_schedulers_conf.xml"
       build_sites_config_file: "/galaxy/server/config/build_sites.yml"
@@ -219,17 +247,19 @@ configs:
       shed_tool_data_table_config: "/galaxy/server/config/mutable/shed_tool_data_table_conf.xml"
       enable_data_manager_user_view: true
       tool_data_path: "{{.Values.persistence.mountPath}}/tool-data"
+      conda_auto_init: false
   container_resolvers_conf.xml: |
     <containers_resolvers>
       <explicit />
       <mulled />
-      <build_mulled />
     </containers_resolvers>
   workflow_schedulers_conf.xml: |
     <?xml version="1.0"?>
     <workflow_schedulers default="core">
       <core id="core" />
-      <handlers assign_with="db-self" />
+      <handlers default="schedulers">
+          <handler id="workflow_scheduler0" tags="schedulers"/>
+      </handlers>
     </workflow_schedulers>
   sanitize_whitelist.txt: |
     toolshed.g2.bx.psu.edu/repos/crs4/taxonomy_krona_chart/taxonomy_krona_chart/2.6.1
@@ -253,6 +283,7 @@ configs:
     toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.3.1
     toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.5.0
     toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.6
+    toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.7
     toolshed.g2.bx.psu.edu/repos/iuc/prestor_abseq3/prestor_abseq3/0.5.4
     toolshed.g2.bx.psu.edu/repos/iuc/quast/quast/4.1.1
     toolshed.g2.bx.psu.edu/repos/iuc/quast/quast/4.6.3
@@ -416,6 +447,21 @@ jobs:
     container_mapper_rules.yml: |
       mappings:
         - tool_ids:
+            - Summary_Statistics1
+          container:
+            docker_container_id_override: cloudve/gsummary:latest
+            resource_set: small
+        - tool_ids:
+            - toolshed.g2.bx.psu.edu/repos/devteam/data_manager_sam_fasta_index_builder/sam_fasta_index_builder/.*
+          container:
+            docker_container_id_override: cloudve/sam-fasta-dm:latest
+            resource_set: small
+        - tool_ids:
+            - toolshed.g2.bx.psu.edu/repos/devteam/data_manager_bwa_mem_index_builder/bwa_mem_index_builder_data_manager/.*
+          container:
+            docker_container_id_override: cloudve/bwa-dm:latest
+            resource_set: small
+        - tool_ids:
             - sort1
             - Grouping1
           container:
@@ -433,3 +479,9 @@ jobs:
         default_resource_set: small
     k8s_container_mapper.py: |
       {{- (.Files.Get "files/rules/k8s_container_mapper.py") }}
+
+influxdb:
+  enabled: true
+  url:
+  username: ""
+  password: ""

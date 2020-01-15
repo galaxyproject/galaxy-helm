@@ -69,8 +69,11 @@ resources:
   #   cpu: 100m
   #   memory: 128Mi
   requests:
-  #   cpu: 100m
-    memory: 2000Mi
+    cpu: 0.5
+    memory: 2G
+  limits:
+    cpu: 2
+    memory: 6G
 
 nodeSelector: {}
 

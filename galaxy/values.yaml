@@ -179,6 +179,7 @@ configs:
               <param id="k8s_supplemental_group_id">101</param>
               <param id="k8s_pull_policy">IfNotPresent</param>
               <param id="k8s_cleanup_job">always</param>
+              <param id="k8s_pod_priority_class">{{ include "galaxy.name" . }}-job-priority</param>
             </plugin>
         </plugins>
         <destinations default="dynamic-k8s-dispatcher">

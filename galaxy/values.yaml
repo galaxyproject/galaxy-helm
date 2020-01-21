@@ -263,6 +263,10 @@ configs:
     toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.72+galaxy1
     toolshed.g2.bx.psu.edu/repos/engineson/multiqc/multiqc/1.0.0.0
     toolshed.g2.bx.psu.edu/repos/iuc/dexseq/dexseq/1.20.1
+    toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/0.5.2.1
+    toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.5+galaxy6
+    toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse_to_standalone/0.5.2
+    toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse_to_standalone/1.16.5+galaxy6
     toolshed.g2.bx.psu.edu/repos/iuc/macs2/macs2_callpeak/2.1.0.20140616.0
     toolshed.g2.bx.psu.edu/repos/iuc/macs2/macs2_callpeak/2.1.0.20151222.0
     toolshed.g2.bx.psu.edu/repos/iuc/meme_meme/meme_meme/4.11.0.0

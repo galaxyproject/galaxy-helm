@@ -462,6 +462,10 @@ jobs:
             docker_container_id_override: cloudve/bwa-dm:latest
             resource_set: small
         - tool_ids:
+            - toolshed.g2.bx.psu.edu/repos/crs4/prokka/prokka/1.14.5
+          container:
+            docker_container_id_override: cloudve/prokka:1.14.5
+        - tool_ids:
             - toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.5+galaxy6
           container:
             docker_container_id_override: cloudve/jbrowse:1.16.5

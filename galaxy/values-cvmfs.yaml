@@ -102,6 +102,7 @@ extraEnv:
     secretKeyRef:
       name: '{{default (printf "%s-galaxy-db-password" .Release.Name) .Values.postgresql.galaxyExistingSecret}}'
       key: '{{default "galaxy-db-password" .Values.postgresql.galaxyExistingSecretKeyRef}}'
+      optional: false
 
 ingress:
   enabled: true
@@ -158,6 +159,7 @@ postgresql:
       secretKeyRef:
         name: '{{default (printf "%s-galaxy-db-password" .Release.Name) .Values.galaxyExistingSecret}}'
         key: '{{default "galaxy-db-password" .Values.galaxyExistingSecretKeyRef}}'
+        optional: false
 
 cvmfs:
   enabled: true

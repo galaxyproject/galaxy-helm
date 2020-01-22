@@ -83,6 +83,7 @@ spec:
             - name: POD_NAME
               valueFrom:
                 fieldRef:
+                  apiVersion: v1
                   fieldPath: metadata.name
           {{ include "galaxy.podEnvVars" . }}
           command: [

@@ -64,15 +64,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            - name: POD_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
-{{- if .Values.extraEnv }}
-{{ tpl (toYaml .Values.extraEnv) . | indent 12 }}
-{{- end }}
-            - name: GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION
-              value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy
+          {{ include "galaxy.podEnvVars" . }}
           command: [
             'sh', '-c',
             '{{- if .Values.extraInitCommands -}}

@@ -69,11 +69,7 @@ spec:
               containerPort: 8080
               protocol: TCP
           env:
-{{- if .Values.extraEnv }}
-{{ tpl (toYaml .Values.extraEnv) . | indent 12 }}
-{{- end }}
-            - name: GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION
-              value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy
+          {{ include "galaxy.podEnvVars" . }}
           command: [
             'sh', '-c',
             '{{- if .Values.extraInitCommands -}}

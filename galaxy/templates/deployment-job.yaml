@@ -54,6 +54,8 @@ spec:
         - name: {{ .Chart.Name }}-db-migrations
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           command: ['sh', '-c', '/galaxy/server/manage_db.sh upgrade']
+          env:
+          {{ include "galaxy.podEnvVars" . }}
           volumeMounts:
             {{- range $key,$entry := .Values.configs }}
             - name: galaxy-conf-files
@@ -82,11 +84,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-{{- if .Values.extraEnv }}
-{{ tpl (toYaml .Values.extraEnv) . | indent 12 }}
-{{- end }}
-            - name: GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION
-              value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy
+          {{ include "galaxy.podEnvVars" . }}
           command: [
             'sh', '-c',
             '{{- if .Values.extraInitCommands -}}

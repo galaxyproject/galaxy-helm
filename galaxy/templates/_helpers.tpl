@@ -97,7 +97,7 @@ Define pod env vars
 {{- define "galaxy.podEnvVars" -}}
 {{- if .Values.extraEnv }}
 {{ tpl (toYaml .Values.extraEnv) . | indent 12 }}
-{{- end }}
+{{- end -}}
             - name: GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION
-              value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy
+              value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_CONFIG_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy
 {{- end -}}

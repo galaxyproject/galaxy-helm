@@ -2,7 +2,7 @@
 
 set -e
 
-psql -v ON_ERROR_STOP=1 -v GXYPASSWORD="'$GALAXY_DB_USER_PASSWORD'" --username "$POSTGRESQL_USERNAME" --dbname "$POSTGRESQL_DATABASE" <<-EOSQL
+psql -v ON_ERROR_STOP=1 -v GXYPASSWORD="'$GALAXY_CONFIG_DB_USER_PASSWORD'" --username "$POSTGRESQL_USERNAME" --dbname "$POSTGRESQL_DATABASE" <<-EOSQL
 		CREATE DATABASE galaxy;
 		CREATE USER {{.Values.postgresql.galaxyDatabaseUser}};
 		ALTER ROLE {{.Values.postgresql.galaxyDatabaseUser}} WITH PASSWORD :GXYPASSWORD;

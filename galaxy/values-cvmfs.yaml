@@ -97,7 +97,7 @@ extraFileMappings:
       </html>
 
 extraEnv:
-- name: GALAXY_DB_USER_PASSWORD
+- name: GALAXY_CONFIG_DB_USER_PASSWORD
   valueFrom:
     secretKeyRef:
       name: '{{default (printf "%s-galaxy-db-password" .Release.Name) .Values.postgresql.galaxyExistingSecret}}'
@@ -153,7 +153,7 @@ postgresql:
   persistence:
     enabled: true
   extraEnv:
-  - name: GALAXY_DB_USER_PASSWORD
+  - name: GALAXY_CONFIG_DB_USER_PASSWORD
     valueFrom:
       secretKeyRef:
         name: '{{default (printf "%s-galaxy-db-password" .Release.Name) .Values.galaxyExistingSecret}}'

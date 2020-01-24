@@ -3,7 +3,7 @@
 apiVersion: v1
 metadata:
   # Extract the filename portion only
-  name: {{ include "galaxy.fullname" $ }}-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}
+  name: {{ include "galaxy.fullname" $ }}-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" | replace "_" "-" }}
   labels:
     app.kubernetes.io/name: {{ include "galaxy.name" $ }}
     helm.sh/chart: {{ include "galaxy.chart" $ }}

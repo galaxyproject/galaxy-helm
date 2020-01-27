@@ -476,10 +476,6 @@ jobs:
           container:
             docker_container_id_override: cloudve/jbrowse:1.16.5
         - tool_ids:
-            - toolshed.g2.bx.psu.edu/repos/iuc/quast/quast/5.0.2+galaxy0
-          container:
-            docker_container_id_override: cloudve/quast:5.0.2
-        - tool_ids:
             - sort1
             - Grouping1
           container:

@@ -482,36 +482,33 @@ jobs:
             docker_container_id_override: {{ .Values.image.repository }}:{{ .Values.image.tag }}
             resource_set: small
         - tool_ids:
-            - toolshed.g2.bx.psu.edu/repos/devteam/bwa/bwa/0.7.17.4
-            - toolshed.g2.bx.psu.edu/repos/devteam/bwa/bwa_mem/0.7.17.1
-            - toolshed.g2.bx.psu.edu/repos/iuc/bwameth/bwameth/0.2.2
-            - toolshed.g2.bx.psu.edu/repos/devteam/bowtie2/bowtie2/2.3.4.3+galaxy0
-            - toolshed.g2.bx.psu.edu/repos/iuc/featurecounts/featurecounts/1.6.4+galaxy1
-            - toolshed.g2.bx.psu.edu/repos/iuc/hisat2/hisat2/2.1.0+galaxy5
-            - toolshed.g2.bx.psu.edu/repos/iuc/minimap2/minimap2/2.17+galaxy0
-            - toolshed.g2.bx.psu.edu/repos/nilesh/rseqc/rseqc_bam2wig/2.6.4
-            - toolshed.g2.bx.psu.edu/repos/iuc/valet/valet/1.0.0
-            - toolshed.g2.bx.psu.edu/repos/iuc/varscan_somatic/varscan_somatic/2.4.3.5
+            - toolshed.g2.bx.psu.edu/repos/devteam/bowtie2/bowtie2/.*
+            - toolshed.g2.bx.psu.edu/repos/devteam/bwa/bwa_mem/.*
+            - toolshed.g2.bx.psu.edu/repos/devteam/bwa/bwa/.*
+            - toolshed.g2.bx.psu.edu/repos/iuc/bwameth/bwameth/.*
+            - toolshed.g2.bx.psu.edu/repos/iuc/featurecounts/featurecounts/.*
+            - toolshed.g2.bx.psu.edu/repos/iuc/hisat2/hisat2/.*
+            - toolshed.g2.bx.psu.edu/repos/iuc/minimap2/minimap2/.*
+            - toolshed.g2.bx.psu.edu/repos/iuc/valet/valet/.*
+            - toolshed.g2.bx.psu.edu/repos/iuc/varscan_somatic/varscan_somatic/.*
+            - toolshed.g2.bx.psu.edu/repos/nilesh/rseqc/rseqc_bam2wig/.*
           container:
             resource_set: medium
         - tool_ids:
-            - toolshed.g2.bx.psu.edu/repos/nml/spades/spades/3.12.0+galaxy1
-            - toolshed.g2.bx.psu.edu/repos/iuc/rnaspades/rnaspades/3.9.0.1
-            - toolshed.g2.bx.psu.edu/repos/iuc/unicycler/unicycler/0.4.8.0
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_bam_compare/deeptools_bam_compare/3.3.0.0.0
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_bam_coverage/deeptools_bam_coverage/3.3.0.0.0
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_bam_compare/deeptools_bam_compare/3.3.0.0.0
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_bam_pe_fragmentsize/deeptools_bam_pe_fragmentsize/3.3.0.0.0
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_bigwig_compare/deeptools_bigwig_compare/3.3.0.0.0
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_compute_gc_bias/deeptools_compute_gc_bias/3.3.0.0.0
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_compute_matrix/deeptools_compute_matrix/3.3.0.0.0
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_compute_gc_bias/deeptools_compute_gc_bias/3.3.0.0.0
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_correct_gc_bias/deeptools_correct_gc_bias/3.3.0.0.0
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_multi_bam_summary/deeptools_multi_bam_summary/3.3.0.0.0
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_multi_bigwig_summary/deeptools_multi_bigwig_summary/3.3.0.0.0
-            - toolshed.g2.bx.psu.edu/repos/devteam/freebayes/freebayes/1.1.0.46-0
-            - toolshed.g2.bx.psu.edu/repos/iuc/rgrnastar/rna_star/2.6.0b-1
-            - toolshed.g2.bx.psu.edu/repos/nml/spades/spades/3.12.0+galaxy1
+            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_bam_compare/deeptools_bam_compare/.*
+            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_bam_coverage/deeptools_bam_coverage/.*
+            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_bam_pe_fragmentsize/deeptools_bam_pe_fragmentsize/.*
+            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_bigwig_compare/deeptools_bigwig_compare/.*
+            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_compute_gc_bias/deeptools_compute_gc_bias/.*
+            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_compute_matrix/deeptools_compute_matrix/.*
+            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_correct_gc_bias/deeptools_correct_gc_bias/.*
+            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_multi_bam_summary/deeptools_multi_bam_summary/.*
+            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_multi_bigwig_summary/deeptools_multi_bigwig_summary/.*
+            - toolshed.g2.bx.psu.edu/repos/devteam/freebayes/freebayes/.*
+            - toolshed.g2.bx.psu.edu/repos/iuc/rgrnastar/rna_star/.*
+            - toolshed.g2.bx.psu.edu/repos/iuc/rnaspades/rnaspades/.*
+            - toolshed.g2.bx.psu.edu/repos/iuc/unicycler/unicycler/.*
+            - toolshed.g2.bx.psu.edu/repos/nml/spades/spades/.*
           container:
             resource_set: large
       resources:

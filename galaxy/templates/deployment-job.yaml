@@ -90,7 +90,7 @@ spec:
             '{{- if .Values.extraInitCommands -}}
              {{- tpl .Values.extraInitCommands $ | nindent 13 -}};
              {{- end -}}
-             python /galaxy/server/scripts/galaxy-main -c /galaxy/server/config/galaxy.yml --server-name $(POD_NAME) --attach-to-pool job-handlers']
+             python /galaxy/server/scripts/galaxy-main -c /galaxy/server/config/galaxy.yml --server-name main_job_handler --attach-to-pool job-handlers']
           args: []
           volumeMounts:
             {{- range $key, $entry := .Values.extraFileMappings -}}

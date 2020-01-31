@@ -18,7 +18,7 @@ class ContainerMapperTest(unittest.TestCase):
             self.params = {}
 
     def patch_mapper(self, rule_map):
-        k8s_container_mapper.CONTAINER_RULE_MAP = yaml.load(rule_map)
+        k8s_container_mapper.CONTAINER_RULE_MAP = yaml.safe_load(rule_map)
 
     def test_existing_tool_map_small_works(self):
         RULE_MAP_SMALL = '''

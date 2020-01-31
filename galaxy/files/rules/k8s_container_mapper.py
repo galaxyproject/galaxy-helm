@@ -15,7 +15,7 @@ CONTAINER_RULE_MAPPER_FILE = os.path.join(
 def _load_container_mappings():
     if os.path.exists(CONTAINER_RULE_MAPPER_FILE):
         with open(CONTAINER_RULE_MAPPER_FILE) as f:
-            return yaml.load(f)
+            return yaml.safe_load(f)
     else:
         return {}
 

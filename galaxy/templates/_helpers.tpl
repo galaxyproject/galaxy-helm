@@ -68,7 +68,7 @@ Return galaxy database user password
 {{- if .Values.postgresql.galaxyDatabasePassword }}
     {{- .Values.postgresql.galaxyDatabasePassword -}}
 {{- else -}}
-    {{- randAlphaNum 10 -}}
+    {{- randAlphaNum 16 -}}
 {{- end -}}
 {{- end -}}
 
@@ -90,7 +90,6 @@ Extract the filename portion from a file path
 {{- printf "%s" (. | splitList "/" | last) -}}
 {{- end -}}
 
-
 {{/*
 Define pod env vars
 */}}
@@ -98,6 +97,11 @@ Define pod env vars
 {{- if .Values.extraEnv }}
 {{ tpl (toYaml .Values.extraEnv) . | indent 12 }}
 {{- end }}
+            - name: GALAXY_DB_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: '{{default (printf "%s-galaxy-secrets" .Release.Name) .Values.postgresql.galaxyExistingSecret}}'
+                  key: '{{default "galaxy-db-password" .Values.postgresql.galaxyExistingSecretKeyRef}}'
             - name: GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION
               value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy
 {{- end -}}

@@ -104,4 +104,9 @@ Define pod env vars
                   key: '{{default "galaxy-db-password" .Values.postgresql.galaxyExistingSecretKeyRef}}'
             - name: GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION
               value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy
+            - name: GALAXY_CONFIG_OVERRIDE_ID_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Release.Name }}-galaxy-secrets"
+                  key: "galaxy-config-id-secret"
 {{- end -}}

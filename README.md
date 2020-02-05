@@ -120,6 +120,12 @@ The above command sets the Galaxy persistent volume to 50GB.
 Setting Galaxy configuration file values requires the key name to be escaped:
 
 ```console
+helm install --set-file "configs.galaxy\.yml.brand"="Hello World"
+```
+
+You can also set the galaxy configuration file in its entirety with:
+
+```console
 helm install --set-file "configs.galaxy\.yml"=/path/to/local/galaxy.yml
 ```
 

@@ -38,12 +38,7 @@ persistence:
   size: 10Gi
   mountPath: /galaxy/server/database
 
-extraEnv:
-- name: GALAXY_DB_USER_PASSWORD
-  valueFrom:
-    secretKeyRef:
-      name: '{{default (printf "%s-galaxy-db-password" .Release.Name) .Values.postgresql.galaxyExistingSecret}}'
-      key: '{{default "galaxy-db-password" .Values.postgresql.galaxyExistingSecretKeyRef}}'
+extraEnv: []
 
 ingress:
   enabled: true
@@ -154,7 +149,7 @@ postgresql:
   - name: GALAXY_DB_USER_PASSWORD
     valueFrom:
       secretKeyRef:
-        name: '{{default (printf "%s-galaxy-db-password" .Release.Name) .Values.galaxyExistingSecret}}'
+        name: '{{default (printf "%s-galaxy-secrets" .Release.Name) .Values.galaxyExistingSecret}}'
         key: '{{default "galaxy-db-password" .Values.galaxyExistingSecretKeyRef}}'
 
 cvmfs:

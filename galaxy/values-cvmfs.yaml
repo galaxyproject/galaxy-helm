@@ -250,6 +250,7 @@ configs:
       enable_data_manager_user_view: true
       tool_data_path: "{{.Values.persistence.mountPath}}/tool-data"
       conda_auto_init: false
+      len_file_path: "{{.Values.cvmfs.data.mountPath}}/managed/len/ucsc"
   container_resolvers_conf.xml: |
     <containers_resolvers>
       <explicit />

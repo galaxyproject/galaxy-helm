@@ -13,6 +13,7 @@ fullnameOverride: ""
 service:
   type: ClusterIP
   port: 8000
+  nodePort: 30700
 
 webHandlers:
   replicaCount: 1

@@ -275,6 +275,7 @@ configs:
     toolshed.g2.bx.psu.edu/repos/iuc/dexseq/dexseq/1.20.1
     toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/0.5.2.1
     toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.5+galaxy6
+    toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.5+galaxy7
     toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse_to_standalone/0.5.2
     toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse_to_standalone/1.16.5+galaxy6
     toolshed.g2.bx.psu.edu/repos/iuc/macs2/macs2_callpeak/2.1.0.20140616.0

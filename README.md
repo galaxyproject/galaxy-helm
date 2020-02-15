@@ -84,10 +84,9 @@ current default values can be found in `values.yaml` file.
 | `image.repository`                      | The repository and name of the Docker image for Galaxy pointing to Docker Hub.                                                                |
 | `image.tag`                             | Galaxy image tag / version                                                                                                                    |
 | `image.pullPolicy`                      | Galaxy image pull policy                                                                                                                      |
-| `service.type`                          | Kubernetes Service type, ClusterIP by default.                                                                                                                       |
-| `service.port`                          | Galaxy service port                                                                                                                           |
-| `service.nodePort`                      | If `service.type` set to `NodePort`, then this can be used to set the port at which Galaxy will be available on all nodes' IP addresses. `30700` by default.
-                                                        |
+| `service.type`                          | Kubernetes Service type, ClusterIP by default.                                                                                                |
+| `service.port`                          | Galaxy service port                                                                                                                          |
+| `service.nodePort`                      | If `service.type` set to `NodePort`, then this can be used to set the port at which Galaxy will be available on all nodes' IP addresses. `30700` by default.                                                                                                            |
 | `webHandlers.replicaCount`              | The number of replicas for the Galaxy web handlers                                                                                            |
 | `jobHandlers.replicaCount`              | The number of replicas for the Galaxy job handlers                                                                                            |
 | `rbac.enabled`                          | Enable Galaxy job RBAC                                                                                                                        |

@@ -60,7 +60,7 @@ script:
      for pod in $(kubectl get pods | awk '{ print $1 }' | grep -v postgres | grep galaxy); do
       kubectl describe pods/$pod
      done
-  - ./util/wait-for-deployment -n default -t 600 $(kubectl get deployment | awk '{ print $1 }' | grep 'galaxy-web$')
+  - bash util/wait-for-deployment -n default -t 600 $(kubectl get deployment | awk '{ print $1 }' | grep 'galaxy-web$')
   # - sleep 360
   # Show pod logs once they are running
   - >

@@ -9,5 +9,12 @@ webHandlers:
 jobHandlers:
   replicaCount: 1
 
+persistence:
+  storageClass: standard
+
 influxdb:
   enabled: false
+
+postgresql:
+  persistence:
+    storageClass: standard

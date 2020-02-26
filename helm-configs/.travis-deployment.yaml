@@ -1,0 +1,13 @@
+image:
+  repository: galaxy/galaxy-k8s
+  tag: 20.01
+  pullPolicy: IfNotPresent
+
+webHandlers:
+  replicaCount: 1
+
+jobHandlers:
+  replicaCount: 1
+
+influxdb:
+  enabled: false

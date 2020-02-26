@@ -1,10 +1,15 @@
 ---
-language: python
+sudo: required
+cache: pip
 
 env:
   global:
     - HELM_URL=https://storage.googleapis.com/kubernetes-helm
     - HELM_TGZ=helm-v2.14.1-linux-amd64.tar.gz
+    - CHANGE_MINIKUBE_NONE_USER=true
+    - K8S_VERSION="v1.13.1"
+    #- MINIKUBE_VERSION="v0.28.2"
+    - MINIKUBE_VERSION="v1.7.3"
 
 install:
   # Installing Helm
@@ -13,12 +18,60 @@ install:
   - PATH=`pwd`/linux-amd64/:$PATH
   - helm init --client-only
 
+before_script:
+  - sudo mount --make-rshared /
+  - sudo apt-get install -y socat
+  # Download kubectl, which is a requirement for using minikube.
+  - curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/${K8S_VERSION}/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+  # Download minikube.
+  - curl -Lo minikube https://github.com/kubernetes/minikube/releases/download/${MINIKUBE_VERSION}/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/
+  # TODO: remove the --bootstrapper flag once this issue is solved: https://github.com/kubernetes/minikube/issues/2704
+  - sudo minikube config set WantReportErrorPrompt false
+  # - sudo minikube start --vm-driver=none --bootstrapper=localkube --kubernetes-version=${K8S_VERSION} --extra-config=apiserver.Authorization.Mode=RBAC
+  - sudo minikube start --vm-driver=none --kubernetes-version=${K8S_VERSION} --extra-config=apiserver.Authorization.Mode=RBAC
+  # Add nsenter binary
+  - sudo docker run --rm -v /usr/local/bin:/target jpetazzo/nsenter
+  - minikube update-context
+  # Wait for Kubernetes to be up and ready.
+  - JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do sleep 1; done
+  # Set up helm
+  - helm init --wait
+  - kubectl create serviceaccount --namespace kube-system tiller
+  - kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+  - kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
+
+
 script:
-  # Check charts format
+  - kubectl cluster-info
+  # for kube-dns
+  - kubectl create clusterrolebinding add-on-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default
+  # kube-addon-manager is responsible for managing other kubernetes components, such as kube-dns, dashboard, storage-provisioner..
+  - JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; until kubectl -n kube-system get pods -lcomponent=kube-addon-manager -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do sleep 1;echo "waiting for kube-addon-manager to be available"; kubectl get pods --all-namespaces; done
+  # Wait for kube-dns to be ready.
+  - JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; until kubectl -n kube-system get pods -lk8s-app=kube-dns -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do sleep 1;echo "waiting for kube-dns to be available"; kubectl get pods --all-namespaces; done
+  - helm install -f helm-configs/.travis-deployment.yaml --name travis ./galaxy
+  # Check charts format in the meantime.
   - >
      for dir in galaxy; do
       helm lint $dir
       if [ $? != 0 ]; then
        travis_terminate 1
       fi
+     done
+  # Describe pods as they are sent to run.
+  - >
+     for pod in $(kubectl get pods | awk '{ print $1 }' | grep -v postgres | grep galaxy); do
+      kubectl describe pods/$pod
+     done
+  - ./util/wait-for-deployment -n default -t 600 $(kubectl get deployment | awk '{ print $1 }' | grep 'galaxy-web$')
+  # - sleep 360
+  # Show pod logs once they are running
+  - >
+     for pod in $(kubectl get pods | awk '{ print $1 }' | grep -v postgres | grep galaxy); do
+      kubectl logs $pod
+     done
+  # Describe pods as they are running.
+  - >
+     for pod in $(kubectl get pods | awk '{ print $1 }' | grep -v postgres | grep galaxy); do
+      kubectl describe pods/$pod
      done

@@ -16,7 +16,6 @@ install:
   - wget -q ${HELM_URL}/${HELM_TGZ}
   - tar xzfv ${HELM_TGZ}
   - PATH=`pwd`/linux-amd64/:$PATH
-  - helm init --client-only
 
 before_script:
   - sudo mount --make-rshared /
@@ -30,21 +29,21 @@ before_script:
   # - sudo minikube start --vm-driver=none --bootstrapper=localkube --kubernetes-version=${K8S_VERSION} --extra-config=apiserver.Authorization.Mode=RBAC
   - sudo minikube start --vm-driver=none --kubernetes-version=${K8S_VERSION}
   # Add nsenter binary
-  - sudo docker run --rm -v /usr/local/bin:/target jpetazzo/nsenter
+  #- sudo docker run --rm -v /usr/local/bin:/target jpetazzo/nsenter
   #- minikube update-context
   # Wait for Kubernetes to be up and ready.
   #- JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do sleep 1; done
   # Set up helm
   - helm init --wait
-  - kubectl create serviceaccount --namespace kube-system tiller
-  - kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
-  - kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
+  #- kubectl create serviceaccount --namespace kube-system tiller
+  #- kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+  #- kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
 
 
 script:
   - kubectl cluster-info
   # for kube-dns
-  - kubectl create clusterrolebinding add-on-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default
+  #- kubectl create clusterrolebinding add-on-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default
   # kube-addon-manager is responsible for managing other kubernetes components, such as kube-dns, dashboard, storage-provisioner..
   #- JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; until kubectl -n kube-system get pods -lcomponent=kube-addon-manager -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do sleep 1;echo "waiting for kube-addon-manager to be available"; kubectl get pods --all-namespaces; done
   # Wait for kube-dns to be ready.
@@ -54,9 +53,6 @@ script:
   - >
      for dir in galaxy; do
       helm lint $dir
-      if [ $? != 0 ]; then
-       travis_terminate 1
-      fi
      done
   # Describe pods as they are sent to run.
   - >

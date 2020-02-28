@@ -44,9 +44,9 @@ script:
      for pod in $(kubectl get pods | awk '{ print $1 }' | grep -v postgres | grep galaxy); do
       kubectl describe pods/$pod
      done
+  # Show pod logs/describe if there is an error
   - >
      bash util/wait-for-deployment -n default -t 600 $(kubectl get deployment | awk '{ print $1 }' | grep 'galaxy-web$')
-     # Show pod logs/describe if there is an error
      if [ $? != 0 ]; then
        for pod in $(kubectl get pods | awk '{ print $1 }' | grep -v postgres | grep galaxy); do
          kubectl logs $pod

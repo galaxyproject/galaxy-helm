@@ -277,7 +277,10 @@ configs:
     toolshed.g2.bx.psu.edu/repos/iuc/prestor_abseq3/prestor_abseq3/0.5.4
     toolshed.g2.bx.psu.edu/repos/iuc/quast/quast/4.1.1
     toolshed.g2.bx.psu.edu/repos/iuc/quast/quast/4.6.3
+    toolshed.g2.bx.psu.edu/repos/iuc/quast/quast/5.0.2+galaxy0
+    toolshed.g2.bx.psu.edu/repos/iuc/quast/quast/5.0.2+galaxy1
     toolshed.g2.bx.psu.edu/repos/iuc/snpeff/snpEff/4.3+T.galaxy1
+    toolshed.g2.bx.psu.edu/repos/iuc/seurat/seurat/3.1.2
   build_sites.yml:
     - type: ucsc
       file: "/cvmfs/data.galaxyproject.org/managed/location/ucsc_build_sites.txt"

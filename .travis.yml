@@ -44,16 +44,16 @@ script:
      for pod in $(kubectl get pods | awk '{ print $1 }' | grep -v postgres | grep galaxy); do
       kubectl describe pods/$pod
      done
-  - bash util/wait-for-deployment -n default -t 600 $(kubectl get deployment | awk '{ print $1 }' | grep 'galaxy-web$')
-  # Show pod logs once they are running
   - >
-     for pod in $(kubectl get pods | awk '{ print $1 }' | grep -v postgres | grep galaxy); do
-      kubectl logs $pod
-     done
-  # Describe pods as they are running.
-  - >
-     for pod in $(kubectl get pods | awk '{ print $1 }' | grep -v postgres | grep galaxy); do
-      kubectl describe pods/$pod
-     done
+     bash util/wait-for-deployment -n default -t 600 $(kubectl get deployment | awk '{ print $1 }' | grep 'galaxy-web$')
+     # Show pod logs/describe if there is an error
+     if [ $? != 0 ]; then
+       for pod in $(kubectl get pods | awk '{ print $1 }' | grep -v postgres | grep galaxy); do
+         kubectl logs $pod
+       done
+       for pod in $(kubectl get pods | awk '{ print $1 }' | grep -v postgres | grep galaxy); do
+         kubectl describe pods/$pod
+       done
+     fi
   - kubectl get pods
   - kubectl get deployments

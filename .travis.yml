@@ -17,7 +17,9 @@ install:
   - PATH=`pwd`/linux-amd64/:$PATH
 
 before_script:
+  # Enable mount propagation for host path shares: https://github.com/kubernetes/kubernetes/issues/61058#issuecomment-372764783
   - sudo mount --make-rshared /
+  # kubectl port forward needs socat: https://github.com/helm/helm/issues/966
   - sudo apt-get install -y socat
   # Download kubectl, which is a requirement for using minikube.
   - curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/${K8S_VERSION}/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
@@ -26,33 +28,20 @@ before_script:
   - sudo minikube start --vm-driver=none --kubernetes-version=${K8S_VERSION}
   - helm init --wait
 
-
 script:
   - kubectl cluster-info
+  - helm lint galaxy
   - helm dependency update ./galaxy
-  - helm install -f helm-configs/.travis-deployment.yaml --name travis ./galaxy
-  # Check charts format in the meantime.
-  - >
-     for dir in galaxy; do
-      helm lint $dir
-      if [ $? != 0 ]; then
-       travis_terminate 1
-      fi
-     done
-  # Describe pods as they are sent to run.
-  - >
-     for pod in $(kubectl get pods | awk '{ print $1 }' | grep -v postgres | grep galaxy); do
-      kubectl describe pods/$pod
-     done
-  # Show pod logs/describe if there is an error
-  - >
-     bash util/wait-for-deployment -n default -t 600 $(kubectl get deployment | awk '{ print $1 }' | grep 'galaxy-web$');
-     if [ $? != 0 ]; then
+  - helm install --wait --timeout 300 -f ci/values-travis.yaml --name travis ./galaxy
+  - |
+     helm test travis;
+     # Show pod logs/describe if there is an error
+     if [ $? -ne 0 ]; then
        for pod in $(kubectl get pods | awk '{ print $1 }' | grep -v postgres | grep galaxy); do
-         kubectl logs $pod
+         kubectl logs $pod;
        done
        for pod in $(kubectl get pods | awk '{ print $1 }' | grep -v postgres | grep galaxy); do
-         kubectl describe pods/$pod
+         kubectl describe pods/$pod;
        done
      fi
   - kubectl get pods

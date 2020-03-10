@@ -95,12 +95,12 @@ extraFileMappings:
               </div>
           </body>
       </html>
-  /tmp/db_probe.py:
+  /tmp/probedb.py:
     useSecret: false
     applyToJob: true
     applyToWeb: false
     content: |
-      {{- (.Files.Get "scripts/probe_db.py") }}
+      {{- (.Files.Get "scripts/probedb.py") }}
 extraEnv: []
 
 ingress:

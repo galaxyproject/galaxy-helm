@@ -48,7 +48,8 @@ def check_rows(args):
     cur.execute("""SELECT server_name, update_time FROM worker_process WHERE server_name LIKE '%""" + args.servername + "%';" )
     rows = cur.fetchall()
     if len(rows) != 1:
-        print("ERROR: there should be only one row, but {} found".format(len(rows)))
+        dprint("ERROR: there should be only one row, but {} found".format(len(rows)))
+        exit(1)
     for row in rows:
         now = datetime.now()
         less_than_60s(row[1], now)

@@ -93,6 +93,25 @@ spec:
              {{- end -}}
              python /galaxy/server/scripts/galaxy-main -c /galaxy/server/config/galaxy.yml --server-name job_handler_{{ $handler_num }} --attach-to-pool job-handlers']
           args: []
+          startupProbe:
+            exec:
+              command: [
+                'sh', '-c',
+                'python /tmp/probedb.py -e $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -o $POD_NAME'
+              ]
+            initialDelaySeconds: 300
+            periodSeconds: 30
+            failureThreshold: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            exec:
+              command: [
+                'sh', '-c',
+                'python /tmp/probedb.py -e $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -o $POD_NAME'
+              ]
+            periodSeconds: 30
+            failureThreshold: 2
+            timeoutSeconds: 2
           volumeMounts:
             {{- range $key, $entry := $.Values.extraFileMappings -}}
             {{- if $entry.applyToJob }}

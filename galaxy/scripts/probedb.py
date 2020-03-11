@@ -28,7 +28,7 @@ def add_arg(shortname, longname, default=None, help_text=None, action=None):
 #    parser.add_argument("-{}".format(shortname), "--{}".format(longname))
 
 args = [
-    { "shortname": "i", "longname": "interval", "help_text": "how long (in seconds) to wait between probes"}
+    { "shortname": "i", "longname": "interval", "help_text": "how long (in seconds) to wait between probes"},
     { "shortname": "v", "longname": "verbose", "help_text": "enable verbose output", "action": "store_true" },
     { "shortname": "e", "longname": "environmentvariable", "help_text": "environment variable that contains connection string" },
     { "shortname": "u", "longname": "username", "help_text": "postgres db user name" },

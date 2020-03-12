@@ -109,10 +109,10 @@ spec:
                 'sh', '-c',
                 'python /tmp/probedb.py -e $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -o $POD_NAME'
               ]
-            periodSeconds: 60
-            initialDelaySeconds: 60
-            failureThreshold: 10
-            timeoutSeconds: 3
+            initialDelaySeconds: {{ $.Values.jobHandlers.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ $.Values.jobHandlers.livenessProbe.periodSeconds }}
+            failureThreshold: {{ $.Values.jobHandlers.livenessProbe.failureThreshold }}
+            timeoutSeconds: {{ $.Values.jobHandlers.livenessProbe.failureThreshold }}
           volumeMounts:
             {{- range $key, $entry := $.Values.extraFileMappings -}}
             {{- if $entry.applyToJob }}

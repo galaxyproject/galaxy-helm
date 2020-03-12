@@ -99,9 +99,9 @@ spec:
                 'sh', '-c',
                 'python /tmp/probedb.py -e $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -o $POD_NAME'
               ]
-            initialDelaySeconds: 510
+            initialDelaySeconds: 60
             periodSeconds: 60
-            failureThreshold: 2
+            failureThreshold: 10
             timeoutSeconds: 3
           livenessProbe:
             exec:
@@ -110,8 +110,8 @@ spec:
                 'python /tmp/probedb.py -e $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -o $POD_NAME'
               ]
             periodSeconds: 60
-            initialDelaySeconds: 510
-            failureThreshold: 2
+            initialDelaySeconds: 60
+            failureThreshold: 10
             timeoutSeconds: 3
           volumeMounts:
             {{- range $key, $entry := $.Values.extraFileMappings -}}

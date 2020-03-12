@@ -24,6 +24,15 @@ jobHandlers:
   # Annotations are used for both job and workflow deployments
   annotations: {}
   podAnnotations: {}
+  readinessProbe:
+    command: [
+      'sh', '-c',
+      'python /tmp/probedb.py -e $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -o $POD_NAME'
+    ]
+    initialDelaySeconds: 60
+    periodSeconds: 60
+    failureThreshold: 10
+    timeoutSeconds: 3
 
 rbac:
   enabled: true

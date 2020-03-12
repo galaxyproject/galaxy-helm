@@ -94,15 +94,13 @@ spec:
              python /galaxy/server/scripts/galaxy-main -c /galaxy/server/config/galaxy.yml --server-name job_handler_{{ $handler_num }} --attach-to-pool job-handlers']
           args: []
           readinessProbe:
-            exec:
-              command: [
-                'sh', '-c',
-                'python /tmp/probedb.py -e $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -o $POD_NAME'
-              ]
-            initialDelaySeconds: 60
-            periodSeconds: 60
-            failureThreshold: 10
-            timeoutSeconds: 3
+            {{ $.Values.jobHandlers.readinessProbe }}
+            # exec:
+            #   command: {{ $.Values.jobHandlers.readinessProbe.command }}
+            # initialDelaySeconds: {{ $.Values.jobHandlers.readinessProbe.initialDelaySeconds }}
+            # periodSeconds: {{ $.Values.jobHandlers.readinessProbe.periodSeconds }}
+            # failureThreshold: {{ $.Values.jobHandlers.readinessProbe.failureThreshold }}
+            # timeoutSeconds: {{ $.Values.jobHandlers.readinessProbe.timeoutSeconds }}
           livenessProbe:
             exec:
               command: [

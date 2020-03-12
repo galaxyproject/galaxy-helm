@@ -25,10 +25,11 @@ jobHandlers:
   annotations: {}
   podAnnotations: {}
   readinessProbe:
-    command: [
+    exec:
+      command: [
       'sh', '-c',
       'python /tmp/probedb.py -e $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -o $POD_NAME'
-    ]
+      ]
     initialDelaySeconds: 60
     periodSeconds: 60
     failureThreshold: 10

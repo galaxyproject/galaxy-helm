@@ -11,6 +11,8 @@ from time import sleep
 
 
 DEBUG=False
+# allowable seconds since db timestamp
+default_interval=60
 
 def dprint(msg):
     if DEBUG:
@@ -39,12 +41,12 @@ args = [
 ]
 
 
-def check_rows(connection_string, query_string):
-    def less_than_60s(a, b):
-        if (b-a).seconds >= 60:
-            dprint("time delta {} >= 60s".format((b-a).seconds))
+def check_rows(connection_string, query_string, interval=60):
+    def less_than_interval(a, b, interval=60):
+        if (b-a).seconds > interval:
+            dprint("time delta {} > {}s".format((b-a).seconds, interval))
             sys.exit(1)
-        dprint("time delta {} < 60s".format((b-a).seconds))
+        dprint("time delta {} <= {}s".format((b-a).seconds, interval))
         sys.exit(0)
 
     conn = psycopg2.connect(connection_string)
@@ -56,7 +58,7 @@ def check_rows(connection_string, query_string):
         exit(1)
     for row in rows:
         now = datetime.now()
-        less_than_60s(row[1], now)
+        less_than_interval(row[1], now, interval)
 
 
 for arg in args:
@@ -78,4 +80,4 @@ query_string = """SELECT server_name, update_time FROM worker_process WHERE host
 dprint("provided arguments: \n" + str(parsed_args))
 dprint("connection string: {}".format(connection_string))
 dprint("query string: {}".format(query_string))
-check_rows(connection_string, query_string)
+check_rows(connection_string, query_string, parsed_args.interval if parsed_args.interval else default_interval)

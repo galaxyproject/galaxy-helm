@@ -95,7 +95,10 @@ spec:
           args: []
           readinessProbe:
             exec:
-              command: {{ $.Values.jobHandlers.readinessProbe.command }}
+              command: [
+                'sh', '-c',
+                'python /tmp/probedb.py -e $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -o $POD_NAME'
+              ]
             initialDelaySeconds: {{ $.Values.jobHandlers.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ $.Values.jobHandlers.readinessProbe.periodSeconds }}
             failureThreshold: {{ $.Values.jobHandlers.readinessProbe.failureThreshold }}

@@ -94,13 +94,12 @@ spec:
              python /galaxy/server/scripts/galaxy-main -c /galaxy/server/config/galaxy.yml --server-name job_handler_{{ $handler_num }} --attach-to-pool job-handlers']
           args: []
           readinessProbe:
-            {{ $.Values.jobHandlers.readinessProbe }}
-            # exec:
-            #   command: {{ $.Values.jobHandlers.readinessProbe.command }}
-            # initialDelaySeconds: {{ $.Values.jobHandlers.readinessProbe.initialDelaySeconds }}
-            # periodSeconds: {{ $.Values.jobHandlers.readinessProbe.periodSeconds }}
-            # failureThreshold: {{ $.Values.jobHandlers.readinessProbe.failureThreshold }}
-            # timeoutSeconds: {{ $.Values.jobHandlers.readinessProbe.timeoutSeconds }}
+            exec:
+              command: {{ $.Values.jobHandlers.readinessProbe.command }}
+            initialDelaySeconds: {{ $.Values.jobHandlers.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ $.Values.jobHandlers.readinessProbe.periodSeconds }}
+            failureThreshold: {{ $.Values.jobHandlers.readinessProbe.failureThreshold }}
+            timeoutSeconds: {{ $.Values.jobHandlers.readinessProbe.failureThreshold }}
           livenessProbe:
             exec:
               command: [

@@ -25,7 +25,7 @@ data:
 apiVersion: v1
 metadata:
   # Extract the filename portion only
-  name: {{ include "galaxy.fullname" . }}-{{ include "galaxy.getFilenameFromPath" probedb.py | replace "." "-" | replace "_" "-" }}
+  name: {{ include "galaxy.fullname" . }}-{{ include "galaxy.getFilenameFromPath" "probedb.py" | replace "." "-" | replace "_" "-" }}
   labels:
     app.kubernetes.io/name: {{ include "galaxy.name" $ }}
     helm.sh/chart: {{ include "galaxy.chart" $ }}

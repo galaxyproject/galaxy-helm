@@ -25,7 +25,7 @@ data:
 apiVersion: v1
 metadata:
   # Extract the filename portion only
-  name: {{ include "galaxy.fullname" . }}-{{ include "galaxy.getFilenameFromPath" "probedb.py" | replace "." "-" | replace "_" "-" }}
+  name: {{ include "galaxy.fullname" $ }}-probedb-py
   labels:
     app.kubernetes.io/name: {{ include "galaxy.name" $ }}
     helm.sh/chart: {{ include "galaxy.chart" $ }}
@@ -33,6 +33,6 @@ metadata:
     app.kubernetes.io/managed-by: {{ $.Release.Service }}
 kind: ConfigMap
 data:
-  probedb.py: |
-    {{- (.Files.Get "scripts/probedb.py") }}
+  probedb.py: | {{- (.Files.Get "scripts/probedb.py") | nindent 4 }}
+
 ---

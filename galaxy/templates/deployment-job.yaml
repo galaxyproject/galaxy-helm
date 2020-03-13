@@ -114,6 +114,9 @@ spec:
             failureThreshold: {{ $.Values.jobHandlers.livenessProbe.failureThreshold }}
             timeoutSeconds: {{ $.Values.jobHandlers.livenessProbe.failureThreshold }}
           volumeMounts:
+            - name: extra-files-probedb-py
+              mountPath: /tmp/probedb.py
+              subPath: probedb.py
             {{- range $key, $entry := $.Values.extraFileMappings -}}
             {{- if $entry.applyToJob }}
             - name: extra-files-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}

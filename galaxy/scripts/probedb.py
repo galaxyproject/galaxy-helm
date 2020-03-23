@@ -1,83 +1,72 @@
-#!/usr/bin/env python3
-
 import argparse
+import logging
 import psycopg2
 import socket
 import sys
 
 
 from datetime import datetime
-from time import sleep
 
-
-DEBUG=False
-# allowable seconds since db timestamp
-default_interval=60
-
-def dprint(msg):
-    if DEBUG:
-        print(msg)
-
-parser = argparse.ArgumentParser()
-
-
-def add_arg(shortname, longname, default=None, help_text=None, action=None):
-    if len(shortname) != 1:
-        print("ERROR: short flag for argument must be a single character")
-        sys.exit(1)
-    parser.add_argument("-{}".format(shortname), "--{}".format(longname), help=help_text, default=default, action=action)
-
-#    parser.add_argument("-{}".format(shortname), "--{}".format(longname))
-
-args = [
-    { "shortname": "i", "longname": "interval", "help_text": "how long (in seconds) to wait between probes"},
-    { "shortname": "v", "longname": "verbose", "help_text": "enable verbose output", "action": "store_true" },
-    { "shortname": "e", "longname": "environmentvariable", "help_text": "environment variable that contains connection string" },
-    { "shortname": "u", "longname": "username", "help_text": "postgres db user name" },
-    { "shortname": "p", "longname": "password", "help_text": "postgres db user pass" },
-    { "shortname": "d", "longname": "dbname", "help_text": "postgres db name to connect to" },
-    { "shortname": "b", "longname": "dbhost", "help_text": "name of host where postgres lives" },
-    { "shortname": "o", "longname": "hostname", "help_text": "handler host name to be checked in postgres db", "default": socket.gethostname() },
-]
-
+log = logging.getLogger()
+log.setLevel(logging.INFO)
+log.addHandler(logging.StreamHandler(sys.stdout))
 
 def check_rows(connection_string, query_string, interval=60):
+    error_prefix = "DB PROBE ERROR"
     def less_than_interval(a, b, interval=60):
         if (b-a).seconds > interval:
-            dprint("time delta {} > {}s".format((b-a).seconds, interval))
-            sys.exit(1)
-        dprint("time delta {} <= {}s".format((b-a).seconds, interval))
-        sys.exit(0)
+            log.debug("time delta {} > {}s".format((b-a).seconds, interval))
+            return 1
+        log.debug("time delta {} <= {}s".format((b-a).seconds, interval))
+        return 0
 
     conn = psycopg2.connect(connection_string)
     cur = conn.cursor()
     cur.execute(query_string)
     rows = cur.fetchall()
     if len(rows) != 1:
-        dprint("ERROR: there should be only one row, but {} found".format(len(rows)))
-        exit(1)
+        log.debug("{}: there should be only one row, but {} found".format(error_prefix, len(rows)))
+        return 1
     for row in rows:
         now = datetime.now()
-        less_than_interval(row[1], now, interval)
+        return less_than_interval(row[0], now, interval)
+    log.info("{}: failure to determine interval".format(error_prefix))
+    return 1
 
+def main():
+    # allowable seconds since db timestamp
+    default_interval=60
 
-for arg in args:
-    add_arg(**arg)
+    parser = argparse.ArgumentParser()
 
-parsed_args = parser.parse_args()
+    parser.add_argument("-i", "--interval", help="how long (in seconds) to wait between probes")
+    parser.add_argument("-v", "--verbose", help="enable verbose output", action="store_true")
+    parser.add_argument("-e", "--environmentvariable", help="environment variable that contains connection string")
+    parser.add_argument("-u", "--username", help="postgres db user name")
+    parser.add_argument("-p", "--password", help="postgres db user pass")
+    parser.add_argument("-d", "--dbname", help="postgres db name to connect to")
+    parser.add_argument("-b", "--dbhost", help="name of host where postgres lives")
+    parser.add_argument("-o", "--hostname", help="handler host name to be checked in postgres db", default=socket.gethostname())
 
-connection_string = ""
+    parsed_args = parser.parse_args()
 
-if parsed_args.verbose:
-    DEBUG=True
+    if parsed_args.verbose:
+        log.setLevel(logging.DEBUG)
 
-if parsed_args.environmentvariable:
-    connection_string = parsed_args.environmentvariable
-else:
-    connection_string = "dbname='" + parsed_args.dbname + "' user='" + parsed_args.username + "' host='" + parsed_args.dbhost + "' password='" + parsed_args.password + "'"
-query_string = """SELECT server_name, update_time FROM worker_process WHERE hostname='""" + parsed_args.hostname + "';"
+    connection_string = ""
+    
+    if parsed_args.environmentvariable:
+        connection_string = parsed_args.environmentvariable
+    else:
+        connection_string = "dbname='" + parsed_args.dbname + "' user='" + parsed_args.username + "' host='" + parsed_args.dbhost + "' password='" + parsed_args.password + "'"
+    
+    query_string = """SELECT update_time FROM worker_process WHERE hostname='""" + parsed_args.hostname + "';"
 
-dprint("provided arguments: \n" + str(parsed_args))
-dprint("connection string: {}".format(connection_string))
-dprint("query string: {}".format(query_string))
-check_rows(connection_string, query_string, parsed_args.interval if parsed_args.interval else default_interval)
+    log.debug("provided arguments: \n" + str(parsed_args))
+    log.debug("connection string: {}".format(connection_string))
+    log.debug("query string: {}".format(query_string))
+
+    return check_rows(connection_string, query_string, parsed_args.interval if parsed_args.interval else default_interval)
+
+if __name__ == '__main__':
+    sys.exit(main())

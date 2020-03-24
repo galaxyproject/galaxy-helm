@@ -24,7 +24,6 @@ data:
 {{- end }}
 apiVersion: v1
 metadata:
-  # Extract the filename portion only
   name: {{ include "galaxy.fullname" $ }}-probedb-py
   labels:
     app.kubernetes.io/name: {{ include "galaxy.name" $ }}

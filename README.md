@@ -169,7 +169,21 @@ volume.
 
 ## Note about persistent deployments and restarts
 
-If you wish to make your deployment persistent or restartable (bring deployment down, keep the state in disk, then bring it up again later in time), you should create PVCs for Galaxy and Postgres and use the existingClaims variables to point to them as explained in the previous section. In addition, you MUST set the `postgresql.galaxyDatabasePassword` variable, as on a restart from the existing PVCs the Helm random password used for that slot won't be maintained, breaking database access.
+If you wish to make your deployment persistent or restartable (bring deployment down, keep the state in disk, then bring it up again later in time), you should create PVCs for Galaxy and Postgres and use the existingClaims variables to point to them as explained in the previous section. In addition, you MUST set the `postgresql.galaxyDatabasePassword` and `postgresql.postgresqlPassword` variables, as on a restart from the existing PVCs the Helm random password used for those slot won't be maintained, breaking database access.
+
+To start a new deployment from PVCs that belonged to a previous deployment on a different cluster, you might need to disable the database init part by setting `postgresql.initdbScriptsSecrets: null`. 
+
+### What if we didn't set db passwords in the first place
+
+You can allow trusted local connections and then use that to enter the postgresql server and change passwords. To allow trusted connections, set the pg_hba.conf file through:
+
+```
+postgresql:
+  pgHbaConfiguration: |
+    host     all             all             0.0.0.0/0               md5
+    host     all             all             ::1/128                 md5
+    local    all             all                                     trust
+```
 
 ## Production Settings
 

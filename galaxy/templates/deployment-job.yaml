@@ -97,7 +97,30 @@ spec:
              {{- end -}}
              python /galaxy/server/scripts/galaxy-main -c /galaxy/server/config/galaxy.yml --server-name job_handler_{{ $handler_num }} --attach-to-pool job-handlers']
           args: []
+          readinessProbe:
+            exec:
+              command: [
+                'sh', '-c',
+                'python /tmp/probedb.py -e $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -o $POD_NAME'
+              ]
+            initialDelaySeconds: {{ $.Values.jobHandlers.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ $.Values.jobHandlers.readinessProbe.periodSeconds }}
+            failureThreshold: {{ $.Values.jobHandlers.readinessProbe.failureThreshold }}
+            timeoutSeconds: {{ $.Values.jobHandlers.readinessProbe.failureThreshold }}
+          livenessProbe:
+            exec:
+              command: [
+                'sh', '-c',
+                'python /tmp/probedb.py -e $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -o $POD_NAME'
+              ]
+            initialDelaySeconds: {{ $.Values.jobHandlers.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ $.Values.jobHandlers.livenessProbe.periodSeconds }}
+            failureThreshold: {{ $.Values.jobHandlers.livenessProbe.failureThreshold }}
+            timeoutSeconds: {{ $.Values.jobHandlers.livenessProbe.failureThreshold }}
           volumeMounts:
+            - name: extra-files-probe-script
+              mountPath: /tmp/probedb.py
+              subPath: probedb.py
             {{- range $key, $entry := $.Values.extraFileMappings -}}
             {{- if $entry.applyToJob }}
             - name: extra-files-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}
@@ -131,6 +154,9 @@ spec:
           resources:
             {{- toYaml $.Values.resources | nindent 12 }}
       volumes:
+        - name: extra-files-probe-script
+          configMap:
+            name: {{ template "galaxy.fullname" $ }}-probedb-py
         - name: galaxy-conf-files
           {{- if $.Values.useSecretConfigs }}
           secret:

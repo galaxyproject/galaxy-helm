@@ -81,6 +81,7 @@ cp -anL /galaxy/server/config/sanitize_whitelist.txt /galaxy/server/config/mutab
 cp -anL /galaxy/server/config/data_manager_conf.xml.sample /galaxy/server/config/mutable/shed_data_manager_conf.xml;
 cp -anL /galaxy/server/config/tool_data_table_conf.xml.sample /galaxy/server/config/mutable/shed_tool_data_table_conf.xml;
 cp -arnL /galaxy/server/tool-data {{.Values.persistence.mountPath}}/;
+cp -arnL /galaxy/server/tools {{.Values.persistence.mountPath}}/tools;
 {{- end -}}
 
 {{/*

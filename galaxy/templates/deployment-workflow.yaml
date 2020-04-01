@@ -42,9 +42,11 @@ spec:
           command: ['sh', '-c', {{ include "galaxy.init-container-commands" . | squote }}]
           volumeMounts:
             {{- range $key,$entry := .Values.configs }}
+            {{ if $entry -}}
             - name: galaxy-conf-files
               mountPath: /galaxy/server/config/{{ $key }}
               subPath: {{ $key }}
+            {{- end -}}
             {{- end }}
             - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/
@@ -81,9 +83,11 @@ spec:
             {{- end }}
             {{- end }}
             {{- range $key,$entry := .Values.configs }}
+            {{ if $entry -}}
             - name: galaxy-conf-files
               mountPath: /galaxy/server/config/{{ $key }}
               subPath: {{ $key }}
+            {{- end -}}
             {{- end }}
             {{- range $key,$entry := .Values.jobs.rules }}
             - name: galaxy-job-rules

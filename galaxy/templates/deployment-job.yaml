@@ -97,7 +97,7 @@ spec:
             exec:
               command: [
                 'sh', '-c',
-                'python /tmp/probedb.py -e $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -o $POD_NAME -i {{ $.Values.jobHandlers.readinessProbe.interval }}'
+                'python /tmp/probedb.py -e $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -o $POD_NAME'
               ]
             initialDelaySeconds: {{ $.Values.jobHandlers.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ $.Values.jobHandlers.readinessProbe.periodSeconds }}
@@ -107,7 +107,7 @@ spec:
             exec:
               command: [
                 'sh', '-c',
-                'python /tmp/probedb.py -e $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -o $POD_NAME -i {{ $.Values.jobHandlers.livenessProbe.interval }}'
+                'python /tmp/probedb.py -e $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -o $POD_NAME'
               ]
             initialDelaySeconds: {{ $.Values.jobHandlers.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ $.Values.jobHandlers.livenessProbe.periodSeconds }}

@@ -44,6 +44,7 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-i", "--interval",
+                        type=int,
                         help="how long (in seconds) to wait between probes")
     parser.add_argument("-v", "--verbose",
                         help="enable verbose output", action="store_true")

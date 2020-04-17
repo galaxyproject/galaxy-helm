@@ -518,6 +518,7 @@ jobs:
             - toolshed.g2.bx.psu.edu/repos/devteam/freebayes/freebayes/.*
             - toolshed.g2.bx.psu.edu/repos/iuc/rgrnastar/rna_star/.*
             - toolshed.g2.bx.psu.edu/repos/iuc/rnaspades/rnaspades/.*
+            - toolshed.g2.bx.psu.edu/repos/iuc/sra_tools/fasterq_dump/.*
           container:
             resource_set: large
         - tool_ids:

@@ -497,7 +497,6 @@ jobs:
             - toolshed.g2.bx.psu.edu/repos/iuc/bwameth/bwameth/.*
             - toolshed.g2.bx.psu.edu/repos/iuc/featurecounts/featurecounts/.*
             - toolshed.g2.bx.psu.edu/repos/iuc/hisat2/hisat2/.*
-            - toolshed.g2.bx.psu.edu/repos/iuc/minimap2/minimap2/.*
             - toolshed.g2.bx.psu.edu/repos/iuc/valet/valet/.*
             - toolshed.g2.bx.psu.edu/repos/iuc/varscan_somatic/varscan_somatic/.*
             - toolshed.g2.bx.psu.edu/repos/nilesh/rseqc/rseqc_bam2wig/.*

@@ -25,6 +25,8 @@ spec:
         component: galaxy-web-handler
       annotations:
         checksum/galaxy_conf: {{ include (print $.Template.BasePath "/configs-galaxy.yaml") . | sha256sum }}
+        checksum/galaxy_rules: {{ include (print $.Template.BasePath "/configmap-galaxy-rules.yaml") . | sha256sum }}
+        checksum/galaxy_extras: {{ include (print $.Template.BasePath "/configmap-extra-files.yaml") . | sha256sum }}
         {{- with .Values.webHandlers.podAnnotations -}}
         {{ toYaml . | nindent 8 }}
         {{- end }}

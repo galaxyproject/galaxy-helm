@@ -50,6 +50,15 @@ persistence:
   size: 10Gi
   mountPath: /galaxy/server/database
 
+# extraVolumes:
+#   - name: shared-data
+#     persistentVolumeClaim:
+#       claimName: shared-data-pvc
+
+# extraVolumeMounts:
+#   - name: shared-data
+#     mountPath: /opt/project/shared-data
+
 extraEnv: []
 
 ingress:

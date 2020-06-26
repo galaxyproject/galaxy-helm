@@ -181,10 +181,12 @@ cvmfs:
   data:
     pvc:
       storage: 1Gi
+      storageClassName: cvmfs-gxy-data
     mountPath: /cvmfs/data.galaxyproject.org
   main:
     pvc:
       storage: 1Gi
+      storageClassName: cvmfs-gxy-main
     mountPath: /cvmfs/main.galaxyproject.org
 
 # When this flag is set to true, all configs will be set in secrets,

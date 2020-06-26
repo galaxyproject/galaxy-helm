@@ -14,5 +14,5 @@ spec:
   resources:
     requests:
       storage: {{ .Values.cvmfs.main.pvc.storage }}
-  storageClassName: cvmfs-gxy-main
+  storageClassName: {{ .Values.cvmfs.main.pvc.storageClassName }}
 {{- end }}

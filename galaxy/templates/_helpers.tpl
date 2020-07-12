@@ -40,6 +40,13 @@ Expand the name of the chart.
 {{- end -}}
 
 {{/*
+Expand chart name for rabbitmq.
+*/}}
+{{- define "galaxy-rabbitmq.fullname" -}}
+{{- printf "%s-%s" .Release.Name .Values.rabbitmq.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
 Add a trailing slash to a given path, if missing
 */}}
 {{- define "galaxy.add_trailing_slash" -}}
@@ -110,4 +117,13 @@ Define pod env vars
                 secretKeyRef:
                   name: "{{ .Release.Name }}-galaxy-secrets"
                   key: "galaxy-config-id-secret"
+{{- if .Values.rabbitmq.enabled }}
+            - name: GALAXY_RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: '{{default (printf "%s-galaxy-secrets" .Release.Name) .Values.postgresql.galaxyExistingSecret}}'
+                  key: rabbitmq-password
+            - name: GALAXY_CONFIG_AMQP_INTERNAL_CONNECTION
+              value: amqp://{{ .Values.rabbitmq.auth.username }}:$(GALAXY_RABBITMQ_PASSWORD)@{{ template "galaxy-rabbitmq.fullname" . }}/galaxy
+{{- end }}
 {{- end -}}

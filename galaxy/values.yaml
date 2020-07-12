@@ -173,6 +173,23 @@ postgresql:
         name: '{{default (printf "%s-galaxy-secrets" .Release.Name) .Values.galaxyExistingSecret}}'
         key: '{{default "galaxy-db-password" .Values.galaxyExistingSecretKeyRef}}'
 
+
+rabbitmq:
+  enabled: false
+  nameOverride: galaxy-rabbitmq
+  auth:
+    username: galaxyrabbitmquser
+    existingPasswordSecret: '{{default (printf "%s-galaxy-secrets" .Release.Name) .Values.galaxyExistingSecret}}' 
+  persistence:
+    enabled: true
+  extraEnv:
+  - name: GALAXY_RABBITMQ_USER_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: '{{default (printf "%s-galaxy-secrets" .Release.Name) .Values.galaxyExistingSecret}}'
+        key: rabbitmq-password
+
+
 cvmfs:
   enabled: false
 

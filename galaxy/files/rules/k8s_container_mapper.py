@@ -71,11 +71,17 @@ def _get_default_resource_set_name():
 def k8s_container_mapper(tool, referrer, k8s_runner_id="k8s"):
     params = dict(referrer.params)
     params['docker_enabled'] = True
-    # Apply default resource limits
+    # 1. First, apply the default resource set (if defined) as job params.
+    #    These will be overridden later by individual tool mappings.
     default_resource_set_name = _get_default_resource_set_name()
     if default_resource_set_name:
         params.update(_map_resource_set(default_resource_set_name))
+    # 2. Next, apply resource mappings for individual tools, overwriting the
+    #    defaults.
     if not _apply_rule_mappings(tool, params):
+        # 3. If no explicit rule mapping was defined, and it's a tool that
+        #    requires galaxy_lib, force the default container. Otherwise,
+        #    Galaxy's default container resolution will apply.
         if tool.id in GALAXY_LIB_TOOLS_UNVERSIONED:
             default_container = params.get('docker_default_container_id')
             if default_container:

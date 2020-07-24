@@ -30,6 +30,7 @@ before_script:
 
 script:
   - kubectl cluster-info
+  - helm repo add bitnami https://charts.bitnami.com/bitnami
   - helm lint galaxy
   - helm dependency update ./galaxy
   - helm install --wait --timeout 300 -f ci/values-travis.yaml --name travis ./galaxy

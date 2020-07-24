@@ -48,6 +48,16 @@ persistence:
   accessMode: ReadWriteMany
   size: 10Gi
   mountPath: /galaxy/server/database
+  customVolume: {}
+    # cephfs:
+    #   monitors:
+    #   - 192.102.25.11:6789
+    #   - 192.102.25.19:6789
+    #   - 192.102.25.28:6789
+    #   path: /volumes/my-special-volume/galaxy
+    #   secretRef:
+    #     name: ceph-secret
+    #   user: myuser
 
 # extraVolumes:
 #   - name: shared-data

@@ -161,7 +161,9 @@ spec:
           configMap:
             name: {{ template "galaxy.fullname" . }}-job-rules
         - name: galaxy-data
-          {{- if .Values.persistence.enabled }}
+          {{- if $.Values.persistence.customVolume -}}
+          {{- $.Values.persistence.customVolume | toYaml | nindent 10}}
+          {{- else if $.Values.persistence.enabled }}
           persistentVolumeClaim:
             claimName: {{ template "galaxy.pvcname" . }}
           {{- else }}

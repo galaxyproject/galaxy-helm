@@ -2,5 +2,8 @@ dependencies:
 - name: postgresql
   repository: https://kubernetes-charts.storage.googleapis.com/
   version: 8.1.4
-digest: sha256:9e8a06995ed5e092650851a2f24eea0c2d7005218f955516a4b675cc2337fcf1
-generated: "2020-04-01T19:20:49.51551-04:00"
+- name: rabbitmq
+  repository: https://charts.bitnami.com/bitnami
+  version: 7.5.6
+digest: sha256:9ace17410e057ac86850cbc028c9f8d5d05a99f6df8ff72bbd62134ba149487f
+generated: 2020-07-23T10:37:42.608158+01:00

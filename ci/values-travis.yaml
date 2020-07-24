@@ -23,6 +23,9 @@ persistence:
 influxdb:
   enabled: false
 
+rabbitmq:
+  enabled: true
+
 postgresql:
   persistence:
     storageClass: standard

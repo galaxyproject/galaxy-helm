@@ -27,7 +27,7 @@ spec:
       containers:
         - name: {{ .Chart.Name }}-db-migrations
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          command: ['sh', '-c', '/galaxy/server/manage_db.sh upgrade']
+          command: ['sh', '-c', 'until nc -z -w3 {{ template "galaxy-postgresql.fullname" $ }} 5432; do echo waiting for galaxy-postgres service; sleep 1; done; /galaxy/server/manage_db.sh upgrade']
           env:
           {{ include "galaxy.podEnvVars" . }}
           volumeMounts:

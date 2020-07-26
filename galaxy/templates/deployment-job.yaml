@@ -56,24 +56,6 @@ spec:
               subPath: config
             - name: galaxy-data
               mountPath: {{ $.Values.persistence.mountPath }}
-        - name: {{ $.Chart.Name }}-db-migrations
-          image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
-          command: ['sh', '-c', '/galaxy/server/manage_db.sh upgrade']
-          env:
-          {{ include "galaxy.podEnvVars" $ }}
-          volumeMounts:
-            {{- range $key,$entry := $.Values.configs }}
-            {{ if $entry -}}
-            - name: galaxy-conf-files
-              mountPath: /galaxy/server/config/{{ $key }}
-              subPath: {{ $key }}
-            {{- end -}}
-            {{- end }}
-            {{- range $key,$entry := $.Values.jobs.rules }}
-            - name: galaxy-job-rules
-              mountPath: /galaxy/server/lib/galaxy/jobs/rules/{{ $key }}
-              subPath: {{ $key }}
-            {{- end }}
         {{- if $.Values.extraInitContainers -}}
         {{- range $each := $.Values.extraInitContainers -}}
         {{- if $each.applyToJob -}}

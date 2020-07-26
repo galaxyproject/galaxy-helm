@@ -1,0 +1,47 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "galaxy.fullname" . }}-db-migrations-job
+  labels:
+    app.kubernetes.io/name: {{ include "galaxy.name" . }}
+    helm.sh/chart: {{ include "galaxy.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  backoffLimit: 10
+  template:
+    spec:
+      restartPolicy: Never
+      volumes:
+        - name: galaxy-conf-files
+          {{- if .Values.useSecretConfigs }}
+          secret:
+            secretName: {{ template "galaxy.fullname" . }}-configs
+          {{- else }}
+          configMap:
+            name: {{ template "galaxy.fullname" . }}-configs
+          {{- end }}
+        - name: galaxy-job-rules
+          configMap:
+            name: {{ template "galaxy.fullname" . }}-job-rules
+      containers:
+        - name: {{ .Chart.Name }}-db-migrations
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command: ['sh', '-c', '/galaxy/server/manage_db.sh upgrade']
+          env:
+          {{ include "galaxy.podEnvVars" . }}
+          volumeMounts:
+            {{- range $key,$entry := .Values.configs }}
+            {{ if $entry -}}
+            - name: galaxy-conf-files
+              mountPath: /galaxy/server/config/{{ $key }}
+              subPath: {{ $key }}
+            {{- end -}}
+            {{- end }}
+            {{- range $key,$entry := .Values.jobs.rules }}
+            - name: galaxy-job-rules
+              mountPath: /galaxy/server/lib/galaxy/jobs/rules/{{ $key }}
+              subPath: {{ $key }}
+            {{- end }}
+      
+---

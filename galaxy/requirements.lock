@@ -4,6 +4,6 @@ dependencies:
   version: 8.1.4
 - name: rabbitmq
   repository: https://charts.bitnami.com/bitnami
-  version: 7.5.6
-digest: sha256:9ace17410e057ac86850cbc028c9f8d5d05a99f6df8ff72bbd62134ba149487f
-generated: 2020-07-23T10:37:42.608158+01:00
+  version: 7.6.3
+digest: sha256:67957448c9fa8e95ab19aa1278f00cf0e72b64ee87ada76a8f7619819beb4efa
+generated: 2020-08-21T13:07:37.575527+01:00

@@ -179,15 +179,21 @@ rabbitmq:
   nameOverride: galaxy-rabbitmq
   auth:
     username: galaxyrabbitmquser
-    existingPasswordSecret: '{{default (printf "%s-galaxy-secrets" .Release.Name) .Values.galaxyExistingSecret}}' 
+    password: changeme
+    existingPasswordSecret: '{{default (printf "%s-galaxy-secrets" .Release.Name) .Values.galaxyExistingSecret}}'
   persistence:
     enabled: true
   extraEnv:
-  - name: GALAXY_RABBITMQ_USER_PASSWORD
-    valueFrom:
-      secretKeyRef:
-        name: '{{default (printf "%s-galaxy-secrets" .Release.Name) .Values.galaxyExistingSecret}}'
-        key: rabbitmq-password
+    - name: GALAXY_RABBITMQ_USER_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: '{{default (printf "%s-galaxy-secrets" .Release.Name) .Values.galaxyExistingSecret}}'
+          key: rabbitmq-password
+  loadDefinition:
+    enabled: true
+    existingSecret: '{{ printf "%s-rabbitmq-load-definitions" .Release.Name }}'
+  extraConfiguration: |
+    management.load_definitions = /app/load_definition.json 
 
 
 cvmfs:

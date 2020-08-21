@@ -40,6 +40,11 @@ spec:
           volumeMounts:
             - name: galaxy-data
               mountPath: {{ .Values.persistence.mountPath }}
+        {{ if .Values.rabbitmq.enabled }}
+        - name: {{ .Chart.Name }}-init-rabbitmq
+          image: alpine:3.7
+          command: ['sh', '-c', 'until nc -z -w3 {{ template "galaxy-rabbitmq.fullname" $ }} 5672; do echo "waiting for galaxy-rabbitmq service"; sleep 1; done;']
+        {{ end }} 
         - name: {{ .Chart.Name }}-init-mounts
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           command: ['sh', '-c', {{ include "galaxy.init-container-commands" . | squote }}]

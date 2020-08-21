@@ -192,7 +192,7 @@ rabbitmq:
   loadDefinition:
     enabled: true
     existingSecret: '{{ printf "%s-rabbitmq-load-definitions" .Release.Name }}'
-  extraConfiguration: |
+  extraConfiguration: |-
     management.load_definitions = /app/load_definition.json 
 
 

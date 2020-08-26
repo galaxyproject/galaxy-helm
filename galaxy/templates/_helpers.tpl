@@ -122,8 +122,8 @@ Define pod env vars
               valueFrom:
                 secretKeyRef:
                   name: '{{default (printf "%s-galaxy-secrets" .Release.Name) .Values.postgresql.galaxyExistingSecret}}'
-                  key: rabbitmq-password
+                  key: galaxy-rabbitmq-password
             - name: GALAXY_CONFIG_AMQP_INTERNAL_CONNECTION
-              value: amqp://{{ .Values.rabbitmq.auth.username }}:$(GALAXY_RABBITMQ_PASSWORD)@{{ template "galaxy-rabbitmq.fullname" . }}/galaxy
+              value: amqp://{{ .Values.rabbitmq.galaxy.user }}:$(GALAXY_RABBITMQ_PASSWORD)@{{ template "galaxy-rabbitmq.fullname" . }}/{{ .Values.rabbitmq.galaxy.vhost }}
 {{- end }}
 {{- end -}}

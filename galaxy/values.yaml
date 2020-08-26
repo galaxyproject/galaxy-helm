@@ -176,6 +176,10 @@ postgresql:
 
 rabbitmq:
   enabled: false
+  galaxy:
+    user: galaxy 
+    password: changeme 
+    vhost: galaxy
   nameOverride: galaxy-rabbitmq
   auth:
     username: galaxyrabbitmquser

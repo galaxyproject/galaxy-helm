@@ -85,15 +85,18 @@ spec:
             httpGet:
               path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}
               port: 8080
-            initialDelaySeconds: 30
-            periodSeconds: 15
+            initialDelaySeconds: {{ .Values.webHandlerss.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.webHandlerss.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.webHandlerss.livenessProbe.failureThreshold }}
+            timeoutSeconds: {{ .Values.webHandlerss.livenessProbe.failureThreshold }}
           livenessProbe:
             httpGet:
               path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}
               port: 8080
-            initialDelaySeconds: 60
-            periodSeconds: 60
-            failureThreshold: 10
+            initialDelaySeconds: {{ .Values.webHandlerss.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.webHandlerss.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.webHandlerss.livenessProbe.failureThreshold }}
+            timeoutSeconds: {{ .Values.webHandlerss.livenessProbe.failureThreshold }}
           volumeMounts:
             {{- range $key, $entry := .Values.extraFileMappings -}}
             {{- if $entry.applyToWeb }}

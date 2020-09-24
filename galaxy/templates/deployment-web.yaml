@@ -83,7 +83,7 @@ spec:
           args: []
           startupProbe:
             httpGet:
-              path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}
+              path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}api/version
               port: 8080
             initialDelaySeconds: {{ .Values.webHandlers.startupProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.webHandlers.startupProbe.periodSeconds }}
@@ -91,7 +91,7 @@ spec:
             timeoutSeconds: {{ .Values.webHandlers.startupProbe.failureThreshold }}
           readinessProbe:
             httpGet:
-              path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}
+              path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}api/version
               port: 8080
             initialDelaySeconds: {{ .Values.webHandlers.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.webHandlers.livenessProbe.periodSeconds }}
@@ -99,7 +99,7 @@ spec:
             timeoutSeconds: {{ .Values.webHandlers.livenessProbe.failureThreshold }}
           livenessProbe:
             httpGet:
-              path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}
+              path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}api/version
               port: 8080
             initialDelaySeconds: {{ .Values.webHandlers.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.webHandlers.livenessProbe.periodSeconds }}

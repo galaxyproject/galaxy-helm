@@ -19,6 +19,11 @@ workflowHandlers:
   replicaCount: 1
   annotations: {}
   podAnnotations: {}
+  startupProbe:
+    initialDelaySeconds: 60
+    periodSeconds: 60
+    failureThreshold: 10
+    timeoutSeconds: 3
   readinessProbe:
     initialDelaySeconds: 60
     periodSeconds: 60
@@ -34,6 +39,11 @@ webHandlers:
   replicaCount: 1
   annotations: {}
   podAnnotations: {}
+  startupProbe:
+    initialDelaySeconds: 60
+    periodSeconds: 60
+    failureThreshold: 10
+    timeoutSeconds: 3
   readinessProbe:
     initialDelaySeconds: 60
     periodSeconds: 60
@@ -51,6 +61,11 @@ jobHandlers:
   annotations: {}
   podAnnotations: {}
   # Probe variables
+  startupProbe:
+    initialDelaySeconds: 60
+    periodSeconds: 60
+    failureThreshold: 10
+    timeoutSeconds: 3
   readinessProbe:
     initialDelaySeconds: 60
     periodSeconds: 60

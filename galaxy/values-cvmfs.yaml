@@ -562,7 +562,7 @@ jobs:
             resource_set: 2xlarge
         - tool_ids:
             - toolshed.g2.bx.psu.edu/repos/iuc/minimap2/minimap2/.*
-            - toolshed.g2.bx.psu.edu/repos/iuc/plink/plink/*
+            - toolshed.g2.bx.psu.edu/repos/iuc/plink/plink/.*
           container:
             resource_set: mlarge
       resources:

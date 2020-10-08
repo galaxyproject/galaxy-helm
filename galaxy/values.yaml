@@ -398,15 +398,81 @@ jobs:
           container:
             docker_container_id_override: {{ .Values.image.repository }}:{{ .Values.image.tag }}
             resource_set: small
+        - tool_ids:
+            - toolshed.g2.bx.psu.edu/repos/devteam/bowtie2/bowtie2/.*
+            - toolshed.g2.bx.psu.edu/repos/iuc/bwameth/bwameth/.*
+            - toolshed.g2.bx.psu.edu/repos/iuc/featurecounts/featurecounts/.*
+            - toolshed.g2.bx.psu.edu/repos/iuc/hisat2/hisat2/.*
+            - toolshed.g2.bx.psu.edu/repos/iuc/valet/valet/.*
+            - toolshed.g2.bx.psu.edu/repos/iuc/varscan_somatic/varscan_somatic/.*
+            - toolshed.g2.bx.psu.edu/repos/nilesh/rseqc/rseqc_bam2wig/.*
+          container:
+            resource_set: medium
+        - tool_ids:
+            - toolshed.g2.bx.psu.edu/repos/devteam/bwa/bwa_mem/.*
+            - toolshed.g2.bx.psu.edu/repos/devteam/bwa/bwa/.*
+            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_bam_compare/deeptools_bam_compare/.*
+            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_bam_coverage/deeptools_bam_coverage/.*
+            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_bam_pe_fragmentsize/deeptools_bam_pe_fragmentsize/.*
+            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_bigwig_compare/deeptools_bigwig_compare/.*
+            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_compute_gc_bias/deeptools_compute_gc_bias/.*
+            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_compute_matrix/deeptools_compute_matrix/.*
+            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_correct_gc_bias/deeptools_correct_gc_bias/.*
+            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_multi_bam_summary/deeptools_multi_bam_summary/.*
+            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_multi_bigwig_summary/deeptools_multi_bigwig_summary/.*
+            - toolshed.g2.bx.psu.edu/repos/devteam/freebayes/freebayes/.*
+            - toolshed.g2.bx.psu.edu/repos/iuc/rgrnastar/rna_star/.*
+            - toolshed.g2.bx.psu.edu/repos/iuc/rnaspades/rnaspades/.*
+            - toolshed.g2.bx.psu.edu/repos/iuc/sra_tools/fasterq_dump/.*
+          container:
+            resource_set: large
+        - tool_ids:
+            - toolshed.g2.bx.psu.edu/repos/iuc/unicycler/unicycler/.*
+            - toolshed.g2.bx.psu.edu/repos/nml/spades/spades/.*
+          container:
+            resource_set: 2xlarge
+        - tool_ids:
+            - toolshed.g2.bx.psu.edu/repos/iuc/minimap2/minimap2/.*
+            - toolshed.g2.bx.psu.edu/repos/iuc/plink/plink/.*
+          container:
+            resource_set: mlarge
       resources:
         resource_sets:
           small:
             requests:
               cpu: 1
-              memory: 500m
+              memory: 2G
             limits:
               cpu: 2
-              memory: 1G
+              memory: 5G
+          medium:
+            requests:
+              cpu: 2
+              memory: 4G
+            limits:
+              cpu: 4
+              memory: 10G
+          large:
+            requests:
+              cpu: 4
+              memory: 8G
+            limits:
+              cpu: 8
+              memory: 16G
+          2xlarge:
+            requests:
+              cpu: 12
+              memory: 20G
+            limits:
+              cpu: 12
+              memory: 24G
+          mlarge:
+            requests:
+              cpu: 2
+              memory: 16G
+            limits:
+              cpu: 4
+              memory: 20G
         default_resource_set: small
     k8s_container_mapper.py: |
       {{- (.Files.Get "files/rules/k8s_container_mapper.py") }}

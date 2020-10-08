@@ -160,6 +160,9 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
+        - name: extra-files-probe-script
+          configMap:
+            name: {{ template "galaxy.fullname" $ }}-probedb-py
         - name: galaxy-conf-files
           {{- if .Values.useSecretConfigs }}
           secret:

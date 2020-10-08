@@ -28,7 +28,7 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 subjects:
 - kind: ServiceAccount
-  name: default
+  name: {{ .Values.rbac.serviceAccount }}
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: Role

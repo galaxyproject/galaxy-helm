@@ -39,6 +39,7 @@ jobHandlers:
 
 rbac:
   enabled: true
+  serviceAccount: default
 
 persistence:
   enabled: true

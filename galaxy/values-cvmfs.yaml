@@ -14,32 +14,59 @@ service:
   type: ClusterIP
   port: 8000
 
-webHandlers:
-  replicaCount: 1
-  annotations: {}
-  podAnnotations: {}
-
 workflowHandlers:
   replicaCount: 1
   annotations: {}
   podAnnotations: {}
+  startupProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    failureThreshold: 720
+    timeoutSeconds: 5
+  readinessProbe:
+    periodSeconds: 10
+    failureThreshold: 12
+    timeoutSeconds: 5
+  livenessProbe:
+    periodSeconds: 10
+    failureThreshold: 30
+    timeoutSeconds: 5
+
+webHandlers:
+  replicaCount: 1
+  annotations: {}
+  podAnnotations: {}
+  startupProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    failureThreshold: 720
+    timeoutSeconds: 5
+  readinessProbe:
+    periodSeconds: 10
+    failureThreshold: 12
+    timeoutSeconds: 5
+  livenessProbe:
+    periodSeconds: 10
+    failureThreshold: 30
+    timeoutSeconds: 5
 
 jobHandlers:
   replicaCount: 1
-  # Annotations are used for both job and workflow deployments
   annotations: {}
   podAnnotations: {}
-  # Probe variables
+  startupProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 5
+    failureThreshold: 720
+    timeoutSeconds: 5
   readinessProbe:
-    initialDelaySeconds: 60
-    periodSeconds: 60
-    failureThreshold: 10
-    timeoutSeconds: 3
+    periodSeconds: 10
+    failureThreshold: 12
+    timeoutSeconds: 5
   livenessProbe:
-    initialDelaySeconds: 60
-    periodSeconds: 60
-    failureThreshold: 10
-    timeoutSeconds: 3
+    periodSeconds: 10
+    failureThreshold: 30
+    timeoutSeconds: 5
 
 rbac:
   enabled: true

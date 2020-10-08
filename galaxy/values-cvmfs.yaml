@@ -19,6 +19,11 @@ webHandlers:
   annotations: {}
   podAnnotations: {}
 
+workflowHandlers:
+  replicaCount: 1
+  annotations: {}
+  podAnnotations: {}
+
 jobHandlers:
   replicaCount: 1
   # Annotations are used for both job and workflow deployments

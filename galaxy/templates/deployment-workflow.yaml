@@ -32,6 +32,7 @@ spec:
     spec:
       securityContext:
         fsGroup: 101
+      serviceAccountName: {{ .Values.rbac.serviceAccount }}
       initContainers:
         - name: {{ .Chart.Name }}-init-postgres
           image: alpine:3.7

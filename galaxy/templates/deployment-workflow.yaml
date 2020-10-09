@@ -7,12 +7,12 @@ metadata:
     helm.sh/chart: {{ include "galaxy.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- with .Values.jobHandlers.annotations }}
+{{- with .Values.workflowHandlers.annotations }}
   annotations:
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.workflowHandlers.replicaCount }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "galaxy.fullname" . }}
@@ -26,7 +26,7 @@ spec:
         checksum/galaxy_conf: {{ include (print $.Template.BasePath "/configs-galaxy.yaml") . | sha256sum }}
         checksum/galaxy_rules: {{ include (print $.Template.BasePath "/configmap-galaxy-rules.yaml") . | sha256sum }}
         checksum/galaxy_extras: {{ include (print $.Template.BasePath "/configmap-extra-files.yaml") . | sha256sum }}
-        {{- with .Values.jobHandlers.podAnnotations -}}
+        {{- with .Values.workflowHandlers.podAnnotations -}}
         {{ toYaml . | nindent 8 }}
         {{ end }}
     spec:
@@ -69,6 +69,10 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
           {{ include "galaxy.podEnvVars" . }}
           command: [
             'sh', '-c',
@@ -77,7 +81,30 @@ spec:
              {{- end -}}
              python /galaxy/server/scripts/galaxy-main -c /galaxy/server/config/galaxy.yml --server-name workflow_scheduler0']
           args: []
+          readinessProbe:
+            exec:
+              command: [
+                'sh', '-c',
+                'python /tmp/probedb.py -e $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -o $POD_NAME'
+              ]
+            initialDelaySeconds: {{ .Values.workflowHandlers.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.workflowHandlers.readinessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.workflowHandlers.readinessProbe.failureThreshold }}
+            timeoutSeconds: {{ .Values.workflowHandlers.readinessProbe.failureThreshold }}
+          livenessProbe:
+            exec:
+              command: [
+                'sh', '-c',
+                'python /tmp/probedb.py -e $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -o $POD_NAME'
+              ]
+            initialDelaySeconds: {{ .Values.workflowHandlers.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.workflowHandlers.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.workflowHandlers.livenessProbe.failureThreshold }}
+            timeoutSeconds: {{ .Values.workflowHandlers.livenessProbe.failureThreshold }}
           volumeMounts:
+            - name: extra-files-probe-script
+              mountPath: /tmp/probedb.py
+              subPath: probedb.py
             {{- range $key, $entry := .Values.extraFileMappings -}}
             {{- if $entry.applyToJob }}
             - name: extra-files-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}
@@ -114,6 +141,9 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
+        - name: extra-files-probe-script
+          configMap:
+            name: {{ template "galaxy.fullname" $ }}-probedb-py
         - name: galaxy-conf-files
           {{- if .Values.useSecretConfigs }}
           secret:

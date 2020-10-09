@@ -84,17 +84,20 @@ spec:
           args: []
           readinessProbe:
             httpGet:
-              path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}
+              path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}api/version
               port: 8080
-            initialDelaySeconds: 211
-            periodSeconds: 15
+            initialDelaySeconds: {{ .Values.webHandlers.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.webHandlers.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.webHandlers.livenessProbe.failureThreshold }}
+            timeoutSeconds: {{ .Values.webHandlers.livenessProbe.failureThreshold }}
           livenessProbe:
             httpGet:
-              path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}
+              path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}api/version
               port: 8080
-            initialDelaySeconds: 60
-            periodSeconds: 61
-            failureThreshold: 10
+            initialDelaySeconds: {{ .Values.webHandlers.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.webHandlers.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.webHandlers.livenessProbe.failureThreshold }}
+            timeoutSeconds: {{ .Values.webHandlers.livenessProbe.failureThreshold }}
           volumeMounts:
             {{- range $key, $entry := .Values.extraFileMappings -}}
             {{- if $entry.applyToWeb }}

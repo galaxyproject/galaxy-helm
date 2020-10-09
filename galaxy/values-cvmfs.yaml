@@ -523,6 +523,10 @@ jobs:
           container:
             docker_container_id_override: cloudve/jbrowse:1.16.5
         - tool_ids:
+            - toolshed.g2.bx.psu.edu/repos/iuc/qq_manhattan/qq_manhattan/0.1.0
+          container:
+            docker_container_id_override: cloudve/mulled-v2-8a7a11298f666d8999e0e1da5b27294e8e5f4835:4b576d5ab962abeaf2af2d01d3c9530214888955-0
+        - tool_ids:
             - sort1
             - Grouping1
           container:

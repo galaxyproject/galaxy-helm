@@ -46,5 +46,9 @@ spec:
                     name: "{{ .Release.Name }}-galaxy-secrets"
                     key: influxdb-password
           restartPolicy: OnFailure
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
   concurrencyPolicy: Forbid
 {{- end }}

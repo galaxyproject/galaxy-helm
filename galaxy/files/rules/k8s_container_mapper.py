@@ -46,16 +46,18 @@ def _map_resource_set(resource_set_name):
 
 
 def _process_tool_mapping(mapping, params):
-    params.update(mapping.get('container'))
+    override_params = mapping.copy()
     # Overwrite with user specified limits
-    resource_set = mapping.get('container', {}).get('resource_set')
+    resource_set = override_params.pop('resource_set', None)
     if resource_set:
         params.update(_map_resource_set(resource_set))
+    override_params.pop('tool_ids')
+    params.update(override_params)
 
 
 def _apply_rule_mappings(tool, params):
     if CONTAINER_RULE_MAP:
-        for mapping in CONTAINER_RULE_MAP.get('mappings', {}):
+        for group_name, mapping in CONTAINER_RULE_MAP.get('mappings', {}).items():
             for mapped_tool_id in mapping.get('tool_ids'):
                 if re.match(mapped_tool_id, tool.id):
                     _process_tool_mapping(mapping, params)

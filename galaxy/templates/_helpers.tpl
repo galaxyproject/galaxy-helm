@@ -80,8 +80,8 @@ cp -anL /galaxy/server/config/integrated_tool_panel.xml /galaxy/server/config/mu
 cp -anL /galaxy/server/config/sanitize_whitelist.txt /galaxy/server/config/mutable/sanitize_whitelist.txt;
 cp -anL /galaxy/server/config/data_manager_conf.xml.sample /galaxy/server/config/mutable/shed_data_manager_conf.xml;
 cp -anL /galaxy/server/config/tool_data_table_conf.xml.sample /galaxy/server/config/mutable/shed_tool_data_table_conf.xml;
-cp -arnL /galaxy/server/tool-data {{.Values.persistence.mountPath}}/;
-cp -arnL /galaxy/server/tools {{.Values.persistence.mountPath}}/tools;
+cp -aruL /galaxy/server/tool-data {{.Values.persistence.mountPath}}/;
+cp -aruL /galaxy/server/tools {{.Values.persistence.mountPath}}/tools | true;
 {{- end -}}
 
 {{/*

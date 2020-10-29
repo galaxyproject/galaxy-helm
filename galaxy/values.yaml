@@ -343,9 +343,6 @@ configs:
     toolshed.g2.bx.psu.edu/repos/iuc/seurat/seurat/3.1.2
     toolshed.g2.bx.psu.edu/repos/iuc/snpeff/snpEff/4.3+T.galaxy1
   build_sites.yml:
-    - type: ucsc
-      file: "/cvmfs/data.galaxyproject.org/managed/location/ucsc_build_sites.txt"
-      display: [main,archaea,ucla]
     - type: gbrowse
       file: "/galaxy/server/tool-data/shared/gbrowse/gbrowse_build_sites.txt"
       display: [wormbase,tair,modencode_worm,modencode_fly]

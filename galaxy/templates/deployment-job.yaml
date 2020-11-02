@@ -31,8 +31,10 @@ spec:
         {{ toYaml . | nindent 8 }}
         {{ end }}
     spec:
+      {{- with $.Values.securityContext }}
       securityContext:
-        fsGroup: 101
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       serviceAccountName: {{ $.Values.rbac.serviceAccount }}
       initContainers:
         - name: {{ $.Chart.Name }}-init-postgres

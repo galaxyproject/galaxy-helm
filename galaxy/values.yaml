@@ -58,6 +58,9 @@ rbac:
   enabled: true
   serviceAccount: default
 
+securityContext:
+  fsGroup: 101
+
 persistence:
   enabled: true
   name: galaxy-pvc

@@ -84,14 +84,17 @@ spec:
              {{- end -}}
              /galaxy/server/.venv/bin/uwsgi --yaml /galaxy/server/config/uwsgi.yml --set galaxy_config_file=/galaxy/server/config/galaxy.yml']
           args: []
+          {{- if .Values.webHandlers.readinessProbe.enabled }}
           readinessProbe:
             httpGet:
               path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}api/version
               port: 8080
-            initialDelaySeconds: {{ .Values.webHandlers.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.webHandlers.livenessProbe.periodSeconds }}
-            failureThreshold: {{ .Values.webHandlers.livenessProbe.failureThreshold }}
-            timeoutSeconds: {{ .Values.webHandlers.livenessProbe.failureThreshold }}
+            initialDelaySeconds: {{ .Values.webHandlers.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.webHandlers.readinessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.webHandlers.readinessProbe.failureThreshold }}
+            timeoutSeconds: {{ .Values.webHandlers.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.webHandlers.livenessProbe.enabled }}
           livenessProbe:
             httpGet:
               path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}api/version
@@ -100,6 +103,7 @@ spec:
             periodSeconds: {{ .Values.webHandlers.livenessProbe.periodSeconds }}
             failureThreshold: {{ .Values.webHandlers.livenessProbe.failureThreshold }}
             timeoutSeconds: {{ .Values.webHandlers.livenessProbe.failureThreshold }}
+          {{- end }}
           volumeMounts:
             {{- range $key, $entry := .Values.extraFileMappings -}}
             {{- if $entry.applyToWeb }}

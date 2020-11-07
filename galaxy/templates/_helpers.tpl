@@ -111,3 +111,29 @@ Define pod env vars
                   name: "{{ .Release.Name }}-galaxy-secrets"
                   key: "galaxy-config-id-secret"
 {{- end -}}
+
+
+{{/*
+Define extra persistent volumes
+*/}}
+{{- define "galaxy.extra_pvc_mounts" -}}
+  {{- if .Values.extraVolumes }}
+    {{- range $num, $entry := .Values.extraVolumes }}
+      {{- if $entry.name }}
+        {{- if $entry.persistentVolumeClaim}}
+          {{- if $entry.persistentVolumeClaim.claimName }}
+            {{- range $num, $mount := $.Values.extraVolumeMounts }}
+              {{- if $mount.name }}
+                {{- if (eq $entry.name $mount.name) }}
+                  {{- if $mount.mountPath -}}
+                    ,{{- $entry.persistentVolumeClaim.claimName -}}:{{- $mount.mountPath -}}
+                  {{- end }}
+                {{- end }}
+              {{- end }}
+            {{- end }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end -}}
+{{- end -}}

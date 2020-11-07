@@ -217,25 +217,7 @@ configs:
               <param id="k8s_use_service_account">true</param>
               <param id="k8s_persistent_volume_claims">
               {{- template "galaxy.pvcname" . -}}:{{.Values.persistence.mountPath}}
-              {{- if .Values.extraVolumes }}
-                {{- range $num, $entry := .Values.extraVolumes }}
-                  {{- if $entry.name }}
-                    {{- if $entry.persistentVolumeClaim}}
-                      {{- if $entry.persistentVolumeClaim.claimName }}
-                        {{- range $num, $mount := $.Values.extraVolumeMounts }}
-                          {{- if $mount.name }}
-                            {{- if (eq $entry.name $mount.name) }}
-                              {{- if $mount.mountPath -}}
-                                ,{{- $entry.persistentVolumeClaim.claimName -}}:{{- $mount.mountPath -}}
-                              {{- end }}
-                            {{- end }}
-                          {{- end }}
-                        {{- end }}
-                      {{- end }}
-                    {{- end }}
-                  {{- end }}
-                {{- end }}
-              {{- end -}}
+              {{- template "galaxy.extra_pvc_mounts" . -}}
               </param>
               <param id="k8s_namespace">{{ .Release.Namespace }}</param>
               <!-- Must be DNS friendly and less than 20 characters -->

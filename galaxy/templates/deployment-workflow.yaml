@@ -35,6 +35,9 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ .Values.rbac.serviceAccount }}
+      {{- if .Values.workflowHandlers.podSpecExtra -}}
+        {{- tpl (toYaml .Values.workflowHandlers.podSpecExtra) . | nindent 6 }}
+      {{- end }}
       initContainers:
         - name: {{ .Chart.Name }}-init-postgres
           image: alpine:3.7

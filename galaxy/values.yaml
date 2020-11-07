@@ -20,10 +20,12 @@ workflowHandlers:
   annotations: {}
   podAnnotations: {}
   readinessProbe:
+    enabled: true
     periodSeconds: 10
     failureThreshold: 12
     timeoutSeconds: 5
   livenessProbe:
+    enabled: true
     periodSeconds: 10
     failureThreshold: 30
     timeoutSeconds: 5
@@ -33,10 +35,12 @@ webHandlers:
   annotations: {}
   podAnnotations: {}
   readinessProbe:
+    enabled: true
     periodSeconds: 10
     failureThreshold: 12
     timeoutSeconds: 5
   livenessProbe:
+    enabled: true
     periodSeconds: 10
     failureThreshold: 30
     timeoutSeconds: 5
@@ -46,10 +50,12 @@ jobHandlers:
   annotations: {}
   podAnnotations: {}
   readinessProbe:
+    enabled: true
     periodSeconds: 10
     failureThreshold: 12
     timeoutSeconds: 5
   livenessProbe:
+    enabled: true
     periodSeconds: 10
     failureThreshold: 30
     timeoutSeconds: 5

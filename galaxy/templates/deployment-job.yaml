@@ -102,26 +102,30 @@ spec:
              {{- end -}}
              python /galaxy/server/scripts/galaxy-main -c /galaxy/server/config/galaxy.yml --server-name job_handler_{{ $handler_num }} --attach-to-pool job-handlers']
           args: []
+          {{- if $.Values.jobHandlers.readinessProbe.enabled }}
           readinessProbe:
             exec:
               command: [
                 'sh', '-c',
-                'python /tmp/probedb.py -e $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -o $POD_NAME'
+                'python /tmp/probedb.py -c $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -s job_handler_{{ $handler_num }} -o $HOSTNAME'
               ]
             initialDelaySeconds: {{ $.Values.jobHandlers.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ $.Values.jobHandlers.readinessProbe.periodSeconds }}
             failureThreshold: {{ $.Values.jobHandlers.readinessProbe.failureThreshold }}
             timeoutSeconds: {{ $.Values.jobHandlers.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if $.Values.jobHandlers.livenessProbe.enabled }}
           livenessProbe:
             exec:
               command: [
                 'sh', '-c',
-                'python /tmp/probedb.py -e $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -o $POD_NAME'
+                'python /tmp/probedb.py -c $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -s job_handler_{{ $handler_num }} -o $HOSTNAME'
               ]
             initialDelaySeconds: {{ $.Values.jobHandlers.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ $.Values.jobHandlers.livenessProbe.periodSeconds }}
             failureThreshold: {{ $.Values.jobHandlers.livenessProbe.failureThreshold }}
             timeoutSeconds: {{ $.Values.jobHandlers.livenessProbe.failureThreshold }}
+          {{- end }}
           volumeMounts:
             - name: extra-files-probe-script
               mountPath: /tmp/probedb.py

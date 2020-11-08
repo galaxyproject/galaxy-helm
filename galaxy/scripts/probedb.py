@@ -17,9 +17,9 @@ def check_rows(connection_string, query_string, interval=60):
     def less_than_interval(a, b, interval=60):
         if (b-a).seconds > interval:
             log.debug("time delta {} > {}s".format((b-a).seconds, interval))
-            return 1
+            return True
         log.debug("time delta {} <= {}s".format((b-a).seconds, interval))
-        return 0
+        return False
 
     conn = psycopg2.connect(connection_string)
     cur = conn.cursor()
@@ -28,6 +28,7 @@ def check_rows(connection_string, query_string, interval=60):
     log.debug(f"matching rows {str(rows)}")
     # At least one matching handler must be alive
     matches = any(less_than_interval(row[0], datetime.now(), interval) for row in rows)
+    log.debug(f"health check {'succeeded' if matches else 'failed'}.")
     return 0 if matches else 1
 
 

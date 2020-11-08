@@ -19,6 +19,7 @@ workflowHandlers:
   replicaCount: 1
   annotations: {}
   podAnnotations: {}
+  podSpecExtra: {}
   readinessProbe:
     enabled: true
     periodSeconds: 10
@@ -34,6 +35,7 @@ webHandlers:
   replicaCount: 1
   annotations: {}
   podAnnotations: {}
+  podSpecExtra: {}
   readinessProbe:
     enabled: true
     periodSeconds: 10
@@ -49,6 +51,7 @@ jobHandlers:
   replicaCount: 1
   annotations: {}
   podAnnotations: {}
+  podSpecExtra: {}
   readinessProbe:
     enabled: true
     periodSeconds: 10

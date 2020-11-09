@@ -1,6 +1,6 @@
 image:
-  repository: galaxy/galaxy-k8s
-  tag: 20.05
+  repository: pcm32/galaxy-k8s
+  tag: 20.05_7ddbf2
   pullPolicy: IfNotPresent
 
 webHandlers:

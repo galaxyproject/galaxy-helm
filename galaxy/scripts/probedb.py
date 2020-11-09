@@ -17,9 +17,9 @@ def check_rows(connection_string, query_string, interval=60):
     def less_than_interval(a, b, interval=60):
         if (b-a).seconds > interval:
             log.debug("time delta {} > {}s".format((b-a).seconds, interval))
-            return True
+            return False
         log.debug("time delta {} <= {}s".format((b-a).seconds, interval))
-        return False
+        return True
 
     conn = psycopg2.connect(connection_string)
     cur = conn.cursor()

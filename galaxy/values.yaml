@@ -367,7 +367,7 @@ configs:
     toolshed.g2.bx.psu.edu/repos/iuc/snpeff/snpEff/4.3+T.galaxy1
   build_sites.yml:
     - type: ucsc
-      file: "/cvmfs/data.galaxyproject.org/managed/location/ucsc_build_sites.txt"
+      file: "{{if .Values.cvmfs.enabled}}{{ .Values.cvmfs.data.mountPath -}}/managed/location/ucsc_build_sites.txt{{else}}/galaxy/server/tool-data/shared/ucsc/ucsc_build_sites.txt.sample{{end}}"
       display: [main,archaea,ucla]
     - type: gbrowse
       file: "/galaxy/server/tool-data/shared/gbrowse/gbrowse_build_sites.txt"

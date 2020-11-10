@@ -299,13 +299,12 @@ configs:
       tool_data_table_config_path: |-
         {{ if .Values.cvmfs.enabled -}}
         {{ .Values.cvmfs.main.mountPath }}/config/shed_tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/byhand/location/tool_data_table_conf.xml
-        {{- else -}}/galaxy/server/config/tool_data_table_conf.xml{{- end }}
+        {{- end }}
       tool_dependency_dir: "{{.Values.persistence.mountPath}}/deps"
       job_config_file: "/galaxy/server/config/job_conf.xml"
       builds_file_path: |-
         {{ if .Values.cvmfs.enabled -}}
         {{.Values.cvmfs.data.mountPath}}/managed/location/builds.txt
-        /galaxy/server/tool-data/shared/ucsc/builds.txt
         {{- end }}
       containers_resolvers_config_file: "/galaxy/server/config/container_resolvers_conf.xml"
       workflow_schedulers_config_file: "/galaxy/server/config/workflow_schedulers_conf.xml"
@@ -319,7 +318,6 @@ configs:
       len_file_path: |-
         {{ if .Values.cvmfs.enabled -}}
         {{.Values.cvmfs.data.mountPath}}/managed/len/ucsc
-        /galaxy/server/tool-data/shared/ucsc/chrom
         {{- end }}
   container_resolvers_conf.xml: |
     <containers_resolvers>

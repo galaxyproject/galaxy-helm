@@ -1,4 +1,4 @@
-# Deployment values for Galaxy with enabled CVMFS integration.
+# Default values for Galaxy working with or without CVMFS integration.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -521,6 +521,7 @@ configs:
       <label id="miscellaneous_tools_label" text="Miscellaneous Tools"/>
     </toolbox>
 
+# Additional dynamic rules to map into the container.
 jobs:
   rules:
     container_mapper_rules.yml: |

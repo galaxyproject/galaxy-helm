@@ -209,6 +209,7 @@ postgresql:
 
 cvmfs:
   enabled: false
+  deploy: false
   data:
     pvc:
       storage: 1Gi
@@ -219,6 +220,14 @@ cvmfs:
       storage: 1Gi
       storageClassName: cvmfs-gxy-main
     mountPath: /cvmfs/main.galaxyproject.org
+  cache:
+    alienCache:
+      enabled: true
+      #storageClass: "nfs"
+    localCache:
+      enabled: false
+    preload:
+      enabled: false
 
 # When this flag is set to true, all configs will be set in secrets,
 # when it is set to false, all configs will be set in configmaps

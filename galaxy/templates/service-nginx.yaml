@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "galaxy.fullname" . }}
+  name: {{ include "galaxy.fullname" . }}-nginx
   labels:
     app.kubernetes.io/name: {{ include "galaxy.name" . }}
     helm.sh/chart: {{ include "galaxy.chart" . }}
@@ -14,14 +14,10 @@ spec:
     {{- if eq .Values.service.type "NodePort" }}
     nodePort: {{ .Values.service.nodePort }}
     {{- end }}
-    targetPort: galaxy-http
+    targetPort: galaxy-nginx
     protocol: TCP
     name: http
-  - port: 4001
-    targetPort: galaxy-uwsgi
-    protocol: TCP
-    name: uwsgi
   selector:
     app.kubernetes.io/name: {{ include "galaxy.fullname" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    component: galaxy-web-handler
+    component: galaxy-nginx

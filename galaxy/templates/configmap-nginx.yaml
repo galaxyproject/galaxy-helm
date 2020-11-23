@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "galaxy.fullname" . }}-nginx-conf
+  labels:
+    app.kubernetes.io/name: {{ include "galaxy.name" . }}
+    helm.sh/chart: {{ include "galaxy.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  nginx.conf: |
+    worker_processes  4;
+
+    events {
+        worker_connections  1024;
+    }
+
+    http {
+        default_type  application/octet-stream;
+        sendfile        on;
+        keepalive_timeout  65;
+        index   index.html index.php index.htm;
+
+        gzip  on;
+        gzip_http_version 1.1;
+        gzip_vary on;
+        gzip_comp_level 6;
+        gzip_proxied any;
+        gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript application/javascript;
+        gzip_buffers 16 8k;
+        proxy_read_timeout 600;
+        uwsgi_read_timeout 300;
+        client_max_body_size {{ .Values.nginx.conf.client_max_body_size }};
+
+        server {
+            listen 80;
+            server_name galaxy;
+
+            # Enable HSTS (age is 180 days)
+            add_header Strict-Transport-Security "max-age=15552000; includeSubdomains";
+
+            location {{ template "galaxy.add_trailing_slash" .Values.ingress.path }} {
+                uwsgi_pass {{ template "galaxy.fullname" . }}:4001;
+                uwsgi_param UWSGI_SCHEME $scheme;
+                include uwsgi_params;
+            }
+
+            location ^~ {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}admin_toolshed/static {
+                uwsgi_pass {{ template "galaxy.fullname" . }}:4001;
+                uwsgi_param UWSGI_SCHEME $scheme;
+                include uwsgi_params;
+            }
+
+            location ~ ^{{ template "galaxy.add_trailing_slash" .Values.ingress.path }}api/dataset_collections/([^/]+)/download/?$ {
+                proxy_buffering off;
+                uwsgi_pass {{ template "galaxy.fullname" . }}:4001;
+                uwsgi_param UWSGI_SCHEME $scheme;
+                include uwsgi_params;
+            }
+
+            location {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}_x_accel_redirect {
+                internal;
+                alias /;
+                add_header X-Frame-Options SAMEORIGIN;
+                add_header X-Content-Type-Options nosniff;
+            }
+
+        # end server
+        }
+    # end http
+    }

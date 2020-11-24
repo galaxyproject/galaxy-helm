@@ -394,7 +394,7 @@ configs:
   integrated_tool_panel.xml: |
     {{- (.Files.Get "files/configs/integrated_tool_panel.xml") }}
   tool_conf.xml: |
-{{- (.Files.Get "files/configs/tool_conf.xml") }}
+    {{- (.Files.Get "files/configs/tool_conf.xml") }}
 
 # Additional dynamic rules to map into the container.
 jobs:

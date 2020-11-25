@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "galaxy.fullname" . }}-nginx
+  labels:
+    app.kubernetes.io/name: {{ include "galaxy.name" . }}
+    helm.sh/chart: {{ include "galaxy.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- with .Values.webHandlers.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+  replicas: {{ .Values.webHandlers.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "galaxy.fullname" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "galaxy.fullname" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        component: galaxy-nginx
+      annotations:
+        checksum/nginx_conf: {{ include (print $.Template.BasePath "/configmap-nginx.yaml") . | sha256sum }}
+    spec:
+      {{- with .Values.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ .Values.rbac.serviceAccount }}
+      {{- if .Values.webHandlers.podSpecExtra -}}
+        {{- tpl (toYaml .Values.webHandlers.podSpecExtra) . | nindent 6 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}-nginx
+          image: "{{ .Values.nginx.image.repository }}:{{ .Values.nginx.image.tag }}"
+          imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
+          ports:
+            - name: galaxy-nginx
+              containerPort: 80
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path:  {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}
+              port: 80
+          livenessProbe:
+            httpGet:
+              path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}
+              port: 80
+          volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+            - name: galaxy-data
+              mountPath: {{ .Values.persistence.mountPath }}
+            - name: galaxy-data
+              mountPath: /galaxy/server/config/mutable/
+              subPath: config
+            {{- if .Values.extraVolumeMounts }}
+            {{- .Values.extraVolumeMounts | toYaml | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/usr/sbin/nginx","-s","quit"]
+      volumes:
+        - name: nginx-conf
+          configMap:
+            name: {{ template "galaxy.fullname" $ }}-nginx-conf
+        - name: galaxy-data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ template "galaxy.pvcname" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

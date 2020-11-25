@@ -307,6 +307,7 @@ configs:
       tool_data_path: "{{.Values.persistence.mountPath}}/tool-data"
       conda_auto_init: false
       len_file_path: "{{.Values.cvmfs.data.mountPath}}/managed/len/ucsc"
+      nginx_x_accel_redirect_base: '/_x_accel_redirect'
   container_resolvers_conf.xml: |
     <containers_resolvers>
       <explicit />

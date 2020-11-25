@@ -12,8 +12,6 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
   annotations:
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      rewrite ^({{ .Values.ingress.path }})$ {{ .Values.ingress.path }}/ redirect;
   {{- with .Values.ingress.annotations }}
     {{- tpl (toYaml .) $ | nindent 4 }}
   {{- end }}
@@ -35,7 +33,7 @@ spec:
         paths:
           - path: {{ $ingressPath }}
             backend:
-              serviceName: {{ $fullName }}
+              serviceName: {{ $fullName }}-nginx
               servicePort: {{ $servicePort }}
   {{- end }}
 {{- end }}

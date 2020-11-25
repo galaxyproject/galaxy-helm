@@ -78,6 +78,9 @@ spec:
             - name: galaxy-http
               containerPort: 8080
               protocol: TCP
+            - name: galaxy-uwsgi
+              containerPort: 4001
+              protocol: TCP
           env:
           {{ include "galaxy.podEnvVars" . }}
           command: [

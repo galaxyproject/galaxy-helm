@@ -7,6 +7,14 @@ image:
   tag: 20.05
   pullPolicy: IfNotPresent
 
+nginx:
+  image:
+    repository: nginx
+    tag: latest
+    pullPolicy: IfNotPresent
+  conf:
+    client_max_body_size: 100g
+
 nameOverride: ""
 fullnameOverride: ""
 
@@ -252,6 +260,7 @@ configs:
     uwsgi:
       virtualenv: /galaxy/server/.venv
       processes: 1
+      socket: 0.0.0.0:4001
       http: 0.0.0.0:8080
       pythonpath: /galaxy/server/lib
       thunder-lock: true
@@ -288,6 +297,7 @@ configs:
       tool_path: "{{.Values.persistence.mountPath}}/tools"
       tool_data_path: "{{.Values.persistence.mountPath}}/tool-data"
       conda_auto_init: false
+      nginx_x_accel_redirect_base: '/_x_accel_redirect'
   container_resolvers_conf.xml: |
     <containers_resolvers>
       <explicit />

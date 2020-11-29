@@ -7,6 +7,14 @@ image:
   tag: 20.05
   pullPolicy: IfNotPresent
 
+nginx:
+  image:
+    repository: nginx
+    tag: latest
+    pullPolicy: IfNotPresent
+  conf:
+    client_max_body_size: 100g
+
 nameOverride: ""
 fullnameOverride: ""
 

@@ -276,6 +276,7 @@ configs:
     uwsgi:
       virtualenv: /galaxy/server/.venv
       processes: 1
+      socket: 0.0.0.0:4001
       http: 0.0.0.0:8080
       pythonpath: /galaxy/server/lib
       thunder-lock: true

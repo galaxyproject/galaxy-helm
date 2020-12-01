@@ -7,7 +7,7 @@ fullnameOverride: ""
 
 image:
   repository: galaxy/galaxy-k8s
-  tag: 20.05
+  tag: 20.09
   pullPolicy: IfNotPresent
 
 nginx:

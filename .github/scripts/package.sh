@@ -20,7 +20,7 @@ echo "Pushing to branch $BRANCH of repo $CHARTS_REPO";
 cd "${CHART_NAME}" && rm -rf charts && rm -f requirements.lock && helm dependency update && cd ..
 git clone "${REMOTE}" && cd "${CHARTS_DIR}" && git checkout $BRANCH && cd ..
 CHARTS_ABS_DIR=$(realpath $CHARTS_DIR)
-cd "${CHART_NAME}" && sh scripts/helm_package "${CHARTS_ABS_DIR}/charts" && cd ..
+cd "${CHART_NAME}" && helm package "${CHARTS_ABS_DIR}/charts" && cd ..
 cd "${CHARTS_DIR}" && helm repo index . --url "https://raw.githubusercontent.com/${CHARTS_REPO}/${BRANCH}/"
 git config --local user.email "action@github.com"
 git config --local user.name "GitHub Action"

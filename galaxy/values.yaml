@@ -119,42 +119,6 @@ extraInitCommands: |
 #  echo "Running extra mapped script. Influx enabled = {{ .Values.influxdb.enabled }}";
 #  /galaxy/server/extra/mapped/script.sh
 
-extraFileMappings:
-  /galaxy/server/static/welcome.html:
-    useSecret: false
-    applyToJob: false
-    applyToWeb: true
-    content: |
-      <!DOCTYPE html>
-      <html lang="en">
-          <head>
-              <meta charset="utf-8">
-              <link rel="stylesheet" href="style/base.css" type="text/css" />
-          </head>
-          <body class="m-0">
-              <div class="py-4">
-                  <div class="container">
-                      <h2>Welcome to <strong>Galaxy v{{ .Chart.AppVersion }}</strong></h2>
-                      <br>
-                      <a target="_blank" href="https://docs.galaxyproject.org/en/master/" class="btn btn-primary">Documentation »</a>
-                      <a target="_blank" href="https://galaxyproject.org" class="btn btn-primary">Community Hub »</a>
-                  </div>
-                  <br>
-                  {{- if .Values.influxdb.enabled }}
-                  <div class="container">
-                      <iframe width="100%" height="1300px" frameborder="0" marginheight="0" marginwidth="0"
-                          src="/grafana/d/gxy_general_stats_{{ .Release.Name }}/galaxy-overview?refresh=60s&orgId=1&kiosk&theme=light"></iframe>
-                  </div>
-                  {{- end }}
-              </div>
-              <div class="container">
-                  <footer class="text-center">
-                      <p>Galaxy v{{ .Chart.AppVersion }}, Helm Chart v{{ .Chart.Version }}</p>
-                  </footer>
-              </div>
-          </body>
-      </html>
-
 extraEnv: []
 
 ingress:
@@ -518,6 +482,42 @@ jobs:
         default_resource_set: small
     k8s_container_mapper.py: |
       {{- (.Files.Get "files/rules/k8s_container_mapper.py") }}
+
+extraFileMappings:
+  /galaxy/server/static/welcome.html:
+    useSecret: false
+    applyToJob: false
+    applyToWeb: true
+    content: |
+      <!DOCTYPE html>
+      <html lang="en">
+          <head>
+              <meta charset="utf-8">
+              <link rel="stylesheet" href="style/base.css" type="text/css" />
+          </head>
+          <body class="m-0">
+              <div class="py-4">
+                  <div class="container">
+                      <h2>Welcome to <strong>Galaxy v{{ .Chart.AppVersion }}</strong></h2>
+                      <br>
+                      <a target="_blank" href="https://docs.galaxyproject.org/en/master/" class="btn btn-primary">Documentation »</a>
+                      <a target="_blank" href="https://galaxyproject.org" class="btn btn-primary">Community Hub »</a>
+                  </div>
+                  <br>
+                  {{- if .Values.influxdb.enabled }}
+                  <div class="container">
+                      <iframe width="100%" height="1300px" frameborder="0" marginheight="0" marginwidth="0"
+                          src="/grafana/d/gxy_general_stats_{{ .Release.Name }}/galaxy-overview?refresh=60s&orgId=1&kiosk&theme=light"></iframe>
+                  </div>
+                  {{- end }}
+              </div>
+              <div class="container">
+                  <footer class="text-center">
+                      <p>Galaxy v{{ .Chart.AppVersion }}, Helm Chart v{{ .Chart.Version }}</p>
+                  </footer>
+              </div>
+          </body>
+      </html>
 
 influxdb:
   enabled: false

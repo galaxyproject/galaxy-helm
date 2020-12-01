@@ -1,4 +1,4 @@
-# A simple values file for galaxy.
+# Default values for Galaxy working with or without CVMFS integration.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -95,45 +95,7 @@ persistence:
 
 # extraVolumeMounts:
 #   - name: shared-data
-#     mountPath: /opt/project/shared-data
-
-extraEnv: []
-
-ingress:
-  enabled: true
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
-    nginx.ingress.kubernetes.io/proxy-body-size: "10G"
-  path: /
-  hosts:
-    - ~
-    # - host: ~
-    #   paths: ["/"]
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
-
-resources:
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  requests:
-    cpu: 0.5
-    memory: 2G
-  limits:
-    cpu: 2
-    memory: 6G
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
+#     mountPath: /mnt/project/shared-data
 
 # extraInitContainers:
 #   - name: my-first-container
@@ -193,6 +155,48 @@ extraFileMappings:
           </body>
       </html>
 
+extraEnv: []
+
+ingress:
+  enabled: true
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10G"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  path: /galaxy
+  hosts:
+    - ~
+    # - host: ~
+    #   paths: ["/"]
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  requests:
+    cpu: 0.5
+    memory: 2G
+    ephemeral-storage: 1Gi
+  limits:
+    cpu: 2
+    memory: 6G
+    ephemeral-storage: 10Gi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
 postgresql:
   enabled: true
   galaxyDatabaseUser: galaxydbuser
@@ -213,6 +217,25 @@ postgresql:
 
 cvmfs:
   enabled: false
+  deploy: false
+  data:
+    pvc:
+      storage: 1Gi
+      storageClassName: cvmfs-gxy-data
+    mountPath: /cvmfs/data.galaxyproject.org
+  main:
+    pvc:
+      storage: 1Gi
+      storageClassName: cvmfs-gxy-main
+    mountPath: /cvmfs/main.galaxyproject.org
+  cache:
+    alienCache:
+      enabled: true
+      #storageClass: "nfs"
+    localCache:
+      enabled: false
+    preload:
+      enabled: false
 
 # When this flag is set to true, all configs will be set in secrets,
 # when it is set to false, all configs will be set in configmaps
@@ -227,8 +250,12 @@ configs:
             <plugin id="k8s" type="runner" load="galaxy.jobs.runners.kubernetes:KubernetesJobRunner">
               <param id="k8s_use_service_account">true</param>
               <param id="k8s_persistent_volume_claims">
-              {{- template "galaxy.pvcname" . -}}:{{.Values.persistence.mountPath}}
+              {{- template "galaxy.pvcname" . -}}:{{.Values.persistence.mountPath}},
+              {{- template "galaxy.fullname" . }}-cvmfs-gxy-data-pvc:{{ .Values.cvmfs.data.mountPath }},
+              {{- template "galaxy.fullname" . }}-cvmfs-gxy-main-pvc:{{ .Values.cvmfs.main.mountPath -}}
+              {{- if .Values.extraVolumes -}}
               {{- template "galaxy.extra_pvc_mounts" . -}}
+              {{- end }}
               </param>
               <param id="k8s_namespace">{{ .Release.Namespace }}</param>
               <!-- Must be DNS friendly and less than 20 characters -->
@@ -238,10 +265,11 @@ configs:
               <param id="k8s_fs_group_id">101</param>
               <param id="k8s_supplemental_group_id">101</param>
               <param id="k8s_pull_policy">IfNotPresent</param>
-              <param id="k8s_cleanup_job">always</param>
+              <param id="k8s_cleanup_job">onsuccess</param>
               <param id="k8s_pod_priority_class">{{ include "galaxy.fullname" . }}-job-priority</param>
             </plugin>
         </plugins>
+        <handlers assign_with="db-skip-locked" />
         <destinations default="dynamic-k8s-dispatcher">
             <destination id="local" runner="local"/>
             <destination id="dynamic-k8s-dispatcher" runner="dynamic">
@@ -284,10 +312,18 @@ configs:
       database_connection: postgresql://unused:because@overridden_by_envvar
       integrated_tool_panel_config: "/galaxy/server/config/mutable/integrated_tool_panel.xml"
       sanitize_whitelist_file: "/galaxy/server/config/mutable/sanitize_whitelist.txt"
-      tool_config_file: "/galaxy/server/config/mutable/editable_shed_tool_conf.xml,/galaxy/server/config/tool_conf.xml"
+      tool_config_file: "/galaxy/server/config/tool_conf.xml{{if .Values.cvmfs.enabled}},{{.Values.cvmfs.main.mountPath}}/config/shed_tool_conf.xml{{end}}"
       shed_tool_config_file: "/galaxy/server/config/mutable/editable_shed_tool_conf.xml"
+      tool_data_table_config_path: |-
+        {{ if .Values.cvmfs.enabled -}}
+        {{ .Values.cvmfs.main.mountPath }}/config/shed_tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/byhand/location/tool_data_table_conf.xml
+        {{- end }}
       tool_dependency_dir: "{{.Values.persistence.mountPath}}/deps"
       job_config_file: "/galaxy/server/config/job_conf.xml"
+      builds_file_path: |-
+        {{ if .Values.cvmfs.enabled -}}
+        {{.Values.cvmfs.data.mountPath}}/managed/location/builds.txt
+        {{- end }}
       containers_resolvers_config_file: "/galaxy/server/config/container_resolvers_conf.xml"
       workflow_schedulers_config_file: "/galaxy/server/config/workflow_schedulers_conf.xml"
       build_sites_config_file: "/galaxy/server/config/build_sites.yml"
@@ -297,7 +333,11 @@ configs:
       tool_path: "{{.Values.persistence.mountPath}}/tools"
       tool_data_path: "{{.Values.persistence.mountPath}}/tool-data"
       conda_auto_init: false
-      nginx_x_accel_redirect_base: '/_x_accel_redirect'
+      len_file_path: |-
+        {{ if .Values.cvmfs.enabled -}}
+        {{.Values.cvmfs.data.mountPath}}/managed/len/ucsc
+        {{- end }}
+      nginx_x_accel_redirect_base: "/_x_accel_redirect"
   container_resolvers_conf.xml: |
     <containers_resolvers>
       <explicit />
@@ -343,11 +383,11 @@ configs:
     toolshed.g2.bx.psu.edu/repos/iuc/prestor_abseq3/prestor_abseq3/0.5.4
     toolshed.g2.bx.psu.edu/repos/iuc/quast/quast/4.1.1
     toolshed.g2.bx.psu.edu/repos/iuc/quast/quast/4.6.3
-    toolshed.g2.bx.psu.edu/repos/iuc/quast/quast/5.0.2+galaxy0
-    toolshed.g2.bx.psu.edu/repos/iuc/quast/quast/5.0.2+galaxy1
-    toolshed.g2.bx.psu.edu/repos/iuc/seurat/seurat/3.1.2
     toolshed.g2.bx.psu.edu/repos/iuc/snpeff/snpEff/4.3+T.galaxy1
   build_sites.yml:
+    - type: ucsc
+      file: "{{if .Values.cvmfs.enabled}}{{ .Values.cvmfs.data.mountPath -}}/managed/location/ucsc_build_sites.txt{{else}}/galaxy/server/tool-data/shared/ucsc/ucsc_build_sites.txt.sample{{end}}"
+      display: [main,archaea,ucla]
     - type: gbrowse
       file: "/galaxy/server/tool-data/shared/gbrowse/gbrowse_build_sites.txt"
       display: [wormbase,tair,modencode_worm,modencode_fly]
@@ -359,31 +399,13 @@ configs:
       file: "/galaxy/server/tool-data/shared/igv/igv_build_sites.txt.sample"
     - type: rviewer
       file: "/galaxy/server/tool-data/shared/rviewer/rviewer_build_sites.txt.sample"
+  # Although this is only one line, the multi-line entry allows us to avoid wrapping
+  # the entire expression in quotes, which would need to be removed in the configmap
+  integrated_tool_panel.xml: |
+    {{- (.Files.Get "files/configs/integrated_tool_panel.xml") }}
   tool_conf.xml: |
-    <?xml version='1.0' encoding='utf-8'?>
-    <toolbox monitor="true">
-      <section id="get_data" name="Get Data">
-        <tool file="data_source/upload.xml" />
-      </section>
-      <label id="general_text_label" text="General Text Tools" />
-      <section id="text_manipulation" name="Text Manipulation">
-        <tool file="filters/fixedValueColumn.xml" />
-        <tool file="filters/catWrapper.xml" />
-        <tool file="filters/condense_characters.xml" />
-        <tool file="filters/convert_characters.xml" />
-        <tool file="filters/mergeCols.xml" />
-        <tool file="filters/cutWrapper.xml" />
-        <tool file="filters/changeCase.xml" />
-        <tool file="filters/pasteWrapper.xml" />
-        <tool file="filters/remove_beginning.xml" />
-        <tool file="filters/randomlines.xml" />
-        <tool file="filters/headWrapper.xml" />
-        <tool file="filters/tailWrapper.xml" />
-        <tool file="filters/trimmer.xml" />
-        <tool file="filters/wc_gnu.xml" />
-        <tool file="filters/secure_hash_message_digest.xml" />
-      </section>
-    </toolbox>
+    {{- (.Files.Get "files/configs/tool_conf.xml") }}
+
 # Additional dynamic rules to map into the container.
 jobs:
   rules:

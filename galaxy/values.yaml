@@ -2,6 +2,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+nameOverride: ""
+fullnameOverride: ""
+
 image:
   repository: galaxy/galaxy-k8s
   tag: 20.05
@@ -14,9 +17,6 @@ nginx:
     pullPolicy: IfNotPresent
   conf:
     client_max_body_size: 100g
-
-nameOverride: ""
-fullnameOverride: ""
 
 service:
   type: ClusterIP

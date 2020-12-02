@@ -12,7 +12,7 @@ jobs:
            persist-credentials: false
       - uses: cloudve/helm-ci@master
         with:
-          chart-name: cloudman
+          chart-name: galaxy
           charts-repo: cloudve/helm-charts
           github-token: ${{ secrets.GITHUB_TOKEN }}
           chart-token: ${{ secrets.CHARTS_TOKEN }}

@@ -210,7 +210,7 @@ helm install --name galaxy cloudve/galaxy -f values.yaml --set cvmfs.enabled=tru
 ```
 
 If you wish to get a quick deployment of a single Galaxy instance with its own
-CVMFS-CSI, you can do by enabling the CVMFS deployment as part of this chart:
+CVMFS-CSI, you can do so by enabling the CVMFS deployment as part of this chart:
 
 ```console
 helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/master/
@@ -220,6 +220,11 @@ helm install --name cvmfs --namespace cvmfs cloudve/galaxy-cvmfs-csi
 # Download values-cvmfs.yaml from this repo and update persistence as needed
 helm install --name galaxy cloudve/galaxy -f values.yaml --set cvmfs.enabled=true --set cvmfs.deploy=true
 ```
+
+If you use the latter method, it is highly recommended that you deploy a single
+Galaxy release per nodepool, as multiple CVMFS-CSI provisioners running on the
+same node can conflict.
+
 Once started, Galaxy will be available under `/galaxy/` (note the trailing `/`).
 This path can be changed by setting the value: `--set ingress.path="/mynewgalaxypath/"
 

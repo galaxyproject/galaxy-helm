@@ -187,17 +187,18 @@ postgresql:
 
 ## Production Settings
 
-This repo contains an additional _values_ file with the production settings,
-called `values-cvmfs.yaml`. This mode of deployment configures Galaxy
-with the data from CMVFS and replicates the functional capabilities of the
-[Galaxy Main server](usegalaxy.org). Note that this deployment mode does not
-work on a Mac laptop because of an unresolved issue in the CVMFS-CSI docker
-container.
+This repo contains a values file that supports CVMFS support out-of-the-box.
+This mode of deployment configures Galaxy with the data from CMVFS and
+replicates the functional capabilities of the [Galaxy Main server](usegalaxy.org).
+Note that this deployment mode does not work on a Mac laptop because of an 
+unresolved issue in the CVMFS-CSI docker container.
 
-To install this version of the chart, we first need to install the Galaxy 
-CVMFS-CSI chart, followed by the Galaxy chart. Depending on the setup of
-the cluster you have available, you may also need to supply values for the
-cluster storage classes or PVCs.
+To install this version of the chart, we need to enable CVMFS deployment.
+Depending on the setup of the cluster you have available, you may also need
+to supply values for the cluster storage classes or PVCs.
+
+If you wish to install a single Galaxy CVMFS-CSI release to be used by multiple
+Galaxy releases, you can do so by installing the CVMFS separately as shown below:
 
 ```console
 helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/master/
@@ -205,12 +206,27 @@ helm repo update
 kubectl create namespace cvmfs
 helm install --name cvmfs --namespace cvmfs cloudve/galaxy-cvmfs-csi
 # Download values-cvmfs.yaml from this repo and update persistence as needed
-helm install --name galaxy -f values-cvmfs.yaml cloudve/galaxy
+helm install --name galaxy cloudve/galaxy -f values.yaml --set cvmfs.enabled=true --set cvmfs.deploy=false
 ```
 
-Note that this setup takes several minutes to start due to Galaxy loading all
-the tool definitions. Once started, Galaxy will be available under `/galaxy/`
-(note the trailing `/` as it is required).
+If you wish to get a quick deployment of a single Galaxy instance with its own
+CVMFS-CSI, you can do so by enabling the CVMFS deployment as part of this chart:
+
+```console
+helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/master/
+helm repo update
+kubectl create namespace cvmfs
+helm install --name cvmfs --namespace cvmfs cloudve/galaxy-cvmfs-csi
+# Download values-cvmfs.yaml from this repo and update persistence as needed
+helm install --name galaxy cloudve/galaxy -f values.yaml --set cvmfs.enabled=true --set cvmfs.deploy=true
+```
+
+If you use the latter method, it is highly recommended that you deploy a single
+Galaxy release per nodepool, as multiple CVMFS-CSI provisioners running on the
+same node can conflict.
+
+Once started, Galaxy will be available under `/galaxy/` (note the trailing `/`).
+This path can be changed by setting the value: `--set ingress.path="/mynewgalaxypath/"
 
 ## Horizontal Scaling
 

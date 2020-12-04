@@ -10,14 +10,6 @@ image:
   tag: 20.09
   pullPolicy: IfNotPresent
 
-nginx:
-  image:
-    repository: nginx
-    tag: latest
-    pullPolicy: IfNotPresent
-  conf:
-    client_max_body_size: 100g
-
 service:
   type: ClusterIP
   port: 8000
@@ -535,3 +527,11 @@ influxdb:
   url:
   username: ""
   password: ""
+
+nginx:
+  image:
+    repository: nginx
+    tag: latest
+    pullPolicy: IfNotPresent
+  conf:
+    client_max_body_size: 100g

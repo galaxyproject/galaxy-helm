@@ -528,6 +528,7 @@ influxdb:
   url:
   username: ""
   password: ""
+  database: telegraf
 
 nginx:
   image:

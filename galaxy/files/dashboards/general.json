@@ -87,7 +87,7 @@
             },
             {
               "params": [
-                "none"
+                "0"
               ],
               "type": "fill"
             }
@@ -137,7 +137,7 @@
             },
             {
               "params": [
-                "none"
+                "0"
               ],
               "type": "fill"
             }
@@ -270,7 +270,7 @@
           "groupBy": [
             {
               "params": [
-                "10m"
+                "1m"
               ],
               "type": "time"
             },
@@ -302,11 +302,17 @@
               },
               {
                 "params": [],
-                "type": "last"
+                "type": "sum"
               }
             ]
           ],
-          "tags": []
+          "tags": [
+            {
+              "key": "state",
+              "operator": "!=",
+              "value": "new"
+            }
+          ]
         }
       ],
       "thresholds": [],
@@ -422,7 +428,7 @@
             },
             {
               "params": [
-                "null"
+                "0"
               ],
               "type": "fill"
             }
@@ -693,7 +699,7 @@
             },
             {
               "params": [
-                "none"
+                "0"
               ],
               "type": "fill"
             }
@@ -713,11 +719,17 @@
               },
               {
                 "params": [],
-                "type": "last"
+                "type": "sum"
               }
             ]
           ],
-          "tags": []
+          "tags": [
+            {
+              "key": "state",
+              "operator": "!=",
+              "value": "new"
+            }
+          ]
         }
       ],
       "thresholds": "",

@@ -36,7 +36,11 @@ Create chart name and version as used by the chart label.
 Expand the name of the chart.
 */}}
 {{- define "galaxy-postgresql.fullname" -}}
+{{- if .Values.postgresql.existingDatabase -}}
+{{- printf "%s" .Values.postgresql.existingDatabase -}}
+{{- else -}}
 {{- printf "%s-%s" .Release.Name .Values.postgresql.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 {{- end -}}
 
 {{/*

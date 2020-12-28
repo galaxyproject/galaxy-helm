@@ -1,135 +1,28 @@
-{{- if not (and .Values.postgresql.enabled .Values.postgresql.existingDatabase) }}
-apiVersion: crunchydata.com/v1
-kind: Pgcluster
+{{- if not (or .Values.postgresql.enabled .Values.postgresql.existingDatabase) }}
+apiVersion: acid.zalan.do/v1
+kind: postgresql
 metadata:
   labels:
-    app.kubernetes.io/name: {{ include "galaxy.name" . }}
-    helm.sh/chart: {{ include "galaxy.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    autofail: "true"
-    crunchy-pgbadger: "false"
-    crunchy-pgha-scope: {{ include "galaxy-postgresql.fullname" . }}
-    crunchy-postgres-exporter: "true"
-    deployment-name: {{ include "galaxy-postgresql.fullname" . }}
-    name: {{ include "galaxy-postgresql.fullname" . }}
-    pg-cluster: {{ include "galaxy-postgresql.fullname" . }}
-    pg-pod-anti-affinity: ""
-    pgo-backrest: "true"
-    pgo-version: {{ .Values.postgresql.operator.pgoversion }}
-    pgouser: admin
+    app.kubernetes.io/name: {{ include "galaxy.name" $ }}
+    helm.sh/chart: {{ include "galaxy.chart" $ }}
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    team: galaxy
   name: {{ include "galaxy-postgresql.fullname" . }}
   namespace: {{ .Release.Namespace }}
 spec:
-  ArchiveStorage:
-    accessmode: ""
-    matchLabels: ""
-    name: ""
-    size: ""
-    storageclass: ""
-    storagetype: ""
-    supplementalgroups: ""
-  BackrestStorage:
-    accessmode: ReadWriteOnce
-    matchLabels: ""
-    name: ""
-    size: 1G
-    storageclass: ""
-    storagetype: dynamic
-    supplementalgroups: ""
-  PrimaryStorage:
-    accessmode: ReadWriteOnce
-    matchLabels: ""
-    name: {{ include "galaxy-postgresql.fullname" . }}
-    size: {{ .Values.postgresql.persistence.size }}
-    storageclass: "{{ .Values.postgresql.persistence.storageClass }}"
-    storagetype: dynamic
-    supplementalgroups: ""
-  ReplicaStorage:
-    accessmode: ReadWriteOnce
-    matchLabels: ""
-    name: ""
-    size: {{ .Values.postgresql.persistence.size }}
-    storageclass: "{{ .Values.postgresql.persistence.storageClass }}"
-    storagetype: dynamic
-    supplementalgroups: ""
-  WALStorage:
-    accessmode: ""
-    matchLabels: ""
-    name: ""
-    size: ""
-    storageclass: ""
-    storagetype: ""
-    supplementalgroups: ""
-  annotations:
-    backrest: {}
-    global: {}
-    pgBouncer: {}
-    postgres: {}
-  backrestConfig: null
-  backrestLimits: {}
-  backrestRepoPath: ""
-  backrestResources:
-    memory: 48Mi
-  backrestS3Bucket: "{{ .Values.postgresql.operator.backrestS3Bucket }}"
-  backrestS3Endpoint: ""
-  backrestS3Region: ""
-  backrestS3URIStyle: ""
-  backrestS3VerifyTLS: "true"
-  ccpimage: crunchy-postgres-ha
-  ccpimageprefix: registry.developers.crunchydata.com/crunchydata
-  ccpimagetag: {{ .Values.postgresql.operator.ccpimagetag }}
-  clustername: {{ include "galaxy-postgresql.fullname" . }}
-  collectSecretName: {{ include "galaxy-postgresql.fullname" . }}-postgres-secret
-  customconfig: ""
-  database: galaxy
-  exporterLimits: {}
-  exporterResources:
-    memory: 24Mi
-  exporterport: "9187"
-  limits: {}
-  name: {{ include "galaxy-postgresql.fullname" . }}
-  namespace: {{ .Release.Namespace }}
-  pgBouncer:
-    limits: {}
-    replicas: 0
-    resources:
-      memory: 24Mi
-  pgDataSource:
-    restoreFrom: ""
-    restoreOpts: ""
-  pgbadgerport: "10000"
-  pgoimageprefix: registry.developers.crunchydata.com/crunchydata
-  podAntiAffinity:
-    default: preferred
-    pgBackRest: preferred
-    pgBouncer: preferred
-  policies: ""
-  port: "5432"
-  primarysecretname: {{ include "galaxy-postgresql.fullname" . }}-primaryuser-secret
-  replicas: "0"
-  resources:
-    memory: 128Mi
-  rootsecretname: {{ include "galaxy-postgresql.fullname" . }}-postgres-secret
-  shutdown: false
-  standby: false
-  syncReplication: null
-  tablespaceMounts: {}
-  tls:
-    caSecret: ""
-    replicationTLSSecret: ""
-    tlsSecret: ""
-  tlsOnly: false
-  user: {{ .Values.postgresql.galaxyDatabaseUser }}
-  userlabels:
-    app.kubernetes.io/name: {{ include "galaxy.name" . }}
-    helm.sh/chart: {{ include "galaxy.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    NodeLabelKey: {{ .Values.postgresql.operator.NodeLabelKey }}
-    NodeLabelValue: {{ .Values.postgresql.operator.NodeLabelValue }}
-    crunchy-postgres-exporter: "true"
-    pg-pod-anti-affinity: ""
-    pgo-version:  {{ .Values.postgresql.operator.pgoversion }}
-  usersecretname: {{ include "galaxy-postgresql.fullname" . }}-{{ .Values.postgresql.galaxyDatabaseUser }}-secret
+  allowedSourceRanges: []
+  databases:
+    galaxy: {{ .Values.postgresql.galaxyDatabaseUser }}
+  numberOfInstances: 1
+  teamId: galaxy
+  users:
+    {{ .Values.postgresql.galaxyDatabaseUser }}: [ ]
+  postgresql:
+    version: '13'
+  volume:
+    size: {{ default "10Gi" .Values.postgresql.persistence.size }}
+  {{- if and .Values.postgresql.operator .Values.postgresql.operator.operatorSpecExtra -}}
+  {{- tpl (toYaml .Values.postgresql.operator.operatorSpecExtra) . | nindent 2 }}
+  {{- end }}
 {{- end }}

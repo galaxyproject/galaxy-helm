@@ -163,9 +163,7 @@ postgresql:
   # galaxyExistingSecret:
   # galaxyExistingSecretKeyRef:
   operator:
-    ccpimagetag: "centos7-12.5-4.5.1"
-    pgoversion: "4.5.1"
-    primaryUserPassword: ""
+    operatorSpecExtra:
   nameOverride: galaxy-postgres
   initdbScriptsSecret: "{{ .Release.Name }}-galaxy-initdb"
   persistence:

@@ -44,11 +44,11 @@ spec:
               protocol: TCP
           readinessProbe:
             httpGet:
-              path:  {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}
+              path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}api/version
               port: 80
           livenessProbe:
             httpGet:
-              path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}
+              path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}api/version
               port: 80
           volumeMounts:
             - name: nginx-conf

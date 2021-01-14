@@ -6,7 +6,6 @@ metadata:
     app.kubernetes.io/name: {{ include "galaxy.name" . }}
     helm.sh/chart: {{ include "galaxy.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
 value: -1000
 preemptionPolicy: Never
 globalDefault: false

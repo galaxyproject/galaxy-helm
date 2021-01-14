@@ -289,12 +289,12 @@ configs:
       tool_path: "{{.Values.persistence.mountPath}}/tools"
       tool_data_path: "{{.Values.persistence.mountPath}}/tool-data"
       conda_auto_init: false
-      nginx_x_accel_redirect_base: '{{ template "galaxy.add_trailing_slash" .Values.ingress.path }}_x_accel_redirect'
+      nginx_x_accel_redirect_base: >
+        {{include "galaxy.add_trailing_slash" .Values.ingress.path}}_x_accel_redirect
       len_file_path: |-
         {{ if .Values.cvmfs.enabled -}}
         {{.Values.cvmfs.data.mountPath}}/managed/len/ucsc
         {{- end }}
-      nginx_x_accel_redirect_base: "/_x_accel_redirect"
   container_resolvers_conf.xml: |
     <containers_resolvers>
       <explicit />

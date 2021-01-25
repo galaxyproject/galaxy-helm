@@ -1,0 +1,28 @@
+{{- if not (or .Values.postgresql.enabled .Values.postgresql.existingDatabase) }}
+apiVersion: acid.zalan.do/v1
+kind: postgresql
+metadata:
+  labels:
+    app.kubernetes.io/name: {{ include "galaxy.name" $ }}
+    helm.sh/chart: {{ include "galaxy.chart" $ }}
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    team: galaxy
+  name: {{ include "galaxy-postgresql.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  allowedSourceRanges: []
+  databases:
+    galaxy: {{ .Values.postgresql.galaxyDatabaseUser }}
+  numberOfInstances: 1
+  teamId: galaxy
+  users:
+    {{ .Values.postgresql.galaxyDatabaseUser }}: [ ]
+  postgresql:
+    version: '13'
+  volume:
+    size: {{ default "10Gi" .Values.postgresql.persistence.size }}
+  {{- if and .Values.postgresql.operator .Values.postgresql.operator.operatorSpecExtra -}}
+  {{- tpl (toYaml .Values.postgresql.operator.operatorSpecExtra) . | nindent 2 }}
+  {{- end }}
+{{- end }}

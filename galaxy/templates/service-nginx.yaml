@@ -20,4 +20,4 @@ spec:
   selector:
     app.kubernetes.io/name: {{ include "galaxy.fullname" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    component: galaxy-nginx
+    app.kubernetes.io/component: galaxy-nginx

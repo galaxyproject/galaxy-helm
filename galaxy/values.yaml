@@ -215,7 +215,7 @@ configs:
               {{- template "galaxy.fullname" . }}-cvmfs-gxy-main-pvc:{{ .Values.cvmfs.main.mountPath -}}
               {{- if .Values.extraVolumes -}}
               {{- template "galaxy.extra_pvc_mounts" . -}}
-              {{- end }}
+              {{- end -}}
               </param>
               <param id="k8s_namespace">{{ .Release.Namespace }}</param>
               <!-- Must be DNS friendly and less than 20 characters -->

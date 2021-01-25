@@ -17,6 +17,7 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ include "galaxy.fullname" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
+      component: galaxy-web-handler
   template:
     metadata:
       labels:

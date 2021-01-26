@@ -18,13 +18,13 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ include "galaxy.fullname" $ }}
       app.kubernetes.io/instance: {{ $.Release.Name }}
-      component: galaxy-job-handler
+      app.kubernetes.io/component: galaxy-job-handler
   template:
     metadata:
       labels:
         app.kubernetes.io/name: {{ include "galaxy.fullname" $ }}
         app.kubernetes.io/instance: {{ $.Release.Name }}
-        component: galaxy-job-handler
+        app.kubernetes.io/component: galaxy-job-handler
       annotations:
         checksum/galaxy_conf: {{ include (print $.Template.BasePath "/configs-galaxy.yaml") $ | sha256sum }}
         checksum/galaxy_rules: {{ include (print $.Template.BasePath "/configmap-galaxy-rules.yaml") $ | sha256sum }}

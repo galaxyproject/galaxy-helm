@@ -293,7 +293,7 @@ configs:
       tool_path: "{{.Values.persistence.mountPath}}/tools"
       tool_data_path: "{{.Values.persistence.mountPath}}/tool-data"
       conda_auto_init: false
-      nginx_x_accel_redirect_base: >
+      nginx_x_accel_redirect_base: >-
         {{include "galaxy.add_trailing_slash" .Values.ingress.path}}_x_accel_redirect
       len_file_path: |-
         {{ if .Values.cvmfs.enabled -}}

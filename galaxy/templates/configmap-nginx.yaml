@@ -37,20 +37,20 @@ data:
             server_name galaxy;
 
             location {{ template "galaxy.add_trailing_slash" .Values.ingress.path }} {
-                uwsgi_pass {{ template "galaxy.fullname" . }}:4001;
+                uwsgi_pass {{ template "galaxy.fullname" . }}-uwsgi:4001;
                 uwsgi_param UWSGI_SCHEME $scheme;
                 include uwsgi_params;
             }
 
             location ^~ {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}admin_toolshed/static {
-                uwsgi_pass {{ template "galaxy.fullname" . }}:4001;
+                uwsgi_pass {{ template "galaxy.fullname" . }}-uwsgi:4001;
                 uwsgi_param UWSGI_SCHEME $scheme;
                 include uwsgi_params;
             }
 
             location ~ ^{{ template "galaxy.add_trailing_slash" .Values.ingress.path }}api/dataset_collections/([^/]+)/download/?$ {
                 proxy_buffering off;
-                uwsgi_pass {{ template "galaxy.fullname" . }}:4001;
+                uwsgi_pass {{ template "galaxy.fullname" . }}-uwsgi:4001;
                 uwsgi_param UWSGI_SCHEME $scheme;
                 include uwsgi_params;
             }

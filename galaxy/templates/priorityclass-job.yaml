@@ -1,7 +1,8 @@
+{{ if and .Values.jobHandlers.priorityClass.enabled (not .Values.jobHandlers.priorityClass.existingClass) }}
 apiVersion: scheduling.k8s.io/v1beta1
 kind: PriorityClass
 metadata:
-  name: {{ include "galaxy.fullname" . }}-job-priority
+  name: {{ include "galaxy.pod-priority-class" . }}
   labels:
     app.kubernetes.io/name: {{ include "galaxy.name" . }}
     helm.sh/chart: {{ include "galaxy.chart" . }}
@@ -10,3 +11,4 @@ value: -1000
 preemptionPolicy: Never
 globalDefault: false
 description: "Galaxy jobs will run when cluster resources are available and will not preempt existing workloads."
+{{ end }}

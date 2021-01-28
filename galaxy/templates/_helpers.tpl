@@ -138,6 +138,17 @@ Define pod env vars
 {{- end -}}
 
 {{/*
+Define pod priority class
+*/}}
+{{- define "galaxy.pod-priority-class" -}}
+{{- if .Values.jobHandlers.priorityClass.existingClass -}}
+{{- printf "%s" .Values.jobHandlers.priorityClass.existingClass -}}
+{{- else -}}
+{{- printf "%s-job-priority" (include "galaxy.fullname" .) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Define extra persistent volumes
 */}}
 {{- define "galaxy.extra_pvc_mounts" -}}

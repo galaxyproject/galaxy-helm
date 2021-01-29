@@ -62,6 +62,9 @@ jobHandlers:
     periodSeconds: 10
     failureThreshold: 30
     timeoutSeconds: 5
+  priorityClass:
+    enabled: true
+    existingClass: ""
 
 rbac:
   enabled: true
@@ -226,7 +229,9 @@ configs:
               <param id="k8s_supplemental_group_id">101</param>
               <param id="k8s_pull_policy">IfNotPresent</param>
               <param id="k8s_cleanup_job">onsuccess</param>
-              <param id="k8s_pod_priority_class">{{ include "galaxy.fullname" . }}-job-priority</param>
+              {{- if .Values.jobHandlers.priorityClass.enabled }}
+              <param id="k8s_pod_priority_class">{{- template "galaxy.pod-priority-class" . -}}</param>
+              {{- end }}
             </plugin>
         </plugins>
         <handlers assign_with="db-skip-locked" />

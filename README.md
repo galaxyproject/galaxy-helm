@@ -137,11 +137,11 @@ current default values can be found in `values.yaml` file.
 | `service.type`                          | Kubernetes [Service type](https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types) |
 | `service.port`                          | Kubernetes service port                                                                                                                          |
 | `service.nodePort`                      | If `service.type` is set to `NodePort`, then this can be used to set the port at which Galaxy will be available on all nodes' IP addresses                                                                                                            |
-| `webHandlers.replicaCount`              | The number of replicas for the Galaxy web handlers                                                                                            |
-| `webHandlers.annotations`               | Annotations for the Galaxy job handlers                                                                                            |
-| `webHandlers.replicaCount`              | The number of replicas for the Galaxy web handlers                                                                                            |
-| `webHandlers.replicaCount`              | The number of replicas for the Galaxy web handlers                                                                                            |
-| `webHandlers.replicaCount`              | The number of replicas for the Galaxy web handlers                                                                                            |
+| `webHandlers.replicaCount`              | The number of replicas for the Galaxy web handlers    |
+| `webHandlers.annotations`               | Additional annotations for the Galaxy web handlers at the Deployment level  |
+| `webHandlers.podAnnotations`              | Additional annotations for the Galaxy web handlers at the Pod level  |
+| `webHandlers.podSpecExtra`              | Additional specs for the Galaxy web handlers at the pod level                                                         |
+| `webHandlers.readinessProbe.enabled`      | The number of replicas for the Galaxy web handlers        |
 |
 | `jobHandlers.replicaCount`              | The number of replicas for the Galaxy job handlers                                                                                            |
 | `rbac.enabled`                          | Enable Galaxy job RBAC                                                                                                                        |

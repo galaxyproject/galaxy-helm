@@ -37,5 +37,6 @@ spec:
               service:
                 name: {{ $fullName }}-nginx
                 port:
-                  number: {{ $servicePort }}  {{- end }}
+                  number: {{ $servicePort }}  
+  {{- end }}
 {{- end }}

@@ -118,7 +118,7 @@ spec:
               subPath: probedb.py
             {{- range $key, $entry := .Values.extraFileMappings -}}
             {{- if $entry.applyToJob }}
-            - name: extra-files-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}
+            - name: extra-files-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" | replace "_" "-" }}
               mountPath: {{ $key }}
               subPath: {{ include "galaxy.getFilenameFromPath" $key }}
             {{- end }}
@@ -165,13 +165,13 @@ spec:
           {{- end }}
         {{- range $key, $entry := .Values.extraFileMappings -}}
         {{- if $entry.applyToJob }}
-        - name: extra-files-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}
+        - name: extra-files-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" | replace "_" "-"  | replace "_" "-"}}
           {{- if $entry.useSecret }}
           secret:
-            secretName: {{ include "galaxy.fullname" $ }}-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}
+            secretName: {{ include "galaxy.fullname" $ }}-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" | replace "_" "-" }}
           {{- else }}
           configMap:
-            name: {{ include "galaxy.fullname" $ }}-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}
+            name: {{ include "galaxy.fullname" $ }}-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" | replace "_" "-" }}
           {{- end }}
         {{- end }}
         {{- end }}

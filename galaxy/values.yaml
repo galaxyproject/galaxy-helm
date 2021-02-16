@@ -66,6 +66,16 @@ jobHandlers:
     enabled: true
     existingClass: ""
 
+metrics:
+  enabled: true
+  annotations: {}
+  podAnnotations: {}
+  podSpecExtra: {}
+  image:
+    repository: cloudve/galaxy-metrics-scraper
+    tag: 2.0.0
+    pullPolicy: IfNotPresent
+
 rbac:
   enabled: true
   serviceAccount: default

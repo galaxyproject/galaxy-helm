@@ -213,9 +213,11 @@ configs:
             <plugin id="k8s" type="runner" load="galaxy.jobs.runners.kubernetes:KubernetesJobRunner">
               <param id="k8s_use_service_account">true</param>
               <param id="k8s_persistent_volume_claims">
-              {{- template "galaxy.pvcname" . -}}:{{.Values.persistence.mountPath}},
-              {{- template "galaxy.fullname" . }}-cvmfs-gxy-data-pvc:{{ .Values.cvmfs.data.mountPath }},
-              {{- template "galaxy.fullname" . }}-cvmfs-gxy-main-pvc:{{ .Values.cvmfs.main.mountPath -}}
+              {{- template "galaxy.pvcname" . -}}:{{.Values.persistence.mountPath}}
+              {{- if .Values.cvmfs.enabled -}}
+              ,{{- template "galaxy.fullname" . -}}-cvmfs-gxy-data-pvc:{{.Values.cvmfs.data.mountPath}},
+              {{- template "galaxy.fullname" . -}}-cvmfs-gxy-main-pvc:{{.Values.cvmfs.data.mountPath}}
+              {{- end -}}
               {{- if .Values.extraVolumes -}}
               {{- template "galaxy.extra_pvc_mounts" . -}}
               {{- end -}}

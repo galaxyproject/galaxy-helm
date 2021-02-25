@@ -110,6 +110,13 @@ cp -aruL /galaxy/server/tools {{.Values.persistence.mountPath}}/tools | true;
 {{- end -}}
 
 {{/*
+Make string DNS-compliant by turning to lowercase then removing all noncompliant characters
+*/}}
+{{- define "galaxy.makeDnsCompliant" -}}
+{{- (printf "%s" (regexReplaceAll "[^a-z0-9-]" (. | lower) "")) | trunc 63 | trimSuffix "-"  }}
+{{- end -}}
+
+{{/*
 Extract the filename portion from a file path
 */}}
 {{- define "galaxy.getFilenameFromPath" -}}

@@ -114,7 +114,7 @@ spec:
           volumeMounts:
             {{- range $key, $entry := .Values.extraFileMappings -}}
             {{- if $entry.applyToWeb }}
-            - name: {{ include "galaxy.makeDnsCompliant" (printf "%extra-%s-%s" (include "galaxy.getFilenameFromPath" $key) ($key | sha256sum)) }}
+            - name: {{ include "galaxy.makeDnsCompliant" (printf "extra-%s-%s" (include "galaxy.getFilenameFromPath" $key) ($key | sha256sum)) }}
               mountPath: {{ $key }}
               subPath: {{ include "galaxy.getFilenameFromPath" $key }}
             {{- end }}
@@ -164,7 +164,7 @@ spec:
           {{- end }}
         {{- range $key, $entry := .Values.extraFileMappings -}}
         {{- if $entry.applyToWeb }}
-        - name: {{ include "galaxy.makeDnsCompliant" (printf "%extra-%s-%s" (include "galaxy.getFilenameFromPath" $key) ($key | sha256sum)) }}
+        - name: {{ include "galaxy.makeDnsCompliant" (printf "extra-%s-%s" (include "galaxy.getFilenameFromPath" $key) ($key | sha256sum)) }}
           {{- if $entry.useSecret }}
           secret:
             secretName: {{ include "galaxy.makeDnsCompliant" (printf "%s-extra-%s-%s" (include "galaxy.fullname" $) (include "galaxy.getFilenameFromPath" $key) ($key | sha256sum)) }}

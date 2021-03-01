@@ -540,7 +540,7 @@ extraFileMappings:
 
 influxdb:
   enabled: false
-  url:
+  url: ""
   username: ""
   password: ""
 

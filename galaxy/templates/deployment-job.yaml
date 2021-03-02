@@ -137,7 +137,7 @@ spec:
               subPath: probedb.py
             {{- range $key, $entry := $.Values.extraFileMappings -}}
             {{- if $entry.applyToJob }}
-            - name: {{ include "galaxy.makeDnsCompliant" (printf "extra-%s-%s" (include "galaxy.getFilenameFromPath" $key) ($key | sha256sum)) }}
+            - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
               mountPath: {{ $key }}
               subPath: {{ include "galaxy.getFilenameFromPath" $key }}
             {{- end }}
@@ -184,13 +184,13 @@ spec:
           {{- end }}
         {{- range $key, $entry := $.Values.extraFileMappings -}}
         {{- if $entry.applyToJob }}
-        - name: {{ include "galaxy.makeDnsCompliant" (printf "extra-%s-%s" (include "galaxy.getFilenameFromPath" $key) ($key | sha256sum)) }}
+        - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
           {{- if $entry.useSecret }}
           secret:
-            secretName: {{ include "galaxy.makeDnsCompliant" (printf "%s-extra-%s-%s" (include "galaxy.fullname" $) (include "galaxy.getFilenameFromPath" $key) ($key | sha256sum)) }}
+            secretName: {{ include "galaxy.makeDnsCompliant" (printf "%s-%s" (include "galaxy.fullname" $) (include "galaxy.getExtraFilesUniqueName" $key)) }}
           {{- else }}
           configMap:
-            name: {{ include "galaxy.makeDnsCompliant" (printf "%s-extra-%s-%s" (include "galaxy.fullname" $) (include "galaxy.getFilenameFromPath" $key) ($key | sha256sum)) }}
+            name: {{ include "galaxy.makeDnsCompliant" (printf "%s-%s" (include "galaxy.fullname" $) (include "galaxy.getExtraFilesUniqueName" $key)) }}
           {{- end }}
         {{- end }}
         {{- end }}

@@ -117,6 +117,13 @@ Make string DNS-compliant by turning to lowercase then removing all noncompliant
 {{- end -}}
 
 {{/*
+Get unique name for extra files
+*/}}
+{{- define "galaxy.getExtraFilesUniqueName" -}}
+{{- (printf "%s" (include "galaxy.makeDnsCompliant" (printf "extra-%s-%s" (include "galaxy.getFilenameFromPath" .) (. | sha256sum))))  }}
+{{- end -}}
+
+{{/*
 Extract the filename portion from a file path
 */}}
 {{- define "galaxy.getFilenameFromPath" -}}

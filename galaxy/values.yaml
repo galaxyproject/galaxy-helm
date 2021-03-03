@@ -212,51 +212,54 @@ useSecretConfigs: false
 
 # All files will be relative to `/galaxy/server/config/` directory
 configs:
-  job_conf.xml: |
-    <job_conf>
-        <plugins>
-            <plugin id="local" type="runner" load="galaxy.jobs.runners.local:LocalJobRunner" workers="4" />
-            <plugin id="k8s" type="runner" load="galaxy.jobs.runners.kubernetes:KubernetesJobRunner">
-              <param id="k8s_use_service_account">true</param>
-              <param id="k8s_persistent_volume_claims">
-              {{- template "galaxy.pvcname" . -}}:{{.Values.persistence.mountPath}}
-              {{- if .Values.cvmfs.enabled -}}
-              ,{{- template "galaxy.fullname" . -}}-cvmfs-gxy-data-pvc:{{.Values.cvmfs.data.mountPath}},
-              {{- template "galaxy.fullname" . -}}-cvmfs-gxy-main-pvc:{{.Values.cvmfs.main.mountPath}}
-              {{- end -}}
-              {{- if .Values.extraVolumes -}}
-              {{- template "galaxy.extra_pvc_mounts" . -}}
-              {{- end -}}
-              </param>
-              <param id="k8s_namespace">{{ .Release.Namespace }}</param>
-              <!-- Must be DNS friendly and less than 20 characters -->
-              <param id="k8s_galaxy_instance_id">{{ .Release.Name }}</param>
-              <param id="k8s_run_as_user_id">101</param>
-              <param id="k8s_run_as_group_id">101</param>
-              <param id="k8s_fs_group_id">101</param>
-              <param id="k8s_supplemental_group_id">101</param>
-              <param id="k8s_pull_policy">IfNotPresent</param>
-              <param id="k8s_cleanup_job">onsuccess</param>
-              {{- if .Values.jobHandlers.priorityClass.enabled }}
-              <param id="k8s_pod_priority_class">{{- template "galaxy.pod-priority-class" . -}}</param>
-              {{- end }}
-            </plugin>
-        </plugins>
-        <handlers assign_with="db-skip-locked" />
-        <destinations default="dynamic-k8s-dispatcher">
-            <destination id="local" runner="local"/>
-            <destination id="dynamic-k8s-dispatcher" runner="dynamic">
-              <param id="type">python</param>
-              <param id="function">k8s_container_mapper</param>
-              <param id="docker_default_container_id">{{ .Values.image.repository }}:{{ .Values.image.tag }}</param>
-              <param id="docker_enabled">true</param>
-            </destination>
-        </destinations>
-        <limits>
-            <limit type="registered_user_concurrent_jobs">5</limit>
-            <limit type="anonymous_user_concurrent_jobs">2</limit>
-        </limits>
-    </job_conf>
+  job_conf.yml:
+    runners:
+      local:
+        load: galaxy.jobs.runners.local:LocalJobRunner
+        workers: 4
+      k8s:
+        load: galaxy.jobs.runners.kubernetes:KubernetesJobRunner
+        k8s_use_service_account: true
+        k8s_persistent_volume_claims: |-
+          {{ template "galaxy.pvcname" . -}}:{{.Values.persistence.mountPath}}
+          {{- if .Values.cvmfs.enabled -}}
+          ,{{- template "galaxy.fullname" . -}}-cvmfs-gxy-data-pvc:{{.Values.cvmfs.data.mountPath}},
+          {{- template "galaxy.fullname" . -}}-cvmfs-gxy-main-pvc:{{.Values.cvmfs.main.mountPath}}
+          {{- end -}}
+          {{- if .Values.extraVolumes -}}
+          {{- template "galaxy.extra_pvc_mounts" . -}}
+          {{- end }}
+        k8s_namespace: "{{ .Release.Namespace }}"
+        k8s_galaxy_instance_id: "{{ .Release.Name }}"
+        k8s_run_as_user_id: "101"
+        k8s_run_as_group_id: "101"
+        k8s_fs_group_id: "101"
+        k8s_supplemental_group_id: "101"
+        k8s_pull_policy: IfNotPresent
+        k8s_cleanup_job: onsuccess
+        k8s_pod_priority_class: >
+          {{ if .Values.jobHandlers.priorityClass.enabled }}
+          {{ include "galaxy.fullname" . }}-job-priority
+          {{ end }}
+    handling:
+      assign:
+        - "db-skip-locked"
+    execution:
+      default: dynamic_k8s_dispatcher
+      environments:
+        local:
+          runner: local
+        dynamic_k8s_dispatcher:
+          runner: dynamic
+          type: python
+          function: k8s_container_mapper
+          docker_enabled: true
+          docker_default_container_id: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+    limits:
+    - type: registered_user_concurrent_jobs
+      value: 5
+    - type: anonymous_user_concurrent_jobs
+      value: 2
   uwsgi.yml: |
     uwsgi:
       virtualenv: /galaxy/server/.venv
@@ -292,7 +295,7 @@ configs:
         {{ .Values.cvmfs.main.mountPath }}/config/shed_tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/byhand/location/tool_data_table_conf.xml
         {{- end }}
       tool_dependency_dir: "{{.Values.persistence.mountPath}}/deps"
-      job_config_file: "/galaxy/server/config/job_conf.xml"
+      job_config_file: "/galaxy/server/config/job_conf.yml"
       builds_file_path: |-
         {{ if .Values.cvmfs.enabled -}}
         {{.Values.cvmfs.data.mountPath}}/managed/location/builds.txt

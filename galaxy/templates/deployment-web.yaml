@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+templates/deployment-web.yamlapiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "galaxy.fullname" . }}-web
@@ -167,10 +167,10 @@ spec:
         - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
           {{- if $entry.useSecret }}
           secret:
-            secretName: {{ include "galaxy.makeDnsCompliant" (printf "%s-%s" (include "galaxy.fullname" $) (include "galaxy.getExtraFilesUniqueName" $key)) }}
+            secretName: {{ printf "%s-%s" (include "galaxy.fullname" $) (include "galaxy.getExtraFilesUniqueName" $key) }}
           {{- else }}
           configMap:
-            name: {{ include "galaxy.makeDnsCompliant" (printf "%s-%s" (include "galaxy.fullname" $) (include "galaxy.getExtraFilesUniqueName" $key)) }}
+            name: {{ printf "%s-%s" (include "galaxy.fullname" $) (include "galaxy.getExtraFilesUniqueName" $key) }}
           {{- end }}
         {{- end }}
         {{- end }}

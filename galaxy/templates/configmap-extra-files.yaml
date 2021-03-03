@@ -3,7 +3,7 @@
 apiVersion: v1
 metadata:
   # Extract the filename portion only
-  name: {{ include "galaxy.makeDnsCompliant" (printf "%s-%s" (include "galaxy.fullname" $) (include "galaxy.getExtraFilesUniqueName" $key)) }}
+  name: {{ printf "%s-%s" (include "galaxy.fullname" $) (include "galaxy.getExtraFilesUniqueName" $key) }}
   labels:
     app.kubernetes.io/name: {{ include "galaxy.name" $ }}
     helm.sh/chart: {{ include "galaxy.chart" $ }}

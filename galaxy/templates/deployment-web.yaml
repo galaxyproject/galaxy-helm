@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+templates/deployment-web.yamlapiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "galaxy.fullname" . }}-web
@@ -114,7 +114,7 @@ spec:
           volumeMounts:
             {{- range $key, $entry := .Values.extraFileMappings -}}
             {{- if $entry.applyToWeb }}
-            - name: extra-files-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}
+            - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
               mountPath: {{ $key }}
               subPath: {{ include "galaxy.getFilenameFromPath" $key }}
             {{- end }}
@@ -164,13 +164,13 @@ spec:
           {{- end }}
         {{- range $key, $entry := .Values.extraFileMappings -}}
         {{- if $entry.applyToWeb }}
-        - name: extra-files-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}
+        - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
           {{- if $entry.useSecret }}
           secret:
-            secretName: {{ include "galaxy.fullname" $ }}-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}
+            secretName: {{ printf "%s-%s" (include "galaxy.fullname" $) (include "galaxy.getExtraFilesUniqueName" $key) }}
           {{- else }}
           configMap:
-            name: {{ include "galaxy.fullname" $ }}-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" }}
+            name: {{ printf "%s-%s" (include "galaxy.fullname" $) (include "galaxy.getExtraFilesUniqueName" $key) }}
           {{- end }}
         {{- end }}
         {{- end }}

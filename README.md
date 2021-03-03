@@ -8,44 +8,92 @@ Galaxy on top of Kubernetes.
 
 You may [follow this documentation](https://galaxyproject.org/cloud/k8s/) on
 how to use this Helm chart to deploy Galaxy on various managed kubernetes 
-services (e.g., Amazon EKS and Google GKE). 
+services (e.g., Amazon EKS and Google GKE).
 
-## TL;DR
+## HELM 2 NOTE
 
-```console
-git clone https://github.com/galaxyproject/galaxy-helm.git
-cd galaxy-helm/galaxy
-helm dependency update
-helm install .
-```
+While the chart is still compatible with Helm 2, we highly recommend you start
+using Helm 3 since we will not keep supporting Helm 2 going forward.
+For Helm 2 installation, you will need to replace `helm install my-galaxy-release`
+with `helm install --name my-galaxy-release` in all the commands below.
 
 ## Introduction
 
-This [Helm chart]() bootstraps a Galaxy deployment on a
+This [Helm chart](https://helm.sh/) bootstraps a Galaxy deployment on a
 [Kubernetes](https://kubernetes.io/) cluster. The chart allows application
 configuration changes, updates, upgrades, and rollbacks.
 
-## Prerequisites
+## Recommended versions
 
-- Kubernetes 1.13+
-- Helm 2.10+
+- Kubernetes 1.16+
+- Helm 3+
 
 You will need a Kubernetes and Helm installation; the easiest option for
 testing and development purposes is to install
 [Docker Desktop](https://www.docker.com/products/docker-desktop), which comes
-with integrated Kubernetes. You will also need to install
-[Helm](https://github.com/helm/helm#install).
+with integrated Kubernetes. You will also need to
+[install Helm](https://github.com/helm/helm#install).
 
 ## Dependency Charts
 
 This chart relies on the features of other charts for common functionality.
 Most notably, this includes the Postgres chart for the database. In addition,
-the chart relies on the use of the CVMFS chart for linking the reference data
+the chart can rely on the use of the CVMFS-CSI chart for linking the reference data
 to Galaxy and jobs. While, technically, CVMFS is an optional dependency,
 production settings will likely want it enabled.
 
 - Postgres
-- CVMFS (optional)
+- [Galaxy-CVMFS-CSI](https://github.com/CloudVE/galaxy-cvmfs-csi-helm) (optional)
+
+
+## TL;DR
+
+### Default simple installation (with few basic tools)
+
+Launching from the source:
+
+```console
+git clone https://github.com/galaxyproject/galaxy-helm.git
+cd galaxy-helm/galaxy
+helm dependency update
+helm install my-galaxy-release .
+```
+
+Launching from the repository of packaged charts:
+
+```console
+helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/master/
+helm repo update
+helm install my-galaxy-release cloudve/galaxy
+```
+
+### Example installation for a single Galaxy instance with CVMFS tools
+
+```console
+helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/master/
+helm repo update
+helm install my-galaxy-release cloudve/galaxy --set cvmfs.enabled=true --set cvmfs.deploy=true
+```
+
+NOTE: It is not advisable to run multiple instances of the CVMFS-CSI simultaneously on
+the same cluster. If you wish to deploy multiple instances of Galaxy on the same cluster,
+please install the CVMFS-CSI chart separately as shown below. One exception to this is
+installing multiple releases of Galaxy in different namespaces AND running on different
+nodepools. In that case, it is possible to have each Galaxy release deploy its own 
+CVMFS-CSI (and own NFS provisioner if desired). For that case, please refer to the
+[GalaxyKubeMan Chart](https://github.com/galaxyproject/galaxykubeman-helm).
+
+### Example installation for multiple Galaxy instances on the same cluster
+
+```console
+helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/master/
+helm repo update
+helm install cvmfs cloudve/galaxy-cvmfs-csi --namespace cvmfs --create-namespace
+helm install my-galaxy-release-1 cloudve/galaxy --set cvmfs.enabled=true --set cvmfs.deploy=false --set ingress.path="/galaxy1/"
+helm install my-galaxy-release-2 cloudve/galaxy --set cvmfs.enabled=true --set ingress.paht="/galaxy2/"
+```
+Note: `cvmfs.deploy` defaults to `false`. The explicit mention in the first release is
+purely visual to highlight the difference.
 
 ## Installing the Chart
 
@@ -57,10 +105,10 @@ cd galaxy-helm/galaxy
 helm dependency update
 ```
 
-2. To install the chart with the release name `galaxy` (note the trailing dot):
+2. To install the chart with the release name `my-galaxy` (note the trailing dot):
 
 ```console
-helm install --name galaxy .
+helm install my-galaxy .
 ```
 
 In about a minute, Galaxy will be available at the root URL of your kubernetes
@@ -71,7 +119,7 @@ cluster.
 To uninstall/delete the `galaxy` deployment, run:
 
 ```console
-helm del --purge galaxy
+helm delete my-galaxy
 ```
 
 ## Configuration
@@ -81,13 +129,20 @@ current default values can be found in `values.yaml` file.
 
 | Parameter                               | Description                                                                                                                                   |
 |-----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| `image.repository`                      | The repository and name of the Docker image for Galaxy pointing to Docker Hub.                                                                |
-| `image.tag`                             | Galaxy image tag / version                                                                                                                    |
-| `image.pullPolicy`                      | Galaxy image pull policy                                                                                                                      |
-| `service.type`                          | Kubernetes Service type, ClusterIP by default.                                                                                                |
-| `service.port`                          | Galaxy service port                                                                                                                          |
-| `service.nodePort`                      | If `service.type` set to `NodePort`, then this can be used to set the port at which Galaxy will be available on all nodes' IP addresses. `30700` by default.                                                                                                            |
-| `webHandlers.replicaCount`              | The number of replicas for the Galaxy web handlers                                                                                            |
+| `nameOverride`                          | Override the name of the chart used to prefix resource names. Defaults to `{{.Chart.Name}}` (i.e. `galaxy`)   |
+| `fullNameOverride`                      | Override the full name used to prefix resource names. Defaults to `{{.Release.Name}}-{{.Values.nameOverride}}` |
+| `image.repository`                      | The repository and name of the Docker image for Galaxy, searches Docker Hub by default                                                               |
+| `image.tag`                             | Galaxy Docker image tag (generally corresponds to the desired Galaxy version)                                                                                                                    |
+| `image.pullPolicy`                      | Galaxy image [pull policy](https://kubernetes.io/docs/concepts/configuration/overview/#container-images) for more info                |
+| `service.type`                          | Kubernetes [Service type](https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types) |
+| `service.port`                          | Kubernetes service port                                                                                                                          |
+| `service.nodePort`                      | If `service.type` is set to `NodePort`, then this can be used to set the port at which Galaxy will be available on all nodes' IP addresses                                                                                                            |
+| `webHandlers.replicaCount`              | The number of replicas for the Galaxy web handlers    |
+| `webHandlers.annotations`               | Additional annotations for the Galaxy web handlers at the Deployment level  |
+| `webHandlers.podAnnotations`              | Additional annotations for the Galaxy web handlers at the Pod level  |
+| `webHandlers.podSpecExtra`              | Additional specs for the Galaxy web handlers at the pod level                                                         |
+| `webHandlers.readinessProbe.enabled`      | The number of replicas for the Galaxy web handlers        |
+|
 | `jobHandlers.replicaCount`              | The number of replicas for the Galaxy job handlers                                                                                            |
 | `rbac.enabled`                          | Enable Galaxy job RBAC                                                                                                                        |
 | `persistence.enabled`                   | Enable persistence using PVC                                                                                                                  |

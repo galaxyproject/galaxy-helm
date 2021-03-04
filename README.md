@@ -5,7 +5,6 @@ accessibility, reproducibility, and transparency of primarily bioinformatics
 data. This repo contains [Helm charts](https://helm.sh/) for easily deploying
 Galaxy on top of Kubernetes.
 
-
 You may [follow this documentation](https://galaxyproject.org/cloud/k8s/) on
 how to use this Helm chart to deploy Galaxy on various managed kubernetes 
 services (e.g., Amazon EKS and Google GKE).
@@ -90,7 +89,7 @@ helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/mast
 helm repo update
 helm install cvmfs cloudve/galaxy-cvmfs-csi --namespace cvmfs --create-namespace
 helm install my-galaxy-release-1 cloudve/galaxy --set cvmfs.enabled=true --set cvmfs.deploy=false --set ingress.path="/galaxy1/"
-helm install my-galaxy-release-2 cloudve/galaxy --set cvmfs.enabled=true --set ingress.paht="/galaxy2/"
+helm install my-galaxy-release-2 cloudve/galaxy --set cvmfs.enabled=true --set ingress.path="/galaxy2/"
 ```
 Note: `cvmfs.deploy` defaults to `false`. The explicit mention in the first release is
 purely visual to highlight the difference.
@@ -139,10 +138,9 @@ current default values can be found in `values.yaml` file.
 | `service.nodePort`                      | If `service.type` is set to `NodePort`, then this can be used to set the port at which Galaxy will be available on all nodes' IP addresses                                                                                                            |
 | `webHandlers.replicaCount`              | The number of replicas for the Galaxy web handlers    |
 | `webHandlers.annotations`               | Additional annotations for the Galaxy web handlers at the Deployment level  |
-| `webHandlers.podAnnotations`              | Additional annotations for the Galaxy web handlers at the Pod level  |
+| `webHandlers.podAnnotations`            | Additional annotations for the Galaxy web handlers at the Pod level  |
 | `webHandlers.podSpecExtra`              | Additional specs for the Galaxy web handlers at the pod level                                                         |
-| `webHandlers.readinessProbe.enabled`      | The number of replicas for the Galaxy web handlers        |
-|
+| `webHandlers.readinessProbe.enabled`    | The number of replicas for the Galaxy web handlers        |
 | `jobHandlers.replicaCount`              | The number of replicas for the Galaxy job handlers                                                                                            |
 | `rbac.enabled`                          | Enable Galaxy job RBAC                                                                                                                        |
 | `persistence.enabled`                   | Enable persistence using PVC                                                                                                                  |
@@ -168,7 +166,7 @@ Specify each parameter using the `--set key=value[,key=value]` argument to
 `helm install`. For example,
 
 ```console
-helm install --name galaxy --set persistence.size=50 .
+helm install galaxy --set persistence.size=50 .
 ```
 
 The above command sets the Galaxy persistent volume to 50GB.
@@ -176,33 +174,33 @@ The above command sets the Galaxy persistent volume to 50GB.
 Setting Galaxy configuration file values requires the key name to be escaped:
 
 ```console
-helm install --set-file "configs.galaxy\.yml.brand"="Hello World"
+helm install --set-file "configs.galaxy\.yml.brand"="Hello World" galaxy
 ```
 
 You can also set the galaxy configuration file in its entirety with:
 
 ```console
-helm install --set-file "configs.galaxy\.yml"=/path/to/local/galaxy.yml
+helm install --set-file "configs.galaxy\.yml"=/path/to/local/galaxy.yml galaxy
 ```
 
 To unset an existing file and revert to the container's default version:
 
 ```console
-helm install --set-file "configs.job_conf\.xml"=null
+helm install --set-file "configs.job_conf\.xml"=null galaxy
 ```
 
 Alternatively, a YAML file that specifies the values of the parameters can be
 provided when installing the chart. For example,
 
 ```console
-helm install --name galaxy -f values-cvmfs.yaml .
+helm install galaxy -f values-cvmfs.yaml .
 ```
 
 To unset a config file, use the yaml null type:
 ```
 configs:
   job_conf.xml: ~
- ```
+```
 
 ## Data Persistence
 
@@ -259,9 +257,9 @@ Galaxy releases, you can do so by installing the CVMFS separately as shown below
 helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/master/
 helm repo update
 kubectl create namespace cvmfs
-helm install --name cvmfs --namespace cvmfs cloudve/galaxy-cvmfs-csi
+helm install cvmfs --namespace cvmfs cloudve/galaxy-cvmfs-csi
 # Download values-cvmfs.yaml from this repo and update persistence as needed
-helm install --name galaxy cloudve/galaxy -f values.yaml --set cvmfs.enabled=true --set cvmfs.deploy=false
+helm install galaxy cloudve/galaxy -f values.yaml --set cvmfs.enabled=true --set cvmfs.deploy=false
 ```
 
 If you wish to get a quick deployment of a single Galaxy instance with its own
@@ -271,14 +269,14 @@ CVMFS-CSI, you can do so by enabling the CVMFS deployment as part of this chart:
 helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/master/
 helm repo update
 kubectl create namespace cvmfs
-helm install --name cvmfs --namespace cvmfs cloudve/galaxy-cvmfs-csi
+helm install cvmfs --namespace cvmfs cloudve/galaxy-cvmfs-csi
 # Download values-cvmfs.yaml from this repo and update persistence as needed
-helm install --name galaxy cloudve/galaxy -f values.yaml --set cvmfs.enabled=true --set cvmfs.deploy=true
+helm install galaxy cloudve/galaxy -f values.yaml --set cvmfs.enabled=true --set cvmfs.deploy=true
 ```
 
 If you use the latter method, it is highly recommended that you deploy a single
 Galaxy release per nodepool, as multiple CVMFS-CSI provisioners running on the
-same node can conflict.
+same node can cause conflicts.
 
 Once started, Galaxy will be available under `/galaxy/` (note the trailing `/`).
 This path can be changed by setting the value: `--set ingress.path="/mynewgalaxypath/"
@@ -298,3 +296,4 @@ by setting the desired values of the `webHandlers.replicaCount` and
 
 - _Version 1_: European Commission (EC) H2020 Project PhenoMeNal, grant
   agreement number 654241.
+

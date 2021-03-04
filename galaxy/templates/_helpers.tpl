@@ -36,7 +36,11 @@ Create chart name and version as used by the chart label.
 Expand the name of the chart.
 */}}
 {{- define "galaxy-postgresql.fullname" -}}
+{{- if .Values.postgresql.existingDatabase -}}
+{{- printf "%s" .Values.postgresql.existingDatabase -}}
+{{- else -}}
 {{- printf "%s-%s" .Release.Name .Values.postgresql.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 {{- end -}}
 
 {{/*
@@ -61,14 +65,35 @@ Return which PVC to use
 {{- end -}}
 {{- end -}}
 
+
+{{- define "galaxy.operator-user-secret-name" -}}
+{{- printf "%s.%s.credentials.postgresql.acid.zalan.do" .Values.postgresql.galaxyDatabaseUser (include "galaxy-postgresql.fullname" .) -}}
+{{- end -}}
+
+{{- define "galaxy.galaxy-secret-name" -}}
+{{- printf "%s-galaxy-secrets" .Release.Name -}}
+{{- end -}}
+
 {{/*
-Return galaxy database user password
+Return galaxy database user password.
+Lookup the existing secret values if they exist, or generate a random value
 */}}
 {{- define "galaxy.galaxyDbPassword" -}}
-{{- if .Values.postgresql.galaxyDatabasePassword }}
+{{- $galaxy_secret_name := (include "galaxy.galaxy-secret-name" .) -}}
+{{- $galaxy_secret := (lookup "v1" "Secret" .Release.Namespace $galaxy_secret_name) -}}
+{{- $operator_secret_name := (include "galaxy.operator-user-secret-name" .) -}}
+{{- $operator_secret := (lookup "v1" "Secret" .Release.Namespace $operator_secret_name) -}}
+{{- if $galaxy_secret -}}
+    {{- $galaxy_key_ref := (default "galaxy-db-password" .Values.postgresql.galaxyExistingSecretKeyRef) -}}
+    {{- index $galaxy_secret "data" $galaxy_key_ref | b64dec -}}
+{{- else if $operator_secret -}}
+    {{- $operator_secret.data.password | b64dec -}}
+{{- else if .Values.postgresql.galaxyDatabasePassword -}}
     {{- .Values.postgresql.galaxyDatabasePassword -}}
 {{- else -}}
-    {{- randAlphaNum 16 -}}
+    {{- $randomValue := (randAlphaNum 32) -}}
+    {{- $generatedValue := (set .Values.postgresql "galaxyDatabasePassword" $randomValue) -}}
+    {{- .Values.postgresql.galaxyDatabasePassword -}}
 {{- end -}}
 {{- end -}}
 
@@ -77,11 +102,25 @@ Creates the bash command for the init containers used to place files and change 
 */}}
 {{- define "galaxy.init-container-commands" -}}
 cp -anL /galaxy/server/config/integrated_tool_panel.xml /galaxy/server/config/mutable/integrated_tool_panel.xml;
-cp -anL /galaxy/server/config/sanitize_whitelist.txt /galaxy/server/config/mutable/sanitize_whitelist.txt;
+cp -anL /galaxy/server/config/sanitize_allowlist.txt /galaxy/server/config/mutable/sanitize_allowlist.txt;
 cp -anL /galaxy/server/config/data_manager_conf.xml.sample /galaxy/server/config/mutable/shed_data_manager_conf.xml;
 cp -anL /galaxy/server/config/tool_data_table_conf.xml.sample /galaxy/server/config/mutable/shed_tool_data_table_conf.xml;
 cp -aruL /galaxy/server/tool-data {{.Values.persistence.mountPath}}/;
 cp -aruL /galaxy/server/tools {{.Values.persistence.mountPath}}/tools | true;
+{{- end -}}
+
+{{/*
+Make string DNS-compliant by turning to lowercase then removing all noncompliant characters
+*/}}
+{{- define "galaxy.makeDnsCompliant" -}}
+{{- (printf "%s" (regexReplaceAll "[^a-z0-9-]" (. | lower) "")) | trunc 63 | trimSuffix "-"  }}
+{{- end -}}
+
+{{/*
+Get unique name for extra files
+*/}}
+{{- define "galaxy.getExtraFilesUniqueName" -}}
+{{- (printf "%s" (include "galaxy.makeDnsCompliant" (printf "extra-%s-%s" (include "galaxy.getFilenameFromPath" .) (. | sha256sum))))  }}
 {{- end -}}
 
 {{/*
@@ -104,7 +143,7 @@ Define pod env vars
                   name: '{{default (printf "%s-galaxy-secrets" .Release.Name) .Values.postgresql.galaxyExistingSecret}}'
                   key: '{{default "galaxy-db-password" .Values.postgresql.galaxyExistingSecretKeyRef}}'
             - name: GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION
-              value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy
+              value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy{{- if not (or .Values.postgresql.enabled .Values.postgresql.existingDatabase) -}}?sslmode=require{{- end }}
             - name: GALAXY_CONFIG_OVERRIDE_ID_SECRET
               valueFrom:
                 secretKeyRef:
@@ -112,6 +151,16 @@ Define pod env vars
                   key: "galaxy-config-id-secret"
 {{- end -}}
 
+{{/*
+Define pod priority class
+*/}}
+{{- define "galaxy.pod-priority-class" -}}
+{{- if .Values.jobHandlers.priorityClass.existingClass -}}
+{{- printf "%s" .Values.jobHandlers.priorityClass.existingClass -}}
+{{- else -}}
+{{- printf "%s-job-priority" (include "galaxy.fullname" .) -}}
+{{- end -}}
+{{- end -}}
 
 {{/*
 Define extra persistent volumes

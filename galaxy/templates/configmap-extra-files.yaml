@@ -3,7 +3,7 @@
 apiVersion: v1
 metadata:
   # Extract the filename portion only
-  name: {{ include "galaxy.fullname" $ }}-{{ include "galaxy.getFilenameFromPath" $key | replace "." "-" | replace "_" "-" }}
+  name: {{ printf "%s-%s" (include "galaxy.fullname" $) (include "galaxy.getExtraFilesUniqueName" $key) }}
   labels:
     app.kubernetes.io/name: {{ include "galaxy.name" $ }}
     helm.sh/chart: {{ include "galaxy.chart" $ }}
@@ -32,6 +32,7 @@ metadata:
     app.kubernetes.io/managed-by: {{ $.Release.Service }}
 kind: ConfigMap
 data:
-  probedb.py: | {{- (.Files.Get "scripts/probedb.py") | nindent 4 }}
+  probedb.py: |
+    {{- (.Files.Get "scripts/probedb.py") | nindent 4 }}
 
 ---

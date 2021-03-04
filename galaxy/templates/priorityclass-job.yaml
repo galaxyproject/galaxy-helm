@@ -1,5 +1,5 @@
 {{ if and .Values.jobHandlers.priorityClass.enabled (not .Values.jobHandlers.priorityClass.existingClass) }}
-apiVersion: scheduling.k8s.io/v1beta1
+apiVersion: scheduling.k8s.io/v1
 kind: PriorityClass
 metadata:
   name: {{ include "galaxy.pod-priority-class" . }}

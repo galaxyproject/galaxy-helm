@@ -55,7 +55,7 @@ data:
                 include uwsgi_params;
             }
 
-            location {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}_x_accel_redirect {
+            location {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}_x_accel_redirect/ {
                 internal;
                 alias /;
                 add_header X-Frame-Options SAMEORIGIN;

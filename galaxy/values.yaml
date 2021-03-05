@@ -514,7 +514,7 @@ extraFileMappings:
     useSecret: false
     applyToJob: false
     applyToWeb: true
-    applyToWorkflow: true
+    applyToWorkflow: false
     content: |
       <!DOCTYPE html>
       <html lang="en">

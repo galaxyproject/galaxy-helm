@@ -16,11 +16,14 @@ special_cases = {
     'configs': 'configs.*',
     'jobs': 'jobs.rules',
     'extraFileMappings': 'extraFileMappings.*',
-    'ingress.annotations': 'ingress.annotations.*'
+    'ingress.annotations': 'ingress.annotations.*',
+    'jobHandlers':'jobHandlers.*',
+    'webHandlers': 'webHandlers.*',
+    'workflowHandlers': 'workflowHandlers.*',
 }
 
 # Entries that should be ignored.
-ignored = []
+ignored = [ 'cvmfs.data', 'cvmfs.main', 'cvmfs.cache']
 
 longest_key = -1
 longest_desc = -1
@@ -88,6 +91,10 @@ def parse_value(key, value, label=None):
         label = key
     else:
         label = label + "." + key
+
+    if label == 'postgresql':
+        record_key('postgresql.enabled')
+        return
 
     if label in ignored:
         print(f"Ignoring {label}")

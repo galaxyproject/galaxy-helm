@@ -91,4 +91,33 @@ Each of the handlers may have readiness and liveness probes defined.
 | `failureThreshold` | The number of times Kubernetes will retry the probe before giving up. |
 | `timeoutSeconds`   | How long Kubernetes will wait for a probe to timeout. |
 
+### Examples
 
+In Yaml:
+
+```yaml
+  jobHandlers:
+    replicaCount: 5
+    readinessProbe:
+      enabled: true
+      periodSeconds: 10
+      failureThreshold: 5
+      timeoutSeconds: 30
+  ...
+  webHandlers:
+    replicaCount: 1
+    livenessProbe:
+       enabled: true
+       periodSeconds: 5
+       failureThreshold: 5
+       timeoutSeconds: 10
+```
+
+On the command line:
+
+```console
+  --set jobHandlers.replicaCount=5 \
+  --set jobHandlers.readinessProbe.enabled=true \
+  --set jobHandlers.readinessProbe.periodSeconds=10 \
+  ...
+```

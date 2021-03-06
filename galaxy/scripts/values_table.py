@@ -10,6 +10,18 @@ import numbers
 original_values = dict()
 key_list = list()
 
+# These entries typically hold dictionaries of arbitrary keys that should not
+# (can not?) be documented.
+special_cases = {
+    'configs': 'configs.*',
+    'jobs': 'jobs.rules',
+    'extraFileMappings': 'extraFileMappings.*',
+    'ingress.annotations': 'ingress.annotations.*'
+}
+
+# Entries that should be ignored.
+ignored = []
+
 longest_key = -1
 longest_desc = -1
 
@@ -54,6 +66,12 @@ def print_table_row(key):
     else:
         print(f"| {key_quoted.ljust(longest_key)} | {' '.ljust(longest_desc)} |")
 
+def record_key(key):
+    global longest_key
+    if len(key) > longest_key:
+        longest_key = len(key)
+    key_list.append(key)
+
 # Recursively parses entries from the values.yml file so that entry names are
 # flattened.  That is:
 # resource:
@@ -70,15 +88,23 @@ def parse_value(key, value, label=None):
         label = key
     else:
         label = label + "." + key
-    if isinstance(value, str) or isinstance(value, numbers.Number):
-        if len(label) > longest_key:
-            longest_key  = len(label)
-        key_list.append(label)
-    elif isinstance(value, dict):
+
+    if label in ignored:
+        print(f"Ignoring {label}")
+        return
+
+    if label in special_cases:
+        print(f"Will ignore {label} from now on")
+        label = special_cases[label]
+        ignored.append(label)
+        record_key(label)
+        return
+
+    if isinstance(value, dict):
         for k in value:
             parse_value(k, value[k], label)
-    # else:
-    #     print(f"Unhandled type {type(value)}")
+    else:
+        record_key(label)
 
 
 # Kicks off parsing of the values.yml file.
@@ -86,21 +112,14 @@ def parse(yaml_path):
     with open(yaml_path) as f:
         data = yaml.safe_load(f)
         for key in data:
-            if key == 'configs':
-                # print_table_row('configs.*')
-                key_list.append('configs.*')
-            elif key == 'jobs':
-                # print_table_row('jobs.rules')
-                key_list.append('jobs.rules')
-            else:
-                value=data[key]
-                parse_value(key, value)
+            value=data[key]
+            parse_value(key, value)
 
 # Entry point with very basic command line parameter parsing.
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("ERROR: The path to the values.yml file must be provided.")
-        print("USAGE: python values_tabls.py ./path/to/values.yml")
+        print("USAGE: python values_table.py ./path/to/values.yml")
         sys.exit(1)
 
     parse_readme()

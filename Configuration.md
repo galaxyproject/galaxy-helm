@@ -4,7 +4,7 @@ The following table lists the configurable parameters of the Galaxy chart. The
 current default values can be found in `values.yaml` file.
 
 | Parameters                           | Description                                                                                                                                  |
-|--------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
+|:--------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------|
 | `nameOverride`                       | Override the name of the chart used to prefix resource names. Defaults to `{{.Chart.Name}}` (i.e. `galaxy`)                                  |
 | `fullnameOverride`                   |                                                                                                                                              |
 | `image.repository`                   | The repository and name of the Docker image for Galaxy, searches Docker Hub by default                                                       |
@@ -65,14 +65,14 @@ current default values can be found in `values.yaml` file.
 Each of the handlers [`workflowHandlers`, `webHandlers`, and `jobHandler`] share common configurations for `replicaCount`, `priorityClass`, and readiness and liveness probes.
 
 | Parameters | Description |
-|------|-----|
+|:------|:-----|
 | `replicaCount`                    | The number of workflowHandlers to be spawned |
 | priorityClass.enabled |  |
 | priorityClass.existingClass |  |
 
 # Readiness and Liveness Probes
 
-Each of the handler may have readiness and liveness probes defined.
+Each of the handlers may have readiness and liveness probes defined.
 
 | Probes |
 |-----|
@@ -84,10 +84,8 @@ Each of the handler may have readiness and liveness probes defined.
 | workflowHandlers.livenessProbe| |
 
 
-
-
 | Parameters | Description |
-|-----|-----|
+|:-----|:-----|
 | `enabled`          | Set to true to enable the probe. A pod is *ready* when all of the containers in the pod are ready. Handlers that do not respond to the liveness probe will be restarted by Kubernetes. |
 | `periodSeconds`    | How frequently Kubernetes with probe the handler. |
 | `failureThreshold` | The number of times Kubernetes will retry the probe before giving up. |

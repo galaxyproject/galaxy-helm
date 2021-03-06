@@ -123,7 +123,7 @@ helm delete my-galaxy
 
 ## Configuration
 
-See an [alternative layout](Configuration) for the table below.
+See an [alternative layout](Configuration.md) for the table below.
 
 The following table lists the configurable parameters of the Galaxy chart. The
 current default values can be found in `values.yaml` file.

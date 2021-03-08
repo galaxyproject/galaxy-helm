@@ -49,6 +49,7 @@ spec:
               mountPath: {{ .Values.persistence.mountPath }}
         - name: {{ .Chart.Name }}-init-mounts
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ['sh', '-c', {{ include "galaxy.init-container-commands" . | squote }}]
           volumeMounts:
             {{- range $key,$entry := .Values.configs }}

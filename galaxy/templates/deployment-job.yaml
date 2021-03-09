@@ -50,6 +50,7 @@ spec:
               mountPath: {{ $.Values.persistence.mountPath }}
         - name: {{ $.Chart.Name }}-init-mounts
           image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
           command: ['sh', '-c', {{ include "galaxy.init-container-commands" $ | squote }}]
           volumeMounts:
             {{- range $key,$entry := $.Values.configs }}
@@ -66,6 +67,7 @@ spec:
               mountPath: {{ $.Values.persistence.mountPath }}
         - name: {{ $.Chart.Name }}-db-migrations
           image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
           command: ['sh', '-c', '/galaxy/server/manage_db.sh upgrade']
           env:
           {{ include "galaxy.podEnvVars" $ }}

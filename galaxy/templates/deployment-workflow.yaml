@@ -66,9 +66,9 @@ spec:
               mountPath: {{ .Values.persistence.mountPath }}
         {{- if .Values.extraInitContainers -}}
         {{- range $each := .Values.extraInitContainers -}}
-        {{- if $each.applyToJob -}}
+        {{- if $each.applyToWorkflow -}}
         {{- print "- " | nindent 8 -}}
-        {{- tpl ((unset (unset $each "applyToJob") "applyToWeb") | toYaml | indent 10 | trim) $ -}}
+        {{- tpl ((unset (unset $each "applyToWorkflow") "applyToWeb") | toYaml | indent 10 | trim) $ -}}
         {{- end }}
         {{- end }}
         {{- end }}
@@ -118,7 +118,7 @@ spec:
               mountPath: /tmp/probedb.py
               subPath: probedb.py
             {{- range $key, $entry := .Values.extraFileMappings -}}
-            {{- if $entry.applyToJob }}
+            {{- if $entry.applyToWorkflow }}
             - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
               mountPath: {{ $key }}
               subPath: {{ include "galaxy.getFilenameFromPath" $key }}
@@ -165,7 +165,7 @@ spec:
             name: {{ template "galaxy.fullname" . }}-configs
           {{- end }}
         {{- range $key, $entry := .Values.extraFileMappings -}}
-        {{- if $entry.applyToJob }}
+        {{- if $entry.applyToWorkflow }}
         - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
           {{- if $entry.useSecret }}
           secret:

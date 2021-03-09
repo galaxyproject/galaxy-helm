@@ -106,6 +106,7 @@ persistence:
 #   - name: my-first-container
 #     applyToJob: true
 #     applyToWeb: true
+#     applyToWorkflow: true
 #     image: "{{.Values.image.repository}}:{{.Values.image.tag}}"
 #     command: ['sh', '-c', 'cp "/galaxy/server/config/job_conf.xml.sample_advanced" {{.Values.persistence.mountPath}}/']
 #     volumeMounts:
@@ -114,6 +115,7 @@ persistence:
 #   - name: my-second-container
 #     applyToJob: true
 #     applyToWeb: false
+#     applyToWorkflow: true
 #     image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
 #     command: ['sh', '-c', 'cp "/galaxy/server/config/galaxy.yml" {{.Values.persistence.mountPath}}/']
 #     volumeMounts:
@@ -512,6 +514,7 @@ extraFileMappings:
     useSecret: false
     applyToJob: false
     applyToWeb: true
+    applyToWorkflow: false
     content: |
       <!DOCTYPE html>
       <html lang="en">

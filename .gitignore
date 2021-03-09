@@ -93,3 +93,6 @@ ENV/
 *.swo
 
 galaxy/charts/
+
+# IDEs
+.idea

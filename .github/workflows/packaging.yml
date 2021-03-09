@@ -1,6 +1,6 @@
 name: Package
 on:
-  pull_request:
+  pull_request_target:
     types: [closed]
 jobs:
   package:
@@ -14,7 +14,7 @@ jobs:
         with:
           chart-name: galaxy
           charts-repo: cloudve/helm-charts
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.CHARTS_TOKEN }}
           chart-token: ${{ secrets.CHARTS_TOKEN }}
           github-labels: ${{ join(github.event.pull_request.labels.*.name, ', ') }}
           git-branch: ${{ github.event.pull_request.base.ref }}

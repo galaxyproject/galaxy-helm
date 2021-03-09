@@ -13,7 +13,7 @@ jobs:
       - uses: cloudve/helm-ci@bump
         with:
           chart-name: galaxy
-          charts-repo: cloudve/helm-charts
+          charts-repo: almahmoud/helm-charts
           github-token: ${{ secrets.CHARTS_TOKEN }}
           chart-token: ${{ secrets.CHARTS_TOKEN }}
           github-labels: ${{ join(github.event.pull_request.labels.*.name, ', ') }}

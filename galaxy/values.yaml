@@ -427,6 +427,7 @@ jobs:
         - tool_ids:
             - sort1
             - Grouping1
+            - CONVERTER_interval_to_bed_0
           container:
             docker_container_id_override: {{ .Values.image.repository }}:{{ .Values.image.tag }}
             resource_set: small

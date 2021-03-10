@@ -123,15 +123,13 @@ helm delete my-galaxy
 
 ## Configuration
 
-See an [alternative layout](Configuration.md) for the table below.
-
 The following table lists the configurable parameters of the Galaxy chart. The
 current default values can be found in `values.yaml` file.
 
 | Parameters                                                         | Description                                                                                                                                  |
 |--------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
 | `nameOverride`                                                     | Override the name of the chart used to prefix resource names. Defaults to `{{.Chart.Name}}` (i.e. `galaxy`)                                  |
-| `fullnameOverride`                                                 |                                                                                                                                              |
+| `fullnameOverride`                                                 | Override the full name used to prefix resource names. Defaults to {{.Release.Name}}-{{.Values.nameOverride}}                                 |
 | `image.repository`                                                 | The repository and name of the Docker image for Galaxy, searches Docker Hub by default                                                       |
 | `image.tag`                                                        | Galaxy Docker image tag (generally corresponds to the desired Galaxy version)                                                                |
 | `image.pullPolicy`                                                 | Galaxy image [pull policy](https://kubernetes.io/docs/concepts/configuration/overview/#container-images) for more info                       |

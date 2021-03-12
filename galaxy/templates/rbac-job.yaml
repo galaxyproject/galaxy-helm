@@ -5,10 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   name: {{ include "galaxy.fullname" . }}-role-pod-jobs
   labels:
-    app.kubernetes.io/name: {{ include "galaxy.name" . }}
-    helm.sh/chart: {{ include "galaxy.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "galaxy.labels" . | nindent 4 }}
 rules:
 - apiGroups: [""]
   resources: ["pods", "pods/log"]
@@ -22,13 +19,10 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "galaxy.fullname" . }}-batch-ops
   labels:
-    app.kubernetes.io/name: {{ include "galaxy.name" . }}
-    helm.sh/chart: {{ include "galaxy.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "galaxy.labels" . | nindent 4 }}
 subjects:
 - kind: ServiceAccount
-  name: {{ .Values.rbac.serviceAccount }}
+  name: {{ include "galaxy.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: Role

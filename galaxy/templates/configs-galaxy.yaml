@@ -2,10 +2,7 @@ apiVersion: v1
 metadata:
   name: {{ include "galaxy.fullname" . }}-configs
   labels:
-    app.kubernetes.io/name: {{ include "galaxy.name" . }}
-    helm.sh/chart: {{ include "galaxy.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "galaxy.labels" . | nindent 4 }}
 {{- if .Values.useSecretConfigs }}
 kind: Secret
 type: Opaque

@@ -4,9 +4,7 @@ kind: PriorityClass
 metadata:
   name: {{ include "galaxy.pod-priority-class" . }}
   labels:
-    app.kubernetes.io/name: {{ include "galaxy.name" . }}
-    helm.sh/chart: {{ include "galaxy.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "galaxy.labels" . | nindent 4 }}
 value: -1000
 preemptionPolicy: Never
 globalDefault: false

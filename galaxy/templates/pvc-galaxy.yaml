@@ -4,10 +4,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: {{ .Release.Name }}-{{ .Values.persistence.name }}
   labels:
-    app.kubernetes.io/name: {{ include "galaxy.name" . }}
-    helm.sh/chart: {{ include "galaxy.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "galaxy.labels" . | nindent 4 }}
 {{- if .Values.persistence.annotations }}
   annotations:
 {{ toYaml .Values.persistence.annotations | indent 4 }}

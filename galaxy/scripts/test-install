@@ -1,7 +1,0 @@
-#! /usr/bin/env bash
-
-# Run this to time the process of launching galaxy with helm.
-
-# call the helm install script; then wait for localhost to be available
-time ./scripts/install && \
-	time until curl -LkIs localhost | grep -q  "HTTP/2 200"; do echo waiting for localhost; sleep 0.5; done;

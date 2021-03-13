@@ -136,6 +136,8 @@ cp -anL /galaxy/server/config/data_manager_conf.xml.sample /galaxy/server/config
 cp -anL /galaxy/server/config/tool_data_table_conf.xml.sample /galaxy/server/config/mutable/shed_tool_data_table_conf.xml;
 cp -aruL /galaxy/server/tool-data {{.Values.persistence.mountPath}}/;
 cp -aruL /galaxy/server/tools {{.Values.persistence.mountPath}}/tools | true;
+cp -aruL /galaxy/server/lib/galaxy/datatypes/converters {{.Values.persistence.mountPath}}/lib/galaxy/datatypes/converters | true;
+sed 's#converters_path="lib/galaxy/datatypes/converters"#converters_path="{{.Values.persistence.mountPath}}/lib/galaxy/datatypes/converters"#g' /galaxy/server/config/datatypes_conf.xml.sample > /galaxy/server/database/config/datatypes_conf.xml
 {{- end -}}
 
 {{/*

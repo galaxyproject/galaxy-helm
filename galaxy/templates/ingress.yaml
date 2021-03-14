@@ -1,8 +1,8 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "galaxy.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}
-{{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
-apiVersion: networking.k8s.io/v1beta1
+{{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1" }}
+apiVersion: networking.k8s.io/v1
 {{- else -}}
 apiVersion: extensions/v1beta1
 {{- end }}
@@ -33,9 +33,18 @@ spec:
         paths:
           {{- range .paths }}
           - path: {{ .path }}
+            pathType: ImplementationSpecific
+{{- if $.Capabilities.APIVersions.Has "networking.k8s.io/v1" }}
+            backend:
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: {{ $svcPort }}
+{{- else -}}
             backend:
               serviceName: {{ $fullName }}
               servicePort: {{ $svcPort }}
+{{- end }}
           {{- end }}
     {{- end }}
   {{- end }}

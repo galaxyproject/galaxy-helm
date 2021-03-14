@@ -4,10 +4,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: {{ include "galaxy.fullname" . }}-cvmfs-gxy-main-pvc
   labels:
-    app.kubernetes.io/name: {{ include "galaxy.name" . }}
-    helm.sh/chart: {{ include "galaxy.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "galaxy.labels" . | nindent 4 }}
 spec:
   accessModes:
   - ReadOnlyMany

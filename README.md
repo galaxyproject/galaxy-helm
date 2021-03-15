@@ -11,10 +11,9 @@ services (e.g., Amazon EKS and Google GKE).
 
 ## HELM 2 NOTE
 
-While the chart is still compatible with Helm 2, we highly recommend you start
-using Helm 3 since we will not keep supporting Helm 2 going forward.
-For Helm 2 installation, you will need to replace `helm install my-galaxy-release`
-with `helm install --name my-galaxy-release` in all the commands below.
+Support for Helm 2 has been removed and users must upgrade to
+[Helm 3](https://helm.sh/docs/intro/install/) to make use of this chart.
+
 
 ## Introduction
 

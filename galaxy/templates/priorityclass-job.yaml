@@ -1,5 +1,12 @@
-{{ if and .Values.jobHandlers.priorityClass.enabled (not .Values.jobHandlers.priorityClass.existingClass) }}
+{{- if and .Values.jobHandlers.priorityClass.enabled (not .Values.jobHandlers.priorityClass.existingClass) }}
+{{- $k8s_version := .Capabilities.KubeVersion.Version | toString }}
+{{- if semverCompare "^1.17" $k8s_version }}
 apiVersion: scheduling.k8s.io/v1
+{{- else if semverCompare "^1.14" $k8s_version }}
+apiVersion: scheduling.k8s.io/v1beta1
+{{ else }}
+  {{ fail "This chart requires Kubernetes v1.14 or later"}}
+{{- end}}
 kind: PriorityClass
 metadata:
   name: {{ include "galaxy.pod-priority-class" . }}

@@ -37,9 +37,17 @@ spec:
         paths:
           {{- range .paths }}
           - path: {{ .path }}
+            pathType: ImplementationSpecific
             backend:
-              serviceName: {{ $fullName }}
+{{- if semverCompare "^1.19" $k8s_version }}
+              service:
+                name: {{ $fullName }}-nginx
+                port:
+                  number: {{ $servicePort }}
+{{- else }}
+              serviceName: {{ $fullName }}-nginx
               servicePort: {{ $servicePort }}
+{{- end }}
           {{- end }}
     {{- end }}
   {{- end }}

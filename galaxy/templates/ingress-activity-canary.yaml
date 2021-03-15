@@ -43,8 +43,15 @@ spec:
           - path: {{ $ingressPath }}/api/users/
             pathType: Prefix
             backend:
+{{- if semverCompare "^1.19" $k8s_version }}
+              service:
+                name: {{ $fullName }}-nginx
+                port:
+                  number: {{ $servicePort }}
+{{- else }}
               serviceName: {{ $fullName }}-nginx
               servicePort: {{ $servicePort }}
+{{- end }}
     {{- end }}
   {{- end }}
 ---

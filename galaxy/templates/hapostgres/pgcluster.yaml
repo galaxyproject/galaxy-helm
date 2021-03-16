@@ -3,10 +3,7 @@ apiVersion: acid.zalan.do/v1
 kind: postgresql
 metadata:
   labels:
-    app.kubernetes.io/name: {{ include "galaxy.name" $ }}
-    helm.sh/chart: {{ include "galaxy.chart" $ }}
-    app.kubernetes.io/instance: {{ $.Release.Name }}
-    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    {{- include "galaxy.labels" . | nindent 4 }}
     team: galaxy
   name: {{ include "galaxy-postgresql.fullname" . }}
   namespace: {{ .Release.Namespace }}

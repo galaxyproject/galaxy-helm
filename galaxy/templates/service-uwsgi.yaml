@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "galaxy.fullname" . }}-uwsgi
+  labels:
+    {{- include "galaxy.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+  - port: 4001
+    targetPort: galaxy-uwsgi
+    protocol: TCP
+    name: uwsgi
+  selector:
+    app.kubernetes.io/component: galaxy-web-handler
+    {{- include "galaxy.selectorLabels" . | nindent 4 }}

@@ -6,4 +6,4 @@ dependencies:
   repository: https://raw.githubusercontent.com/cloudve/helm-charts/master/
   version: 1.3.2
 digest: sha256:8b5102e874f361207aa96f3dc254626855ef0fe4bf4b547ad23932e2a37bcc27
-generated: "2021-01-28T23:37:57.651525+05:30"
+generated: "2021-03-03T18:46:28.373265+05:30"

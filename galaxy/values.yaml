@@ -10,6 +10,8 @@ image:
   tag: 20.09
   pullPolicy: IfNotPresent
 
+imagePullSecrets: []
+
 service:
   type: ClusterIP
   port: 8000
@@ -76,9 +78,17 @@ metrics:
     tag: 2.0.0
     pullPolicy: IfNotPresent
 
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
 rbac:
   enabled: true
-  serviceAccount: default
 
 securityContext:
   fsGroup: 101
@@ -106,6 +116,7 @@ persistence:
 #   - name: my-first-container
 #     applyToJob: true
 #     applyToWeb: true
+#     applyToWorkflow: true
 #     image: "{{.Values.image.repository}}:{{.Values.image.tag}}"
 #     command: ['sh', '-c', 'cp "/galaxy/server/config/job_conf.xml.sample_advanced" {{.Values.persistence.mountPath}}/']
 #     volumeMounts:
@@ -114,6 +125,7 @@ persistence:
 #   - name: my-second-container
 #     applyToJob: true
 #     applyToWeb: false
+#     applyToWorkflow: true
 #     image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
 #     command: ['sh', '-c', 'cp "/galaxy/server/config/galaxy.yml" {{.Values.persistence.mountPath}}/']
 #     volumeMounts:
@@ -137,9 +149,9 @@ ingress:
     # kubernetes.io/tls-acme: "true"
   path: /galaxy
   hosts:
-    - ~
-    # - host: ~
-    #   paths: ["/"]
+    - host: ~
+      paths:
+        - path: "/"
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
@@ -237,10 +249,10 @@ configs:
         k8s_supplemental_group_id: "101"
         k8s_pull_policy: IfNotPresent
         k8s_cleanup_job: onsuccess
-        k8s_pod_priority_class: >
-          {{ if .Values.jobHandlers.priorityClass.enabled }}
-          {{ include "galaxy.fullname" . }}-job-priority
-          {{ end }}
+        k8s_pod_priority_class: >-
+          {{ if .Values.jobHandlers.priorityClass.enabled -}}
+          {{- include "galaxy.fullname" . }}-job-priority
+          {{- end }}
     handling:
       assign:
         - "db-skip-locked"
@@ -512,6 +524,7 @@ extraFileMappings:
     useSecret: false
     applyToJob: false
     applyToWeb: true
+    applyToWorkflow: false
     content: |
       <!DOCTYPE html>
       <html lang="en">

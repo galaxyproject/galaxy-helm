@@ -4,10 +4,7 @@ kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-galaxy-dashboard
   labels:
-    app.kubernetes.io/name: {{ include "galaxy.name" . }}
-    helm.sh/chart: {{ include "galaxy.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "galaxy.labels" . | nindent 4 }}
     grafana_dashboard: "1"
 data:
   {{- $root := . }}

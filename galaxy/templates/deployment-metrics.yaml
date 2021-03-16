@@ -4,10 +4,7 @@ kind: Deployment
 metadata:
   name: {{ include "galaxy.fullname" . }}-metrics-scraper
   labels:
-    app.kubernetes.io/name: {{ include "galaxy.name" . }}
-    helm.sh/chart: {{ include "galaxy.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "galaxy.labels" . | nindent 4 }}
 {{- with .Values.metrics.annotations }}
   annotations:
 {{ toYaml . | indent 4 }}
@@ -16,25 +13,27 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "galaxy.fullname" . }}
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "galaxy.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: galaxy-metrics
   template:
     metadata:
-      labels:
-        app.kubernetes.io/name: {{ include "galaxy.fullname" . }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
-        app.kubernetes.io/component: galaxy-metrics
-    annotations:
-      {{- with .Values.metrics.podAnnotations -}}
-      {{ toYaml . | nindent 8 }}
+      {{- with .Values.metrics.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
       {{- end }}
+      labels:
+        {{- include "galaxy.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: galaxy-metrics
     spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "galaxy.serviceAccountName" . }}
       {{- with .Values.securityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ .Values.rbac.serviceAccount }}
       {{- if .Values.metrics.podSpecExtra -}}
         {{- tpl (toYaml .Values.metrics.podSpecExtra) . | nindent 6 }}
       {{- end }}

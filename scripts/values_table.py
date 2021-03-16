@@ -17,9 +17,9 @@ special_cases = {
     'jobs': 'jobs.rules',
     'extraFileMappings': 'extraFileMappings.*',
     'ingress.annotations': 'ingress.annotations.*',
-    'jobHandlers':'jobHandlers.*',
-    'webHandlers': 'webHandlers.*',
-    'workflowHandlers': 'workflowHandlers.*',
+    # 'jobHandlers':'jobHandlers.*',
+    # 'webHandlers': 'webHandlers.*',
+    # 'workflowHandlers': 'workflowHandlers.*',
 }
 
 # Entries that should be ignored.
@@ -97,11 +97,11 @@ def parse_value(key, value, label=None):
         return
 
     if label in ignored:
-        print(f"Ignoring {label}")
+        # print(f"Ignoring {label}")
         return
 
     if label in special_cases:
-        print(f"Will ignore {label} from now on")
+        # print(f"Will ignore {label} from now on")
         label = special_cases[label]
         ignored.append(label)
         record_key(label)

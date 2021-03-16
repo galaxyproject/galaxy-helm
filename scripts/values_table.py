@@ -31,9 +31,9 @@ longest_desc = -1
 # Parse current entry descriptions for the README so they can be included in
 # the generated table.  This code is fragile in that it relies on the entry
 # name being surrounded by backticks.
-def parse_readme():
+def parse_readme(readme_path):
     global longest_desc
-    with open("../README.md") as f:
+    with open(readme_path) as f:
         for line in f.readlines():
             line = line.strip()
             if line.startswith('|') and line.find('`') > 0:
@@ -124,11 +124,11 @@ def parse(yaml_path):
 
 # Entry point with very basic command line parameter parsing.
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) != 3:
         print("ERROR: The path to the values.yml file must be provided.")
-        print("USAGE: python values_table.py ./path/to/values.yml")
+        print("USAGE: python3 values_table.py ./path/to/README.md ./path/to/values.yml")
         sys.exit(1)
 
-    parse_readme()
-    parse(sys.argv[1])
+    parse_readme(sys.argv[1])
+    parse(sys.argv[2])
     print_table()

@@ -1,6 +1,6 @@
 image:
-  repository: galaxy/galaxy-k8s
-  tag: 20.01
+  repository: galaxy/galaxy-min
+  tag: 21.01
   pullPolicy: IfNotPresent
 
 webHandlers:

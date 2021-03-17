@@ -7,7 +7,15 @@ import sys
 import yaml
 import numbers
 
-original_values = dict()
+# original_values = dict()
+original_values = {
+    # 'jobHandlers.*': 'Configuration for jobHandlers (see below)',
+    # 'webHandlers.*': 'Configuration for webHandlers',
+    # 'workflowHandlers.*': 'Configuration for workflowHandlers'
+    # 'jobHandlers.priorityClass.enabled': 'jobHandlers.priorityClass.enabled',
+    # 'jobHandlers.priorityClass.existingClass': 'jobHandlers.priorityClass.existingClass'
+}
+
 key_list = list()
 
 # These entries typically hold dictionaries of arbitrary keys that should not
@@ -17,13 +25,16 @@ special_cases = {
     'jobs': 'jobs.rules',
     'extraFileMappings': 'extraFileMappings.*',
     'ingress.annotations': 'ingress.annotations.*',
-    # 'jobHandlers':'jobHandlers.*',
-    # 'webHandlers': 'webHandlers.*',
-    # 'workflowHandlers': 'workflowHandlers.*',
+    'jobHandlers.priorityClass.enabled': 'jobHandlers.priorityClass.enabled',
+    'jobHandlers.priorityClass.existingClass': 'jobHandlers.priorityClass.existingClass',
+    # 'jobHandlers.replicaCount':'jobHandlers.replicaCount',
+    'webHandlers': 'webHandlers.replicaCount',
+    'workflowHandlers': 'workflowHandlers.replicaCount',
 }
 
+
 # Entries that should be ignored.
-ignored = [ 'cvmfs.data', 'cvmfs.main', 'cvmfs.cache']
+ignored = [ 'cvmfs.data', 'cvmfs.main', 'cvmfs.cache', 'jobHandlers.readinessProbe', 'jobHandlers.livenessProbe']
 
 longest_key = -1
 longest_desc = -1
@@ -102,10 +113,12 @@ def parse_value(key, value, label=None):
 
     if label in special_cases:
         # print(f"Will ignore {label} from now on")
-        label = special_cases[label]
-        ignored.append(label)
-        record_key(label)
-        return
+        replacement = special_cases[label]
+        record_key(replacement)
+        if label == 'jobHandlers.replicaCount':
+            ignored.append(label)
+        else:
+            return
 
     if isinstance(value, dict):
         for k in value:

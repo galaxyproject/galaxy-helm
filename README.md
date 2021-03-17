@@ -145,7 +145,7 @@ current default values can be found in `values.yaml` file.
 | `metrics.image.pullPolicy`                | Define the [pull policy](https://kubernetes.io/docs/concepts/containers/images/#updating-images), that is, when Kubernetes will pull the image. |
 | `serviceAccount.create`                   | The serviceAccount will be created if it does not exist.     |
 | `serviceAccount.name`                     | The serviceAccount account to use.                           |
-| `rbac.enabled`                            | Enable Galaxy job RBAC                                       |
+| `rbac.enabled`                            | Enable Galaxy job RBAC. This will grant the service account the necessary permissions/roles to view jobs and pods in this namespace. Defaults to true.  |
 | `securityContext.fsGroup`                 | The [group](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/) for any files created. |
 | `persistence.enabled`                     | Enable persistence using PVC                                 |
 | `persistence.name`                        | Name of the PVC                                              |
@@ -363,4 +363,3 @@ by setting the desired values of the `webHandlers.replicaCount` and
 
 - _Version 1_: European Commission (EC) H2020 Project PhenoMeNal, grant
   agreement number 654241.
-

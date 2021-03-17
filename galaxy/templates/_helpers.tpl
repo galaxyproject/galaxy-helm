@@ -184,8 +184,8 @@ Define pod env vars
 Define pod priority class
 */}}
 {{- define "galaxy.pod-priority-class" -}}
-{{- if .Values.jobHandlers.priorityClass.existingClass -}}
-{{- printf "%s" .Values.jobHandlers.priorityClass.existingClass -}}
+{{- if .Values.jobs.priorityClass.existingClass -}}
+{{- printf "%s" .Values.jobs.priorityClass.existingClass -}}
 {{- else -}}
 {{- printf "%s-job-priority" (include "galaxy.fullname" .) -}}
 {{- end -}}

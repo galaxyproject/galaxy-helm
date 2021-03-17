@@ -64,9 +64,6 @@ jobHandlers:
     periodSeconds: 10
     failureThreshold: 30
     timeoutSeconds: 5
-  priorityClass:
-    enabled: true
-    existingClass: ""
 
 metrics:
   enabled: false
@@ -250,7 +247,7 @@ configs:
         k8s_pull_policy: IfNotPresent
         k8s_cleanup_job: onsuccess
         k8s_pod_priority_class: >-
-          {{ if .Values.jobHandlers.priorityClass.enabled -}}
+          {{ if .Values.jobs.priorityClass.enabled -}}
           {{- include "galaxy.fullname" . }}-job-priority
           {{- end }}
     handling:
@@ -408,6 +405,9 @@ configs:
 
 # Additional dynamic rules to map into the container.
 jobs:
+  priorityClass:
+    enabled: true
+    existingClass: ""
   rules:
     container_mapper_rules.yml: |
       mappings:

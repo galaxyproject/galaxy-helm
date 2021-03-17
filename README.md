@@ -137,8 +137,6 @@ current default values can be found in `values.yaml` file.
 | `workflowHandlers.*`                      | Configuration for the workflowHandlers (See below for all options) |
 | `webHandlers.*`                           | Configuration for the webHandlers                            |
 | `jobHandlers.*`                           | Configuration fo the jobHandlers                             |
-| `jobHandlers.priorityClass.enabled`       | Assign a [priorityClass](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass) to this handler. |
-| `jobHandlers.priorityClass.existingClass` | The [priorityClass](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass) to assign. |
 | `metrics.enabled`                         | Enable metrics gathering.  The influxdb setting must be specified when using this setting.                                  |
 | `metrics.image.repository`                | The location of the [galay-metrics-scraping](https://github.com/CloudVE/galaxy-docker-k8s-metrics) image to use. |
 | `metrics.image.tag`                       | The image version to use.                                    |
@@ -173,6 +171,8 @@ current default values can be found in `values.yaml` file.
 | `useSecretConfigs`                        | Enable Kubernetes Secrets for all config maps                |
 | `configs.*`                               | Galaxy configuration files and values for each of the files. The provided value represent the entire content of the given configuration file |
 | `jobs.rules`                              | Galaxy dynamic job rules                                     |
+| `jobs.priorityClass.enabled`              | Assign a [priorityClass](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass) to the dispatched jobs. |
+| `jobs.priorityClass.existingClass`        | Use an existing [priorityClass](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass) to assign if `jobs.priorityClass.enabled=true` |
 | `extraFileMappings.*`                     | Map arbitrary files as configMaps or Secrets into any of the handlers |
 | `influxdb.enabled`                        | Enable the `influxdb` used by the metrics scraper.           |
 | `influxdb.url`                            | The connection URL to in the `influxdb`                      |

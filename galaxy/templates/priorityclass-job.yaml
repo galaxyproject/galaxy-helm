@@ -1,4 +1,4 @@
-{{- if and .Values.jobHandlers.priorityClass.enabled (not .Values.jobHandlers.priorityClass.existingClass) }}
+{{- if and .Values.jobs.priorityClass.enabled (not .Values.jobs.priorityClass.existingClass) }}
 {{- $k8s_version := .Capabilities.KubeVersion.Version | toString }}
 {{- if semverCompare "^1.17" $k8s_version }}
 apiVersion: scheduling.k8s.io/v1

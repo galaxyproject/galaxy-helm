@@ -133,7 +133,7 @@ current default values can be found in `values.yaml` file.
 | `image.repository`                               | The repository and name of the Docker image for Galaxy, searches Docker Hub by default                                                          |
 | `image.tag`                                      | Galaxy Docker image tag (generally corresponds to the desired Galaxy version)                                                                   |
 | `image.pullPolicy`                               | Galaxy image [pull policy](https://kubernetes.io/docs/concepts/configuration/overview/#container-images) for more info                          |
-| `imagePullSecrets`                               |                                                                                                                                                 |
+| `imagePullSecrets`                               | Secrets used to [access a Galaxy image from a private repository](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/)     |
 | `service.type`                                   | Kubernetes [Service type](https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types)                   |
 | `service.port`                                   | Kubernetes service port                                                                                                                         |
 | `service.nodePort`                               | If `service.type` is set to `NodePort`, then this can be used to set the port at which Galaxy will be available on all nodes' IP addresses      |
@@ -148,7 +148,7 @@ current default values can be found in `values.yaml` file.
 | `workflowHandlers.livenessProbe.timeoutSeconds`  | How long Kubernetes will wait for a liveness probe to timeout.                                                                                  |
 | `webHandlers.replicaCount`                       | The number of replicas for the Galaxy web handlers                                                                                              |
 | `webHandlers.readinessProbe.enabled`             | Readiness probe configuration for the webHandlers                                                                                               |
-| `webHandlers.readinessProbe.periodSeconds`       |                                                                                                                                                 |
+| `webHandlers.readinessProbe.periodSeconds`       | How frequently Kubernetes with check if the web handlers are ready.                                                                         |
 | `webHandlers.readinessProbe.failureThreshold`    |                                                                                                                                                 |
 | `webHandlers.readinessProbe.timeoutSeconds`      |                                                                                                                                                 |
 | `webHandlers.livenessProbe.enabled`              | Liveness probe configuration for the webHandlers.                                                                                               |
@@ -185,8 +185,8 @@ current default values can be found in `values.yaml` file.
 | `ingress.canary.enabled`                         | Enable [canary](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#canary) ingress.                         |
 | `ingress.annotations.*`                          | Annotations that can be defined to configure an ingress controller.                                                                             |
 | `ingress.path`                                   | Path where Galaxy application will be hosted                                                                                                    |
-| `ingress.hosts`                                  |                                                                                                                                                 |
-| `ingress.tls`                                    |                                                                                                                                                 |
+| `ingress.hosts`                                  | Hosts for the Galaxy ingress                                                                                              |
+| `ingress.tls`                                    | Ingress configuration with HTTPS support                                                                                                                                                 |
 | `resources.requests.cpu`                         | The requested amount of CPU (as time or number of cores)                                                                                        |
 | `resources.requests.memory`                      | The requested amount of memory.                                                                                                                 |
 | `resources.requests.ephemeral-storage`           | The requested amount of ephemeral storage                                                                                                       |
@@ -200,7 +200,7 @@ current default values can be found in `values.yaml` file.
 | `useSecretConfigs`                               | Enable Kubernetes Secrets for all config maps                                                                                                   |
 | `configs.*`                                      | Galaxy configuration files and values for each of the files. The provided value represent the entire content of the given configuration file    |
 | `jobs.rules`                                     | Galaxy dynamic job rules                                                                                                                        |
-| `extraFileMappings.*`                            |                                                                                                                                                 |
+| `extraFileMappings.*`                            | Map arbitrary files as configMaps or Secrets into any of the handlers                                                     |
 | `influxdb.enabled`                               | Enable the `influxdb` used by the metrics scraper.                                                                                              |
 | `influxdb.url`                                   | The connection URL to in the `influxdb`                                                                                                         |
 | `influxdb.username`                              | Influxdb user name.                                                                                                                             |

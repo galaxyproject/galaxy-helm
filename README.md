@@ -139,7 +139,7 @@ current default values can be found in `values.yaml` file.
 | `jobHandlers.*`                           | Configuration fo the jobHandlers                             |
 | `jobHandlers.priorityClass.enabled`       | Assign a [priorityClass](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass) to this handler. |
 | `jobHandlers.priorityClass.existingClass` | The [priorityClass](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass) to assign. |
-| `metrics.enabled`                         | Enable metrics gathering.                                    |
+| `metrics.enabled`                         | Enable metrics gathering.  The influxdb setting must be specified when using this setting.                                  |
 | `metrics.image.repository`                | The location of the [galay-metrics-scraping](https://github.com/CloudVE/galaxy-docker-k8s-metrics) image to use. |
 | `metrics.image.tag`                       | The image version to use.                                    |
 | `metrics.image.pullPolicy`                | Define the [pull policy](https://kubernetes.io/docs/concepts/containers/images/#updating-images), that is, when Kubernetes will pull the image. |
@@ -155,7 +155,7 @@ current default values can be found in `values.yaml` file.
 | `extraInitCommands`                       | Extra commands that will be run during initialization.       |
 | `extraEnv`                                | Environment variables that will be defined                   |
 | `ingress.enabled`                         | Enable Kubernetes ingress                                    |
-| `ingress.canary.enabled`                  | Enable [canary](https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#canary) ingress. |
+| `ingress.canary.enabled`                  | This will create an additional ingress for detecting activity on Galaxy. Useful for autoscaling on activity. |
 | `ingress.annotations.*`                   | Annotations that can be defined to configure an ingress controller. |
 | `ingress.path`                            | Path where Galaxy application will be hosted                 |
 | `ingress.hosts`                           | Hosts for the Galaxy ingress                                 |

@@ -51,8 +51,8 @@ spec:
           - name: PGPASSWORD
             valueFrom:
               secretKeyRef:
-                name: "{{ .Release.Name }}-galaxy-secrets"
-                key: galaxy-db-password
+                name: '{{ include "galaxy.galaxyDbSecretName" . }}'
+                key: '{{ include "galaxy.galaxyDbSecretKey" . }}'
           - name: INFLUX_URL
             value: "{{ .Values.influxdb.url }}"
           - name: INFLUX_DB

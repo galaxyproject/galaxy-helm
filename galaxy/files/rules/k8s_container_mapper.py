@@ -57,7 +57,9 @@ def _process_tool_mapping(mapping, params):
 
 def _apply_rule_mappings(tool, params):
     if CONTAINER_RULE_MAP:
-        for group_name, mapping in CONTAINER_RULE_MAP.get('mappings', {}).items():
+        for mapping in CONTAINER_RULE_MAP.get('mappings', {}):
+            if isinstance(mapping, str):
+                mapping = CONTAINER_RULE_MAP.get('mappings', {}).get(mapping)
             for mapped_tool_id in mapping.get('tool_ids'):
                 if re.match(mapped_tool_id, tool.id):
                     _process_tool_mapping(mapping, params)

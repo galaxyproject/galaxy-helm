@@ -89,7 +89,7 @@ def k8s_container_mapper(tool, referrer, k8s_runner_id="k8s"):
         # 3. If no explicit rule mapping was defined, and it's a tool that
         #    requires galaxy_lib, force the default container. Otherwise,
         #    Galaxy's default container resolution will apply.
-        if tool.id in GALAXY_LIB_TOOLS_UNVERSIONED:
+        if tool.id in GALAXY_LIB_TOOLS_UNVERSIONED or "CONVERTER_" in tool.id:
             default_container = params.get('docker_default_container_id')
             if default_container:
                 params['docker_container_id_override'] = default_container

@@ -1,1 +1,0 @@
-Any files found in this directory will be injected as config maps.

@@ -173,6 +173,9 @@ affinity: {}
 
 postgresql:
   enabled: true
+  # Whether to deploy the postgresl operator. In general, we recommend installing the operator
+  # globally.
+  deploy: false
   # hostname and port of an existing database to use.
   existingDatabase:
   galaxyDatabaseUser: galaxydbuser
@@ -183,15 +186,8 @@ postgresql:
   operator:
     operatorSpecExtra:
   nameOverride: galaxy-postgres
-  initdbScriptsSecret: "{{ .Release.Name }}-galaxy-initdb"
   persistence:
     enabled: true
-  extraEnv:
-  - name: GALAXY_DB_USER_PASSWORD
-    valueFrom:
-      secretKeyRef:
-        name: '{{default (printf "%s-galaxy-secrets" .Release.Name) .Values.galaxyExistingSecret}}'
-        key: '{{default "galaxy-db-password" .Values.galaxyExistingSecretKeyRef}}'
 
 cvmfs:
   enabled: false

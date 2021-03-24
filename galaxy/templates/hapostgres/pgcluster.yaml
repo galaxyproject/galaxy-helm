@@ -1,4 +1,4 @@
-{{- if not (or .Values.postgresql.enabled .Values.postgresql.existingDatabase) }}
+{{- if and .Values.postgresql.enabled (not .Values.postgresql.existingDatabase) }}
 apiVersion: acid.zalan.do/v1
 kind: postgresql
 metadata:
@@ -19,6 +19,9 @@ spec:
     version: '13'
   volume:
     size: {{ default "10Gi" .Values.postgresql.persistence.size }}
+    {{- if .Values.postgresql.persistence.storageClass }}
+    storageClass: {{ .Values.postgresql.persistence.storageClass }}
+    {{- end }}
   {{- if and .Values.postgresql.operator .Values.postgresql.operator.operatorSpecExtra -}}
   {{- tpl (toYaml .Values.postgresql.operator.operatorSpecExtra) . | nindent 2 }}
   {{- end }}

@@ -22,6 +22,11 @@ workflowHandlers:
   annotations: {}
   podAnnotations: {}
   podSpecExtra: {}
+  startupProbe:
+    initialDelaySeconds: 15
+    periodSeconds: 5
+    failureThreshold: 40
+    timeoutSeconds: 5
   readinessProbe:
     enabled: true
     periodSeconds: 10
@@ -38,6 +43,11 @@ webHandlers:
   annotations: {}
   podAnnotations: {}
   podSpecExtra: {}
+  startupProbe:
+    initialDelaySeconds: 15
+    periodSeconds: 5
+    failureThreshold: 40
+    timeoutSeconds: 5
   readinessProbe:
     enabled: true
     periodSeconds: 10
@@ -54,6 +64,11 @@ jobHandlers:
   annotations: {}
   podAnnotations: {}
   podSpecExtra: {}
+  startupProbe:
+    initialDelaySeconds: 15
+    periodSeconds: 5
+    failureThreshold: 40
+    timeoutSeconds: 5
   readinessProbe:
     enabled: true
     periodSeconds: 10

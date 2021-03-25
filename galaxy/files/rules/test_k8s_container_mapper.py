@@ -21,7 +21,7 @@ class ContainerMapperTest(unittest.TestCase):
         k8s_container_mapper.CONTAINER_RULE_MAP = yaml.safe_load(rule_map)
 
     def test_existing_tool_map_small_works(self):
-        RULE_MAP_SMALL = '''
+        RULE_MAP_SMALL_OLD = '''
           mappings:
             - tool_ids:
                 - sort1
@@ -40,6 +40,43 @@ class ContainerMapperTest(unittest.TestCase):
                   memory: 1G
             default_resource_set: small
         '''
+
+        self.patch_mapper(RULE_MAP_SMALL_OLD)
+
+        destination = k8s_container_mapper.k8s_container_mapper(
+            ContainerMapperTest.Tool('sort1'),
+            ContainerMapperTest.Referrer())
+        assert(destination.params.get(
+            'docker_container_id_override') == 'test_container')
+        assert (destination.params.get(
+            'requests_cpu') == 1)
+        assert (destination.params.get(
+            'requests_memory') == '500m')
+        assert (destination.params.get(
+            'limits_cpu') == 2)
+        assert (destination.params.get(
+            'limits_memory') == '1G')
+
+        RULE_MAP_SMALL = '''
+          mappings:
+            set_small:
+              tool_ids:
+                - sort1
+                - Grouping1
+              docker_container_id_override: test_container
+              resource_set: small
+          resources:
+            resource_sets:
+              small:
+                requests:
+                  cpu: 1
+                  memory: 500m
+                limits:
+                  cpu: 2
+                  memory: 1G
+            default_resource_set: small
+        '''
+
         self.patch_mapper(RULE_MAP_SMALL)
 
         destination = k8s_container_mapper.k8s_container_mapper(
@@ -57,7 +94,7 @@ class ContainerMapperTest(unittest.TestCase):
             'limits_memory') == '1G')
 
     def test_existing_tool_map_medium_works(self):
-        RULE_MAP_MEDIUM = '''
+        RULE_MAP_MEDIUM_OLD = '''
           mappings:
             - tool_ids:
                 - sort1
@@ -81,6 +118,47 @@ class ContainerMapperTest(unittest.TestCase):
                   memory: 2G
             default_resource_set: small
         '''
+
+        self.patch_mapper(RULE_MAP_MEDIUM_OLD)
+
+        destination = k8s_container_mapper.k8s_container_mapper(
+            ContainerMapperTest.Tool('Grouping1'),
+            ContainerMapperTest.Referrer())
+        assert(destination.params.get(
+            'docker_container_id_override') == 'test_container')
+        assert (destination.params.get(
+            'requests_cpu') == 1)
+        assert (destination.params.get(
+            'requests_memory') == '1G')
+        assert (destination.params.get(
+            'limits_cpu') == 2)
+        assert (destination.params.get(
+            'limits_memory') == '2G')
+
+        RULE_MAP_MEDIUM = '''
+          mappings:
+              tool_ids:
+                - sort1
+                - Grouping1
+              docker_container_id_override: test_container
+              resource_set: medium_mem
+          resources:
+            resource_sets:
+              small:
+                requests:
+                  cpu: 1
+                  memory: 500m
+                limits:
+                  cpu: 2
+                  memory: 1G
+              medium_mem:
+                requests:
+                  memory: 1G
+                limits:
+                  memory: 2G
+            default_resource_set: small
+        '''
+
         self.patch_mapper(RULE_MAP_MEDIUM)
 
         destination = k8s_container_mapper.k8s_container_mapper(
@@ -100,12 +178,12 @@ class ContainerMapperTest(unittest.TestCase):
     def test_nonexisting_tool_resource(self):
         RULE_MAP_RESOURCE_NOTEXIST = '''
           mappings:
-            - tool_ids:
+            non_existent:
+              tool_ids:
                 - sort1
                 - Grouping1
-              container:
-                docker_container_id_override: test_container
-                resource_set: non_existent
+              docker_container_id_override: test_container
+              resource_set: non_existent
           resources:
             resource_sets:
               small:
@@ -136,12 +214,12 @@ class ContainerMapperTest(unittest.TestCase):
     def test_nonexisting_tool(self):
         RULE_MAP_TOOL_NOTEXIST = '''
           mappings:
-            - tool_ids:
+            non_existent:
+              tool_ids:
                 - sort1
                 - Grouping1
-              container:
-                docker_container_id_override: test_container
-                resource_set: non_existent
+              docker_container_id_override: test_container
+              resource_set: non_existent
           resources:
             resource_sets:
               small:
@@ -175,7 +253,7 @@ class ContainerMapperTest(unittest.TestCase):
             'limits_memory') == '1G')
 
     def test_no_resource_mappings(self):
-        RULE_MAP_NO_RESOURCES = '''
+        RULE_MAP_NO_RESOURCES_OLD = '''
           mappings:
             - tool_ids:
                 - sort1
@@ -183,7 +261,7 @@ class ContainerMapperTest(unittest.TestCase):
               container:
                 docker_container_id_override: test_container
         '''
-        self.patch_mapper(RULE_MAP_NO_RESOURCES)
+        self.patch_mapper(RULE_MAP_NO_RESOURCES_OLD)
 
         destination = k8s_container_mapper.k8s_container_mapper(
             ContainerMapperTest.Tool('sort1'),
@@ -194,10 +272,10 @@ class ContainerMapperTest(unittest.TestCase):
     def test_regex_mappings(self):
         RULE_MAP_REGEX = '''
           mappings:
-            - tool_ids:
+            regex:
+              tool_ids:
                 - .*data_manager_sam_fasta_index_builder/sam_fasta_index_builder/.*
-              container:
-                docker_container_id_override: test_container
+              docker_container_id_override: test_container
         '''
         self.patch_mapper(RULE_MAP_REGEX)
 

@@ -89,6 +89,15 @@ spec:
              {{- end -}}
              /galaxy/server/.venv/bin/uwsgi --yaml /galaxy/server/config/uwsgi.yml --set galaxy_config_file=/galaxy/server/config/galaxy.yml']
           args: []
+          {{- if .Values.webHandlers.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}api/version
+              port: 8080
+            initialDelaySeconds: {{ .Values.webHandlers.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.webHandlers.startupProbe.periodSeconds }}
+            failureThreshold: {{ .Values.webHandlers.startupProbe.failureThreshold }}
+            timeoutSeconds: {{ .Values.webHandlers.startupProbe.failureThreshold }}
           {{- if .Values.webHandlers.readinessProbe.enabled }}
           readinessProbe:
             httpGet:

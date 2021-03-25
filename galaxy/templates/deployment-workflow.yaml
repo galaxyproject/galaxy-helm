@@ -86,6 +86,27 @@ spec:
              {{- end -}}
              python /galaxy/server/scripts/galaxy-main -c /galaxy/server/config/galaxy.yml --server-name workflow_scheduler0']
           args: []
+          {{- if .Values.workflowHandlers.startupProbe.enabled }}
+          startupProbe:
+            exec:
+              command: [
+                'sh', '-c',
+                'python /tmp/probedb.py -e $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -o $POD_NAME'
+              ]
+            initialDelaySeconds: {{ .Values.workflowHandlers.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.workflowHandlers.startupProbe.periodSeconds }}
+            failureThreshold: {{ .Values.workflowHandlers.startupProbe.failureThreshold }}
+            timeoutSeconds: {{ .Values.workflowHandlers.startupProbe.failureThreshold }}
+          livenessProbe:
+            exec:
+              command: [
+                'sh', '-c',
+                'python /tmp/probedb.py -e $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -o $POD_NAME'
+              ]
+            initialDelaySeconds: {{ .Values.workflowHandlers.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.workflowHandlers.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.workflowHandlers.livenessProbe.failureThreshold }}
+            timeoutSeconds: {{ .Values.workflowHandlers.livenessProbe.failureThreshold }}
           {{- if .Values.workflowHandlers.readinessProbe.enabled }}
           readinessProbe:
             exec:

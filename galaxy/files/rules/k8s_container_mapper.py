@@ -75,6 +75,9 @@ def _get_default_resource_set_name():
 def k8s_container_mapper(tool, referrer, k8s_runner_id="k8s"):
     params = dict(referrer.params)
     params['docker_enabled'] = True
+    # For backwards compatibility: unnest parameters under "container"
+    cont_map = params.pop("container", {})
+    params.update(cont_map)
     # 1. First, apply the default resource set (if defined) as job params.
     #    These will be overridden later by individual tool mappings.
     default_resource_set_name = _get_default_resource_set_name()

@@ -407,36 +407,37 @@ jobs:
   rules:
     container_mapper_rules.yml: |
       mappings:
-        - tool_ids:
+        summary_stats:
+          tool_ids:
             - Summary_Statistics1
-          container:
-            docker_container_id_override: cloudve/gsummary:latest
-            resource_set: small
-        - tool_ids:
+          docker_container_id_override: cloudve/gsummary:latest
+          resource_set: small
+        sam_fasta_dm:
+          tool_ids:
             - toolshed.g2.bx.psu.edu/repos/devteam/data_manager_sam_fasta_index_builder/sam_fasta_index_builder/.*
-          container:
-            docker_container_id_override: cloudve/sam-fasta-dm:latest
-            resource_set: small
-        - tool_ids:
+          docker_container_id_override: cloudve/sam-fasta-dm:latest
+          resource_set: small
+        bwa_dm:
+          tool_ids:
             - toolshed.g2.bx.psu.edu/repos/devteam/data_manager_bwa_mem_index_builder/bwa_mem_index_builder_data_manager/.*
-          container:
-            docker_container_id_override: cloudve/bwa-dm:latest
-            resource_set: small
-        - tool_ids:
+          docker_container_id_override: cloudve/bwa-dm:latest
+          resource_set: small
+        prokka:
+          tool_ids:
             - toolshed.g2.bx.psu.edu/repos/crs4/prokka/prokka/1.14.5
-          container:
-            docker_container_id_override: cloudve/prokka:1.14.5
-        - tool_ids:
+          docker_container_id_override: cloudve/prokka:1.14.5
+        jbrowse:
+          tool_ids:
             - toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.5+galaxy6
-          container:
-            docker_container_id_override: cloudve/jbrowse:1.16.5
-        - tool_ids:
+          docker_container_id_override: cloudve/jbrowse:1.16.5
+        lib_galaxy:
+          tool_ids:
             - sort1
             - Grouping1
-          container:
-            docker_container_id_override: {{ .Values.image.repository }}:{{ .Values.image.tag }}
-            resource_set: small
-        - tool_ids:
+          docker_container_id_override: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          resource_set: small
+        set_medium:
+          tool_ids:
             - toolshed.g2.bx.psu.edu/repos/devteam/bowtie2/bowtie2/.*
             - toolshed.g2.bx.psu.edu/repos/iuc/bwameth/bwameth/.*
             - toolshed.g2.bx.psu.edu/repos/iuc/featurecounts/featurecounts/.*
@@ -444,9 +445,9 @@ jobs:
             - toolshed.g2.bx.psu.edu/repos/iuc/valet/valet/.*
             - toolshed.g2.bx.psu.edu/repos/iuc/varscan_somatic/varscan_somatic/.*
             - toolshed.g2.bx.psu.edu/repos/nilesh/rseqc/rseqc_bam2wig/.*
-          container:
-            resource_set: medium
-        - tool_ids:
+          resource_set: medium
+        set_large:
+          tool_ids:
             - toolshed.g2.bx.psu.edu/repos/devteam/bwa/bwa_mem/.*
             - toolshed.g2.bx.psu.edu/repos/devteam/bwa/bwa/.*
             - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_bam_compare/deeptools_bam_compare/.*
@@ -462,18 +463,17 @@ jobs:
             - toolshed.g2.bx.psu.edu/repos/iuc/rgrnastar/rna_star/.*
             - toolshed.g2.bx.psu.edu/repos/iuc/rnaspades/rnaspades/.*
             - toolshed.g2.bx.psu.edu/repos/iuc/sra_tools/fasterq_dump/.*
-          container:
-            resource_set: large
-        - tool_ids:
+          resource_set: large
+        set_2xlarge:
+          tool_ids:
             - toolshed.g2.bx.psu.edu/repos/iuc/unicycler/unicycler/.*
             - toolshed.g2.bx.psu.edu/repos/nml/spades/spades/.*
-          container:
-            resource_set: 2xlarge
-        - tool_ids:
+          resource_set: 2xlarge
+        set_mlarge:
+          tool_ids:
             - toolshed.g2.bx.psu.edu/repos/iuc/minimap2/minimap2/.*
             - toolshed.g2.bx.psu.edu/repos/iuc/plink/plink/.*
-          container:
-            resource_set: mlarge
+          resource_set: mlarge
       resources:
         resource_sets:
           small:

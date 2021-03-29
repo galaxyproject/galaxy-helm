@@ -119,6 +119,7 @@ spec:
             periodSeconds: {{ $.Values.jobHandlers.startupProbe.periodSeconds }}
             failureThreshold: {{ $.Values.jobHandlers.startupProbe.failureThreshold }}
             timeoutSeconds: {{ $.Values.jobHandlers.startupProbe.failureThreshold }}
+          {{- end }}
           {{- if $.Values.jobHandlers.readinessProbe.enabled }}
           readinessProbe:
             exec:

@@ -23,6 +23,7 @@ workflowHandlers:
   podAnnotations: {}
   podSpecExtra: {}
   startupProbe:
+    enabled: true
     initialDelaySeconds: 15
     periodSeconds: 5
     failureThreshold: 40
@@ -44,6 +45,7 @@ webHandlers:
   podAnnotations: {}
   podSpecExtra: {}
   startupProbe:
+    enabled: true
     initialDelaySeconds: 15
     periodSeconds: 5
     failureThreshold: 40
@@ -65,6 +67,7 @@ jobHandlers:
   podAnnotations: {}
   podSpecExtra: {}
   startupProbe:
+    enabled: true
     initialDelaySeconds: 15
     periodSeconds: 5
     failureThreshold: 40

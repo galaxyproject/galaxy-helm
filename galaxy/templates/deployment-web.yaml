@@ -98,6 +98,7 @@ spec:
             periodSeconds: {{ .Values.webHandlers.startupProbe.periodSeconds }}
             failureThreshold: {{ .Values.webHandlers.startupProbe.failureThreshold }}
             timeoutSeconds: {{ .Values.webHandlers.startupProbe.failureThreshold }}
+          {{- end }}
           {{- if .Values.webHandlers.readinessProbe.enabled }}
           readinessProbe:
             httpGet:

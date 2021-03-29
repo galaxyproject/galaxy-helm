@@ -107,6 +107,7 @@ spec:
             periodSeconds: {{ .Values.workflowHandlers.livenessProbe.periodSeconds }}
             failureThreshold: {{ .Values.workflowHandlers.livenessProbe.failureThreshold }}
             timeoutSeconds: {{ .Values.workflowHandlers.livenessProbe.failureThreshold }}
+          {{- end }}
           {{- if .Values.workflowHandlers.readinessProbe.enabled }}
           readinessProbe:
             exec:

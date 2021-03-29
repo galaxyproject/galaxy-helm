@@ -12,7 +12,7 @@ spec:
   databases:
     galaxy: {{ .Values.postgresql.galaxyDatabaseUser }}
   numberOfInstances: 1
-  teamId: galaxy
+  teamId: {{ include "galaxy-postgresql.teamId" . }}
   users:
     {{ .Values.postgresql.galaxyDatabaseUser }}: [ ]
   postgresql:

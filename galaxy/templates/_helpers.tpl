@@ -62,13 +62,20 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
+Define TeamID for the postgresql name
+*/}}
+{{- define "galaxy-postgresql.teamId" -}}
+{{- printf "%s" .Chart.Name -}}
+{{- end }}
+
+{{/*
 Return the postgresql database name to use
 */}}
 {{- define "galaxy-postgresql.fullname" -}}
 {{- if .Values.postgresql.existingDatabase -}}
 {{- printf "%s" .Values.postgresql.existingDatabase -}}
 {{- else -}}
-{{- printf "%s-%s" .Release.Name .Values.postgresql.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-%s-%s" (include "galaxy-postgresql.teamId" .) .Release.Name .Values.postgresql.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
 

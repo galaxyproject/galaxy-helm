@@ -113,12 +113,12 @@ spec:
             exec:
               command: [
                 'sh', '-c',
-                'python /tmp/probedb.py -e $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -o $POD_NAME'
+                'python /tmp/probedb.py -c $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -s job_handler_{{ $handler_num }} -o $HOSTNAME'
               ]
             initialDelaySeconds: {{ $.Values.jobHandlers.startupProbe.initialDelaySeconds }}
             periodSeconds: {{ $.Values.jobHandlers.startupProbe.periodSeconds }}
             failureThreshold: {{ $.Values.jobHandlers.startupProbe.failureThreshold }}
-            timeoutSeconds: {{ $.Values.jobHandlers.startupProbe.failureThreshold }}
+            timeoutSeconds: {{ $.Values.jobHandlers.startupProbe.timeoutSeconds }}
           {{- end }}
           {{- if $.Values.jobHandlers.readinessProbe.enabled }}
           readinessProbe:
@@ -130,7 +130,7 @@ spec:
             initialDelaySeconds: {{ $.Values.jobHandlers.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ $.Values.jobHandlers.readinessProbe.periodSeconds }}
             failureThreshold: {{ $.Values.jobHandlers.readinessProbe.failureThreshold }}
-            timeoutSeconds: {{ $.Values.jobHandlers.readinessProbe.failureThreshold }}
+            timeoutSeconds: {{ $.Values.jobHandlers.readinessProbe.timeoutSeconds }}
           {{- end }}
           {{- if $.Values.jobHandlers.livenessProbe.enabled }}
           livenessProbe:
@@ -142,7 +142,7 @@ spec:
             initialDelaySeconds: {{ $.Values.jobHandlers.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ $.Values.jobHandlers.livenessProbe.periodSeconds }}
             failureThreshold: {{ $.Values.jobHandlers.livenessProbe.failureThreshold }}
-            timeoutSeconds: {{ $.Values.jobHandlers.livenessProbe.failureThreshold }}
+            timeoutSeconds: {{ $.Values.jobHandlers.livenessProbe.timeoutSeconds }}
           {{- end }}
           volumeMounts:
             - name: extra-files-probe-script

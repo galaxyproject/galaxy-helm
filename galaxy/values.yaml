@@ -197,9 +197,9 @@ affinity: {}
 
 postgresql:
   enabled: true
-  # Whether to deploy the postgresl operator. In general, we recommend installing the operator
-  # globally.
-  deploy: false
+  # Whether to deploy the postgresl operator.
+  # In general, we recommend installing the operator globally in production.
+  deploy: true
   # hostname and port of an existing database to use.
   existingDatabase:
   galaxyDatabaseUser: galaxydbuser

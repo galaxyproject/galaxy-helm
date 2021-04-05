@@ -118,16 +118,20 @@ persistence:
   size: 10Gi
   mountPath: /galaxy/server/database
 
-# extraVolumes:
+extraVolumes: []
 #   - name: shared-data
 #     persistentVolumeClaim:
 #       claimName: shared-data-pvc
 
-# extraVolumeMounts:
+extraVolumeMounts: []
 #   - name: shared-data
 #     mountPath: /mnt/project/shared-data
 
-# extraInitContainers:
+initContainers:
+  mainHandler: "web" # valid values are "web" "job" or "workflow"
+  createDatabase: true
+
+extraInitContainers: []
 #   - name: my-first-container
 #     applyToJob: true
 #     applyToWeb: true
@@ -147,7 +151,7 @@ persistence:
 #       - name: galaxy-data
 #         mountPath: "{{.Values.persistence.mountPath}}"
 
-extraInitCommands: |
+extraInitCommands: ""
 #  echo "Running extra mapped script. Influx enabled = {{ .Values.influxdb.enabled }}";
 #  /galaxy/server/extra/mapped/script.sh
 

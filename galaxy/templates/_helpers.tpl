@@ -195,6 +195,76 @@ Define pod env vars
                   key: "galaxy-config-id-secret"
 {{- end -}}
 
+
+{{/*
+Define necessary init containers
+*/}}
+{{- define "galaxy.mainInitContainers" -}}
+        - name: {{ .Chart.Name }}-init-mounts
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ['sh', '-c', {{ include "galaxy.init-container-commands" . | squote }}]
+          volumeMounts:
+            {{- range $key,$entry := .Values.configs }}
+            {{ if $entry -}}
+            - name: galaxy-conf-files
+              mountPath: /galaxy/server/config/{{ $key }}
+              subPath: {{ $key }}
+            {{- end -}}
+            {{- end }}
+            - name: galaxy-data
+              mountPath: {{ .Values.persistence.mountPath }}
+            - name: galaxy-data
+              mountPath: /galaxy/server/config/mutable/
+              subPath: config
+        - name: {{ .Chart.Name }}-init-postgres
+          image: alpine:3.7
+          command: ['sh', '-c', 'chown 101:101 {{ .Values.persistence.mountPath }}; until nc -z -w3 {{ template "galaxy-postgresql.fullname" . }} 5432; do echo waiting for galaxy-postgres service; sleep 1; done;']
+        - name: {{ .Chart.Name }}-db-init
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.initContainers.createDatabase }}
+          command: ['sh', '-c', 'if [ -f /galaxy/server/config/mutable/db_init_done ]; then /galaxy/server/manage_db.sh upgrade; else (/galaxy/server/create_db.sh && touch /galaxy/server/config/mutable/db_init_done;) fi']
+          {{- else }}
+          command: ['sh', '-c', '/galaxy/server/manage_db.sh upgrade && touch /galaxy/server/config/mutable/db_init_done;']
+          {{- end }}
+          env:
+          {{ include "galaxy.podEnvVars" . }}
+          volumeMounts:
+            {{- range $key, $entry := .Values.extraFileMappings -}}
+            {{- if $entry.applyToJob }}
+            - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
+              mountPath: {{ $key }}
+              subPath: {{ include "galaxy.getFilenameFromPath" $key }}
+            {{- end }}
+            {{- end }}
+            {{- range $key,$entry := .Values.configs }}
+            {{ if $entry -}}
+            - name: galaxy-conf-files
+              mountPath: /galaxy/server/config/{{ $key }}
+              subPath: {{ $key }}
+            {{- end -}}
+            {{- end }}
+            {{- range $key,$entry := .Values.jobs.rules }}
+            - name: galaxy-job-rules
+              mountPath: /galaxy/server/lib/galaxy/jobs/rules/{{ $key }}
+              subPath: {{ $key }}
+            {{- end }}
+            - name: galaxy-data
+              mountPath: /galaxy/server/config/mutable/
+              subPath: config
+            {{- if .Values.cvmfs.enabled }}
+            - name: cvmfs-gxy-main
+              mountPath: {{ .Values.cvmfs.main.mountPath }}
+            - name: cvmfs-gxy-data
+              mountPath: {{ .Values.cvmfs.data.mountPath }}
+            {{- end }}
+            {{- if .Values.extraVolumeMounts }}
+            {{- .Values.extraVolumeMounts | toYaml | nindent 12 }}
+            {{- end }}
+{{- end -}}
+
+
 {{/*
 Define pod priority class
 */}}

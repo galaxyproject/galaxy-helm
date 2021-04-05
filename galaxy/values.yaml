@@ -19,6 +19,7 @@ service:
 
 workflowHandlers:
   replicaCount: 1
+  startupDelay: 10 # used to avoid race conditions
   annotations: {}
   podAnnotations: {}
   podSpecExtra: {}
@@ -41,6 +42,7 @@ workflowHandlers:
 
 webHandlers:
   replicaCount: 1
+  startupDelay: 0 # used to avoid race conditions
   annotations: {}
   podAnnotations: {}
   podSpecExtra: {}
@@ -63,6 +65,7 @@ webHandlers:
 
 jobHandlers:
   replicaCount: 1
+  startupDelay: 5 # used to avoid race conditions
   annotations: {}
   podAnnotations: {}
   podSpecExtra: {}

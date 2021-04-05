@@ -87,7 +87,7 @@ spec:
         {{- range $each := $.Values.extraInitContainers -}}
         {{- if $each.applyToJob -}}
         {{- print "- " | nindent 8 -}}
-        {{- tpl ((unset (unset $each "applyToJob") "applyToWeb") | toYaml | indent 10 | trim) $ -}}
+        {{- tpl ((unset (unset (unset $each "applyToJob") "applyToWeb") "applyToWorkflow") | toYaml | indent 10 | trim) $ -}}
         {{- end }}
         {{- end }}
         {{- end }}

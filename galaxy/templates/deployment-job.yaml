@@ -47,7 +47,7 @@ spec:
         - name: {{ $.Chart.Name }}-wait-db
           image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
-          command: ['sh', '-c', 'until [ -f /galaxy/server/config/mutable/db_init_done ]; do echo "waiting for DB initialization"; sleep 1; done; sleep 10;']
+          command: ['sh', '-c', 'until [ -f /galaxy/server/config/mutable/db_init_done ]; do echo "waiting for DB initialization"; sleep 1; done; sleep {{ $.Values.jobHandlers.startupDelay }};']
           volumeMounts:
             - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/

@@ -41,48 +41,9 @@ spec:
         {{- tpl (toYaml $.Values.jobHandlers.podSpecExtra) (set $ "handler_num" $handler_num) | nindent 6 }}
       {{- end }}
       initContainers:
-        - name: {{ $.Chart.Name }}-init-postgres
-          image: alpine:3.7
-          command: ['sh', '-c', 'chown 101:101 {{ $.Values.persistence.mountPath }}; until nc -z -w3 {{ template "galaxy-postgresql.fullname" $ }} 5432; do echo waiting for galaxy-postgres service; sleep 1; done;']
-          volumeMounts:
-            - name: galaxy-data
-              mountPath: {{ $.Values.persistence.mountPath }}
-        - name: {{ $.Chart.Name }}-init-mounts
-          image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag | default $.Chart.AppVersion }}"
-          imagePullPolicy: {{ $.Values.image.pullPolicy }}
-          command: ['sh', '-c', {{ include "galaxy.init-container-commands" $ | squote }}]
-          volumeMounts:
-            {{- range $key,$entry := $.Values.configs }}
-            {{ if $entry -}}
-            - name: galaxy-conf-files
-              mountPath: /galaxy/server/config/{{ $key }}
-              subPath: {{ $key }}
-            {{- end -}}
-            {{- end }}
-            - name: galaxy-data
-              mountPath: /galaxy/server/config/mutable/
-              subPath: config
-            - name: galaxy-data
-              mountPath: {{ $.Values.persistence.mountPath }}
-        - name: {{ $.Chart.Name }}-db-migrations
-          image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag | default $.Chart.AppVersion }}"
-          imagePullPolicy: {{ $.Values.image.pullPolicy }}
-          command: ['sh', '-c', '/galaxy/server/manage_db.sh upgrade']
-          env:
-          {{ include "galaxy.podEnvVars" $ }}
-          volumeMounts:
-            {{- range $key,$entry := $.Values.configs }}
-            {{ if $entry -}}
-            - name: galaxy-conf-files
-              mountPath: /galaxy/server/config/{{ $key }}
-              subPath: {{ $key }}
-            {{- end -}}
-            {{- end }}
-            {{- range $key,$entry := $.Values.jobs.rules }}
-            - name: galaxy-job-rules
-              mountPath: /galaxy/server/lib/galaxy/jobs/rules/{{ $key }}
-              subPath: {{ $key }}
-            {{- end }}
+      {{- if eq $.Values.initContainers.mainHandler "job" }}
+        {{ include "galaxy.mainInitContainers" $ }}
+      {{- end }}
         {{- if $.Values.extraInitContainers -}}
         {{- range $each := $.Values.extraInitContainers -}}
         {{- if $each.applyToJob -}}
@@ -106,6 +67,7 @@ spec:
             '{{- if $.Values.extraInitCommands -}}
              {{- tpl $.Values.extraInitCommands $ | nindent 13 -}};
              {{- end -}}
+             until [ -f /galaxy/server/config/mutable/db_init_done ]; do echo "waiting for DB initialization"; sleep 1; done;
              python /galaxy/server/scripts/galaxy-main -c /galaxy/server/config/galaxy.yml --server-name job_handler_{{ $handler_num }} --attach-to-pool job-handlers']
           args: []
           {{- if $.Values.jobHandlers.startupProbe.enabled }}

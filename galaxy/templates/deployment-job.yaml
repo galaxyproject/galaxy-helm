@@ -67,7 +67,7 @@ spec:
             '{{- if $.Values.extraInitCommands -}}
              {{- tpl $.Values.extraInitCommands $ | nindent 13 -}};
              {{- end -}}
-             until [ -f /galaxy/server/config/mutable/db_init_done ]; do echo "waiting for DB initialization"; sleep 1; done;
+             until [ -f /galaxy/server/config/mutable/db_init_done ]; do echo "waiting for DB initialization"; sleep 1; done; sleep 10;
              python /galaxy/server/scripts/galaxy-main -c /galaxy/server/config/galaxy.yml --server-name job_handler_{{ $handler_num }} --attach-to-pool job-handlers']
           args: []
           {{- if $.Values.jobHandlers.startupProbe.enabled }}

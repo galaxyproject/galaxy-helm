@@ -34,7 +34,7 @@ special_cases = {
 
 
 # Entries that should be ignored.
-ignored = [ 'cvmfs.data', 'cvmfs.main', 'cvmfs.cache', 'jobHandlers.readinessProbe', 'jobHandlers.livenessProbe']
+ignored = [ 'cvmfs.data', 'cvmfs.cloud', 'cvmfs.cache', 'jobHandlers.readinessProbe', 'jobHandlers.livenessProbe']
 
 longest_key = -1
 longest_desc = -1

@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "galaxy.fullname" . }}-cvmfs-gxy-main-pvc
+  name: {{ include "galaxy.fullname" . }}-cvmfs-gxy-cloud-pvc
   labels:
     {{- include "galaxy.labels" . | nindent 4 }}
 spec:
@@ -10,6 +10,6 @@ spec:
   - ReadOnlyMany
   resources:
     requests:
-      storage: {{ .Values.cvmfs.main.pvc.storage }}
-  storageClassName: {{ .Values.cvmfs.main.pvc.storageClassName }}
+      storage: {{ .Values.cvmfs.cloud.pvc.storage }}
+  storageClassName: {{ .Values.cvmfs.cloud.pvc.storageClassName }}
 {{- end }}

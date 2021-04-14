@@ -26,6 +26,9 @@ data:
         gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript application/javascript;
         gzip_buffers 16 8k;
         proxy_read_timeout 600;
+        uwsgi_buffer_size   128k;
+        uwsgi_buffers   4 256k;
+        uwsgi_busy_buffers_size   256k;
         uwsgi_read_timeout 300;
         client_max_body_size {{ .Values.nginx.conf.client_max_body_size }};
 

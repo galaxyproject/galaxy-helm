@@ -114,22 +114,6 @@
     </section>
     <section id="transit" name="TRANSIT" version="">
     </section>
-    <label id="miscellaneous_tools_label" text="Miscellaneous Tools" version="" />
-    <section id="genome_diversity" name="Genome Diversity" version="">
-        <label id="gd_init" text="Basic analyses" version="" />
-        <label id="gd_pop" text="Population structure" version="" />
-        <label id="gd_fst_ss" text="FST and selective sweeps" version="" />
-        <label id="gd_kegg" text="KEGG and GO" version="" />
-        <label id="gd_geno" text="Design genotyping studies" version="" />
-        <label id="gd_kin" text="Kinship" version="" />
-        <label id="gd_mito" text="Mitochondria" version="" />
-    </section>
-    <section id="iwtomics" name="IWTomics" version="">
-    </section>
-    <section id="presto" name="pRESTO" version="">
-    </section>
-    <section id="planttribes" name="PlantTribes" version="">
-    </section>
     <label id="statistics_and_visualization_label" text="Statistics and Visualization" version="" />
     <section id="statistics" name="Statistics" version="">
         <label id="multiple_regression_label" text="Multiple Regression" version="" />

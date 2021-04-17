@@ -187,7 +187,7 @@ Define pod env vars
                   name: '{{ include "galaxy.galaxyDbSecretName" . }}'
                   key: '{{ include "galaxy.galaxyDbSecretKey" . }}'
             - name: GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION
-              value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy{{- if not (or .Values.postgresql.enabled .Values.postgresql.existingDatabase) -}}?sslmode=require{{- end }}
+              value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy{{- .Values.postgresql.galaxyConnectionParams }}
             - name: GALAXY_CONFIG_OVERRIDE_ID_SECRET
               valueFrom:
                 secretKeyRef:

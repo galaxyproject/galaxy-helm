@@ -131,7 +131,6 @@ extraVolumeMounts: []
 #     mountPath: /mnt/project/shared-data
 
 initContainers:
-  mainHandler: "web" # valid values are "web" "job" or "workflow"
   createDatabase: true
 
 extraInitContainers: []

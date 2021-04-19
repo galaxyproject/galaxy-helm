@@ -142,7 +142,7 @@ Lookup the existing secret values if they exist, or generate a random value
 {{- end -}}
 
 {{/*
-Creates the bash command for the init containers used to place files and change permissions in the galaxy pods
+Creates the bash command for the init container used to place files and change permissions in the galaxy pods
 */}}
 {{- define "galaxy.init-container-commands" -}}
 cp -anL /galaxy/server/config/integrated_tool_panel.xml /galaxy/server/config/mutable/integrated_tool_panel.xml;
@@ -153,6 +153,16 @@ cp -aruL /galaxy/server/tool-data {{.Values.persistence.mountPath}}/;
 cp -aruL /galaxy/server/tools {{.Values.persistence.mountPath}}/tools | true;
 echo "Done" > /galaxy/server/config/mutable/init_mounts_done_{{.Release.Revision}}
 {{- end -}}
+
+{{/*
+Creates the bash command for the handlers to wait for init scripts
+*/}}
+{{- define "galaxy.init-container-wait-command" -}}
+until [ -f /galaxy/server/config/mutable/db_init_done_{{$.Release.Revision}} ]; do echo "waiting for DB initialization"; sleep 1; done;
+until [ -f /galaxy/server/config/mutable/init_mounts_done_{{$.Release.Revision}} ]; do echo "waiting for copying onto NFS"; sleep 1; done;
+{{- end -}}
+
+
 
 {{/*
 Make string DNS-compliant by turning to lowercase then removing all noncompliant characters

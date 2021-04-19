@@ -1,0 +1,100 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "galaxy.fullname" . }}-init-mounts-{{ randAlphaNum 5 | lower }}
+  labels:
+    {{- include "galaxy.labels" . | nindent 4 }}
+spec:
+  ttlSecondsAfterFinished: 10
+  template:
+    metadata:
+      generateName: "{{ include "galaxy.fullname" . }}-init-mounts-"
+      labels:
+        {{- include "galaxy.labels" . | nindent 8 }}
+      annotations:
+        checksum/galaxy_conf: {{ include (print $.Template.BasePath "/configs-galaxy.yaml") . | sha256sum }}
+        checksum/galaxy_rules: {{ include (print $.Template.BasePath "/configmap-galaxy-rules.yaml") . | sha256sum }}
+        checksum/galaxy_extras: {{ include (print $.Template.BasePath "/configmap-extra-files.yaml") . | sha256sum }}
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: {{ .Chart.Name }}-init-mounts
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ['sh', '-c', {{ include "galaxy.init-container-commands" . | squote }}]
+          volumeMounts:
+            {{- range $key, $entry := .Values.extraFileMappings -}}
+            {{- if $entry.applyToWeb }}
+            - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
+              mountPath: {{ $key }}
+              subPath: {{ include "galaxy.getFilenameFromPath" $key }}
+            {{- end }}
+            {{- end }}
+            {{- range $key,$entry := .Values.configs }}
+            {{ if $entry -}}
+            - name: galaxy-conf-files
+              mountPath: /galaxy/server/config/{{ $key }}
+              subPath: {{ $key }}
+            {{- end -}}
+            {{- end }}
+            {{- range $key,$entry := .Values.jobs.rules }}
+            - name: galaxy-job-rules
+              mountPath: /galaxy/server/lib/galaxy/jobs/rules/{{ $key }}
+              subPath: {{ $key }}
+            {{- end }}
+            - name: galaxy-data
+              mountPath: {{ .Values.persistence.mountPath }}
+            - name: galaxy-data
+              mountPath: /galaxy/server/config/mutable/
+              subPath: config
+            {{- if .Values.cvmfs.enabled }}
+            - name: cvmfs-gxy-main
+              mountPath: {{ .Values.cvmfs.main.mountPath }}
+            - name: cvmfs-gxy-data
+              mountPath: {{ .Values.cvmfs.data.mountPath }}
+            {{- end }}
+            {{- if .Values.extraVolumeMounts }}
+            {{- .Values.extraVolumeMounts | toYaml | nindent 12 }}
+            {{- end }}
+      volumes:
+        - name: galaxy-conf-files
+          {{- if .Values.useSecretConfigs }}
+          secret:
+            secretName: {{ template "galaxy.fullname" . }}-configs
+          {{- else }}
+          configMap:
+            name: {{ template "galaxy.fullname" . }}-configs
+          {{- end }}
+        {{- range $key, $entry := .Values.extraFileMappings -}}
+        {{- if $entry.applyToWeb }}
+        - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
+          {{- if $entry.useSecret }}
+          secret:
+            secretName: {{ printf "%s-%s" (include "galaxy.fullname" $) (include "galaxy.getExtraFilesUniqueName" $key) }}
+          {{- else }}
+          configMap:
+            name: {{ printf "%s-%s" (include "galaxy.fullname" $) (include "galaxy.getExtraFilesUniqueName" $key) }}
+          {{- end }}
+        {{- end }}
+        {{- end }}
+        - name: galaxy-job-rules
+          configMap:
+            name: {{ template "galaxy.fullname" . }}-job-rules
+        - name: galaxy-data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ template "galaxy.pvcname" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        {{- if .Values.cvmfs.enabled }}
+        - name: cvmfs-gxy-main
+          persistentVolumeClaim:
+            claimName: {{ template "galaxy.fullname" . }}-cvmfs-gxy-main-pvc
+        - name: cvmfs-gxy-data
+          persistentVolumeClaim:
+            claimName: {{ template "galaxy.fullname" . }}-cvmfs-gxy-data-pvc
+        {{- end }}
+        {{- if .Values.extraVolumes }}
+        {{- .Values.extraVolumes | toYaml | nindent 8 }}
+        {{- end }}

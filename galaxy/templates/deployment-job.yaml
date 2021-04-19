@@ -41,13 +41,10 @@ spec:
         {{- tpl (toYaml $.Values.jobHandlers.podSpecExtra) (set $ "handler_num" $handler_num) | nindent 6 }}
       {{- end }}
       initContainers:
-      {{- if eq $.Values.initContainers.mainHandler "job" }}
-        {{ include "galaxy.mainInitContainers" $ }}
-      {{- end }}
         - name: {{ $.Chart.Name }}-wait-db
           image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
-          command: ['sh', '-c', 'until [ -f /galaxy/server/config/mutable/db_init_done ]; do echo "waiting for DB initialization"; sleep 1; done; sleep {{ $.Values.jobHandlers.startupDelay }};']
+          command: ['sh', '-c', 'until [ -f /galaxy/server/config/mutable/db_init_done_{{$.Release.Revision}} ]; do echo "waiting for DB initialization"; sleep 1; done; until [ -f /galaxy/server/config/mutable/init_mounts_done_{{$.Release.Revision}} ]; do echo "waiting for copying onto NFS"; sleep 1; done; sleep {{ $.Values.jobHandlers.startupDelay }}; sleep {{ $.Values.jobHandlers.startupDelay }};']
           volumeMounts:
             - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/

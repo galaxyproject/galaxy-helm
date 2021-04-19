@@ -41,7 +41,7 @@ spec:
         - name: {{ .Chart.Name }}-wait-db
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ['sh', '-c', 'until [ -f /galaxy/server/config/mutable/db_init_done_{{.Release.Revision}} ]; do echo "waiting for DB initialization"; sleep 1; done; until [ -f /galaxy/server/config/mutable/init_mounts_done_{{.Release.Revision}} ]; do echo "waiting for copying onto NFS"; sleep 1; done; sleep {{ .Values.workflowHandlers.startupDelay }};']
+          command: ['sh', '-c', '{{ include "galaxy.init-container-wait-command" . }} sleep {{ .Values.workflowHandlers.startupDelay }};']
           volumeMounts:
             - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/

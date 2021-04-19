@@ -29,7 +29,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if .Values.initContainers.createDatabase }}
-          command: ['sh', '-c', 'if [ -f /galaxy/server/config/mutable/db_init_done_{{.Release.Revision}} ]; then /galaxy/server/manage_db.sh upgrade; else (/galaxy/server/create_db.sh && echo "Done" > /galaxy/server/config/mutable/db_init_done_{{.Release.Revision}};) fi']
+          command: ['sh', '-c', 'if (ls /galaxy/server/config/mutable/ | grep -q "db_init_done*"); then /galaxy/server/manage_db.sh upgrade; else (/galaxy/server/create_db.sh && echo "Done" > /galaxy/server/config/mutable/db_init_done_{{.Release.Revision}};) fi']
           {{- else }}
           command: ['sh', '-c', '/galaxy/server/manage_db.sh upgrade && touch /galaxy/server/config/mutable/db_init_done_{{.Release.Revision}};']
           {{- end }}

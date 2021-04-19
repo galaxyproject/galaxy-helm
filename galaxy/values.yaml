@@ -130,7 +130,7 @@ extraVolumeMounts: []
 #   - name: shared-data
 #     mountPath: /mnt/project/shared-data
 
-initContainers:
+initJob:
   createDatabase: true
 
 extraInitContainers: []

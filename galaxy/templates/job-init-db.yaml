@@ -28,10 +28,20 @@ spec:
         - name: {{ .Chart.Name }}-db-init
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if .Values.initContainers.createDatabase }}
-          command: ['sh', '-c', 'if (ls /galaxy/server/config/mutable/ | grep -q "db_init_done*"); then /galaxy/server/manage_db.sh upgrade && echo "Done" > /galaxy/server/config/mutable/db_init_done_{{.Release.Revision}}; else (/galaxy/server/create_db.sh && echo "Done" > /galaxy/server/config/mutable/db_init_done_{{.Release.Revision}};) fi']
+          {{- if .Values.initJob.createDatabase }}
+          command:
+            - 'sh'
+            - '-c'
+            - >
+              if (ls /galaxy/server/config/mutable/ | grep -q "db_init_done*");
+                then /galaxy/server/manage_db.sh upgrade && echo "Done" > /galaxy/server/config/mutable/db_init_done_{{.Release.Revision}};
+                else (/galaxy/server/create_db.sh && echo "Done" > /galaxy/server/config/mutable/db_init_done_{{.Release.Revision}};);
+              fi;
           {{- else }}
-          command: ['sh', '-c', '/galaxy/server/manage_db.sh upgrade && echo "Done" > /galaxy/server/config/mutable/db_init_done_{{.Release.Revision}};']
+          command:
+            - 'sh'
+            - '-c'
+            - '/galaxy/server/manage_db.sh upgrade && echo "Done" > /galaxy/server/config/mutable/db_init_done_{{.Release.Revision}};'
           {{- end }}
           env:
           {{ include "galaxy.podEnvVars" . }}
@@ -55,6 +65,44 @@ spec:
               mountPath: /galaxy/server/lib/galaxy/jobs/rules/{{ $key }}
               subPath: {{ $key }}
             {{- end }}
+            - name: galaxy-data
+              mountPath: /galaxy/server/config/mutable/
+              subPath: config
+            {{- if .Values.cvmfs.enabled }}
+            - name: cvmfs-gxy-main
+              mountPath: {{ .Values.cvmfs.main.mountPath }}
+            - name: cvmfs-gxy-data
+              mountPath: {{ .Values.cvmfs.data.mountPath }}
+            {{- end }}
+            {{- if .Values.extraVolumeMounts }}
+            {{- .Values.extraVolumeMounts | toYaml | nindent 12 }}
+            {{- end }}
+        - name: {{ .Chart.Name }}-init-mounts
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ['sh', '-c', {{ include "galaxy.init-container-commands" . | squote }}]
+          volumeMounts:
+            {{- range $key, $entry := .Values.extraFileMappings -}}
+            {{- if $entry.applyToWeb }}
+            - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
+              mountPath: {{ $key }}
+              subPath: {{ include "galaxy.getFilenameFromPath" $key }}
+            {{- end }}
+            {{- end }}
+            {{- range $key,$entry := .Values.configs }}
+            {{ if $entry -}}
+            - name: galaxy-conf-files
+              mountPath: /galaxy/server/config/{{ $key }}
+              subPath: {{ $key }}
+            {{- end -}}
+            {{- end }}
+            {{- range $key,$entry := .Values.jobs.rules }}
+            - name: galaxy-job-rules
+              mountPath: /galaxy/server/lib/galaxy/jobs/rules/{{ $key }}
+              subPath: {{ $key }}
+            {{- end }}
+            - name: galaxy-data
+              mountPath: {{ .Values.persistence.mountPath }}
             - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/
               subPath: config

@@ -1,0 +1,22 @@
+name: Run Linting
+on:
+  push: {}
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Kubectl
+        run: curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x ./kubectl && sudo mv ./kubectl /usr/local/bin/kubectl && kubectl version || true
+      - name: Install Helm
+        run: curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - name: Helm dep update
+        run: cd galaxy/ && helm dep update && cd ..
+      - name: Helm linting
+        run: helm lint galaxy/
+

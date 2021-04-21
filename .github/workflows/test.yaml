@@ -1,0 +1,44 @@
+name: CVMFS-disabled deployment test on K3S
+on:
+  push: {}
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Helm
+        run: curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - name: Helm dep update
+        run: cd galaxy/ && helm dep update && cd ..
+      - name: Start k8s locally
+        uses: jupyterhub/action-k3s-helm@v1
+        with:
+          k3s-version: v1.19.10+k3s1 # releases:  https://github.com/k3s-io/k3s/tags
+
+      - name: Verify function of k8s, kubectl, and helm
+        run: |
+          echo "kubeconfig: $KUBECONFIG"
+          kubectl version
+          kubectl get pods --all-namespaces
+
+          helm version
+          helm list
+      - name: Helm repo add galaxy
+        run: helm repo add galaxy https://github.com/CloudVE/helm-charts/raw/master
+      - name: Helm install Galaxy
+        run: time bash -c 'helm install --create-namespace -n galaxy galaxy-test ./galaxy --set persistence.accessMode="ReadWriteOnce" --set persistence.size="5Gi" --set postgresql.deploy=true --set resources.requests.memory=0Mi,resources.requests.cpu=0m --wait --timeout=600s'
+      - name: Get events
+        run: kubectl get events -n galaxy; kubectl get events -n csi-drivers
+      - name: Print web handler log
+        run: POD=$(kubectl -n galaxy get pods | grep -o '[^ ]*galaxy-web[^ ]*'); kubectl logs -n galaxy $POD
+      - name: Print job handler log
+        run: POD=$(kubectl -n galaxy get pods | grep -o '[^ ]*galaxy-job[^ ]*'); kubectl logs -n galaxy $POD
+      - name: Print workflow handler log
+        run: POD=$(kubectl -n galaxy get pods | grep -o '[^ ]*galaxy-workflow[^ ]*'); kubectl logs -n galaxy $POD
+
+       

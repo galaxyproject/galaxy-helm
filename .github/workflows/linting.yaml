@@ -1,8 +1,9 @@
-name: Run Linting
+name: Run Linting and Deployment tests with and without CVMFS
 on:
   push: {}
+  workflow_dispatch: {}
 jobs:
-  setup:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - name: Install Kubectl
@@ -19,4 +20,88 @@ jobs:
         run: cd galaxy/ && helm dep update && cd ..
       - name: Helm linting
         run: helm lint galaxy/
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Helm
+        run: curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - name: Helm dep update
+        run: cd galaxy/ && helm dep update && cd ..
+      - name: Helm linting
+        run: helm lint galaxy/
+      - name: Start k8s locally
+        uses: jupyterhub/action-k3s-helm@v1
+        with:
+          k3s-version: v1.19.10+k3s1 # releases:  https://github.com/k3s-io/k3s/tags
+      - name: Verify function of k8s, kubectl, and helm
+        run: |
+          echo "kubeconfig: $KUBECONFIG"
+          kubectl version
+          kubectl get pods --all-namespaces
+
+          helm version
+          helm list
+      - name: Helm repo add galaxy
+        run: helm repo add galaxy https://github.com/CloudVE/helm-charts/raw/master
+      - name: Helm install Galaxy
+        run: time bash -c 'helm install --create-namespace -n galaxy galaxy ./galaxy --set persistence.accessMode="ReadWriteOnce" --set persistence.size="5Gi" --set postgresql.deploy=true --set resources.requests.memory=0Mi,resources.requests.cpu=0m --wait --timeout=600s'
+        continue-on-error: true
+      - name: Get events
+        run: kubectl get events -n galaxy; kubectl get events -n csi-drivers;
+      - name: Print web handler log
+        run: bash -c "kubectl logs -n galaxy $(kubectl -n galaxy get pods | grep -o '[^ ]*galaxy-web[^ ]*')"
+      - name: Print job handler log
+        run: bash -c "kubectl logs -n galaxy $(kubectl -n galaxy get pods | grep -o '[^ ]*galaxy-job[^ ]*')"
+      - name: Print workflow handler log
+        run: bash -c "kubectl logs -n galaxy $(kubectl -n galaxy get pods | grep -o '[^ ]*galaxy-workflow[^ ]*')"
+
+  cvmfstest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Helm
+        run: curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - name: Helm dep update
+        run: cd galaxy/ && helm dep update && cd ..
+      - name: Helm linting
+        run: helm lint galaxy/
+      - name: Start k8s locally
+        uses: jupyterhub/action-k3s-helm@v1
+        with:
+          k3s-version: v1.19.10+k3s1 # releases:  https://github.com/k3s-io/k3s/tags
+      - name: Verify function of k8s, kubectl, and helm
+        run: |
+          echo "kubeconfig: $KUBECONFIG"
+          kubectl version
+          kubectl get pods --all-namespaces
+
+          helm version
+          helm list
+      - name: Helm repo add galaxy
+        run: helm repo add galaxy https://github.com/CloudVE/helm-charts/raw/master
+      - name: Helm install CVMFS-CSI
+        run: helm install --create-namespace -n csi-drivers gxy-cvmfs galaxy/galaxy-cvmfs-csi --set cache.preload.enabled=false --set cache.alienCache.enabled=false --set cache.localCache.enabled=true
+      - name: Helm install Galaxy
+        run: time bash -c 'helm install --create-namespace -n galaxy galaxy ./galaxy --set persistence.accessMode="ReadWriteOnce" --set persistence.size="5Gi" --set cvmfs.enabled=true --set postgresql.deploy=true --set resources.requests.memory=0Mi,resources.requests.cpu=0m --wait --timeout=600s'
+        continue-on-error: true
+      - name: Get events
+        run: kubectl get events -n galaxy; kubectl get events -n csi-drivers
+      - name: Print web handler log
+        run: bash -c "kubectl logs -n galaxy $(kubectl -n galaxy get pods | grep -o '[^ ]*galaxy-web[^ ]*')"
+      - name: Print job handler log
+        run: bash -c "kubectl logs -n galaxy $(kubectl -n galaxy get pods | grep -o '[^ ]*galaxy-job[^ ]*')"
+      - name: Print workflow handler log
+        run: bash -c "kubectl logs -n galaxy $(kubectl -n galaxy get pods | grep -o '[^ ]*galaxy-workflow[^ ]*')"
 

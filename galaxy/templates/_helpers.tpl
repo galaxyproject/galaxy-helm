@@ -62,20 +62,13 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
-Define TeamID for the postgresql name
-*/}}
-{{- define "galaxy-postgresql.teamId" -}}
-{{- printf "%s" .Chart.Name -}}
-{{- end }}
-
-{{/*
 Return the postgresql database name to use
 */}}
 {{- define "galaxy-postgresql.fullname" -}}
 {{- if .Values.postgresql.existingDatabase -}}
 {{- printf "%s" .Values.postgresql.existingDatabase -}}
 {{- else -}}
-{{- printf "%s-%s-%s" (include "galaxy-postgresql.teamId" .) .Release.Name .Values.postgresql.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-%s" .Release.Name .Values.postgresql.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
 
@@ -102,24 +95,12 @@ Return which PVC to use
 {{- end -}}
 
 
-{{- define "galaxy.operatorUserSecretName" -}}
+{{- define "galaxy.operator-user-secret-name" -}}
 {{- printf "%s.%s.credentials.postgresql.acid.zalan.do" .Values.postgresql.galaxyDatabaseUser (include "galaxy-postgresql.fullname" .) -}}
 {{- end -}}
 
-{{- define "galaxy.galaxyDbSecretName" -}}
-{{- if .Values.postgresql.galaxyExistingSecret -}}
-{{- printf "%s" .Values.postgresql.galaxyExistingSecret  -}}
-{{- else -}}
-{{- printf "%s" (include "galaxy.operatorUserSecretName" .)  -}}
-{{- end -}}
-{{- end -}}
-
-{{- define "galaxy.galaxyDbSecretKey" -}}
-{{- if and .Values.postgresql.galaxyExistingSecret .Values.postgresql.galaxyExistingSecretKeyRef -}}
-{{- printf "%s" .Values.postgresql.galaxyExistingSecretKeyRef  -}}
-{{- else -}}
-{{- printf "password" -}}
-{{- end -}}
+{{- define "galaxy.galaxy-secret-name" -}}
+{{- printf "%s-galaxy-secrets" .Release.Name -}}
 {{- end -}}
 
 {{/*
@@ -127,11 +108,15 @@ Return galaxy database user password.
 Lookup the existing secret values if they exist, or generate a random value
 */}}
 {{- define "galaxy.galaxyDbPassword" -}}
-{{- $galaxy_secret_name := (include "galaxy.galaxyDbSecretName" .) -}}
+{{- $galaxy_secret_name := (include "galaxy.galaxy-secret-name" .) -}}
 {{- $galaxy_secret := (lookup "v1" "Secret" .Release.Namespace $galaxy_secret_name) -}}
+{{- $operator_secret_name := (include "galaxy.operator-user-secret-name" .) -}}
+{{- $operator_secret := (lookup "v1" "Secret" .Release.Namespace $operator_secret_name) -}}
 {{- if $galaxy_secret -}}
-    {{- $galaxy_key_ref := (include "galaxy.galaxyDbSecretKey" .) -}}
+    {{- $galaxy_key_ref := (default "galaxy-db-password" .Values.postgresql.galaxyExistingSecretKeyRef) -}}
     {{- index $galaxy_secret "data" $galaxy_key_ref | b64dec -}}
+{{- else if $operator_secret -}}
+    {{- $operator_secret.data.password | b64dec -}}
 {{- else if .Values.postgresql.galaxyDatabasePassword -}}
     {{- .Values.postgresql.galaxyDatabasePassword -}}
 {{- else -}}
@@ -195,8 +180,8 @@ Define pod env vars
             - name: GALAXY_DB_USER_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: '{{ include "galaxy.galaxyDbSecretName" . }}'
-                  key: '{{ include "galaxy.galaxyDbSecretKey" . }}'
+                  name: '{{default (printf "%s-galaxy-secrets" .Release.Name) .Values.postgresql.galaxyExistingSecret}}'
+                  key: '{{default "galaxy-db-password" .Values.postgresql.galaxyExistingSecretKeyRef}}'
             - name: GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION
               value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy{{- .Values.postgresql.galaxyConnectionParams }}
             - name: GALAXY_CONFIG_OVERRIDE_ID_SECRET

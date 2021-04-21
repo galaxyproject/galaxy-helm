@@ -31,14 +31,12 @@ jobs:
       - name: Helm repo add galaxy
         run: helm repo add galaxy https://github.com/CloudVE/helm-charts/raw/master
       - name: Helm install Galaxy
-        run: time bash -c 'helm install --create-namespace -n galaxy galaxy-test ./galaxy --set persistence.accessMode="ReadWriteOnce" --set persistence.size="5Gi" --set postgresql.deploy=true --set resources.requests.memory=0Mi,resources.requests.cpu=0m --wait --timeout=600s'
+        run: time bash -c 'helm install --create-namespace -n galaxy galaxy ./galaxy --set persistence.accessMode="ReadWriteOnce" --set persistence.size="5Gi" --set postgresql.deploy=true --set resources.requests.memory=0Mi,resources.requests.cpu=0m --wait --timeout=600s'
       - name: Get events
-        run: kubectl get events -n galaxy; kubectl get events -n csi-drivers
+        run: kubectl get events -n galaxy; kubectl get events -n csi-drivers;
       - name: Print web handler log
-        run: POD=$(kubectl -n galaxy get pods | grep -o '[^ ]*galaxy-web[^ ]*'); kubectl logs -n galaxy $POD
+        run: bash -c "kubectl logs -n galaxy $(kubectl -n galaxy get pods | grep -o '[^ ]*galaxy-web[^ ]*')"
       - name: Print job handler log
-        run: POD=$(kubectl -n galaxy get pods | grep -o '[^ ]*galaxy-job[^ ]*'); kubectl logs -n galaxy $POD
+        run: bash -c "kubectl logs -n galaxy $(kubectl -n galaxy get pods | grep -o '[^ ]*galaxy-job[^ ]*')"
       - name: Print workflow handler log
-        run: POD=$(kubectl -n galaxy get pods | grep -o '[^ ]*galaxy-workflow[^ ]*'); kubectl logs -n galaxy $POD
-
-       
+        run: bash -c "kubectl logs -n galaxy $(kubectl -n galaxy get pods | grep -o '[^ ]*galaxy-workflow[^ ]*')"

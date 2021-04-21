@@ -6,11 +6,10 @@ appVersion: "21.05"
 description: Chart for Galaxy, an open, web-based platform for accessible, reproducible, and transparent computational biomedical research.
 icon: https://galaxyproject.org/images/galaxy-logos/galaxy_project_logo_square.png
 dependencies:
-    - name: postgres-operator
-      repository: https://raw.githubusercontent.com/zalando/postgres-operator/master/charts/postgres-operator/
-      version: 1.6.2
-      alias: postgresql
-      condition: postgresql.deploy
+    - name: postgresql
+      repository: https://charts.helm.sh/stable/
+      version: 8.1.4
+      condition: postgresql.enabled
     - name: galaxy-cvmfs-csi
       repository: https://raw.githubusercontent.com/cloudve/helm-charts/master/
       version: 1.6.0

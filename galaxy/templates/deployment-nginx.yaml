@@ -58,10 +58,11 @@ spec:
               mountPath: /galaxy/server/config/mutable/
               subPath: config
             {{- if .Values.cvmfs.enabled }}
-            - name: cvmfs-gxy-cloud
-              mountPath: {{ .Values.cvmfs.cloud.mountPath }}
             - name: cvmfs-gxy-data
               mountPath: {{ .Values.cvmfs.data.mountPath }}
+            - name: galaxy-data
+              mountPath: /cvmfs/cloud.galaxyproject.org
+              subPath: cvmfs
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- .Values.extraVolumeMounts | toYaml | nindent 12 }}
@@ -84,9 +85,6 @@ spec:
           emptyDir: {}
           {{- end }}
         {{- if .Values.cvmfs.enabled }}
-        - name: cvmfs-gxy-cloud
-          persistentVolumeClaim:
-            claimName: {{ template "galaxy.fullname" . }}-cvmfs-gxy-cloud-pvc
         - name: cvmfs-gxy-data
           persistentVolumeClaim:
             claimName: {{ template "galaxy.fullname" . }}-cvmfs-gxy-data-pvc

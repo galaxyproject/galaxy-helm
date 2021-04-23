@@ -215,6 +215,9 @@ postgresql:
     enabled: true
 
 cvmfs:
+  repositories:
+    cvmfs-gxy-data: data.galaxyproject.org
+    cvmfs-gxy-cloud: cloud.galaxyproject.org
   enabled: false
   deploy: false
   data:
@@ -253,8 +256,8 @@ configs:
         k8s_persistent_volume_claims: |-
           {{ template "galaxy.pvcname" . -}}:{{.Values.persistence.mountPath}}
           {{- if .Values.cvmfs.enabled -}}
-          ,{{- template "galaxy.fullname" . -}}-cvmfs-gxy-data-pvc:{{.Values.cvmfs.data.mountPath}},
-          {{- template "galaxy.fullname" . -}}-cvmfs-gxy-cloud-pvc:{{.Values.cvmfs.cloud.mountPath}}
+          ,{{- template "galaxy.fullname" . -}}-cvmfs-gxy-data-pvc:{{.Values.cvmfs.data.mountPath}}
+          ,{{- template "galaxy.fullname" . -}}-cvmfs-gxy-cloud-pvc:{{.Values.cvmfs.cloud.mountPath}}
           {{- end -}}
           {{- if .Values.extraVolumes -}}
           {{- template "galaxy.extra_pvc_mounts" . -}}
@@ -318,12 +321,12 @@ configs:
       database_connection: postgresql://unused:because@overridden_by_envvar
       integrated_tool_panel_config: "/galaxy/server/config/mutable/integrated_tool_panel.xml"
       sanitize_allowlist_file: "/galaxy/server/config/mutable/sanitize_allowlist.txt"
-      tool_config_file: "/galaxy/server/config/tool_conf.xml{{if .Values.cvmfs.enabled}},{{.Values.cvmfs.cloud.mountPath}}/config/shed_tool_conf.xml{{end}}"
+      tool_config_file: "/galaxy/server/config/tool_conf.xml{{if .Values.cvmfs.enabled}},/cvmfs/cloud.galaxyproject.org/config/shed_tool_conf.xml{{end}}"
       shed_tool_config_file: "/galaxy/server/config/mutable/editable_shed_tool_conf.xml"
       enable_tool_document_cache: true
       tool_data_table_config_path: |-
         {{ if .Values.cvmfs.enabled -}}
-        {{ .Values.cvmfs.cloud.mountPath }}/config/shed_tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/byhand/location/tool_data_table_conf.xml
+        /cvmfs/cloud.galaxyproject.org/config/shed_tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/byhand/location/tool_data_table_conf.xml
         {{- end }}
       tool_dependency_dir: "{{.Values.persistence.mountPath}}/deps"
       job_config_file: "/galaxy/server/config/job_conf.yml"

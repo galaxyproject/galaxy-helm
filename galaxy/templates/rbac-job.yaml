@@ -13,7 +13,7 @@ rules:
 - apiGroups: ["batch", "extensions"]
   resources: ["jobs"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
-- apiGroups: ["", "networking.k8s.io"]
+- apiGroups: ["", "networking.k8s.io", "extensions"]
   resources: ["services", "ingresses"]
   verbs: ["get", "list", "watch", "create", "delete"]
 ---

@@ -132,6 +132,24 @@ extraVolumeMounts: []
 
 initJob:
   createDatabase: true
+  externalConfs:
+    enabled: true
+    # Uses Galaxy's shared file system volume
+    volume:
+      subPath: cvmfsclone # on galaxy-data volume (avoid config, tools, lib, etc...)
+      mountPath: /cvmfs/cloud.galaxyproject.org
+    archives:
+      # A tar.gz publicly accessible archive containing AT LEAST conf files and XML tool wrappers.
+      # Meant to be enough for Galaxy handlers to startup
+      startup: https://storage.googleapis.com/cloud-cvmfs/startup.tar.gz
+      # A tar.gz publicly accessible archive containing AT LEAST confs, tool wrappers, and scripts
+      # excluding test data.
+      # Meant to be enough for Galaxy handlers to run jobs.
+      running: https://storage.googleapis.com/cloud-cvmfs/partial.tar.gz
+      # A tar.gz publicly accessible archive containing the full `tools` directory,
+      # including each tool's test data.
+      # Meant to be enough to run automated tool-tests, fully mimicking CVMFS setup
+      full: https://storage.googleapis.com/cloud-cvmfs/contents.tar.gz
 
 extraInitContainers: []
 #   - name: my-first-container
@@ -217,19 +235,18 @@ postgresql:
 cvmfs:
   repositories:
     cvmfs-gxy-data: data.galaxyproject.org
-    cvmfs-gxy-cloud: cloud.galaxyproject.org
+    # cvmfs-gxy-cloud: cloud.galaxyproject.org
   enabled: false
   deploy: false
-  data:
-    pvc:
+  galaxyPersistentVolumeClaims:
+    data:
       storage: 1Gi
       storageClassName: cvmfs-gxy-data
-    mountPath: /cvmfs/data.galaxyproject.org
-  cloud:
-    pvc:
-      storage: 1Gi
-      storageClassName: cvmfs-gxy-cloud
-    mountPath: /cvmfs/cloud.galaxyproject.org
+      mountPath: /cvmfs/data.galaxyproject.org
+    # cloud:
+    #   storage: 1Gi
+    #   storageClassName: cvmfs-gxy-cloud
+    #   mountPath: /cvmfs/cloud.galaxyproject.org
   cache:
     alienCache:
       enabled: true
@@ -256,8 +273,12 @@ configs:
         k8s_persistent_volume_claims: |-
           {{ template "galaxy.pvcname" . -}}:{{.Values.persistence.mountPath}}
           {{- if .Values.cvmfs.enabled -}}
-          ,{{- template "galaxy.fullname" . -}}-cvmfs-gxy-data-pvc:{{.Values.cvmfs.data.mountPath}}
-          ,{{- template "galaxy.fullname" . -}}-cvmfs-gxy-cloud-pvc:{{.Values.cvmfs.cloud.mountPath}}
+          {{- range $key, $entry := .Values.cvmfs.galaxyPersistentVolumeClaims -}}
+          ,{{- template "galaxy.fullname" $ -}}-cvmfs-gxy-{{ $key }}-pvc:{{ $entry.mountPath }}
+          {{- end -}}
+          {{- end -}}
+          {{- if .Values.initJob.externalConfs.enabled }}
+          ,{{ template "galaxy.pvcname" . -}}/{{ .Values.initJob.externalConfs.volume.subPath }}:{{ .Values.initJob.externalConfs.volume.mountPath }}
           {{- end -}}
           {{- if .Values.extraVolumes -}}
           {{- template "galaxy.extra_pvc_mounts" . -}}
@@ -321,18 +342,25 @@ configs:
       database_connection: postgresql://unused:because@overridden_by_envvar
       integrated_tool_panel_config: "/galaxy/server/config/mutable/integrated_tool_panel.xml"
       sanitize_allowlist_file: "/galaxy/server/config/mutable/sanitize_allowlist.txt"
-      tool_config_file: "/galaxy/server/config/tool_conf.xml{{if .Values.cvmfs.enabled}},/cvmfs/cloud.galaxyproject.org/config/shed_tool_conf.xml{{end}}"
+      tool_config_file: "/galaxy/server/config/tool_conf.xml{{if .Values.initJob.externalConfs.enabled}},{{ .Values.initJob.externalConfs.volume.mountPath }}/config/shed_tool_conf.xml{{end}}"
       shed_tool_config_file: "/galaxy/server/config/mutable/editable_shed_tool_conf.xml"
       enable_tool_document_cache: true
       tool_data_table_config_path: |-
-        {{ if .Values.cvmfs.enabled -}}
-        /cvmfs/cloud.galaxyproject.org/config/shed_tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.cvmfs.data.mountPath}}/byhand/location/tool_data_table_conf.xml
+        {{ if .Values.initJob.externalConfs.enabled }}
+        {{- .Values.initJob.externalConfs.volume.mountPath }}/config/shed_tool_data_table_conf.xml
+        {{- if .Values.cvmfs.enabled -}}
+        ,{{- .Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/byhand/location/tool_data_table_conf.xml
+        {{- end }}
+        {{- else }}
+        {{- if .Values.cvmfs.enabled -}}
+        {{- .Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/byhand/location/tool_data_table_conf.xml
+        {{- end }}
         {{- end }}
       tool_dependency_dir: "{{.Values.persistence.mountPath}}/deps"
       job_config_file: "/galaxy/server/config/job_conf.yml"
       builds_file_path: |-
-        {{ if .Values.cvmfs.enabled -}}
-        {{.Values.cvmfs.data.mountPath}}/managed/location/builds.txt
+        {{ if .Values.cvmfs.enabled }}
+        {{ .Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/builds.txt
         {{- end }}
       containers_resolvers_config_file: "/galaxy/server/config/container_resolvers_conf.xml"
       workflow_schedulers_config_file: "/galaxy/server/config/workflow_schedulers_conf.xml"
@@ -347,7 +375,7 @@ configs:
         {{include "galaxy.add_trailing_slash" .Values.ingress.path}}_x_accel_redirect
       len_file_path: |-
         {{ if .Values.cvmfs.enabled -}}
-        {{.Values.cvmfs.data.mountPath}}/managed/len/ucsc
+        {{ .Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/managed/len/ucsc
         {{- end }}
   container_resolvers_conf.xml: |
     <containers_resolvers>
@@ -409,7 +437,7 @@ configs:
     toolshed.g2.bx.psu.edu/repos/iuc/snpeff/snpEff/4.3+T.galaxy1
   build_sites.yml:
     - type: ucsc
-      file: "{{if .Values.cvmfs.enabled}}{{ .Values.cvmfs.data.mountPath -}}/managed/location/ucsc_build_sites.txt{{else}}/galaxy/server/tool-data/shared/ucsc/ucsc_build_sites.txt.sample{{end}}"
+      file: "{{if .Values.cvmfs.enabled}}{{.Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath -}}/managed/location/ucsc_build_sites.txt{{else}}/galaxy/server/tool-data/shared/ucsc/ucsc_build_sites.txt.sample{{end}}"
       display: [main,archaea,ucla]
     - type: gbrowse
       file: "/galaxy/server/tool-data/shared/gbrowse/gbrowse_build_sites.txt"

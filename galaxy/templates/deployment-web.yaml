@@ -129,12 +129,16 @@ spec:
             - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/
               subPath: config
-            {{- if .Values.cvmfs.enabled }}
-            - name: cvmfs-gxy-data
-              mountPath: {{ .Values.cvmfs.data.mountPath }}
+            {{- if .Values.initJob.externalConfs.enabled }}
             - name: galaxy-data
-              mountPath: /cvmfs/cloud.galaxyproject.org
-              subPath: cvmfs
+              mountPath: {{ .Values.initJob.externalConfs.volume.mountPath }}
+              subPath: {{ .Values.initJob.externalConfs.volume.subPath }}
+            {{- end }}
+            {{- if .Values.cvmfs.enabled }}
+            {{- range $key, $entry := .Values.cvmfs.galaxyPersistentVolumeClaims }}
+            - name: cvmfs-gxy-{{ $key }}
+              mountPath: {{ $entry.mountPath }}
+            {{- end -}}
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- .Values.extraVolumeMounts | toYaml | nindent 12 }}
@@ -179,9 +183,11 @@ spec:
           emptyDir: {}
           {{- end }}
         {{- if .Values.cvmfs.enabled }}
-        - name: cvmfs-gxy-data
+        {{- range $key, $entry := .Values.cvmfs.galaxyPersistentVolumeClaims }}
+        - name: cvmfs-gxy-{{ $key }}
           persistentVolumeClaim:
-            claimName: {{ template "galaxy.fullname" . }}-cvmfs-gxy-data-pvc
+            claimName: {{ template "galaxy.fullname" $ -}}-cvmfs-gxy-{{ $key }}-pvc
+        {{- end }}
         {{- end }}
         {{- if .Values.extraVolumes }}
         {{- .Values.extraVolumes | toYaml | nindent 8 }}

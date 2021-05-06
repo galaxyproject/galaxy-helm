@@ -176,6 +176,8 @@ extraInitCommands: ""
 #  /galaxy/server/extra/mapped/script.sh
 
 extraEnv: []
+  # - name: EXAMPLE_ENV
+  #   value: MY_VALUE
 
 ingress:
   enabled: true

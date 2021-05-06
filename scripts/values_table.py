@@ -22,19 +22,20 @@ key_list = list()
 # These entries typically hold dictionaries of arbitrary keys that should not
 # (can not?) be documented.
 special_cases = {
-    'configs': 'configs.*',
+    'configs': 'configs.{}',
     'extraFileMappings': 'extraFileMappings.{}',
     '(.*)\\.annotations': '\\1.annotations.{}',
     '(.*)\\.podAnnotations': '\\1.podAnnotations.{}',
     '(.*)\\.podSpecExtra': '\\1.podSpecExtra.{}',
     'extraVolumes': 'extraVolumes.[]',
     'extraVolumeMounts': 'extraVolumeMounts.[]',
-    'jobs.rules\\..*': 'jobs.rules'
+    'jobs\\.rules\\..*': 'jobs.rules',
+    'cvmfs\\.galaxyPersistentVolumeClaims\\..*': 'cvmfs.galaxyPersistentVolumeClaims.{}'
 }
 
 
 # Entries that should be ignored.
-ignored = [ 'cvmfs.repositories', 'cvmfs.cache', 'cvmfs.galaxyPersistentVolumeClaims.data', 'jobHandlers', 'webHandlers', 'workflowHandlers']
+ignored = [ 'cvmfs.repositories', 'cvmfs.cache', 'jobHandlers', 'webHandlers', 'workflowHandlers']
 
 longest_key = -1
 longest_desc = -1
@@ -69,7 +70,7 @@ def print_table():
     desc_hr =  "-".ljust(longest_desc, "-")
     print(f"| {params} | {desc} |")
     print(f"|-{params_hr}-|-{desc_hr}-|")
-    for key in key_list:
+    for key in sorted(set(key_list)):
         print_table_row(key)
 
 # Prints a single row in the table.

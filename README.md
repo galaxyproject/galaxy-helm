@@ -123,65 +123,79 @@ helm delete my-galaxy
 The following table lists the configurable parameters of the Galaxy chart. The
 current default values can be found in `values.yaml` file.
 
-| Parameters                                | Description                                                  |
-| ----------------------------------------- | ------------------------------------------------------------ |
-| `nameOverride`                            | Override the name of the chart used to prefix resource names. Defaults to `{{.Chart.Name}}` (i.e. `galaxy`) |
-| `fullnameOverride`                        | Override the full name used to prefix resource names. Defaults to {{.Release.Name}}-{{.Values.nameOverride}} |
-| `image.repository`                        | The repository and name of the Docker image for Galaxy, searches Docker Hub by default |
-| `image.tag`                               | Galaxy Docker image tag (generally corresponds to the desired Galaxy version) |
-| `image.pullPolicy`                        | Galaxy image [pull policy](https://kubernetes.io/docs/concepts/configuration/overview/#container-images) for more info |
-| `imagePullSecrets`                        | Secrets used to [access a Galaxy image from a private repository](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) |
-| `service.type`                            | Kubernetes [Service type](https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types) |
-| `service.port`                            | Kubernetes service port                                      |
-| `service.nodePort`                        | If `service.type` is set to `NodePort`, then this can be used to set the port at which Galaxy will be available on all nodes' IP addresses |
-| `workflowHandlers.*`                      | Configuration for the workflowHandlers (See below for all options) |
-| `webHandlers.*`                           | Configuration for the webHandlers                            |
-| `jobHandlers.*`                           | Configuration fo the jobHandlers                             |
-| `metrics.enabled`                         | Enable metrics gathering.  The influxdb setting must be specified when using this setting.                                  |
-| `metrics.image.repository`                | The location of the [galay-metrics-scraping](https://github.com/CloudVE/galaxy-docker-k8s-metrics) image to use. |
-| `metrics.image.tag`                       | The image version to use.                                    |
-| `metrics.image.pullPolicy`                | Define the [pull policy](https://kubernetes.io/docs/concepts/containers/images/#updating-images), that is, when Kubernetes will pull the image. |
-| `serviceAccount.create`                   | The serviceAccount will be created if it does not exist.     |
-| `serviceAccount.name`                     | The serviceAccount account to use.                           |
-| `rbac.enabled`                            | Enable Galaxy job RBAC. This will grant the service account the necessary permissions/roles to view jobs and pods in this namespace. Defaults to true.  |
-| `securityContext.fsGroup`                 | The [group](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/) for any files created. |
-| `persistence.enabled`                     | Enable persistence using PVC                                 |
-| `persistence.name`                        | Name of the PVC                                              |
-| `persistence.accessMode`                  | PVC access mode for the Galaxy volume                        |
-| `persistence.size`                        | PVC storage request for the Galaxy volume, in GB             |
-| `persistence.mountPath`                   | Path where to mount the Galaxy volume                        |
-| `extraInitCommands`                       | Extra commands that will be run during initialization.       |
-| `extraEnv`                                | Environment variables that will be defined                   |
-| `ingress.enabled`                         | Enable Kubernetes ingress                                    |
-| `ingress.canary.enabled`                  | This will create an additional ingress for detecting activity on Galaxy. Useful for autoscaling on activity. |
-| `ingress.annotations.*`                   | Annotations that can be defined to configure an ingress controller. |
-| `ingress.path`                            | Path where Galaxy application will be hosted                 |
-| `ingress.hosts`                           | Hosts for the Galaxy ingress                                 |
-| `ingress.tls`                             | Ingress configuration with HTTPS support                     |
-| `resources.requests.cpu`                  | The requested amount of CPU (as time or number of cores)     |
-| `resources.requests.memory`               | The requested amount of memory.                              |
-| `resources.requests.ephemeral-storage`    | The requested amount of ephemeral storage                    |
-| `resources.limits.cpu`                    | The maximum CPU that can be alloacted.                       |
-| `resources.limits.memory`                 | The maximum memory that can be allocated.                    |
-| `resources.limits.ephemeral-storage`      | The maximum ephemeral storage that can be allocated.         |
-| `tolerations`                             | Define the `taints` that are tolerated.                      |
-| `postgresql.enabled`                      | Enable the postgresql condition in the [requirements.yml](https://github.com/galaxyproject/galaxy-helm/blob/master/galaxy/requirements.yaml). |
-| `cvmfs.enabled`                           | Enable CVMFS.                                                |
-| `cvmfs.deploy`                            | Sets the `cvmfs.deploy` condition in the [requirements.yml](https://github.com/galaxyproject/galaxy-helm/blob/master/galaxy/requirements.yaml). |
-| `useSecretConfigs`                        | Enable Kubernetes Secrets for all config maps                |
-| `configs.*`                               | Galaxy configuration files and values for each of the files. The provided value represent the entire content of the given configuration file |
-| `jobs.rules`                              | Galaxy dynamic job rules                                     |
-| `jobs.priorityClass.enabled`              | Assign a [priorityClass](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass) to the dispatched jobs. |
-| `jobs.priorityClass.existingClass`        | Use an existing [priorityClass](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass) to assign if `jobs.priorityClass.enabled=true` |
-| `extraFileMappings.*`                     | Map arbitrary files as configMaps or Secrets into any of the handlers |
-| `influxdb.enabled`                        | Enable the `influxdb` used by the metrics scraper.           |
-| `influxdb.url`                            | The connection URL to in the `influxdb`                      |
-| `influxdb.username`                       | Influxdb user name.                                          |
-| `influxdb.password`                       | Password for the influxdb user.                              |
-| `nginx.image.repository`                  | Where to obtain the Nginx container.                         |
-| `nginx.image.tag`                         | The Nginx version to pull.                                   |
-| `nginx.image.pullPolicy`                  | When Kubernetes will [pull](https://kubernetes.io/docs/concepts/containers/images/#updating-images) the Nginx image from the repository. |
-| `nginx.conf.client_max_body_size`         | Requests larger than this size will result in a `413 Payload Too Large`. |
+| Parameters                                 | Description                                                                                                                                                              |
+|--------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `nameOverride`                             | Override the name of the chart used to prefix resource names. Defaults to `{{.Chart.Name}}` (i.e. `galaxy`)                                                              |
+| `fullnameOverride`                         | Override the full name used to prefix resource names. Defaults to {{.Release.Name}}-{{.Values.nameOverride}}                                                             |
+| `image.repository`                         | The repository and name of the Docker image for Galaxy, searches Docker Hub by default                                                                                   |
+| `image.tag`                                | Galaxy Docker image tag (generally corresponds to the desired Galaxy version)                                                                                            |
+| `image.pullPolicy`                         | Galaxy image [pull policy](https://kubernetes.io/docs/concepts/configuration/overview/#container-images) for more info                                                   |
+| `imagePullSecrets`                         | Secrets used to [access a Galaxy image from a private repository](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/)                 |
+| `service.type`                             | Kubernetes [Service type](https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types)                                            |
+| `service.port`                             | Kubernetes service port                                                                                                                                                  |
+| `service.nodePort`                         | If `service.type` is set to `NodePort`, then this can be used to set the port at which Galaxy will be available on all nodes' IP addresses                               |
+| `metrics.enabled`                          | Enable metrics gathering.  The influxdb setting must be specified when using this setting.                                                                               |
+| `metrics.annotations.{}`                   |  Dictionary of annotations to add to the metrics deployment's metadata at the deployment level  |
+| `metrics.podAnnotations.{}`                | Dictionary of annotations to add to the metrics deployment's metadata at the pod level  |
+| `metrics.podSpecExtra.{}`                  | Dictionary to add to the metrics deployment's pod template under `spec`  |
+| `metrics.image.repository`                 | The location of the [galay-metrics-scraping](https://github.com/CloudVE/galaxy-docker-k8s-metrics) image to use.                                                         |
+| `metrics.image.tag`                        | The image version to use.                                                                                                                                                |
+| `metrics.image.pullPolicy`                 | Define the [pull policy](https://kubernetes.io/docs/concepts/containers/images/#updating-images), that is, when Kubernetes will pull the image.                          |
+| `serviceAccount.create`                    | The serviceAccount will be created if it does not exist.                                                                                                                 |
+| `serviceAccount.annotations.{}`            | Dictionary of annotations to add to the service account's metadata |
+| `serviceAccount.name`                      | The serviceAccount account to use.                                                                                                                                       |
+| `rbac.enabled`                             | Enable Galaxy job RBAC. This will grant the service account the necessary permissions/roles to view jobs and pods in this namespace. Defaults to true.                   |
+| `securityContext.fsGroup`                  | The [group](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/) for any files created.                                                           |
+| `persistence.enabled`                      | Enable persistence using PVC                                                                                                                                             |
+| `persistence.name`                         | Name of the PVC                                                                                                                                                          |
+| `persistence.annotations.{}`               | Dictionary of annotations to add to the persistent volume claim's metadata  |
+| `persistence.storageClass`                 | Storage class to use for provisioning the Persistent Volume Claim |
+| `persistence.existingClaim`                | Use existing Persistent Volume Claim instead of creating one |
+| `persistence.accessMode`                   | PVC access mode for the Galaxy volume                                                                                                                                    |
+| `persistence.size`                         | PVC storage request for the Galaxy volume, in GB                                                                                                                         |
+| `persistence.mountPath`                    | Path where to mount the Galaxy volume                                                                                                                                    |
+| `extraVolumes.[]`                          | List of volumes to add to all handlers |
+| `extraVolumeMounts.[]`                     | List of volumeMounts to add to all handlers |
+| `initJob.createDatabase`                   | Deploy a job to create a Galaxy database from scratch (does not affect subsequent upgrades, only first startup) |
+| `initJob.downloadToolConfs.enabled`        | Download configuration files and the `tools` directory from an archive via a job at startup |
+| `initJob.downloadToolConfs.volume.subPath` | Name of subdirectory on Galaxy's shared filesystem to use for the unarchived configs |
+| `initJob.downloadToolConfs.volume.mountPath` | Path at which to mount the unarchived confs in the each handler (should match path set in the tool confs) |
+| `initJob.downloadToolConfs.archives.startup` | A URL to a `tar.gz` publicly accessible archive containing AT LEAST conf files and XML tool wrappers. Meant to be enough for Galaxy handlers to startup. |
+| `initJob.downloadToolConfs.archives.running` | A URL to a `tar.gz` publicly accessible archive containing AT LEAST confs, tool wrappers, and tool scripts but excluding test data. Meant to be enough for Galaxy handlers to run jobs. |
+| `initJob.downloadToolConfs.archives.full`  | A URL to a `tar.gz` publicly accessible archive containing the full `tools` directory, including each tool's test data. Meant to be enough to run automated tool-tests, fully mimicking CVMFS repositories |
+| `extraInitContainers`                      | A list of extra init containers for the handler pods |
+| `extraInitCommands`                        | Extra commands that will be run during initialization.                                                                                                                   |
+| `extraEnv`                                 | Environment variables that will be defined                                                                                                                               |
+| `ingress.enabled`                          | Enable Kubernetes ingress                                                                                                                                                |
+| `ingress.canary.enabled`                   | This will create an additional ingress for detecting activity on Galaxy. Useful for autoscaling on activity.                                                             |
+| `ingress.annotations.{}`                   | Dictionary of annotations to add to the ingress's metadata at the deployment level |
+| `ingress.path`                             | Path where Galaxy application will be hosted                                                                                                                             |
+| `ingress.hosts`                            | Hosts for the Galaxy ingress                                                                                                                                             |
+| `ingress.tls`                              | Ingress configuration with HTTPS support                                                                                                                                 |
+| `resources.requests.cpu`                   | The requested amount of CPU (as time or number of cores)                                                                                                                 |
+| `resources.requests.memory`                | The requested amount of memory.                                                                                                                                          |
+| `resources.requests.ephemeral-storage`     | The requested amount of ephemeral storage                                                                                                                                |
+| `resources.limits.cpu`                     | The maximum CPU that can be alloacted.                                                                                                                                   |
+| `resources.limits.memory`                  | The maximum memory that can be allocated.                                                                                                                                |
+| `resources.limits.ephemeral-storage`       | The maximum ephemeral storage that can be allocated.                                                                                                                     |
+| `tolerations`                              | Define the `taints` that are tolerated.                                                                                                                                  |
+| `postgresql.enabled`                       | Enable the postgresql condition in the [requirements.yml](https://github.com/galaxyproject/galaxy-helm/blob/master/galaxy/requirements.yaml).                            |
+| `cvmfs.enabled`                            | Enable CVMFS.                                                                                                                                                            |
+| `cvmfs.deploy`                             | Sets the `cvmfs.deploy` condition in the [requirements.yml](https://github.com/galaxyproject/galaxy-helm/blob/master/galaxy/requirements.yaml).                          |
+| `useSecretConfigs`                         | Enable Kubernetes Secrets for all config maps                                                                                                                            |
+| `configs.*`                                | Galaxy configuration files and values for each of the files. The provided value represent the entire content of the given configuration file                             |
+| `jobs.priorityClass.enabled`               | Assign a [priorityClass](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass) to the dispatched jobs.                               |
+| `jobs.priorityClass.existingClass`         | Use an existing [priorityClass](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass) to assign if `jobs.priorityClass.enabled=true` |
+| `jobs.rules`                               | Galaxy dynamic job rules. See `values.yaml`                                                                                                                                            |
+| `extraFileMappings.{}`                     | Add extra files mapped as configMaps or Secrets at arbitrary paths. See `values.yaml` for examples. |
+| `influxdb.enabled`                         | Enable the `influxdb` used by the metrics scraper.                                                                                                                       |
+| `influxdb.url`                             | The connection URL to in the `influxdb`                                                                                                                                  |
+| `influxdb.username`                        | Influxdb user name.                                                                                                                                                      |
+| `influxdb.password`                        | Password for the influxdb user.                                                                                                                                          |
+| `nginx.image.repository`                   | Where to obtain the Nginx container.                                                                                                                                     |
+| `nginx.image.tag`                          | The Nginx version to pull.                                                                                                                                               |
+| `nginx.image.pullPolicy`                   | When Kubernetes will [pull](https://kubernetes.io/docs/concepts/containers/images/#updating-images) the Nginx image from the repository.                                 |
+| `nginx.conf.client_max_body_size`          | Requests larger than this size will result in a `413 Payload Too Large`.                                                                                                 |
 
 # Handlers
 
@@ -192,6 +206,10 @@ Galaxy defines three handler types: `jobHandlers`, `webHandlers`, and `workflowH
 | `replicaCount`   | The number of handlers to be spawned.                        |
 | `livenessProbe`  | Probe used to determine if a pod should be restarted.        |
 | `readinessProbe` | Probe used to determine if the pod is ready to accept workloads. |
+| `startupDelay`   | Delay in seconds for handler startup. Used to offset handlers and avoid race conditions at first startup |
+| `annotations`    | Dictionary of annotations to add to this handler's metadata at the deployment level   |
+| `podAnnotations` | Dictionary of annotations to add to this handler's metadata at the pod level |
+| `podSpecExtra`   | Dictionary to add to this handler's pod template under `spec` |
 
 ## Liveness and Readiness Probes
 

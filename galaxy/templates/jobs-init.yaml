@@ -122,7 +122,7 @@ spec:
         {{- .Values.extraVolumes | toYaml | nindent 8 }}
         {{- end }}
 ---
-{{ if .Values.initJob.externalConfs.enabled }}
+{{ if .Values.initJob.downloadToolConfs.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -190,28 +190,28 @@ spec:
             {{- end }}
         - name: {{ .Chart.Name }}-init-cloud-repo
           image: alpine:3.7
-          command: ['sh', '-c', 'wget -O startup.tar.gz {{ .Values.initJob.externalConfs.archives.startup }} && tar -xvf startup.tar.gz > /dev/null && echo "Done" > /galaxy/server/config/mutable/init_clone_done_{{.Release.Revision}}']
+          command: ['sh', '-c', 'wget -O startup.tar.gz {{ .Values.initJob.downloadToolConfs.archives.startup }} && tar -xvf startup.tar.gz > /dev/null && echo "Done" > /galaxy/server/config/mutable/init_clone_done_{{.Release.Revision}}']
           volumeMounts:
             - name: galaxy-data
-              mountPath: {{ .Values.initJob.externalConfs.volume.mountPath }}
-              subPath: {{ .Values.initJob.externalConfs.volume.subPath }}
+              mountPath: {{ .Values.initJob.downloadToolConfs.volume.mountPath }}
+              subPath: {{ .Values.initJob.downloadToolConfs.volume.subPath }}
             - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/
               subPath: config
         - name: {{ .Chart.Name }}-init-cloud-repo-partial
           image: alpine:3.7
-          command: ['sh', '-c', 'wget -O partial.tar.gz {{ .Values.initJob.externalConfs.archives.running }} && tar -xvf partial.tar.gz > /dev/null']
+          command: ['sh', '-c', 'wget -O partial.tar.gz {{ .Values.initJob.downloadToolConfs.archives.running }} && tar -xvf partial.tar.gz > /dev/null']
           volumeMounts:
             - name: galaxy-data
-              mountPath: {{ .Values.initJob.externalConfs.volume.mountPath }}
-              subPath: {{ .Values.initJob.externalConfs.volume.subPath }}
+              mountPath: {{ .Values.initJob.downloadToolConfs.volume.mountPath }}
+              subPath: {{ .Values.initJob.downloadToolConfs.volume.subPath }}
         - name: {{ .Chart.Name }}-init-cloud-repo-full
           image: alpine:3.7
-          command: ['sh', '-c', 'wget -O contents.tar.gz {{ .Values.initJob.externalConfs.archives.full }} && tar -xvf contents.tar.gz > /dev/null && chown 101:101 {{ .Values.initJob.externalConfs.volume.mountPath }};']
+          command: ['sh', '-c', 'wget -O contents.tar.gz {{ .Values.initJob.downloadToolConfs.archives.full }} && tar -xvf contents.tar.gz > /dev/null && chown 101:101 {{ .Values.initJob.downloadToolConfs.volume.mountPath }};']
           volumeMounts:
             - name: galaxy-data
-              mountPath: {{ .Values.initJob.externalConfs.volume.mountPath }}
-              subPath: {{ .Values.initJob.externalConfs.volume.subPath }}
+              mountPath: {{ .Values.initJob.downloadToolConfs.volume.mountPath }}
+              subPath: {{ .Values.initJob.downloadToolConfs.volume.subPath }}
       volumes:
         - name: galaxy-conf-files
           {{- if .Values.useSecretConfigs }}

@@ -129,10 +129,10 @@ spec:
             - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/
               subPath: config
-            {{- if .Values.initJob.externalConfs.enabled }}
+            {{- if .Values.initJob.downloadToolConfs.enabled }}
             - name: galaxy-data
-              mountPath: {{ .Values.initJob.externalConfs.volume.mountPath }}
-              subPath: {{ .Values.initJob.externalConfs.volume.subPath }}
+              mountPath: {{ .Values.initJob.downloadToolConfs.volume.mountPath }}
+              subPath: {{ .Values.initJob.downloadToolConfs.volume.subPath }}
             {{- end }}
             {{- if .Values.cvmfs.enabled }}
             {{- range $key, $entry := .Values.cvmfs.galaxyPersistentVolumeClaims }}

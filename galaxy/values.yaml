@@ -114,9 +114,9 @@ securityContext:
 persistence:
   enabled: true
   name: galaxy-pvc
-  # annotations: {}
-  # storageClass:
-  # existingClaim:
+  annotations: {}
+  storageClass: ""
+  existingClaim: null
   accessMode: ReadWriteMany
   size: 10Gi
   mountPath: /galaxy/server/database

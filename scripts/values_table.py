@@ -3,6 +3,7 @@
 # and generate a new table with the entries in the current values.yml file.
 # Any existing descriptions will be added to the new table.
 
+import re
 import sys
 import yaml
 import numbers
@@ -22,19 +23,18 @@ key_list = list()
 # (can not?) be documented.
 special_cases = {
     'configs': 'configs.*',
-    'jobs': 'jobs.rules',
-    'extraFileMappings': 'extraFileMappings.*',
-    'ingress.annotations': 'ingress.annotations.*',
-    'jobHandlers.priorityClass.enabled': 'jobHandlers.priorityClass.enabled',
-    'jobHandlers.priorityClass.existingClass': 'jobHandlers.priorityClass.existingClass',
-    # 'jobHandlers.replicaCount':'jobHandlers.replicaCount',
-    'webHandlers': 'webHandlers.replicaCount',
-    'workflowHandlers': 'workflowHandlers.replicaCount',
+    'extraFileMappings': 'extraFileMappings.{}',
+    '(.*)\\.annotations': '\\1.annotations.{}',
+    '(.*)\\.podAnnotations': '\\1.podAnnotations.{}',
+    '(.*)\\.podSpecExtra': '\\1.podSpecExtra.{}',
+    'extraVolumes': 'extraVolumes.[]',
+    'extraVolumeMounts': 'extraVolumeMounts.[]',
+    'jobs.rules\\..*': 'jobs.rules'
 }
 
 
 # Entries that should be ignored.
-ignored = [ 'cvmfs.data', 'cvmfs.cloud', 'cvmfs.cache', 'jobHandlers.readinessProbe', 'jobHandlers.livenessProbe']
+ignored = [ 'cvmfs.repositories', 'cvmfs.cache', 'cvmfs.galaxyPersistentVolumeClaims.data', 'jobHandlers', 'webHandlers', 'workflowHandlers']
 
 longest_key = -1
 longest_desc = -1
@@ -111,13 +111,10 @@ def parse_value(key, value, label=None):
         # print(f"Ignoring {label}")
         return
 
-    if label in special_cases:
-        # print(f"Will ignore {label} from now on")
-        replacement = special_cases[label]
-        record_key(replacement)
-        if label == 'jobHandlers.replicaCount':
-            ignored.append(label)
-        else:
+    for each in special_cases.keys():
+        if re.match(each, label):
+            replacement = re.sub(each, special_cases[each], label)
+            record_key(replacement)
             return
 
     if isinstance(value, dict):

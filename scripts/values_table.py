@@ -30,12 +30,47 @@ special_cases = {
     'extraVolumes': 'extraVolumes.[]',
     'extraVolumeMounts': 'extraVolumeMounts.[]',
     'jobs\\.rules\\..*': 'jobs.rules',
-    'cvmfs\\.galaxyPersistentVolumeClaims\\..*': 'cvmfs.galaxyPersistentVolumeClaims.{}'
+    'cvmfs\\.galaxyPersistentVolumeClaims\\..*': 'cvmfs.galaxyPersistentVolumeClaims.{}',
+    'jobHandlers\\..*': 'jobHandlers.{}',
+    'webHandlers\\..*': 'webHandlers.{}',
+    'workflowHandlers\\..*': 'workflowHandlers.{}',
 }
 
 
+README_ORDER = ["fullnameOverride",
+                "nameOverride",
+                "image",
+                "imagePullSecrets",
+                "persistence",
+                "useSecretConfigs",
+                "configs",
+                "jobs",
+                "cvmfs",
+                "initJob",
+                "ingress",
+                "service",
+                "serviceAccount",
+                "rbac",
+                "webHandlers",
+                "jobHandlers",
+                "workflowHandlers",
+                "resources",
+                "securityContext",
+                "tolerations",
+                "extraEnv",
+                "extraFileMappings",
+                "extraInitCommands",
+                "extraInitContainers",
+                "extraVolumeMounts",
+                "extraVolumes",
+                "postgresql",
+                "influxdb",
+                "metrics",
+                "nginx",
+                ]
+
 # Entries that should be ignored.
-ignored = [ 'cvmfs.repositories', 'cvmfs.cache', 'jobHandlers', 'webHandlers', 'workflowHandlers']
+ignored = [ 'cvmfs.repositories', 'cvmfs.cache']
 
 longest_key = -1
 longest_desc = -1
@@ -70,7 +105,12 @@ def print_table():
     desc_hr =  "-".ljust(longest_desc, "-")
     print(f"| {params} | {desc} |")
     print(f"|-{params_hr}-|-{desc_hr}-|")
-    for key in sorted(set(key_list)):
+    numbered_order = {}
+    for full_key in set(key_list):
+        for i, key in enumerate(README_ORDER):
+            if key in full_key:
+                numbered_order[full_key] = i
+    for key in sorted(set(key_list), key=lambda d: numbered_order[d]):
         print_table_row(key)
 
 # Prints a single row in the table.

@@ -142,11 +142,11 @@ current default values can be found in `values.yaml` file.
 | `useSecretConfigs`                         | Enable Kubernetes Secrets for all config maps                                                                                                                                                              |
 | `configs.{}`                               | Galaxy configuration files and values for each of the files. The provided value represent the entire content of the given configuration file                                                               |
 | `jobs.priorityClass.enabled`               | Assign a [priorityClass](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass) to the dispatched jobs.                                                                 |
-| `jobs.rules`                               | Galaxy dynamic job rules. See `values.yaml`                                                                                                                                                                |
+| `jobs.rules`                               | Galaxy dynamic job rules. <a href="galaxy/values.yaml">See `values.yaml`</a>                                                                                                                                                                |
 | `jobs.priorityClass.existingClass`         | Use an existing [priorityClass](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass) to assign if `jobs.priorityClass.enabled=true`                                   |
 | `cvmfs.deploy`                             | Deploy the Galaxy-CVMFS-CSI Helm Chart. This is an optional dependency, and for production scenarios it should be deployed separately as a cluster-wide resource                                           |
 | `cvmfs.enabled`                            | Enable use of CVMFS in configs, and deployment of CVMFS Persistent Volume Claims for Galaxy                                                                                                                |
-| `cvmfs.galaxyPersistentVolumeClaims.{}`    | Persistent Volume Claims to deploy for CVMFS repositories. See `values.yaml` for examples.                                                                                                                 |
+| `cvmfs.galaxyPersistentVolumeClaims.{}`    | Persistent Volume Claims to deploy for CVMFS repositories. <a href="galaxy/values.yaml">See `values.yaml`</a> for examples.                                                                                                                 |
 | `initJob.downloadToolConfs.enabled`        | Download configuration files and the `tools` directory from an archive via a job at startup                                                                                                                |
 | `initJob.downloadToolConfs.archives.startup` | A URL to a `tar.gz` publicly accessible archive containing AT LEAST conf files and XML tool wrappers. Meant to be enough for Galaxy handlers to startup.                                                   |
 | `initJob.downloadToolConfs.archives.running` | A URL to a `tar.gz` publicly accessible archive containing AT LEAST confs, tool wrappers, and tool scripts but excluding test data. Meant to be enough for Galaxy handlers to run jobs.                    |
@@ -167,9 +167,9 @@ current default values can be found in `values.yaml` file.
 | `serviceAccount.create`                    | The serviceAccount will be created if it does not exist.                                                                                                                                                   |
 | `serviceAccount.name`                      | The serviceAccount account to use.                                                                                                                                                                         |
 | `rbac.enabled`                             | Enable Galaxy job RBAC. This will grant the service account the necessary permissions/roles to view jobs and pods in this namespace. Defaults to true.                                                     |
-| `webHandlers.{}`                           | Configuration for the web handlers (See table below for all options)                                                                                                                                       |
-| `jobHandlers.{}`                           | Configuration for the job handlers (See table below for all options)                                                                                                                                       |
-| `workflowHandlers.{}`                      | Configuration for the workflow handlers (See table below for all options)                                                                                                                                  |
+| `webHandlers.{}`                           | Configuration for the web handlers (<a href="#handlers">See table below for all options</a>)                                                                                                                                       |
+| `jobHandlers.{}`                           | Configuration for the job handlers (<a href="#handlers">See table below for all options</a>)                                                                                                                                       |
+| `workflowHandlers.{}`                      | Configuration for the workflow handlers (<a href="#handlers">See table below for all options</a>)                                                                                                                                  |
 | `resources.limits.memory`                  | The maximum memory that can be allocated.                                                                                                                                                                  |
 | `resources.requests.memory`                | The requested amount of memory.                                                                                                                                                                            |
 | `resources.limits.cpu`                     | The maximum CPU that can be alloacted.                                                                                                                                                                     |
@@ -178,7 +178,7 @@ current default values can be found in `values.yaml` file.
 | `resources.requests.ephemeral-storage`     | The requested amount of ephemeral storage                                                                                                                                                                  |
 | `securityContext.fsGroup`                  | The [group](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/) for any files created.                                                                                             |
 | `tolerations`                              | Define the `taints` that are tolerated.                                                                                                                                                                    |
-| `extraFileMappings.{}`                     | Add extra files mapped as configMaps or Secrets at arbitrary paths. See `values.yaml` for examples.                                                                                                        |
+| `extraFileMappings.{}`                     | Add extra files mapped as configMaps or Secrets at arbitrary paths. <a href="galaxy/values.yaml">See `values.yaml`</a> for examples.                                                                                                        |
 | `extraInitCommands`                        | Extra commands that will be run during initialization.                                                                                                                                                     |
 | `extraInitContainers.[]`                   | A list of extra init containers for the handler pods                                                                                                                                                       |
 | `extraVolumeMounts.[]`                     | List of volumeMounts to add to all handlers                                                                                                                                                                |
@@ -207,16 +207,17 @@ Galaxy defines three handler types: `jobHandlers`, `webHandlers`, and `workflowH
 | Parameter        | Description                                                  |
 | :--------------- | :----------------------------------------------------------- |
 | `replicaCount`   | The number of handlers to be spawned.                        |
-| `livenessProbe`  | Probe used to determine if a pod should be restarted.        |
-| `readinessProbe` | Probe used to determine if the pod is ready to accept workloads. |
 | `startupDelay`   | Delay in seconds for handler startup. Used to offset handlers and avoid race conditions at first startup |
 | `annotations`    | Dictionary of annotations to add to this handler's metadata at the deployment level   |
 | `podAnnotations` | Dictionary of annotations to add to this handler's metadata at the pod level |
 | `podSpecExtra`   | Dictionary to add to this handler's pod template under `spec` |
+| `startupProbe`   | Probe used to determine if a pod has started. Other probes wait for the startup probe. <a href="#probes">See table below for all probe options</a> |
+| `livenessProbe`  | Probe used to determine if a pod should be restarted. <a href="#probes">See table below for all probe options</a>       |
+| `readinessProbe` | Probe used to determine if the pod is ready to accept workloads. <a href="#probes">See table below for all probe options</a> |
 
-## Liveness and Readiness Probes
+## Probes
 
-Kubernetes uses `livenessProbe`s and `readinessProbe`s to determine the state of a pod.  Pods that fail the `livenessProbe` will be restarted and work will not be dispatched to the pod until the `readinessProbe` returns true.  A pod is `ready` when all of its containers are `ready`.
+Kubernetes uses probes to determine the state of a pod. Pods are not considered to have started up, and hence other probes are not run, until the startup probes has succeeded. Pods that fail the `livenessProbe` will be restarted and work will not be dispatched to the pod until the `readinessProbe` returns true.  A pod is `ready` when all of its containers are `ready`.
 
 Liveness and readiness probes share the same configuration options.
 

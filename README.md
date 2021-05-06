@@ -366,6 +366,22 @@ by setting the desired values of the `webHandlers.replicaCount`,
 `jobHandlers.replicaCount`, and `workflowHandlers.replicaCount` configuration options.
 
 
+## Galaxy versions
+
+Some changes introduced in the chart sometimes rely on changes in the Galaxy container image,
+especially in relation to the kubernetes runner. This table will keep track of recommended Chart
+versions for particular Galaxy versions as breaking changes are introduced. Otherwise, the Galaxy image
+and chart should be independently upgrade-able. In other words, upgrading the Galaxy image from `21.05`
+to `21.09` should be as simple as `helm upgrade mygalaxy cloudve/galaxy --reuse-values --set image.tag=21.09`.
+
+depending on
+
+| Char version        | Galaxy version   | Description     |
+| :------------------ | :--------------- | :-------------- |
+| `4.0`               | `21.05`          | Needs [Galaxy PR#11899](https://github.com/galaxyproject/galaxy/pull/11899) for eliminating the CVMFS. If running chart 4.0+ with Galaxy image `21.01` or below, use the CVMFS instead with `--set initJob.downloadToolConfs.enabled=false --set cvmfs.repositories.cvmfs-gxy-cloud=cloud.galaxyproject.org --set cvmfs.galaxyPersistentVolumeClaims.cloud.storage=1Gi --set cvmfs.galaxyPersistentVolumeClaims.cloud.storageClassName=cvmfs-gxy-cloud --set cvmfs.galaxyPersistentVolumeClaims.cloud.mountPath=/cvmfs/cloud.galaxyproject.org` |
+
+
+
 ## Funding
 
 - _Version 3+_: Galaxy Project, Genomics Virtual Laboratory (GVL)

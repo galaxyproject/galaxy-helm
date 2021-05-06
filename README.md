@@ -303,8 +303,9 @@ configs:
 
 ## Data Persistence
 
-The Galaxy handlers store all user data under `/galaxy/server/database`
-path in each container. Persistent Volume Claims (PVCs) are used to share the
+By default, the Galaxy handlers store all user data under `/galaxy/server/database`
+path in each container. This path can be changed via `persistence.mountPath`.
+Persistent Volume Claims (PVCs) are used to share the
 data across deployments. It is possible to specify en existing PVC via
 `persistence.existingClaim`. Alternatively, a value for
 `persistence.storageClass` can be supplied to designate a desired storage

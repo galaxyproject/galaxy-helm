@@ -22,7 +22,7 @@ configuration changes, updates, upgrades, and rollbacks.
 ## Recommended versions
 
 - Kubernetes 1.16+
-- Helm 3+
+- Helm 3.5+
 
 You will need a Kubernetes and Helm installation; the easiest option for
 testing and development purposes is to install

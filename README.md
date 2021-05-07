@@ -33,7 +33,7 @@ integrated Kubernetes.
 Another out-of-the box option is [`k3d`](https://k3d.io/) which runs a `k3s`
 cluster.
 
-_Note:_ The CVMFS-CSI driver used for referecen data unfortunately does not work
+_Note:_ The CVMFS-CSI driver used for reference data unfortunately does not work
 on a Mac at the moment.
 
 ## Dependency charts
@@ -273,7 +273,7 @@ Setting Galaxy configuration file values requires the key name to be escaped.
 In this example, we are upgrading an existing deployment.
 
 ```console
-helm upgrade my-galaxy . --set-file "configs.galaxy\.yml.brand"="Hello World"
+helm upgrade my-galaxy . --set "configs.galaxy\.yml.brand"="Hello World"
 ```
 
 You can also set the galaxy configuration file in its entirety with:
@@ -285,7 +285,7 @@ helm install my-galaxy . --set-file "configs.galaxy\.yml"=/path/to/local/galaxy.
 To unset an existing file and revert to the container's default version:
 
 ```console
-helm upgrade my-galaxy . --set-file "configs.job_conf\.xml"=null
+helm upgrade my-galaxy . --set "configs.job_conf\.xml"=null
 ```
 
 Alternatively, any number of YAML files that specifies the values of the parameters can be

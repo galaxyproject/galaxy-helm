@@ -3,67 +3,65 @@
 [Galaxy](https://galaxyproject.org/) is a data analysis platform focusing on
 accessibility, reproducibility, and transparency of primarily bioinformatics
 data. This repo contains [Helm charts](https://helm.sh/) for easily deploying
-Galaxy on top of Kubernetes.
+Galaxy on top of Kubernetes. The chart allows application configuration changes,
+updates, upgrades, and rollbacks.
 
 You may [follow this documentation](https://galaxyproject.org/cloud/k8s/) on
-how to use this Helm chart to deploy Galaxy on various managed kubernetes 
+how to use this Helm chart to deploy Galaxy on various managed kubernetes
 services (e.g., Amazon EKS and Google GKE).
-
-## HELM 2 NOTE
-
-Support for Helm 2 has been discontinued and users must upgrade to [Helm 3](https://helm.sh) to use these charts.
-
-## Introduction
-
-This [Helm chart](https://helm.sh/) bootstraps a Galaxy deployment on a
-[Kubernetes](https://kubernetes.io/) cluster. The chart allows application
-configuration changes, updates, upgrades, and rollbacks.
 
 ## Recommended versions
 
 - Kubernetes 1.16+
 - Helm 3.5+
 
+### Helm 2 note
+
+Support for Helm 2 has been discontinued and users must upgrade to [Helm
+3](https://helm.sh) to use these charts.
+
+## Kubernetes cluster
+
 You will need `kubectl` ([instructions](https://kubernetes.io/docs/tasks/tools/#kubectl))
 and `Helm` ([instructions](https://helm.sh/docs/intro/install/)) installed.
 
-## Kubernetes Cluster
+In terms of getting a Kubernetes cluster, an easy option for testing and
+development purposes is to install [Docker
+Desktop](https://www.docker.com/products/docker-desktop), which comes with
+integrated Kubernetes.
 
-In terms of getting a Kubernetes cluster, an easy option for
-testing and development purposes is to install
-[Docker Desktop](https://www.docker.com/products/docker-desktop), which comes
-with integrated Kubernetes.
+Another out-of-the box option is [`k3d`](https://k3d.io/) which runs a `k3s`
+cluster.
 
-Another out-of-the box option is [`k3d`](https://k3d.io/) which runs a `k3s` cluster.
+_Note:_ The CVMFS-CSI driver used for referecen data unfortunately does not work
+on a Mac at the moment.
 
-Note: The CVMFS-CSI driver unfortunately does not work on Mac at the moment.
+## Dependency charts
 
-## Optional Dependency Charts
+This chart relies on the features of other charts for common functionality:
+- [postgres-operator](https://github.com/zalando/postgres-operator) for the
+  database;
+- [CVMFS-CSI chart](https://github.com/CloudVE/galaxy-cvmfs-csi-helm) for
+  linking the reference data to Galaxy and jobs. While, technically, CVMFS is an
+  optional dependency, production settings will likely want it enabled.
 
-This chart relies on the features of other charts for common functionality.
-Most notably, this includes the postgres-operator chart for the database. In addition,
-the chart can rely on the use of the CVMFS-CSI chart for linking the reference data
-to Galaxy and jobs. While, technically, CVMFS is an optional dependency,
-production settings will likely want it enabled.
+_Note:_ It is not advisable to run multiple instances of the CVMFS-CSI
+simultaneously on the same cluster. If you wish to deploy multiple instances of
+Galaxy on the same cluster, please install the CVMFS-CSI chart separately as
+shown below. One exception to this is installing multiple releases of Galaxy in
+different namespaces AND running on different nodepools. In that case, it is
+possible to have each Galaxy release deploy its own CVMFS-CSI (and own NFS
+provisioner if desired). For that case, please refer to the [GalaxyKubeMan
+Chart](https://github.com/galaxyproject/galaxykubeman-helm).
 
-- [Postgres-Operator](https://github.com/zalando/postgres-operator)
-- [Galaxy-CVMFS-CSI](https://github.com/CloudVE/galaxy-cvmfs-csi-helm)
-
-NOTE: It is not advisable to run multiple instances of the CVMFS-CSI simultaneously on
-the same cluster. If you wish to deploy multiple instances of Galaxy on the same cluster,
-please install the CVMFS-CSI chart separately as shown below. One exception to this is
-installing multiple releases of Galaxy in different namespaces AND running on different
-nodepools. In that case, it is possible to have each Galaxy release deploy its own 
-CVMFS-CSI (and own NFS provisioner if desired). For that case, please refer to the
-[GalaxyKubeMan Chart](https://github.com/galaxyproject/galaxykubeman-helm).
-
-In a production setting, especially if the intention is to run multiple Galaxies in
-a single cluster, we recommend installing these charts separately once per cluster, and
-installing Galaxy with `--set postgresql.deploy=false --set cvmfs.deploy=false --set cvmfs.enabled=true`
+In a production setting, especially if the intention is to run multiple Galaxies
+in a single cluster, we recommend installing these charts separately once per
+cluster, and installing Galaxy with `--set postgresql.deploy=false --set
+cvmfs.deploy=false --set cvmfs.enabled=true`.
 
 ## TL;DR
 
-### Default simple installation (with few basic tools)
+### Default simple installation (with only a few basic Galaxy tools)
 
 Launching from the source:
 
@@ -82,7 +80,7 @@ helm repo update
 helm install my-galaxy-release cloudve/galaxy
 ```
 
-### Example installation for a single Galaxy instance with CVMFS tools
+### Example installation for a single Galaxy instance with CVMFS
 
 ```console
 helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/master/
@@ -99,10 +97,10 @@ helm install cvmfs cloudve/galaxy-cvmfs-csi --namespace cvmfs --create-namespace
 helm install my-galaxy-release-1 cloudve/galaxy --set cvmfs.enabled=true --set cvmfs.deploy=false --set ingress.path="/galaxy1/"
 helm install my-galaxy-release-2 cloudve/galaxy --set cvmfs.enabled=true --set ingress.path="/galaxy2/"
 ```
-Note: `cvmfs.deploy` defaults to `false`. The explicit mention in the first release is
+_Note:_ `cvmfs.deploy` defaults to `false`. The explicit mention in the first release is
 purely visual to highlight the difference.
 
-## Installing the Chart
+## Installing the chart
 
 1. Clone this repository and install the required dependency charts.
 
@@ -118,10 +116,10 @@ helm dependency update
 helm install my-galaxy .
 ```
 
-In about a minute, Galaxy will be available at the root URL of your kubernetes
+In about a minute, Galaxy will be available at the root URL of your Kubernetes
 cluster.
 
-## Uninstalling the Chart
+## Uninstalling the chart
 
 To uninstall/delete the `galaxy` deployment, run:
 
@@ -213,7 +211,8 @@ current default values can be found in `values.yaml` file.
 
 # Handlers
 
-Galaxy defines three handler types: `jobHandlers`, `webHandlers`, and `workflowHandlers`.  All three handler types share common configuration options.
+Galaxy defines three handler types: `jobHandlers`, `webHandlers`, and
+`workflowHandlers`.  All three handler types share common configuration options.
 
 | Parameter        | Description                                                  |
 | :--------------- | :----------------------------------------------------------- |
@@ -228,7 +227,11 @@ Galaxy defines three handler types: `jobHandlers`, `webHandlers`, and `workflowH
 
 ## Probes
 
-Kubernetes uses probes to determine the state of a pod. Pods are not considered to have started up, and hence other probes are not run, until the startup probes has succeeded. Pods that fail the `livenessProbe` will be restarted and work will not be dispatched to the pod until the `readinessProbe` returns true.  A pod is `ready` when all of its containers are `ready`.
+Kubernetes uses probes to determine the state of a pod. Pods are not considered
+to have started up, and hence other probes are not run, until the startup probes
+have succeeded. Pods that fail the `livenessProbe` will be restarted and work
+will not be dispatched to the pod until the `readinessProbe` returns
+successfully.  A pod is `ready` when all of its containers are `ready`.
 
 Liveness and readiness probes share the same configuration options.
 
@@ -245,7 +248,7 @@ Liveness and readiness probes share the same configuration options.
 ```
 jobHandlers:
   replicaCount: 2
-  livenessProbe: 
+  livenessProbe:
     enabled: false
   readinessProbe:
     enabled: true
@@ -255,42 +258,41 @@ jobHandlers:
     failureThreshhold: 3
 ```
 
-
-
-## Setting Parameters on the Command Line
+## Setting parameters on the command line
 
 Specify each parameter using the `--set key=value[,key=value]` argument to
-`helm install`. For example,
+`helm install` or `helm upgrade`. For example,
 
 ```console
-helm install mygalaxy . --set persistence.size=50Gi
+helm install my-galaxy . --set persistence.size=50Gi
 ```
 
 The above command sets the Galaxy persistent volume to 50GB.
 
-Setting Galaxy configuration file values requires the key name to be escaped:
+Setting Galaxy configuration file values requires the key name to be escaped.
+In this example, we are upgrading an existing deployment.
 
 ```console
-helm install mygalaxy . --set-file "configs.galaxy\.yml.brand"="Hello World"
+helm upgrade my-galaxy . --set-file "configs.galaxy\.yml.brand"="Hello World"
 ```
 
 You can also set the galaxy configuration file in its entirety with:
 
 ```console
-helm install mygalaxy . --set-file "configs.galaxy\.yml"=/path/to/local/galaxy.yml
+helm install my-galaxy . --set-file "configs.galaxy\.yml"=/path/to/local/galaxy.yml
 ```
 
 To unset an existing file and revert to the container's default version:
 
 ```console
-helm install mygalaxy . --set-file "configs.job_conf\.xml"=null
+helm upgrade my-galaxy . --set-file "configs.job_conf\.xml"=null
 ```
 
 Alternatively, any number of YAML files that specifies the values of the parameters can be
 provided when installing the chart. For example,
 
 ```console
-helm install mygalaxy . -f values.yaml -f new-values.yaml
+helm install my-galaxy . -f values.yaml -f new-values.yaml
 ```
 
 To unset a config file in a values file, use the YAML null type:
@@ -300,39 +302,45 @@ configs:
   job_conf.xml: ~
 ```
 
+## Data persistence
 
-## Data Persistence
-
-By default, the Galaxy handlers store all user data under `/galaxy/server/database`
-path in each container. This path can be changed via `persistence.mountPath`.
-Persistent Volume Claims (PVCs) are used to share the
-data across deployments. It is possible to specify en existing PVC via
+By default, the Galaxy handlers store all user data under
+`/galaxy/server/database/` path in each container. This path can be changed via
+`persistence.mountPath` variable. Persistent Volume Claims (PVCs) are used to
+share the data across deployments. It is possible to specify en existing PVC via
 `persistence.existingClaim`. Alternatively, a value for
-`persistence.storageClass` can be supplied to designate a desired storage
-class for dynamic provisioning of the necessary PVCs. If neither value is
-supplied, the default storage class for the k8s cluster will be used.
+`persistence.storageClass` can be supplied to designate a desired storage class
+for dynamic provisioning of the necessary PVCs. If neither value is supplied,
+the default storage class for the K8s cluster will be used.
 
-For multi-node scenarios, we recommend a storage class that supports `ReadWriteMany`, such as the
+For multi-node scenarios, we recommend a storage class that supports
+`ReadWriteMany`, such as the
 [nfs-provisioner](https://github.com/helm/charts/tree/master/stable/nfs-server-provisioner)
 as the data must be available to all nodes in the cluster.
 
-In single-node scenarios, you must use `--set persistence.accessMode="ReadWriteOnce"`
+In single-node scenarios, you must use `--set persistence.accessMode="ReadWriteOnce"`.
 
-## Note about persistent deployments and restarts
+### Note about persistent deployments and restarts
 
-If you wish to make your deployment persistent or restartable (bring deployment down, keep the state in disk, then bring it up again later in time), you should create PVCs for Galaxy and Postgres and use the existingClaims variables to point to them as explained in the previous section. In addition, you MUST set the `postgresql.galaxyDatabasePassword` variable, otherwise it will be autogenerated and will mismatch when restoring.
+If you wish to make your deployment persistent or restartable (bring deployment
+down, keep the state in disk, then bring it up again later in time), you should
+create PVCs for Galaxy and Postgres and use the `persistence.existingClaim`
+variable to point to them as explained in the previous section. In addition, you
+must set the `postgresql.galaxyDatabasePassword` variable; otherwise, it will be
+autogenerated and will mismatch when restoring.
 
-## Production Settings
+## Production settings
 
-Note that this deployment mode does not work on a Mac laptop because of an 
+Note that this deployment mode does not work on a Mac because of an
 unresolved issue in the CVMFS-CSI driver.
 
-To install this version of the chart, we need to enable CVMFS deployment.
+To install this configuration of the chart, we need to enable CVMFS deployment.
 Depending on the setup of the cluster you have available, you may also need
 to supply values for the cluster storage classes or PVCs.
 
-If you wish to install a single Galaxy CVMFS-CSI and Postgres-Operator release to be used by multiple
-Galaxy releases, you can do so by installing the CVMFS separately as shown below:
+If you wish to install a single Galaxy CVMFS-CSI and Postgres operator release
+to be used by multiple Galaxy releases, you can do so by installing the CVMFS
+separately as shown below:
 
 ```console
 helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/master/
@@ -355,32 +363,31 @@ helm install galaxy cloudve/galaxy --set cvmfs.enabled=true --set cvmfs.deploy=t
 ```
 
 If you use the latter method, it is highly recommended that you deploy a single
-Galaxy release per nodepool/namespace, as multiple CVMFS-CSI provisioners and postgres
-operators running side-by-side can interfer with one another.
+Galaxy release per nodepool/namespace, as multiple CVMFS-CSI provisioners and Postgres
+operator running side-by-side can interfer with one another.
 
 
-## Horizontal Scaling
+## Horizontal scaling
 
 The Galaxy application can be horizontally scaled for the web, job, or workflow handlers
 by setting the desired values of the `webHandlers.replicaCount`,
 `jobHandlers.replicaCount`, and `workflowHandlers.replicaCount` configuration options.
 
-
 ## Galaxy versions
 
-Some changes introduced in the chart sometimes rely on changes in the Galaxy container image,
-especially in relation to the kubernetes runner. This table will keep track of recommended Chart
-versions for particular Galaxy versions as breaking changes are introduced. Otherwise, the Galaxy image
-and chart should be independently upgrade-able. In other words, upgrading the Galaxy image from `21.05`
-to `21.09` should be as simple as `helm upgrade mygalaxy cloudve/galaxy --reuse-values --set image.tag=21.09`.
+Some changes introduced in the chart sometimes rely on changes in the Galaxy
+container image, especially in relation to the Kubernetes runner. This table
+keeps track of recommended Chart versions for particular Galaxy versions as
+breaking changes are introduced. Otherwise, the Galaxy image and chart should be
+independently upgrade-able. In other words, upgrading the Galaxy image from
+`21.05` to `21.09` should be a matter of `helm upgrade mygalaxy cloudve/galaxy
+--reuse-values --set image.tag=21.09`.
 
 depending on
 
 | Char version        | Galaxy version   | Description     |
 | :------------------ | :--------------- | :-------------- |
 | `4.0`               | `21.05`          | Needs [Galaxy PR#11899](https://github.com/galaxyproject/galaxy/pull/11899) for eliminating the CVMFS. If running chart 4.0+ with Galaxy image `21.01` or below, use the CVMFS instead with `--set initJob.downloadToolConfs.enabled=false --set cvmfs.repositories.cvmfs-gxy-cloud=cloud.galaxyproject.org --set cvmfs.galaxyPersistentVolumeClaims.cloud.storage=1Gi --set cvmfs.galaxyPersistentVolumeClaims.cloud.storageClassName=cvmfs-gxy-cloud --set cvmfs.galaxyPersistentVolumeClaims.cloud.mountPath=/cvmfs/cloud.galaxyproject.org` |
-
-
 
 ## Funding
 

@@ -2,13 +2,13 @@ apiVersion: v2
 name: galaxy
 type: application
 version: 4.0.0
-appVersion: "21.01"
+appVersion: "21.05"
 description: Chart for Galaxy, an open, web-based platform for accessible, reproducible, and transparent computational biomedical research.
 icon: https://galaxyproject.org/images/galaxy-logos/galaxy_project_logo_square.png
 dependencies:
     - name: postgres-operator
-      repository: "https://raw.githubusercontent.com/zalando/postgres-operator/v1.6.1/charts/postgres-operator/"
-      version: 1.6.1
+      repository: "https://raw.githubusercontent.com/zalando/postgres-operator/master/charts/postgres-operator/"
+      version: 1.6.2
       alias: postgresql
       condition: postgresql.deploy
     - name: galaxy-cvmfs-csi

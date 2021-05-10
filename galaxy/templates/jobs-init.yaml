@@ -122,7 +122,6 @@ spec:
         {{- .Values.extraVolumes | toYaml | nindent 8 }}
         {{- end }}
 ---
-{{ if .Values.initJob.downloadToolConfs.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -188,6 +187,7 @@ spec:
             {{- if .Values.extraVolumeMounts }}
             {{- .Values.extraVolumeMounts | toYaml | nindent 12 }}
             {{- end }}
+{{ if .Values.initJob.downloadToolConfs.enabled }}
         - name: {{ .Chart.Name }}-init-cloud-repo
           image: alpine:3.7
           command: ['sh', '-c', 'wget -O startup.tar.gz {{ .Values.initJob.downloadToolConfs.archives.startup }} && tar -xvf startup.tar.gz > /dev/null && echo "Done" > /galaxy/server/config/mutable/init_clone_done_{{.Release.Revision}}']
@@ -211,7 +211,8 @@ spec:
           volumeMounts:
             - name: galaxy-data
               mountPath: {{ .Values.initJob.downloadToolConfs.volume.mountPath }}
-              subPath: {{ .Values.initJob.downloadToolConfs.volume.subPath }}
+              subPath: {{ .Values.initJob.downloadToolConfs.volume.subPath }}     
+{{ end }}
       volumes:
         - name: galaxy-conf-files
           {{- if .Values.useSecretConfigs }}
@@ -253,4 +254,3 @@ spec:
         {{- if .Values.extraVolumes }}
         {{- .Values.extraVolumes | toYaml | nindent 8 }}
         {{- end }}
-{{ end }}

@@ -287,8 +287,6 @@ configs:
           {{- end }}
         k8s_namespace: "{{ .Release.Namespace }}"
         k8s_galaxy_instance_id: "{{ .Release.Name }}"
-        k8s_run_as_user_id: "0"
-        k8s_run_as_group_id: "0"
         k8s_fs_group_id: "101"
         k8s_supplemental_group_id: "101"
         k8s_pull_policy: IfNotPresent

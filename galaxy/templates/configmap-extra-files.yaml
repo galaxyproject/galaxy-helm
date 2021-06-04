@@ -19,7 +19,7 @@ data:
     {{- ($.Files.Get $entry.path) | nindent 4 }}
   {{- else }}
     {{- tpl (tpl $entry.content $) $ | nindent 4 }}
-  {{- end}}
+  {{- end }}
 ---
 {{- end }}
 {{- end }}

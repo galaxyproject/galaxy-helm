@@ -258,6 +258,24 @@ jobHandlers:
     failureThreshhold: 3
 ```
 
+## Extra File Mappings
+
+The `extraFileMappings` field can be used to inject files to arbitrary paths in the `job`, `web`, or `workflow` handlers.  The contents of the file can be specified directly in the `values.yml` file with the `content` attribute, or by specifying the path to the file to be injected with the `path` attribute.
+
+```yaml
+extraFileMappings:
+  /galaxy/server/static/welcome.html:
+    applyToWeb: true
+    applyToJob: false
+    applyToWorkflow: false
+    content: |
+      <!DOCTYPE html>
+      <html>...</html>
+  /galaxy/server/config/object_store_conf.xml:
+    applyToWeb: true
+    path: files/config/object_store_conf.xml
+```
+
 ## Setting parameters on the command line
 
 Specify each parameter using the `--set key=value[,key=value]` argument to

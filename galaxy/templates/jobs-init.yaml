@@ -5,7 +5,9 @@ metadata:
   labels:
     {{- include "galaxy.labels" . | nindent 4 }}
 spec:
+  {{- if .Values.initJob.ttlSecondsAfterFinished }}
   ttlSecondsAfterFinished: {{ .Values.initJob.ttlSecondsAfterFinished }}
+  {{- end }}
   template:
     metadata:
       labels:
@@ -129,7 +131,9 @@ metadata:
   labels:
     {{- include "galaxy.labels" . | nindent 4 }}
 spec:
+  {{- if .Values.initJob.ttlSecondsAfterFinished }}
   ttlSecondsAfterFinished: {{ .Values.initJob.ttlSecondsAfterFinished }}
+  {{- end }}
   template:
     metadata:
       labels:

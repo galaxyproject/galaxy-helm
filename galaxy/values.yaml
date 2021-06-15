@@ -131,6 +131,7 @@ extraVolumeMounts: []
 #     mountPath: /mnt/project/shared-data
 
 initJob:
+  ttlSecondsAfterFinished: 10
   createDatabase: true
   downloadToolConfs:
     enabled: true

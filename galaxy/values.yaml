@@ -132,6 +132,7 @@ extraVolumeMounts: []
 
 initJob:
   createDatabase: true
+  ttlSecondsAfterFinished: 10
   downloadToolConfs:
     enabled: true
     # Uses Galaxy's shared file system volume

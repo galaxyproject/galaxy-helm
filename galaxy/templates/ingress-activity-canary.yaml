@@ -40,7 +40,7 @@ spec:
     - host: {{ .host | quote }}
       http:
         paths:
-          - path: {{ $ingressPath }}/api/users/
+          - path: {{ trimSuffix "/" $ingressPath }}/api/users/
 {{- if semverCompare "^1.19.0-0" $k8s_version }}
             pathType: Prefix
             backend:

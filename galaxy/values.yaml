@@ -379,8 +379,6 @@ configs:
       enable_data_manager_user_view: true
       tool_path: "{{.Values.persistence.mountPath}}/tools"
       tool_data_path: "{{.Values.persistence.mountPath}}/tool-data"
-      # HTTP will redirect to HTTPS anyway, so hardcoding it to http seems ok
-      galaxy_infrastructure_url: "http://{{$host := index .Values.ingress.hosts 0}}{{$path := index $host.paths 0}}{{$host.host}}{{$path.path}}"
       conda_auto_init: false
       nginx_x_accel_redirect_base: >-
         {{include "galaxy.add_trailing_slash" .Values.ingress.path}}_x_accel_redirect

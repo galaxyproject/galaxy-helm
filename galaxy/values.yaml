@@ -347,6 +347,7 @@ configs:
       interactivetools_prefix: "its"
       interactivetools_proxy_host: "{{ $host := index .Values.ingress.hosts 0 }}{{$host.host}}"
       interactivetools_shorten_url: true
+      interactivetools_base_path: "{{$host := index .Values.ingress.hosts 0}}{{$path := index $host.paths 0}}{{$path.path}}"
       database_connection: postgresql://unused:because@overridden_by_envvar
       integrated_tool_panel_config: "/galaxy/server/config/mutable/integrated_tool_panel.xml"
       sanitize_allowlist_file: "/galaxy/server/config/mutable/sanitize_allowlist.txt"

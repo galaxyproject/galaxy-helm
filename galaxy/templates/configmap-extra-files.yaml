@@ -15,8 +15,10 @@ kind: ConfigMap
 data:
 {{- end }}
   {{- include "galaxy.getFilenameFromPath" $key | nindent 2 }}: |
-  {{- if $entry.path }}
+  {{- if $entry.tpl }}
     {{- tpl (tpl $entry.content $) $ | nindent 4 }}
+  {{- else }}
+    {{- $entry.content | nindent 4 }}
   {{- end }}
 ---
 {{- end }}

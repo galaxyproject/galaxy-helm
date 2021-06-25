@@ -627,3 +627,13 @@ nginx:
     pullPolicy: IfNotPresent
   conf:
     client_max_body_size: 100g
+  resources:
+    # We recommend updating these based on the usage levels of the server
+    requests:
+      cpu: 100m
+      memory: 500M
+      ephemeral-storage: 1Gi
+    limits:
+      cpu: 2
+      memory: 3G
+      ephemeral-storage: 10Gi

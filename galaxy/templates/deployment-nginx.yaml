@@ -54,12 +54,6 @@ spec:
               mountPath: {{ .Values.initJob.downloadToolConfs.volume.mountPath }}
               subPath: {{ .Values.initJob.downloadToolConfs.volume.subPath }}
             {{- end }}
-            {{- if .Values.cvmfs.enabled }}
-            {{- range $key, $entry := .Values.cvmfs.galaxyPersistentVolumeClaims }}
-            - name: cvmfs-gxy-{{ $key }}
-              mountPath: {{ $entry.mountPath }}
-            {{- end -}}
-            {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- .Values.extraVolumeMounts | toYaml | nindent 12 }}
             {{- end }}
@@ -80,13 +74,6 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
-        {{- if .Values.cvmfs.enabled }}
-        {{- range $key, $entry := .Values.cvmfs.galaxyPersistentVolumeClaims }}
-        - name: cvmfs-gxy-{{ $key }}
-          persistentVolumeClaim:
-            claimName: {{ template "galaxy.fullname" $ -}}-cvmfs-gxy-{{ $key }}-pvc
-        {{- end }}
-        {{- end }}
         {{- if .Values.extraVolumes }}
         {{- .Values.extraVolumes | toYaml | nindent 8 }}
         {{- end }}

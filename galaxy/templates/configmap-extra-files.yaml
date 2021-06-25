@@ -16,8 +16,6 @@ data:
 {{- end }}
   {{- include "galaxy.getFilenameFromPath" $key | nindent 2 }}: |
   {{- if $entry.path }}
-    {{- ($.Files.Get $entry.path) | nindent 4 }}
-  {{- else }}
     {{- tpl (tpl $entry.content $) $ | nindent 4 }}
   {{- end }}
 ---

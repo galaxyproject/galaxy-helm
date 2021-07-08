@@ -194,6 +194,7 @@ ingress:
     - host: ~
       paths:
         - path: "/galaxy"
+        - path: "/training-material"
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:

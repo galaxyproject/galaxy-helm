@@ -628,3 +628,4 @@ nginx:
     pullPolicy: IfNotPresent
   conf:
     client_max_body_size: 100g
+

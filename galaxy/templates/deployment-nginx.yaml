@@ -64,7 +64,7 @@ spec:
             {{- .Values.extraVolumeMounts | toYaml | nindent 12 }}
             {{- end }}
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.nginx.resources | nindent 12 }}
           lifecycle:
             preStop:
               exec:

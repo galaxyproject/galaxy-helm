@@ -298,6 +298,9 @@ configs:
           {{ if .Values.jobs.priorityClass.enabled -}}
           {{- include "galaxy.fullname" . }}-job-priority
           {{- end }}
+        k8s_job_metadata: |
+          labels:
+            usegalaxy.org/cm_autoscaling_group: "default"
     handling:
       assign:
         - "db-skip-locked"

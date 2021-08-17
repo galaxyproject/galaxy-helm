@@ -156,6 +156,7 @@ current default values can be found in `values.yaml` file.
 | `cvmfs.deploy`                             | Deploy the Galaxy-CVMFS-CSI Helm Chart. This is an optional dependency, and for production scenarios it should be deployed separately as a cluster-wide resource                                           |
 | `cvmfs.enabled`                            | Enable use of CVMFS in configs, and deployment of CVMFS Persistent Volume Claims for Galaxy                                                                                                                |
 | `cvmfs.galaxyPersistentVolumeClaims.{}`    | Persistent Volume Claims to deploy for CVMFS repositories. <a href="galaxy/values.yaml">See `values.yaml`</a> for examples.                                                                                                                 |
+| `initJob.ttlSecondsAfterFinished`          | Sets `ttlSecondsAfterFinished` for the initialization jobs. See the [Kubernetes documentation](https://kubernetes.io/docs/concepts/workloads/controllers/ttlafterfinished/#ttl-controller) for more details.       |
 | `initJob.downloadToolConfs.enabled`        | Download configuration files and the `tools` directory from an archive via a job at startup                                                                                                                |
 | `initJob.downloadToolConfs.archives.startup` | A URL to a `tar.gz` publicly accessible archive containing AT LEAST conf files and XML tool wrappers. Meant to be enough for Galaxy handlers to startup.                                                   |
 | `initJob.downloadToolConfs.archives.running` | A URL to a `tar.gz` publicly accessible archive containing AT LEAST confs, tool wrappers, and tool scripts but excluding test data. Meant to be enough for Galaxy handlers to run jobs.                    |
@@ -257,6 +258,30 @@ jobHandlers:
     timeoutSeconds: 5
     failureThreshhold: 3
 ```
+
+## Extra File Mappings
+
+The `extraFileMappings` field can be used to inject files to arbitrary paths in the `job`, `web`, or `workflow` handlers.  The contents of the file can be specified directly in the `values.yml` file with the `content` attribute, or by specifying the path to the file to be injected with the `path` attribute.
+
+```yaml
+extraFileMappings:
+  /galaxy/server/static/welcome.html:
+    applyToWeb: true
+    applyToJob: false
+    applyToWorkflow: false
+    content: |
+      <!DOCTYPE html>
+      <html>...</html>
+  /galaxy/server/config/object_store_conf.xml:
+    applyToWeb: true
+    path: files/config/object_store_conf.xml
+```
+
+**NOTE** for security reasons Helm will not load files from outside the chart so the `path` must be a relative path to location inside the chart directory.  This will change when [helm#3276](https://github.com/helm/helm/issues/3276) is resolved.  In the interim files can be loaded from external locations by:
+
+1. Creating a symbolic link in the chart directory to the external file, or
+2. using `--set-file` to specify the contents of the file. E.g:
+   `helm upgrade --install galaxy cloudve/galaxy -n galaxy --set-file extraFileMappings."/galaxy/server/static/welcome\.html".content=/home/user/data/welcome.html`
 
 ## Setting parameters on the command line
 

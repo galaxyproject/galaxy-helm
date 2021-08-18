@@ -29,7 +29,8 @@ data:
         uwsgi_buffer_size   128k;
         uwsgi_buffers   4 256k;
         uwsgi_busy_buffers_size   256k;
-        uwsgi_read_timeout 300;
+        uwsgi_read_timeout 600;
+        uwsgi_send_timeout 600;
         client_max_body_size {{ .Values.nginx.conf.client_max_body_size }};
 
         server {

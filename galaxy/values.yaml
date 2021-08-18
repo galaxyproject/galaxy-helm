@@ -389,6 +389,7 @@ configs:
         {{ if .Values.cvmfs.enabled -}}
         {{ .Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/managed/len/ucsc
         {{- end }}
+      chunk_upload_size: 52428800
   container_resolvers_conf.xml: |
     <containers_resolvers>
       <explicit />

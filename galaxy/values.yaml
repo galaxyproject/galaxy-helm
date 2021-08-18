@@ -320,7 +320,14 @@ configs:
   uwsgi.yml: |
     uwsgi:
       virtualenv: /galaxy/server/.venv
-      processes: 1
+      processes: 8
+      vacuum: true
+      single-interpreter: true
+      need-app: true
+      max-requests: 1000
+      max-worker-lifetime: 7200
+      reload-on-rss: 4096
+      worker-reload-mercy: 120
       socket: 0.0.0.0:4001
       http: 0.0.0.0:8080
       pythonpath: /galaxy/server/lib

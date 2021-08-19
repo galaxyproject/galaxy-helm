@@ -312,7 +312,7 @@ configs:
           function: k8s_container_mapper
           docker_enabled: true
           docker_default_container_id: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          tmp_dir: true
+          tmp_dir: "true"
     limits:
     - type: registered_user_concurrent_jobs
       value: 5

@@ -132,6 +132,7 @@ extraVolumeMounts: []
 
 initJob:
   createDatabase: true
+  ttlSecondsAfterFinished: 10
   downloadToolConfs:
     enabled: true
     # Uses Galaxy's shared file system volume
@@ -277,14 +278,14 @@ configs:
         load: galaxy.jobs.runners.kubernetes:KubernetesJobRunner
         k8s_use_service_account: true
         k8s_persistent_volume_claims: |-
-          {{ template "galaxy.pvcname" . -}}:{{.Values.persistence.mountPath}}
+          {{ template "galaxy.pvcname" . -}}:{{ .Values.persistence.mountPath -}}
           {{- if .Values.cvmfs.enabled -}}
           {{- range $key, $entry := .Values.cvmfs.galaxyPersistentVolumeClaims -}}
-          ,{{- template "galaxy.fullname" $ -}}-cvmfs-gxy-{{ $key }}-pvc:{{ $entry.mountPath }}
+          ,{{- template "galaxy.fullname" $ -}}-cvmfs-gxy-{{ $key }}-pvc:{{ $entry.mountPath -}}
           {{- end -}}
           {{- end -}}
-          {{- if .Values.initJob.downloadToolConfs.enabled }}
-          ,{{ template "galaxy.pvcname" . -}}/{{ .Values.initJob.downloadToolConfs.volume.subPath }}:{{ .Values.initJob.downloadToolConfs.volume.mountPath }}
+          {{- if .Values.initJob.downloadToolConfs.enabled -}}
+          ,{{ template "galaxy.pvcname" . -}}/{{ .Values.initJob.downloadToolConfs.volume.subPath }}:{{ .Values.initJob.downloadToolConfs.volume.mountPath -}}
           {{- end -}}
           {{- if .Values.extraVolumes -}}
           {{- template "galaxy.extra_pvc_mounts" . -}}
@@ -315,6 +316,7 @@ configs:
           function: k8s_container_mapper
           docker_enabled: true
           docker_default_container_id: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          tmp_dir: "true"
     limits:
     - type: registered_user_concurrent_jobs
       value: 5
@@ -345,6 +347,7 @@ configs:
   galaxy.yml:
     galaxy:
       id_secret:
+      logo_src: '{{ trimSuffix "/" .Values.ingress.path }}/static/favicon.png'
       database_connection: postgresql://unused:because@overridden_by_envvar
       integrated_tool_panel_config: "/galaxy/server/config/mutable/integrated_tool_panel.xml"
       sanitize_allowlist_file: "/galaxy/server/config/mutable/sanitize_allowlist.txt"
@@ -418,10 +421,12 @@ configs:
     toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse_to_standalone/0.5.2
     toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse_to_standalone/1.16.5+galaxy6
     toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse_to_standalone/1.16.9+galaxy0
+    toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse_to_standalone/1.16.11+galaxy0
     toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/0.5.2.1
     toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.5+galaxy6
     toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.5+galaxy7
     toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.9+galaxy0
+    toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.11+galaxy0
     toolshed.g2.bx.psu.edu/repos/iuc/macs2/macs2_callpeak/2.1.0.20140616.0
     toolshed.g2.bx.psu.edu/repos/iuc/macs2/macs2_callpeak/2.1.0.20151222.0
     toolshed.g2.bx.psu.edu/repos/iuc/macs2/macs2_callpeak/2.1.1.20160309.6
@@ -585,6 +590,7 @@ extraFileMappings:
     applyToJob: false
     applyToWeb: true
     applyToWorkflow: false
+    tpl: true
     content: |
       <!DOCTYPE html>
       <html lang="en">
@@ -629,3 +635,4 @@ nginx:
     pullPolicy: IfNotPresent
   conf:
     client_max_body_size: 100g
+

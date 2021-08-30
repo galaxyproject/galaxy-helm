@@ -275,6 +275,8 @@ configs:
         k8s_use_service_account: true
         k8s_data_volume_claim: |-
           {{ template "galaxy.pvcname" . -}}:{{ .Values.persistence.mountPath -}}
+        k8s_working_volume_claim: |-
+          {{ template "galaxy.pvcname" . -}}:{{ .Values.persistence.mountPath -}}
         k8s_persistent_volume_claims: |-
           {{ template "galaxy.pvcname" . -}}/cache:{{ .Values.persistence.mountPath -}}/cache,
           {{- template "galaxy.pvcname" . -}}/config:{{ .Values.persistence.mountPath -}}/config,

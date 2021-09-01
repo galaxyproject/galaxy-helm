@@ -158,7 +158,7 @@ extraInitContainers: []
 #     applyToWeb: true
 #     applyToWorkflow: true
 #     image: "{{.Values.image.repository}}:{{.Values.image.tag}}"
-#     command: ['sh', '-c', 'cp "/galaxy/server/config/job_conf.xml.sample_advanced" {{.Values.persistence.mountPath}}/']
+#     args: ['sh', '-c', 'cp "/galaxy/server/config/job_conf.xml.sample_advanced" {{.Values.persistence.mountPath}}/']
 #     volumeMounts:
 #       - name: galaxy-data
 #         mountPath: "{{.Values.persistence.mountPath}}"
@@ -167,7 +167,7 @@ extraInitContainers: []
 #     applyToWeb: false
 #     applyToWorkflow: true
 #     image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-#     command: ['sh', '-c', 'cp "/galaxy/server/config/galaxy.yml" {{.Values.persistence.mountPath}}/']
+#     args: ['sh', '-c', 'cp "/galaxy/server/config/galaxy.yml" {{.Values.persistence.mountPath}}/']
 #     volumeMounts:
 #       - name: galaxy-data
 #         mountPath: "{{.Values.persistence.mountPath}}"

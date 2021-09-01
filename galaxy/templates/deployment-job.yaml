@@ -44,7 +44,7 @@ spec:
         - name: {{ $.Chart.Name }}-wait-db
           image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
-          command: ['sh', '-c', '{{ include "galaxy.init-container-wait-command" $ }} sleep {{ $.Values.jobHandlers.startupDelay }};']
+          args: ['sh', '-c', '{{ include "galaxy.init-container-wait-command" $ }} sleep {{ $.Values.jobHandlers.startupDelay }};']
           volumeMounts:
             - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/
@@ -67,13 +67,12 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
           {{ include "galaxy.podEnvVars" $ }}
-          command: [
+          args: [
             'sh', '-c',
             '{{- if $.Values.extraInitCommands -}}
              {{- tpl $.Values.extraInitCommands $ | nindent 13 -}};
              {{- end -}}
              python /galaxy/server/scripts/galaxy-main -c /galaxy/server/config/galaxy.yml --server-name job_handler_{{ $handler_num }} --attach-to-pool job-handlers']
-          args: []
           {{- if $.Values.jobHandlers.startupProbe.enabled }}
           startupProbe:
             exec:

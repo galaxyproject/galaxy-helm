@@ -478,7 +478,7 @@ jobs:
     enabled: true
     existingClass: ""
   rules:
-    container_mapper_rules.yml: |
+    container_mapper_rules.yml:
       mappings:
         summary_stats:
           tool_ids:
@@ -507,7 +507,7 @@ jobs:
           tool_ids:
             - sort1
             - Grouping1
-          docker_container_id_override: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          docker_container_id_override: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           resource_set: small
         set_medium:
           tool_ids:

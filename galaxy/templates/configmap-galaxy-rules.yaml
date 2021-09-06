@@ -8,6 +8,9 @@ data:
   {{- range $key, $entry := .Values.jobs.rules -}}
   {{- if $entry -}}
   {{- $key | nindent 2 }}: |
-    {{- tpl (tpl $entry $) $ | nindent 4 -}}
-  {{- end }}
-  {{- end }}
+  {{- $original := (toYaml $entry) -}}
+  {{- $nomultiline := (regexReplaceAll "^^\\s*\\|\\n*" $original "") -}}
+  {{- $nowhitespace := (regexReplaceAll "{{\\s*([^}\\s]+)\\s*}}" $nomultiline "{{$1}}") -}}
+  {{- tpl (tpl $nowhitespace $) $ | nindent 4 -}}
+  {{- end -}}
+  {{- end -}}

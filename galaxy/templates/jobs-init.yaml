@@ -198,7 +198,7 @@ spec:
 {{ if .Values.initJob.downloadToolConfs.enabled }}
         - name: {{ .Chart.Name }}-init-cloud-repo
           image: alpine:3.7
-          command: ['sh', '-c', 'wget -O startup.tar.gz {{ .Values.initJob.downloadToolConfs.archives.startup }} && tar -xvf startup.tar.gz > /dev/null && echo "Done" > /galaxy/server/config/mutable/init_clone_done_{{.Release.Revision}}']
+          command: ['sh', '-c', '{{ include "galaxy.extract-archive-if-changed-command" (dict "extractPath" .Values.initJob.downloadToolConfs.volume.mountPath "downloadUrl" .Values.initJob.downloadToolConfs.archives.startup) }} && echo "Done" > /galaxy/server/config/mutable/init_clone_done_{{.Release.Revision}}']
           volumeMounts:
             - name: galaxy-data
               mountPath: {{ .Values.initJob.downloadToolConfs.volume.mountPath }}
@@ -208,14 +208,14 @@ spec:
               subPath: config
         - name: {{ .Chart.Name }}-init-cloud-repo-partial
           image: alpine:3.7
-          command: ['sh', '-c', 'wget -O partial.tar.gz {{ .Values.initJob.downloadToolConfs.archives.running }} && tar -xvf partial.tar.gz > /dev/null']
+          command: ['sh', '-c', '{{ include "galaxy.extract-archive-if-changed-command" (dict "extractPath" .Values.initJob.downloadToolConfs.volume.mountPath "downloadUrl" .Values.initJob.downloadToolConfs.archives.running) }}']
           volumeMounts:
             - name: galaxy-data
               mountPath: {{ .Values.initJob.downloadToolConfs.volume.mountPath }}
               subPath: {{ .Values.initJob.downloadToolConfs.volume.subPath }}
         - name: {{ .Chart.Name }}-init-cloud-repo-full
           image: alpine:3.7
-          command: ['sh', '-c', 'wget -O contents.tar.gz {{ .Values.initJob.downloadToolConfs.archives.full }} && tar -xvf contents.tar.gz > /dev/null && chown 101:101 {{ .Values.initJob.downloadToolConfs.volume.mountPath }};']
+          command: ['sh', '-c', '{{ include "galaxy.extract-archive-if-changed-command" (dict "extractPath" .Values.initJob.downloadToolConfs.volume.mountPath "downloadUrl" .Values.initJob.downloadToolConfs.archives.full) }}']
           volumeMounts:
             - name: galaxy-data
               mountPath: {{ .Values.initJob.downloadToolConfs.volume.mountPath }}

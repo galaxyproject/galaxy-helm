@@ -166,6 +166,21 @@ until [ -f /galaxy/server/config/mutable/init_clone_done_{{$.Release.Revision}} 
 {{- end }}
 {{- end -}}
 
+{{/*
+Creates shell commands for downloading and extracting archives if modified
+*/}}
+{{- define "galaxy.extract-archive-if-changed-command" -}}
+if [ -f {{ .extractPath }}/{{ base .downloadUrl }}_timestamp ]; then
+  echo "File {{ .downloadUrl }} previously downloaded. Only downloading if changed..."
+  wget -qO- --header="If-Modified-Since: `cat {{ .extractPath }}/{{ base .downloadUrl }}_timestamp`" {{ .downloadUrl }} | tar -xvz || echo File not changed, ignoring....
+else
+  echo "File not previously downloaded. Downloading and extracting {{ .downloadUrl }}..."
+  wget -qO- {{ .downloadUrl }} | tar -xvz || exit 1
+fi
+# store the latest timestamp
+wget --server-response --spider {{ .downloadUrl }} 2>&1 | grep -i "Last-Modified: " | cut -c18- > {{ .extractPath }}/{{ base .downloadUrl }}_timestamp;
+echo "Completed download and extraction of: {{ .downloadUrl }}"
+{{- end -}}
 
 
 {{/*

@@ -37,6 +37,11 @@ data:
             listen 80;
             server_name galaxy;
 
+            location {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}static {
+                alias /galaxy/server/static;
+                expires 24h;
+            }
+
             location {{ template "galaxy.add_trailing_slash" .Values.ingress.path }} {
                 uwsgi_pass {{ template "galaxy.fullname" . }}-uwsgi:4001;
                 uwsgi_param UWSGI_SCHEME $scheme;

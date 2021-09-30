@@ -38,7 +38,7 @@ data:
             server_name galaxy;
 
             location {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}static {
-                alias /galaxy/server/static;
+                alias {{ .Values.nginx.galaxyStaticDir }};
                 expires 24h;
             }
 

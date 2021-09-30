@@ -53,7 +53,7 @@ spec:
               mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf
             - name: static-dir
-              mountPath: /galaxy/server/static
+              mountPath: {{ .Values.nginx.galaxyStaticDir }}
               subPath: static
             - name: galaxy-data
               mountPath: {{ .Values.persistence.mountPath }}

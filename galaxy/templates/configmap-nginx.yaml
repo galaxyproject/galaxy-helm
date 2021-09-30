@@ -14,6 +14,7 @@ data:
 
     http {
         default_type  application/octet-stream;
+        include /etc/nginx/mime.types;
         sendfile        on;
         keepalive_timeout  65;
         index   index.html index.php index.htm;
@@ -36,6 +37,11 @@ data:
         server {
             listen 80;
             server_name galaxy;
+
+            location {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}static {
+                alias {{ .Values.nginx.galaxyStaticDir }};
+                expires 24h;
+            }
 
             location {{ template "galaxy.add_trailing_slash" .Values.ingress.path }} {
                 uwsgi_pass {{ template "galaxy.fullname" . }}-uwsgi:4001;

@@ -14,6 +14,7 @@ data:
 
     http {
         default_type  application/octet-stream;
+        include /etc/nginx/mime.types;
         sendfile        on;
         keepalive_timeout  65;
         index   index.html index.php index.htm;

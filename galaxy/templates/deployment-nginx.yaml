@@ -35,7 +35,7 @@ spec:
       initContainers:
         - name: {{ .Chart.Name }}-init-static
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           volumeMounts:
             - name: static-dir
               mountPath: /tmp/galaxy

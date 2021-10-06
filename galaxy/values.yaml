@@ -633,8 +633,8 @@ nginx:
     requests:
       cpu: 100m
       memory: 500M
-      ephemeral-storage: 1Gi
+      ephemeral-storage: 10Gi
     limits:
       cpu: 2
       memory: 3G
-      ephemeral-storage: 10Gi
+      ephemeral-storage: 100Gi

@@ -17,6 +17,10 @@ spec:
         checksum/galaxy_rules: {{ include (print $.Template.BasePath "/configmap-galaxy-rules.yaml") . | sha256sum }}
         checksum/galaxy_extras: {{ include (print $.Template.BasePath "/configmap-extra-files.yaml") . | sha256sum }}
     spec:
+      securityContext:
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -34,7 +38,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if .Values.initJob.createDatabase }}
-          command:
+          args:
             - 'sh'
             - '-c'
             - >
@@ -43,7 +47,7 @@ spec:
                 else (/galaxy/server/create_db.sh && echo "Done" > /galaxy/server/config/mutable/db_init_done_{{.Release.Revision}};);
               fi;
           {{- else }}
-          command:
+          args:
             - 'sh'
             - '-c'
             - '/galaxy/server/manage_db.sh upgrade && echo "Done" > /galaxy/server/config/mutable/db_init_done_{{.Release.Revision}};'
@@ -156,7 +160,7 @@ spec:
         - name: {{ .Chart.Name }}-init-mounts
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ['sh', '-c', {{ include "galaxy.init-container-commands" . | squote }}]
+          args: ['sh', '-c', {{ include "galaxy.init-container-commands" . | squote }}]
           volumeMounts:
             {{- range $key, $entry := .Values.extraFileMappings -}}
             {{- if $entry.applyToWeb }}

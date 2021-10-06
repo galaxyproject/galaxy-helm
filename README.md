@@ -209,6 +209,8 @@ current default values can be found in `values.yaml` file.
 | `nginx.image.tag`                          | The Nginx version to pull.                                                                                                                                                                                 |
 | `nginx.image.repository`                   | Where to obtain the Nginx container.                                                                                                                                                                       |
 | `nginx.image.pullPolicy`                   | When Kubernetes will [pull](https://kubernetes.io/docs/concepts/containers/images/#updating-images) the Nginx image from the repository.                                                                   |
+| `nginx.galaxyStaticDir`                    | Location at which to copy Galaxy static content in the NGINX pod init container, for direct serving. Defaults to `/galaxy/server/static`                   |
+
 
 # Handlers
 

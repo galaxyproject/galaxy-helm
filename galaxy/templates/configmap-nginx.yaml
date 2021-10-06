@@ -14,6 +14,7 @@ data:
 
     http {
         default_type  application/octet-stream;
+        include /etc/nginx/mime.types;
         sendfile        on;
         keepalive_timeout  65;
         index   index.html index.php index.htm;
@@ -29,12 +30,18 @@ data:
         uwsgi_buffer_size   128k;
         uwsgi_buffers   4 256k;
         uwsgi_busy_buffers_size   256k;
-        uwsgi_read_timeout 300;
+        uwsgi_read_timeout 600;
+        uwsgi_send_timeout 600;
         client_max_body_size {{ .Values.nginx.conf.client_max_body_size }};
 
         server {
             listen 80;
             server_name galaxy;
+
+            location {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}static {
+                alias {{ .Values.nginx.galaxyStaticDir }};
+                expires 24h;
+            }
 
             location {{ template "galaxy.add_trailing_slash" .Values.ingress.path }} {
                 uwsgi_pass {{ template "galaxy.fullname" . }}-uwsgi:4001;

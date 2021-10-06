@@ -2,13 +2,12 @@
 # on activity. A 200 on this endpoint indicates that a user
 # is active on the system, and the cluster can be autoscaled
 # in anticipation of jobs
----
-{{- if .Values.ingress.canary.enabled -}}
+{{ if .Values.ingress.canary.enabled -}}
 {{- $fullName := include "galaxy.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 {{- $servicePort := .Values.service.port -}}
 {{- $k8s_version := .Capabilities.KubeVersion.Version | toString }}
-{{- if semverCompare "^1.19.0-0" $k8s_version -}}
+{{- if semverCompare "^1.19.0-0" $k8s_version }}
 apiVersion: networking.k8s.io/v1
 {{- else if semverCompare "^1.14.0-0" $k8s_version -}}
 apiVersion: networking.k8s.io/v1beta1

@@ -32,6 +32,14 @@ spec:
       {{- if .Values.webHandlers.podSpecExtra -}}
         {{- tpl (toYaml .Values.webHandlers.podSpecExtra) . | nindent 6 }}
       {{- end }}
+      initContainers:
+        - name: {{ .Chart.Name }}-init-static
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            - name: static-dir
+              mountPath: /tmp/galaxy
+          command: ['/bin/sh', '-c', 'cp -r /galaxy/server/static /tmp/galaxy/static;']
       containers:
         - name: {{ .Chart.Name }}-nginx
           image: "{{ .Values.nginx.image.repository }}:{{ .Values.nginx.image.tag }}"
@@ -44,6 +52,9 @@ spec:
             - name: nginx-conf
               mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf
+            - name: static-dir
+              mountPath: {{ .Values.nginx.galaxyStaticDir }}
+              subPath: static
             - name: galaxy-data
               mountPath: {{ .Values.persistence.mountPath }}
             - name: galaxy-data
@@ -67,6 +78,8 @@ spec:
         - name: nginx-conf
           configMap:
             name: {{ template "galaxy.fullname" $ }}-nginx-conf
+        - name: static-dir
+          emptyDir: {}
         - name: galaxy-data
           {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:

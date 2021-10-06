@@ -158,7 +158,7 @@ extraInitContainers: []
 #     applyToWeb: true
 #     applyToWorkflow: true
 #     image: "{{.Values.image.repository}}:{{.Values.image.tag}}"
-#     command: ['sh', '-c', 'cp "/galaxy/server/config/job_conf.xml.sample_advanced" {{.Values.persistence.mountPath}}/']
+#     args: ['sh', '-c', 'cp "/galaxy/server/config/job_conf.xml.sample_advanced" {{.Values.persistence.mountPath}}/']
 #     volumeMounts:
 #       - name: galaxy-data
 #         mountPath: "{{.Values.persistence.mountPath}}"
@@ -167,7 +167,7 @@ extraInitContainers: []
 #     applyToWeb: false
 #     applyToWorkflow: true
 #     image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-#     command: ['sh', '-c', 'cp "/galaxy/server/config/galaxy.yml" {{.Values.persistence.mountPath}}/']
+#     args: ['sh', '-c', 'cp "/galaxy/server/config/galaxy.yml" {{.Values.persistence.mountPath}}/']
 #     volumeMounts:
 #       - name: galaxy-data
 #         mountPath: "{{.Values.persistence.mountPath}}"
@@ -312,6 +312,7 @@ configs:
           function: k8s_container_mapper
           docker_enabled: true
           docker_default_container_id: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          tmp_dir: "true"
     limits:
     - type: registered_user_concurrent_jobs
       value: 5
@@ -320,7 +321,14 @@ configs:
   uwsgi.yml: |
     uwsgi:
       virtualenv: /galaxy/server/.venv
-      processes: 1
+      processes: 8
+      vacuum: true
+      single-interpreter: true
+      need-app: true
+      max-requests: 1000
+      max-worker-lifetime: 7200
+      reload-on-rss: 4096
+      worker-reload-mercy: 120
       socket: 0.0.0.0:4001
       http: 0.0.0.0:8080
       pythonpath: /galaxy/server/lib
@@ -416,10 +424,12 @@ configs:
     toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse_to_standalone/0.5.2
     toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse_to_standalone/1.16.5+galaxy6
     toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse_to_standalone/1.16.9+galaxy0
+    toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse_to_standalone/1.16.11+galaxy0
     toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/0.5.2.1
     toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.5+galaxy6
     toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.5+galaxy7
     toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.9+galaxy0
+    toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.11+galaxy0
     toolshed.g2.bx.psu.edu/repos/iuc/macs2/macs2_callpeak/2.1.0.20140616.0
     toolshed.g2.bx.psu.edu/repos/iuc/macs2/macs2_callpeak/2.1.0.20151222.0
     toolshed.g2.bx.psu.edu/repos/iuc/macs2/macs2_callpeak/2.1.1.20160309.6
@@ -467,7 +477,7 @@ jobs:
     enabled: true
     existingClass: ""
   rules:
-    container_mapper_rules.yml: |
+    container_mapper_rules.yml:
       mappings:
         summary_stats:
           tool_ids:
@@ -496,7 +506,7 @@ jobs:
           tool_ids:
             - sort1
             - Grouping1
-          docker_container_id_override: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          docker_container_id_override: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           resource_set: small
         set_medium:
           tool_ids:
@@ -622,6 +632,7 @@ influxdb:
   password: ""
 
 nginx:
+  galaxyStaticDir: "/galaxy/server/static"
   image:
     repository: nginx
     tag: latest

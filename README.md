@@ -264,8 +264,11 @@ jobHandlers:
 ## Extra File Mappings
 
 The `extraFileMappings` field can be used to inject files to arbitrary paths in the `nginx` deployment, as well as any of the `job`, `web`, or `workflow` handlers.
+
 The contents of the file can be specified directly in the `values.yml` file with the `content` attribute.
+
 The `tpl` flag will determine whether these contents are run through the helm templating engine.
+
 Note: when running with `tpl: true`, brackets (`{{ }}`) not meant for Helm should be escaped. One way of escaping is: `{{ '{{ mynon-helm-content}}' }}`
 
 ```yaml

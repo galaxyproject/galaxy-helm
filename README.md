@@ -263,7 +263,13 @@ jobHandlers:
 
 ## Extra File Mappings
 
-The `extraFileMappings` field can be used to inject files to arbitrary paths in the `job`, `web`, or `workflow` handlers.  The contents of the file can be specified directly in the `values.yml` file with the `content` attribute, or by specifying the path to the file to be injected with the `path` attribute.
+The `extraFileMappings` field can be used to inject files to arbitrary paths in the `nginx` deployment, as well as any of the `job`, `web`, or `workflow` handlers.
+
+The contents of the file can be specified directly in the `values.yml` file with the `content` attribute.
+
+The `tpl` flag will determine whether these contents are run through the helm templating engine.
+
+Note: when running with `tpl: true`, brackets (`{{ }}`) not meant for Helm should be escaped. One way of escaping is: `{{ '{{ mynon-helm-content}}' }}`
 
 ```yaml
 extraFileMappings:
@@ -271,12 +277,11 @@ extraFileMappings:
     applyToWeb: true
     applyToJob: false
     applyToWorkflow: false
+    applyToNginx: true
+    tpl: false
     content: |
       <!DOCTYPE html>
       <html>...</html>
-  /galaxy/server/config/object_store_conf.xml:
-    applyToWeb: true
-    path: files/config/object_store_conf.xml
 ```
 
 **NOTE** for security reasons Helm will not load files from outside the chart so the `path` must be a relative path to location inside the chart directory.  This will change when [helm#3276](https://github.com/helm/helm/issues/3276) is resolved.  In the interim files can be loaded from external locations by:

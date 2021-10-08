@@ -593,6 +593,7 @@ extraFileMappings:
     applyToJob: false
     applyToWeb: true
     applyToWorkflow: false
+    applyToNginx: true
     tpl: true
     content: |
       <!DOCTYPE html>

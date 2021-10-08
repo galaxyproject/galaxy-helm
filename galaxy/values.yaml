@@ -633,11 +633,20 @@ influxdb:
   password: ""
 
 nginx:
+  galaxyStaticDir: "/galaxy/server/static"
   image:
     repository: nginx
     tag: latest
     pullPolicy: IfNotPresent
   conf:
     client_max_body_size: 100g
-  galaxyStaticDir: "/galaxy/server/static"
-
+  resources:
+    # We recommend updating these based on the usage levels of the server
+    requests:
+      cpu: 100m
+      memory: 500M
+      ephemeral-storage: 10Gi
+    limits:
+      cpu: 2
+      memory: 3G
+      ephemeral-storage: 100Gi

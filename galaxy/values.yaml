@@ -288,8 +288,6 @@ configs:
           {{- end }}
         k8s_namespace: "{{ .Release.Namespace }}"
         k8s_galaxy_instance_id: "{{ .Release.Name }}"
-        k8s_run_as_user_id: "101"
-        k8s_run_as_group_id: "101"
         k8s_fs_group_id: "101"
         k8s_supplemental_group_id: "101"
         k8s_pull_policy: IfNotPresent
@@ -298,6 +296,9 @@ configs:
           {{ if .Values.jobs.priorityClass.enabled -}}
           {{- include "galaxy.fullname" . }}-job-priority
           {{- end }}
+        k8s_interactivetools_use_ssl: true
+        k8s_interactivetools_ingress_annotations: |
+          {{.Values.ingress.annotations | toYaml | nindent 6 }}
     handling:
       assign:
         - "db-skip-locked"
@@ -307,6 +308,7 @@ configs:
         local:
           runner: local
         dynamic_k8s_dispatcher:
+          container_monitor: false
           runner: dynamic
           type: python
           function: k8s_container_mapper
@@ -349,6 +351,12 @@ configs:
       mount: {{.Values.ingress.path}}=galaxy.webapps.galaxy.buildapp:uwsgi_app()
   galaxy.yml:
     galaxy:
+      interactivetools_enable: true
+      interactivetools_map: database/interactivetools_map.sqlite
+      interactivetools_prefix: "its"
+      interactivetools_proxy_host: '{{ $host := index .Values.ingress.hosts 0 }}{{ default "localhost" $host.host}}'
+      interactivetools_shorten_url: true
+      interactivetools_base_path: "{{$host := index .Values.ingress.hosts 0}}{{$path := index $host.paths 0}}{{$path.path}}"
       id_secret:
       logo_src: '{{ trimSuffix "/" .Values.ingress.path }}/static/favicon.png'
       database_connection: postgresql://unused:because@overridden_by_envvar

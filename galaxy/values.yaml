@@ -343,10 +343,10 @@ configs:
       mount: {{.Values.ingress.path}}=galaxy.webapps.galaxy.buildapp:uwsgi_app()
   galaxy.yml:
     galaxy:
-      interactivetools_enable: false
+      interactivetools_enable: true
       interactivetools_map: database/interactivetools_map.sqlite
       interactivetools_prefix: "its"
-      interactivetools_proxy_host: "{{ $host := index .Values.ingress.hosts 0 }}{{$host.host}}"
+      interactivetools_proxy_host: '{{ $host := index .Values.ingress.hosts 0 }}{{ default "localhost" $host.host}}'
       interactivetools_shorten_url: true
       interactivetools_base_path: "{{$host := index .Values.ingress.hosts 0}}{{$path := index $host.paths 0}}{{$path.path}}"
       id_secret:

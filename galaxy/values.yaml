@@ -182,6 +182,7 @@ extraEnv: []
 
 ingress:
   enabled: true
+  ingressClassName: nginx
   canary:
     enabled: true
   annotations:

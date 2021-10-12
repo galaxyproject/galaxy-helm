@@ -127,4 +127,16 @@
     <tool file="maf/vcf_to_maf_customtrack.xml" />
   </section>
   <label id="miscellaneous_tools_label" text="Miscellaneous Tools"/>
+  <section id="interactivetools" name="Interactive tools">
+    <tool file="interactive/codingSnps.xml" />
+    <tool file="interactive/interactivetool_askomics.xml" />
+    <tool file="interactive/interactivetool_bam_iobio.xml" />
+    <tool file="interactive/interactivetool_cellxgene.xml" />
+    <tool file="interactive/interactivetool_ethercalc.xml" />
+    <tool file="interactive/interactivetool_hicbrowser.xml" />
+    <tool file="interactive/interactivetool_jupyter_notebook.xml" />
+    <tool file="interactive/interactivetool_neo4j.xml" />
+    <tool file="interactive/interactivetool_phinch.xml" />
+    <tool file="interactive/interactivetool_isee.xml" />
+  </section>
 </toolbox>

@@ -398,6 +398,33 @@ If you use the latter method, it is highly recommended that you deploy a single
 Galaxy release per nodepool/namespace, as multiple CVMFS-CSI provisioners and Postgres
 operator running side-by-side can interfer with one another.
 
+## Making Interactive Tools work on localhost
+
+In general, Interactive Tools should work out of the box as long as you have a wildcard DNS mapping
+to *.its.<host_name>. To make Interactive Tools work on localhost, you can use dnsmasq or similar to
+handle wildcard DNS mappings for *.localhost.
+
+For mac:
+```bash
+  $ brew install dnsmasq
+  $ cp /usr/local/opt/dnsmasq/dnsmasq.conf.example /usr/local/etc/dnsmasq.conf
+  $ edit /usr/local/etc/dnsmasq.conf and set
+
+    address=/localhost/127.0.0.1
+
+  $ sudo brew services start dnsmasq
+  $ sudo mkdir /etc/resolver
+  $ sudo touch /etc/resolver/localhost
+  $ edit /etc/resolver/localhost and set
+
+    nameserver 127.0.0.1
+
+  $ sudo brew services restart dnsmasq
+```
+
+This should make all *.localhost and *.its.localhost map to 127.0.0.1, and ITs should work with a regular
+helm install on localhost.
+
 
 ## Horizontal scaling
 

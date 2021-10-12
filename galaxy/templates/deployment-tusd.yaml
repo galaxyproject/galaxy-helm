@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "galaxy.fullname" . }}-tusd
+  labels:
+    {{- include "galaxy.labels" . | nindent 4 }}
+{{- with .Values.tusd.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+  replicas: {{ .Values.tusd.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "galaxy.selectorLabels" $ | nindent 6 }}
+      app.kubernetes.io/component: galaxy-tusd-handler
+  template:
+    metadata:
+      labels:
+        {{- include "galaxy.selectorLabels" $ | nindent 8 }}
+        app.kubernetes.io/component: galaxy-tusd-handler
+      annotations:
+        {{- with .Values.tusd.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "galaxy.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.tusd.securityContext | nindent 8 }}
+      {{- if .Values.tusd.podSpecExtra -}}
+        {{- tpl (toYaml .Values.webHandlers.podSpecExtra) . | nindent 6 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}-tusd
+          image: "{{ .Values.tusd.image.repository }}:{{ .Values.tusd.image.tag }}"
+          imagePullPolicy: {{ .Values.tusd.image.pullPolicy }}
+          args:
+            - "-host"
+            - "0.0.0.0"
+            - "-port"
+            - "1080"
+            - "-upload-dir={{ .Values.persistence.mountPath }}/tmp"
+            - '-hooks-http=http://{{ include "galaxy.fullname" . }}-nginx:{{ .Values.service.port }}{{ template "galaxy.add_trailing_slash" .Values.ingress.path }}api/upload/hooks'
+            - "-hooks-http-forward-headers=X-Api-Key,Cookie"
+          env:
+          {{ include "galaxy.podEnvVars" . }}
+          ports:
+            - name: tusd-http
+              containerPort: 1080
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /
+              port: tusd-http
+          livenessProbe:
+            httpGet:
+              path: /
+              port: tusd-http
+          volumeMounts:
+            - name: galaxy-data
+              mountPath: {{ .Values.persistence.mountPath }}
+            {{- if .Values.extraVolumeMounts }}
+            {{- .Values.extraVolumeMounts | toYaml | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: galaxy-data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ template "galaxy.pvcname" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        {{- if .Values.extraVolumes }}
+        {{- .Values.extraVolumes | toYaml | nindent 8 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

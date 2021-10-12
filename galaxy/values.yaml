@@ -93,7 +93,7 @@ metrics:
   podSpecExtra: {}
   image:
     repository: cloudve/galaxy-metrics-scraper
-    tag: 2.0.0
+    tag: 2.1.0
     pullPolicy: IfNotPresent
 
 serviceAccount:

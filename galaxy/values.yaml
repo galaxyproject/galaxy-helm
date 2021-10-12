@@ -659,3 +659,17 @@ nginx:
       cpu: 2
       memory: 3G
       ephemeral-storage: 100Gi
+
+tusd:
+  replicaCount: 1
+  annotations: {}
+  podAnnotations: {}
+  podSpecExtra: {}
+  securityContext:
+    runAsUser: 101
+    runAsGroup: 101
+    fsGroup: 101
+  image:
+    repository: tusproject/tusd
+    tag: v1.6.0
+    pullPolicy: IfNotPresent

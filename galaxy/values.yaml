@@ -661,6 +661,7 @@ nginx:
       ephemeral-storage: 100Gi
 
 tusd:
+  enabled: false
   replicaCount: 1
   annotations: {}
   podAnnotations: {}

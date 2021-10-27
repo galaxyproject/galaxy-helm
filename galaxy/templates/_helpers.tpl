@@ -260,3 +260,14 @@ Define extra persistent volumes
     {{- end }}
   {{- end -}}
 {{- end -}}
+
+{{/*
+Get default value or max
+*/}}
+{{- define "galaxy.max_value" -}}
+  {{-  if gt (.default | int) (.max | int) }}
+    {{- .max | int }}
+  {{- else }}
+    {{- .default | int }}
+  {{- end }}
+{{- end }}

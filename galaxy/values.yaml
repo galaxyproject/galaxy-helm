@@ -484,6 +484,12 @@ jobs:
   priorityClass:
     enabled: true
     existingClass: ""
+  maxRequests:
+    cpu: 10
+    memory: 20 # in G
+  maxLimits:
+    cpu: 12
+    memory: 24 # in G
   rules:
     container_mapper_rules.yml:
       mappings:
@@ -558,39 +564,39 @@ jobs:
         resource_sets:
           small:
             requests:
-              cpu: 1
-              memory: 2G
+              cpu: '{{include "galaxy.max_value" (dict "default" 1 "max" .Values.jobs.maxRequests.cpu)}}'
+              memory: '{{include "galaxy.max_value" (dict "default" 2 "max" .Values.jobs.maxRequests.memory)}}G'
             limits:
-              cpu: 2
-              memory: 5G
+              cpu: '{{include "galaxy.max_value" (dict "default" 2 "max" .Values.jobs.maxLimits.cpu)}}'
+              memory: '{{include "galaxy.max_value" (dict "default" 5 "max" .Values.jobs.maxLimits.memory)}}G'
           medium:
             requests:
-              cpu: 2
-              memory: 4G
+              cpu: '{{include "galaxy.max_value" (dict "default" 2 "max" .Values.jobs.maxRequests.cpu)}}'
+              memory: '{{include "galaxy.max_value" (dict "default" 4 "max" .Values.jobs.maxRequests.memory)}}G'
             limits:
-              cpu: 4
-              memory: 10G
+              cpu: '{{include "galaxy.max_value" (dict "default" 4 "max" .Values.jobs.maxLimits.cpu)}}'
+              memory: '{{include "galaxy.max_value" (dict "default" 10 "max" .Values.jobs.maxLimits.memory)}}G'
           large:
             requests:
-              cpu: 4
-              memory: 8G
+              cpu: '{{include "galaxy.max_value" (dict "default" 4 "max" .Values.jobs.maxRequests.cpu)}}'
+              memory: '{{include "galaxy.max_value" (dict "default" 8 "max" .Values.jobs.maxRequests.memory)}}G'
             limits:
-              cpu: 8
-              memory: 16G
+              cpu: '{{include "galaxy.max_value" (dict "default" 8 "max" .Values.jobs.maxLimits.cpu)}}'
+              memory: '{{include "galaxy.max_value" (dict "default" 16 "max" .Values.jobs.maxLimits.memory)}}G'
           2xlarge:
             requests:
-              cpu: 12
-              memory: 20G
+              cpu: '{{include "galaxy.max_value" (dict "default" 10 "max" .Values.jobs.maxRequests.cpu)}}'
+              memory: '{{include "galaxy.max_value" (dict "default" 20 "max" .Values.jobs.maxRequests.memory)}}G'
             limits:
-              cpu: 12
-              memory: 24G
+              cpu: '{{include "galaxy.max_value" (dict "default" 12 "max" .Values.jobs.maxLimits.cpu)}}'
+              memory: '{{include "galaxy.max_value" (dict "default" 24 "max" .Values.jobs.maxLimits.memory)}}G'
           mlarge:
             requests:
-              cpu: 2
-              memory: 16G
+              cpu: '{{include "galaxy.max_value" (dict "default" 2 "max" .Values.jobs.maxRequests.cpu)}}'
+              memory: '{{include "galaxy.max_value" (dict "default" 16 "max" .Values.jobs.maxRequests.memory)}}G'
             limits:
-              cpu: 4
-              memory: 20G
+              cpu: '{{include "galaxy.max_value" (dict "default" 4 "max" .Values.jobs.maxLimits.cpu)}}'
+              memory: '{{include "galaxy.max_value" (dict "default" 20 "max" .Values.jobs.maxLimits.memory)}}G'
         default_resource_set: small
     k8s_container_mapper.py: |
       {{- (.Files.Get "files/rules/k8s_container_mapper.py") }}

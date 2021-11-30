@@ -601,6 +601,7 @@ extraFileMappings:
     useSecret: false
     applyToJob: false
     applyToWeb: true
+    applyToInit: false
     applyToWorkflow: false
     applyToNginx: true
     tpl: true

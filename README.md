@@ -263,7 +263,7 @@ jobHandlers:
 
 ## Extra File Mappings
 
-The `extraFileMappings` field can be used to inject files to arbitrary paths in the `nginx` deployment, as well as any of the `job`, `web`, or `workflow` handlers.
+The `extraFileMappings` field can be used to inject files to arbitrary paths in the `nginx` deployment, as well as any of the `job`, `web`, or `workflow` handlers, and the `init` jobs.
 
 The contents of the file can be specified directly in the `values.yml` file with the `content` attribute.
 
@@ -278,6 +278,7 @@ extraFileMappings:
     applyToJob: false
     applyToWorkflow: false
     applyToNginx: true
+    applyToInit: false
     tpl: false
     content: |
       <!DOCTYPE html>

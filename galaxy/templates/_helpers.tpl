@@ -249,7 +249,7 @@ Define extra persistent volumes
               {{- if $mount.name }}
                 {{- if (eq $entry.name $mount.name) }}
                   {{- if $mount.mountPath -}}
-                    ,{{- $entry.persistentVolumeClaim.claimName -}}:{{- $mount.mountPath -}}
+                    ,{{- tpl $entry.persistentVolumeClaim.claimName $ -}}:{{- tpl $mount.mountPath $ -}}
                   {{- end }}
                 {{- end }}
               {{- end }}

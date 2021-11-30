@@ -146,7 +146,7 @@ spec:
             {{- end -}}
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
-            {{- .Values.extraVolumeMounts | toYaml | nindent 12 }}
+            {{- tpl (.Values.extraVolumeMounts | toYaml | nindent 12) . }}
             {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
@@ -192,7 +192,7 @@ spec:
         {{- end }}
         {{- end }}
         {{- if .Values.extraVolumes }}
-        {{- .Values.extraVolumes | toYaml | nindent 8 }}
+        {{- tpl (.Values.extraVolumes | toYaml | nindent 8) . }}
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

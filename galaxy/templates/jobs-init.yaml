@@ -84,7 +84,7 @@ spec:
             {{- end -}}
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
-            {{- .Values.extraVolumeMounts | toYaml | nindent 12 }}
+            {{- tpl (.Values.extraVolumeMounts | toYaml | nindent 12) . }}
             {{- end }}
       volumes:
         - name: galaxy-conf-files
@@ -96,7 +96,7 @@ spec:
             name: {{ template "galaxy.fullname" . }}-configs
           {{- end }}
         {{- range $key, $entry := .Values.extraFileMappings -}}
-        {{- if $entry.applyToWeb }}
+        {{- if $entry.applyToInit }}
         - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
           {{- if $entry.useSecret }}
           secret:
@@ -125,7 +125,7 @@ spec:
         {{- end }}
         {{- end }}
         {{- if .Values.extraVolumes }}
-        {{- .Values.extraVolumes | toYaml | nindent 8 }}
+        {{- tpl (.Values.extraVolumes | toYaml | nindent 8) . }}
         {{- end }}
 ---
 apiVersion: batch/v1
@@ -163,7 +163,7 @@ spec:
           args: ['sh', '-c', {{ include "galaxy.init-container-commands" . | squote }}]
           volumeMounts:
             {{- range $key, $entry := .Values.extraFileMappings -}}
-            {{- if $entry.applyToWeb }}
+            {{- if $entry.applyToInit }}
             - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
               mountPath: {{ $key }}
               subPath: {{ include "galaxy.getFilenameFromPath" $key }}
@@ -193,7 +193,7 @@ spec:
             {{- end -}}
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
-            {{- .Values.extraVolumeMounts | toYaml | nindent 12 }}
+            {{- tpl (.Values.extraVolumeMounts | toYaml | nindent 12) . }}
             {{- end }}
 {{ if .Values.initJob.downloadToolConfs.enabled }}
         - name: {{ .Chart.Name }}-init-cloud-repo
@@ -231,7 +231,7 @@ spec:
             name: {{ template "galaxy.fullname" . }}-configs
           {{- end }}
         {{- range $key, $entry := .Values.extraFileMappings -}}
-        {{- if $entry.applyToWeb }}
+        {{- if $entry.applyToInit }}
         - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
           {{- if $entry.useSecret }}
           secret:
@@ -260,5 +260,5 @@ spec:
         {{- end }}
         {{- end }}
         {{- if .Values.extraVolumes }}
-        {{- .Values.extraVolumes | toYaml | nindent 8 }}
+        {{- tpl (.Values.extraVolumes | toYaml | nindent 8) . }}
         {{- end }}

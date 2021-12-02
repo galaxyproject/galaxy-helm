@@ -11,9 +11,7 @@ spec:
       template:
         spec:
           securityContext:
-            runAsUser: 101
-            runAsGroup: 101
-            fsGroup: 101
+            {{- toYaml .Values.securityContext | nindent 12 }}
           {{- with .Values.nodeSelector }}
           nodeSelector:
             {{- toYaml . | nindent 16 }}

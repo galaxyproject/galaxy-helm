@@ -6,8 +6,8 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
-  repository: galaxy/galaxy-min
-  tag: 21.05
+  repository: galaxyproject/galaxy-min
+  tag: 21.09
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []

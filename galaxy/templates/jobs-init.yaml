@@ -5,8 +5,8 @@ metadata:
   labels:
     {{- include "galaxy.labels" . | nindent 4 }}
 spec:
-  {{- if .Values.initJob.ttlSecondsAfterFinished }}
-  ttlSecondsAfterFinished: {{ .Values.initJob.ttlSecondsAfterFinished }}
+  {{- if .Values.setupJob.ttlSecondsAfterFinished }}
+  ttlSecondsAfterFinished: {{ .Values.setupJob.ttlSecondsAfterFinished }}
   {{- end }}
   template:
     metadata:
@@ -37,7 +37,7 @@ spec:
         - name: {{ .Chart.Name }}-db-init
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if .Values.initJob.createDatabase }}
+          {{- if .Values.setupJob.createDatabase }}
           args:
             - 'sh'
             - '-c'
@@ -96,7 +96,7 @@ spec:
             name: {{ template "galaxy.fullname" . }}-configs
           {{- end }}
         {{- range $key, $entry := .Values.extraFileMappings -}}
-        {{- if $entry.applyToInit }}
+        {{- if $entry.applyToSetupJobs }}
         - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
           {{- if $entry.useSecret }}
           secret:
@@ -135,8 +135,8 @@ metadata:
   labels:
     {{- include "galaxy.labels" . | nindent 4 }}
 spec:
-  {{- if .Values.initJob.ttlSecondsAfterFinished }}
-  ttlSecondsAfterFinished: {{ .Values.initJob.ttlSecondsAfterFinished }}
+  {{- if .Values.setupJob.ttlSecondsAfterFinished }}
+  ttlSecondsAfterFinished: {{ .Values.setupJob.ttlSecondsAfterFinished }}
   {{- end }}
   template:
     metadata:
@@ -163,7 +163,7 @@ spec:
           args: ['sh', '-c', {{ include "galaxy.init-container-commands" . | squote }}]
           volumeMounts:
             {{- range $key, $entry := .Values.extraFileMappings -}}
-            {{- if $entry.applyToInit }}
+            {{- if $entry.applyToSetupJobs }}
             - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
               mountPath: {{ $key }}
               subPath: {{ include "galaxy.getFilenameFromPath" $key }}
@@ -195,31 +195,31 @@ spec:
             {{- if .Values.extraVolumeMounts }}
             {{- tpl (.Values.extraVolumeMounts | toYaml | nindent 12) . }}
             {{- end }}
-{{ if .Values.initJob.downloadToolConfs.enabled }}
+{{ if .Values.setupJob.downloadToolConfs.enabled }}
         - name: {{ .Chart.Name }}-init-cloud-repo
           image: alpine:3.7
-          command: ['sh', '-c', '{{- include "galaxy.extract-archive-if-changed-command" (dict "extractPath" .Values.initJob.downloadToolConfs.volume.mountPath "downloadUrl" .Values.initJob.downloadToolConfs.archives.startup) -}} && echo "Done" > /galaxy/server/config/mutable/init_clone_done_{{.Release.Revision}}']
+          command: ['sh', '-c', '{{- include "galaxy.extract-archive-if-changed-command" (dict "extractPath" .Values.setupJob.downloadToolConfs.volume.mountPath "downloadUrl" .Values.setupJob.downloadToolConfs.archives.startup) -}} && echo "Done" > /galaxy/server/config/mutable/init_clone_done_{{.Release.Revision}}']
           volumeMounts:
             - name: galaxy-data
-              mountPath: {{ .Values.initJob.downloadToolConfs.volume.mountPath }}
-              subPath: {{ .Values.initJob.downloadToolConfs.volume.subPath }}
+              mountPath: {{ .Values.setupJob.downloadToolConfs.volume.mountPath }}
+              subPath: {{ .Values.setupJob.downloadToolConfs.volume.subPath }}
             - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/
               subPath: config
         - name: {{ .Chart.Name }}-init-cloud-repo-partial
           image: alpine:3.7
-          command: ['sh', '-c', '{{- include "galaxy.extract-archive-if-changed-command" (dict "extractPath" .Values.initJob.downloadToolConfs.volume.mountPath "downloadUrl" .Values.initJob.downloadToolConfs.archives.running) -}}']
+          command: ['sh', '-c', '{{- include "galaxy.extract-archive-if-changed-command" (dict "extractPath" .Values.setupJob.downloadToolConfs.volume.mountPath "downloadUrl" .Values.setupJob.downloadToolConfs.archives.running) -}}']
           volumeMounts:
             - name: galaxy-data
-              mountPath: {{ .Values.initJob.downloadToolConfs.volume.mountPath }}
-              subPath: {{ .Values.initJob.downloadToolConfs.volume.subPath }}
+              mountPath: {{ .Values.setupJob.downloadToolConfs.volume.mountPath }}
+              subPath: {{ .Values.setupJob.downloadToolConfs.volume.subPath }}
         - name: {{ .Chart.Name }}-init-cloud-repo-full
           image: alpine:3.7
-          command: ['sh', '-c', '{{- include "galaxy.extract-archive-if-changed-command" (dict "extractPath" .Values.initJob.downloadToolConfs.volume.mountPath "downloadUrl" .Values.initJob.downloadToolConfs.archives.full) -}}']
+          command: ['sh', '-c', '{{- include "galaxy.extract-archive-if-changed-command" (dict "extractPath" .Values.setupJob.downloadToolConfs.volume.mountPath "downloadUrl" .Values.setupJob.downloadToolConfs.archives.full) -}}']
           volumeMounts:
             - name: galaxy-data
-              mountPath: {{ .Values.initJob.downloadToolConfs.volume.mountPath }}
-              subPath: {{ .Values.initJob.downloadToolConfs.volume.subPath }}     
+              mountPath: {{ .Values.setupJob.downloadToolConfs.volume.mountPath }}
+              subPath: {{ .Values.setupJob.downloadToolConfs.volume.subPath }}     
 {{ end }}
       volumes:
         - name: galaxy-conf-files
@@ -231,7 +231,7 @@ spec:
             name: {{ template "galaxy.fullname" . }}-configs
           {{- end }}
         {{- range $key, $entry := .Values.extraFileMappings -}}
-        {{- if $entry.applyToInit }}
+        {{- if $entry.applyToSetupJobs }}
         - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
           {{- if $entry.useSecret }}
           secret:

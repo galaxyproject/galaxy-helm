@@ -130,7 +130,7 @@ extraVolumeMounts: []
 #   - name: shared-data
 #     mountPath: /mnt/project/shared-data
 
-initJob:
+setupJob:
   createDatabase: true
   ttlSecondsAfterFinished: 10
   downloadToolConfs:
@@ -280,8 +280,8 @@ configs:
           ,{{- template "galaxy.fullname" $ -}}-cvmfs-gxy-{{ $key }}-pvc:{{ $entry.mountPath -}}
           {{- end -}}
           {{- end -}}
-          {{- if .Values.initJob.downloadToolConfs.enabled -}}
-          ,{{ template "galaxy.pvcname" . -}}/{{ .Values.initJob.downloadToolConfs.volume.subPath }}:{{ .Values.initJob.downloadToolConfs.volume.mountPath -}}
+          {{- if .Values.setupJob.downloadToolConfs.enabled -}}
+          ,{{ template "galaxy.pvcname" . -}}/{{ .Values.setupJob.downloadToolConfs.volume.subPath }}:{{ .Values.setupJob.downloadToolConfs.volume.mountPath -}}
           {{- end -}}
           {{- if .Values.extraVolumes -}}
           {{- template "galaxy.extra_pvc_mounts" . -}}
@@ -362,12 +362,12 @@ configs:
       database_connection: postgresql://unused:because@overridden_by_envvar
       integrated_tool_panel_config: "/galaxy/server/config/mutable/integrated_tool_panel.xml"
       sanitize_allowlist_file: "/galaxy/server/config/mutable/sanitize_allowlist.txt"
-      tool_config_file: "/galaxy/server/config/tool_conf.xml{{if .Values.initJob.downloadToolConfs.enabled}},{{ .Values.initJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_conf.xml{{end}}"
+      tool_config_file: "/galaxy/server/config/tool_conf.xml{{if .Values.setupJob.downloadToolConfs.enabled}},{{ .Values.setupJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_conf.xml{{end}}"
       shed_tool_config_file: "/galaxy/server/config/mutable/editable_shed_tool_conf.xml"
       enable_tool_document_cache: true
       tool_data_table_config_path: |-
-        {{ if .Values.initJob.downloadToolConfs.enabled }}
-        {{- .Values.initJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_data_table_conf.xml
+        {{ if .Values.setupJob.downloadToolConfs.enabled }}
+        {{- .Values.setupJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_data_table_conf.xml
         {{- if .Values.cvmfs.enabled -}}
         ,{{- .Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/byhand/location/tool_data_table_conf.xml
         {{- end }}
@@ -600,7 +600,7 @@ extraFileMappings:
     useSecret: false
     applyToJob: false
     applyToWeb: true
-    applyToInit: false
+    applyToSetupJobs: false
     applyToWorkflow: false
     applyToNginx: true
     tpl: true

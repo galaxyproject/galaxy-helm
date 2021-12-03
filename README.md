@@ -156,14 +156,14 @@ current default values can be found in `values.yaml` file.
 | `cvmfs.deploy`                             | Deploy the Galaxy-CVMFS-CSI Helm Chart. This is an optional dependency, and for production scenarios it should be deployed separately as a cluster-wide resource                                           |
 | `cvmfs.enabled`                            | Enable use of CVMFS in configs, and deployment of CVMFS Persistent Volume Claims for Galaxy                                                                                                                |
 | `cvmfs.galaxyPersistentVolumeClaims.{}`    | Persistent Volume Claims to deploy for CVMFS repositories. <a href="galaxy/values.yaml">See `values.yaml`</a> for examples.                                                                                                                 |
-| `initJob.ttlSecondsAfterFinished`          | Sets `ttlSecondsAfterFinished` for the initialization jobs. See the [Kubernetes documentation](https://kubernetes.io/docs/concepts/workloads/controllers/ttlafterfinished/#ttl-controller) for more details.       |
-| `initJob.downloadToolConfs.enabled`        | Download configuration files and the `tools` directory from an archive via a job at startup                                                                                                                |
-| `initJob.downloadToolConfs.archives.startup` | A URL to a `tar.gz` publicly accessible archive containing AT LEAST conf files and XML tool wrappers. Meant to be enough for Galaxy handlers to startup.                                                   |
-| `initJob.downloadToolConfs.archives.running` | A URL to a `tar.gz` publicly accessible archive containing AT LEAST confs, tool wrappers, and tool scripts but excluding test data. Meant to be enough for Galaxy handlers to run jobs.                    |
-| `initJob.downloadToolConfs.archives.full`  | A URL to a `tar.gz` publicly accessible archive containing the full `tools` directory, including each tool's test data. Meant to be enough to run automated tool-tests, fully mimicking CVMFS repositories |
-| `initJob.downloadToolConfs.volume.mountPath` | Path at which to mount the unarchived confs in the each handler (should match path set in the tool confs)                                                                                                  |
-| `initJob.downloadToolConfs.volume.subPath` | Name of subdirectory on Galaxy's shared filesystem to use for the unarchived configs                                                                                                                       |
-| `initJob.createDatabase`                   | Deploy a job to create a Galaxy database from scratch (does not affect subsequent upgrades, only first startup)                                                                                            |
+| `setupJob.ttlSecondsAfterFinished`          | Sets `ttlSecondsAfterFinished` for the initialization jobs. See the [Kubernetes documentation](https://kubernetes.io/docs/concepts/workloads/controllers/ttlafterfinished/#ttl-controller) for more details.       |
+| `setupJob.downloadToolConfs.enabled`        | Download configuration files and the `tools` directory from an archive via a job at startup                                                                                                                |
+| `setupJob.downloadToolConfs.archives.startup` | A URL to a `tar.gz` publicly accessible archive containing AT LEAST conf files and XML tool wrappers. Meant to be enough for Galaxy handlers to startup.                                                   |
+| `setupJob.downloadToolConfs.archives.running` | A URL to a `tar.gz` publicly accessible archive containing AT LEAST confs, tool wrappers, and tool scripts but excluding test data. Meant to be enough for Galaxy handlers to run jobs.                    |
+| `setupJob.downloadToolConfs.archives.full`  | A URL to a `tar.gz` publicly accessible archive containing the full `tools` directory, including each tool's test data. Meant to be enough to run automated tool-tests, fully mimicking CVMFS repositories |
+| `setupJob.downloadToolConfs.volume.mountPath` | Path at which to mount the unarchived confs in the each handler (should match path set in the tool confs)                                                                                                  |
+| `setupJob.downloadToolConfs.volume.subPath` | Name of subdirectory on Galaxy's shared filesystem to use for the unarchived configs                                                                                                                       |
+| `setupJob.createDatabase`                   | Deploy a job to create a Galaxy database from scratch (does not affect subsequent upgrades, only first startup)                                                                                            |
 | `ingress.path`                             | Path where Galaxy application will be hosted                                                                                                                                                               |
 | `ingress.annotations.{}`                   | Dictionary of annotations to add to the ingress's metadata at the deployment level                                                                                                                         |
 | `ingress.hosts`                            | Hosts for the Galaxy ingress                                                                                                                                                                               |
@@ -278,7 +278,7 @@ extraFileMappings:
     applyToJob: false
     applyToWorkflow: false
     applyToNginx: true
-    applyToInit: false
+    applyToSetupJobs: false
     tpl: false
     content: |
       <!DOCTYPE html>
@@ -419,7 +419,7 @@ independently upgrade-able. In other words, upgrading the Galaxy image from
 
 | Chart version        | Galaxy version   | Description     |
 | :------------------ | :--------------- | :-------------- |
-| `4.0`               | `21.05`          | Needs [Galaxy PR#11899](https://github.com/galaxyproject/galaxy/pull/11899) for eliminating the CVMFS. If running chart 4.0+ with Galaxy image `21.01` or below, use the CVMFS instead with `--set initJob.downloadToolConfs.enabled=false --set cvmfs.repositories.cvmfs-gxy-cloud=cloud.galaxyproject.org --set cvmfs.galaxyPersistentVolumeClaims.cloud.storage=1Gi --set cvmfs.galaxyPersistentVolumeClaims.cloud.storageClassName=cvmfs-gxy-cloud --set cvmfs.galaxyPersistentVolumeClaims.cloud.mountPath=/cvmfs/cloud.galaxyproject.org` |
+| `4.0`               | `21.05`          | Needs [Galaxy PR#11899](https://github.com/galaxyproject/galaxy/pull/11899) for eliminating the CVMFS. If running chart 4.0+ with Galaxy image `21.01` or below, use the CVMFS instead with `--set setupJob.downloadToolConfs.enabled=false --set cvmfs.repositories.cvmfs-gxy-cloud=cloud.galaxyproject.org --set cvmfs.galaxyPersistentVolumeClaims.cloud.storage=1Gi --set cvmfs.galaxyPersistentVolumeClaims.cloud.storageClassName=cvmfs-gxy-cloud --set cvmfs.galaxyPersistentVolumeClaims.cloud.mountPath=/cvmfs/cloud.galaxyproject.org` |
 
 ## Funding
 

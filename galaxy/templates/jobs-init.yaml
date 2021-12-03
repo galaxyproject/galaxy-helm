@@ -96,7 +96,7 @@ spec:
             name: {{ template "galaxy.fullname" . }}-configs
           {{- end }}
         {{- range $key, $entry := .Values.extraFileMappings -}}
-        {{- if $entry.applyToSetupJobs }}
+        {{- if $entry.applyToSetupJob }}
         - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
           {{- if $entry.useSecret }}
           secret:
@@ -163,7 +163,7 @@ spec:
           args: ['sh', '-c', {{ include "galaxy.init-container-commands" . | squote }}]
           volumeMounts:
             {{- range $key, $entry := .Values.extraFileMappings -}}
-            {{- if $entry.applyToSetupJobs }}
+            {{- if $entry.applyToSetupJob }}
             - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
               mountPath: {{ $key }}
               subPath: {{ include "galaxy.getFilenameFromPath" $key }}
@@ -231,7 +231,7 @@ spec:
             name: {{ template "galaxy.fullname" . }}-configs
           {{- end }}
         {{- range $key, $entry := .Values.extraFileMappings -}}
-        {{- if $entry.applyToSetupJobs }}
+        {{- if $entry.applyToSetupJob }}
         - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
           {{- if $entry.useSecret }}
           secret:

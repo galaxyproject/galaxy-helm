@@ -278,7 +278,7 @@ extraFileMappings:
     applyToJob: false
     applyToWorkflow: false
     applyToNginx: true
-    applyToSetupJobs: false
+    applyToSetupJob: false
     tpl: false
     content: |
       <!DOCTYPE html>

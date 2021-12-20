@@ -274,18 +274,14 @@ configs:
         load: galaxy.jobs.runners.kubernetes:KubernetesJobRunner
         k8s_use_service_account: true
         k8s_data_volume_claim: |-
-          {{ template "galaxy.pvcname" . -}}:{{ .Values.persistence.mountPath -}}
+          {{ template "galaxy.pvcname" . -}}:{{ .Values.persistence.mountPath -}}:r
         k8s_working_volume_claim: |-
           {{ template "galaxy.pvcname" . -}}:{{ .Values.persistence.mountPath -}}
         k8s_persistent_volume_claims: |-
-          {{ template "galaxy.pvcname" . -}}/cache:{{ .Values.persistence.mountPath -}}/cache,
-          {{- template "galaxy.pvcname" . -}}/config:{{ .Values.persistence.mountPath -}}/config,
-          {{- template "galaxy.pvcname" . -}}/deps:{{ .Values.persistence.mountPath -}}/deps,
-          {{- template "galaxy.pvcname" . -}}/object_store_cache:{{ .Values.persistence.mountPath -}}/object_store_cache,
-          {{- template "galaxy.pvcname" . -}}/tmp:{{ .Values.persistence.mountPath -}}/tmp,
-          {{- template "galaxy.pvcname" . -}}/tool-data:{{ .Values.persistence.mountPath -}}/tool-data,
-          {{- template "galaxy.pvcname" . -}}/tools:{{ .Values.persistence.mountPath -}}/tools,
-          {{- template "galaxy.pvcname" . -}}/tool_search_index:{{ .Values.persistence.mountPath -}}/tool_search_index
+          {{ template "galaxy.pvcname" . -}}/config:{{ .Values.persistence.mountPath -}}/config:r,
+          {{- template "galaxy.pvcname" . -}}/tmp:{{ .Values.persistence.mountPath -}}/tmp:rw,
+          {{- template "galaxy.pvcname" . -}}/tool-data:{{ .Values.persistence.mountPath -}}/tool-data:r,
+          {{- template "galaxy.pvcname" . -}}/tools:{{ .Values.persistence.mountPath -}}/tools:r
           {{- if .Values.cvmfs.enabled -}}
           {{- range $key, $entry := .Values.cvmfs.galaxyPersistentVolumeClaims -}}
           ,{{ template "galaxy.fullname" $ -}}-cvmfs-gxy-{{ $key }}-pvc:{{ $entry.mountPath -}}

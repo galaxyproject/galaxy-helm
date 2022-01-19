@@ -132,6 +132,7 @@ extraVolumeMounts: []
 
 setupJob:
   createDatabase: true
+  runAsUser: 0
   ttlSecondsAfterFinished: 10
   downloadToolConfs:
     enabled: true
@@ -235,6 +236,12 @@ postgresql:
   nameOverride: galaxy-postgres
   persistence:
     enabled: true
+    #storageClass:
+    #size:
+    #extra:
+    #  selector:
+    #    matchLabels:
+    #      label-key: label-value
 
 cvmfs:
   repositories:
@@ -648,6 +655,7 @@ nginx:
     repository: nginx
     tag: latest
     pullPolicy: IfNotPresent
+  containerPort: 80
   conf:
     client_max_body_size: 100g
   resources:

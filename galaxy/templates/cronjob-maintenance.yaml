@@ -21,12 +21,18 @@ spec:
             image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
             imagePullPolicy: {{ .Values.image.pullPolicy }}
             # delete all tmp files older than walltime limit
-            args:
+            command:
               - find
               - {{ .Values.persistence.mountPath }}/tmp
-              - \! -newermt '-{{ (index .Values "configs" "job_conf.yml" "runners" "k8s" "k8s_walltime_limit" | default 604800) }} seconds'
-              - -type f
-              - -exec rm {} \;
+              - '!' 
+              - -newermt 
+              - '-{{ (index .Values "configs" "job_conf.yml" "runners" "k8s" "k8s_walltime_limit" | default 604800) }} seconds'
+              - -type 
+              - f
+              - -exec
+              - rm 
+              - '{}'
+              - ;
             volumeMounts:
             - name: galaxy-data
               mountPath: {{ .Values.persistence.mountPath }}

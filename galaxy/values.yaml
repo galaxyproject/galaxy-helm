@@ -413,50 +413,23 @@ configs:
     </workflow_schedulers>
   sanitize_allowlist.txt: |
     toolshed.g2.bx.psu.edu/repos/bgruening/diff/diff/3.7+galaxy0
-    toolshed.g2.bx.psu.edu/repos/crs4/taxonomy_krona_chart/taxonomy_krona_chart/2.6.1
-    toolshed.g2.bx.psu.edu/repos/crs4/taxonomy_krona_chart/taxonomy_krona_chart/2.6.1.1
-    toolshed.g2.bx.psu.edu/repos/crs4/taxonomy_krona_chart/taxonomy_krona_chart/2.7.1
-    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.52
-    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.63
-    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.64
-    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.65
-    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.67
-    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.68
-    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.69
-    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.72
+    toolshed.g2.bx.psu.edu/repos/bgruening/pharmcat/pharmcat/1.3.1+galaxy0
+    toolshed.g2.bx.psu.edu/repos/crs4/taxonomy_krona_chart/taxonomy_krona_chart/2.7.1+galaxy0
     toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.72+galaxy1
-    toolshed.g2.bx.psu.edu/repos/engineson/multiqc/multiqc/1.0.0.0
-    toolshed.g2.bx.psu.edu/repos/iuc/dexseq/dexseq/1.20.1
-    toolshed.g2.bx.psu.edu/repos/iuc/dexseq/dexseq/1.28.1+galaxy1
-    toolshed.g2.bx.psu.edu/repos/iuc/fastp/fastp/0.19.5+galaxy1
+    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.73+galaxy0
+    toolshed.g2.bx.psu.edu/repos/iuc/dexseq/dexseq/1.28.1+galaxy2
     toolshed.g2.bx.psu.edu/repos/iuc/fastp/fastp/0.20.1+galaxy0
-    toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse_to_standalone/0.5.2
-    toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse_to_standalone/1.16.5+galaxy6
-    toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse_to_standalone/1.16.9+galaxy0
     toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse_to_standalone/1.16.11+galaxy0
-    toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/0.5.2.1
-    toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.5+galaxy6
-    toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.5+galaxy7
-    toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.9+galaxy0
+    toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse_to_standalone/1.16.11+galaxy1
     toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.11+galaxy0
-    toolshed.g2.bx.psu.edu/repos/iuc/macs2/macs2_callpeak/2.1.0.20140616.0
-    toolshed.g2.bx.psu.edu/repos/iuc/macs2/macs2_callpeak/2.1.0.20151222.0
+    toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.11+galaxy1
     toolshed.g2.bx.psu.edu/repos/iuc/macs2/macs2_callpeak/2.1.1.20160309.6
-    toolshed.g2.bx.psu.edu/repos/iuc/meme_meme/meme_meme/4.11.0.0
-    toolshed.g2.bx.psu.edu/repos/iuc/meme_meme/meme_meme/4.11.0.1
-    toolshed.g2.bx.psu.edu/repos/iuc/meme_meme/meme_meme/4.11.1.0
     toolshed.g2.bx.psu.edu/repos/iuc/meme_meme/meme_meme/5.0.5.0
-    toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.3.1
-    toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.5.0
-    toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.6
-    toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.7
-    toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.8+galaxy1
-    toolshed.g2.bx.psu.edu/repos/iuc/prestor_abseq3/prestor_abseq3/0.5.4
-    toolshed.g2.bx.psu.edu/repos/iuc/prestor_abseq3/prestor_abseq3/0.5.4+galaxy1
-    toolshed.g2.bx.psu.edu/repos/iuc/quast/quast/4.1.1
-    toolshed.g2.bx.psu.edu/repos/iuc/quast/quast/4.6.3
-    toolshed.g2.bx.psu.edu/repos/iuc/quast/quast/5.0.2+galaxy1
-    toolshed.g2.bx.psu.edu/repos/iuc/seurat/seurat/3.2.2+galaxy0
+    toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.11+galaxy0
+    toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.9+galaxy1
+    toolshed.g2.bx.psu.edu/repos/iuc/prestor_abseq3/prestor_abseq3/0.6.2+galaxy0
+    toolshed.g2.bx.psu.edu/repos/iuc/quast/quast/5.0.2+galaxy3
+    toolshed.g2.bx.psu.edu/repos/iuc/seurat/seurat/4.1.0+galaxy0
     toolshed.g2.bx.psu.edu/repos/iuc/snpeff/snpEff/4.3+T.galaxy1
   build_sites.yml:
     - type: ucsc

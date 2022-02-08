@@ -35,7 +35,7 @@ data:
         client_max_body_size {{ .Values.nginx.conf.client_max_body_size }};
 
         server {
-            listen 80;
+            listen {{ .Values.nginx.containerPort }};
             server_name galaxy;
 
             location {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}static {

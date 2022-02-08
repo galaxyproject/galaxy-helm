@@ -53,7 +53,7 @@ spec:
           imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
           ports:
             - name: galaxy-nginx
-              containerPort: 80
+              containerPort: {{ .Values.nginx.containerPort }}
               protocol: TCP
           volumeMounts:
             {{- range $key, $entry := .Values.extraFileMappings -}}

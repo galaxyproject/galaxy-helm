@@ -658,7 +658,7 @@ nginx:
     repository: nginx
     tag: latest
     pullPolicy: IfNotPresent
-  containerPort: 80
+  containerPort: 7080
   conf:
     client_max_body_size: 100g
   resources:

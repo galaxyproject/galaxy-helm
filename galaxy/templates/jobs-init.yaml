@@ -152,9 +152,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       securityContext:
-        runAsUser: {{ .Values.setupJob.runAsUser }}
-        runAsGroup: 101
-        fsGroup: 101
+        {{- toYaml .Values.setupJob.securityContext | nindent 8 }}
       restartPolicy: OnFailure
       containers:
         - name: {{ .Chart.Name }}-init-mounts

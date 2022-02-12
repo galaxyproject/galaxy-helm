@@ -152,7 +152,6 @@ cp -anL /galaxy/server/config/tool_data_table_conf.xml.sample /galaxy/server/con
 cp -aruL /galaxy/server/tool-data {{.Values.persistence.mountPath}}/;
 cp -aruL /galaxy/server/tools {{.Values.persistence.mountPath}}/tools | true;
 echo "Done" > /galaxy/server/config/mutable/init_mounts_done_{{.Release.Revision}};
-. /galaxy/server/.venv/bin/activate && python -c "import os; [([os.chown(os.path.join(root, each), 101, 101) for each in dirs], [os.chown(os.path.join(root, each), 101, 101) for each in files]) for root, dirs, files in os.walk(\"{{.Values.persistence.mountPath}}\")];"
 {{- end -}}
 
 {{/*

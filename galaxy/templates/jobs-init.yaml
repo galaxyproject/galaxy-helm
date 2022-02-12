@@ -18,9 +18,7 @@ spec:
         checksum/galaxy_extras: {{ include (print $.Template.BasePath "/configmap-extra-files.yaml") . | sha256sum }}
     spec:
       securityContext:
-        runAsUser: {{ .Values.setupJob.runAsUser }}
-        runAsGroup: 101
-        fsGroup: 101
+        {{- toYaml .Values.setupJob.securityContext | nindent 8 }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

@@ -54,7 +54,7 @@ spec:
           {{ include "galaxy.podEnvVars" . }}
           volumeMounts:
             {{- range $key, $entry := .Values.extraFileMappings -}}
-            {{- if $entry.applyToJob }}
+            {{- if $entry.applyToSetupJob }}
             - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
               mountPath: {{ $key }}
               subPath: {{ include "galaxy.getFilenameFromPath" $key }}

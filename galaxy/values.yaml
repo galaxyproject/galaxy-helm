@@ -239,21 +239,24 @@ postgresql:
         name: '{{default (printf "%s-galaxy-secrets" .Release.Name) .Values.galaxyExistingSecret}}'
         key: '{{default "galaxy-db-password" .Values.galaxyExistingSecretKeyRef}}'
 
-cvmfs:
-  repositories:
-    cvmfs-gxy-data: data.galaxyproject.org
-    # cvmfs-gxy-cloud: cloud.galaxyproject.org
-  enabled: false
-  deploy: false
+refdata:
+  enabled: true
+  type: s3csi
   galaxyPersistentVolumeClaims:
     data:
       storage: 1Gi
-      storageClassName: cvmfs-gxy-data
+      storageClassName: refdata-gxy-data
       mountPath: /cvmfs/data.galaxyproject.org
     # cloud:
     #   storage: 1Gi
     #   storageClassName: cvmfs-gxy-cloud
     #   mountPath: /cvmfs/cloud.galaxyproject.org
+
+cvmfs:
+  repositories:
+    cvmfs-gxy-data: data.galaxyproject.org
+    # cvmfs-gxy-cloud: cloud.galaxyproject.org
+  deploy: false
   cache:
     alienCache:
       enabled: true
@@ -389,14 +392,14 @@ configs:
       shed_tool_config_file: "/galaxy/server/config/mutable/editable_shed_tool_conf.xml"
       enable_tool_document_cache: true
       tool_data_table_config_path: |-
-        {{ if .Values.initJob.downloadToolConfs.enabled }}
-        {{- .Values.initJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_data_table_conf.xml
-        {{- if .Values.cvmfs.enabled -}}
-        ,{{- .Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/byhand/location/tool_data_table_conf.xml
+        {{ if .Values.setupJob.downloadToolConfs.enabled }}
+        {{- .Values.setupJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_data_table_conf.xml
+        {{- if .Values.refdata.enabled -}}
+        ,{{- .Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/byhand/location/tool_data_table_conf.xml
         {{- end }}
         {{- else }}
-        {{- if .Values.cvmfs.enabled -}}
-        {{- .Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/byhand/location/tool_data_table_conf.xml
+        {{- if .Values.refdata.enabled -}}
+        {{- .Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/byhand/location/tool_data_table_conf.xml
         {{- end }}
         {{- end }}
       tool_dependency_dir: "{{.Values.persistence.mountPath}}/deps"
@@ -455,7 +458,7 @@ configs:
     toolshed.g2.bx.psu.edu/repos/iuc/snpeff/snpEff/4.3+T.galaxy1
   build_sites.yml:
     - type: ucsc
-      file: "{{if .Values.cvmfs.enabled}}{{.Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath -}}/managed/location/ucsc_build_sites.txt{{else}}/galaxy/server/tool-data/shared/ucsc/ucsc_build_sites.txt.sample{{end}}"
+      file: "{{if .Values.refdata.enabled}}{{.Values.refdata.galaxyPersistentVolumeClaims.data.mountPath -}}/managed/location/ucsc_build_sites.txt{{else}}/galaxy/server/tool-data/shared/ucsc/ucsc_build_sites.txt.sample{{end}}"
       display: [main,archaea,ucla]
     - type: gbrowse
       file: "/galaxy/server/tool-data/shared/gbrowse/gbrowse_build_sites.txt"

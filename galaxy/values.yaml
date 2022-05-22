@@ -246,21 +246,24 @@ postgresql:
     #    matchLabels:
     #      label-key: label-value
 
-cvmfs:
-  repositories:
-    cvmfs-gxy-data: data.galaxyproject.org
-    # cvmfs-gxy-cloud: cloud.galaxyproject.org
-  enabled: false
-  deploy: false
+refdata:
+  enabled: true
+  type: s3csi
   galaxyPersistentVolumeClaims:
     data:
       storage: 1Gi
-      storageClassName: cvmfs-gxy-data
+      storageClassName: refdata-gxy-data
       mountPath: /cvmfs/data.galaxyproject.org
     # cloud:
     #   storage: 1Gi
     #   storageClassName: cvmfs-gxy-cloud
     #   mountPath: /cvmfs/cloud.galaxyproject.org
+
+cvmfs:
+  repositories:
+    cvmfs-gxy-data: data.galaxyproject.org
+    # cvmfs-gxy-cloud: cloud.galaxyproject.org
+  deploy: false
   cache:
     alienCache:
       enabled: true
@@ -269,6 +272,19 @@ cvmfs:
       enabled: false
     preload:
       enabled: false
+
+s3csi:
+  deploy: true
+  images:
+    csi: cloudve/csi-s3:0.30.10
+  storageClass:
+    name: refdata-gxy-data
+    singleBucket: biorefdata
+  secret:
+    endpoint: https://s3.ap-southeast-2.amazonaws.com
+    usePrefix: true
+    prefix: /galaxy/v1/data.galaxyproject.org/
+
 
 # When this flag is set to true, all configs will be set in secrets,
 # when it is set to false, all configs will be set in configmaps
@@ -286,9 +302,9 @@ configs:
         k8s_use_service_account: true
         k8s_persistent_volume_claims: |-
           {{ template "galaxy.pvcname" . -}}:{{ .Values.persistence.mountPath -}}
-          {{- if .Values.cvmfs.enabled -}}
+          {{- if .Values.refdata.enabled -}}
           {{- range $key, $entry := .Values.cvmfs.galaxyPersistentVolumeClaims -}}
-          ,{{- template "galaxy.fullname" $ -}}-cvmfs-gxy-{{ $key }}-pvc:{{ $entry.mountPath -}}
+          ,{{- template "galaxy.fullname" $ -}}-refdata-gxy-{{ $key }}-pvc:{{ $entry.mountPath -}}
           {{- end -}}
           {{- end -}}
           {{- if .Values.setupJob.downloadToolConfs.enabled -}}
@@ -379,19 +395,19 @@ configs:
       tool_data_table_config_path: |-
         {{ if .Values.setupJob.downloadToolConfs.enabled }}
         {{- .Values.setupJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_data_table_conf.xml
-        {{- if .Values.cvmfs.enabled -}}
-        ,{{- .Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/byhand/location/tool_data_table_conf.xml
+        {{- if .Values.refdata.enabled -}}
+        ,{{- .Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/byhand/location/tool_data_table_conf.xml
         {{- end }}
         {{- else }}
-        {{- if .Values.cvmfs.enabled -}}
-        {{- .Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/byhand/location/tool_data_table_conf.xml
+        {{- if .Values.refdata.enabled -}}
+        {{- .Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/byhand/location/tool_data_table_conf.xml
         {{- end }}
         {{- end }}
       tool_dependency_dir: "{{.Values.persistence.mountPath}}/deps"
       job_config_file: "/galaxy/server/config/job_conf.yml"
       builds_file_path: |-
-        {{ if .Values.cvmfs.enabled }}
-        {{ .Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/builds.txt
+        {{ if .Values.refdata.enabled }}
+        {{ .Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/builds.txt
         {{- end }}
       containers_resolvers_config_file: "/galaxy/server/config/container_resolvers_conf.xml"
       workflow_schedulers_config_file: "/galaxy/server/config/workflow_schedulers_conf.xml"
@@ -405,8 +421,8 @@ configs:
       nginx_x_accel_redirect_base: >-
         {{include "galaxy.add_trailing_slash" .Values.ingress.path}}_x_accel_redirect
       len_file_path: |-
-        {{ if .Values.cvmfs.enabled -}}
-        {{ .Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/managed/len/ucsc
+        {{ if .Values.refdata.enabled -}}
+        {{ .Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/managed/len/ucsc
         {{- end }}
   container_resolvers_conf.xml: |
     <containers_resolvers>
@@ -443,7 +459,7 @@ configs:
     toolshed.g2.bx.psu.edu/repos/iuc/snpeff/snpEff/4.3+T.galaxy1
   build_sites.yml:
     - type: ucsc
-      file: "{{if .Values.cvmfs.enabled}}{{.Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath -}}/managed/location/ucsc_build_sites.txt{{else}}/galaxy/server/tool-data/shared/ucsc/ucsc_build_sites.txt.sample{{end}}"
+      file: "{{if .Values.refdata.enabled}}{{.Values.refdata.galaxyPersistentVolumeClaims.data.mountPath -}}/managed/location/ucsc_build_sites.txt{{else}}/galaxy/server/tool-data/shared/ucsc/ucsc_build_sites.txt.sample{{end}}"
       display: [main,archaea,ucla]
     - type: gbrowse
       file: "/galaxy/server/tool-data/shared/gbrowse/gbrowse_build_sites.txt"

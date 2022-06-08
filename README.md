@@ -97,8 +97,8 @@ helm install cvmfs cloudve/galaxy-cvmfs-csi --namespace cvmfs --create-namespace
 helm install my-galaxy-release-1 cloudve/galaxy --set cvmfs.enabled=true --set cvmfs.deploy=false --set ingress.path="/galaxy1/"
 helm install my-galaxy-release-2 cloudve/galaxy --set cvmfs.enabled=true --set ingress.path="/galaxy2/"
 ```
-_Note:_ `cvmfs.deploy` defaults to `false`. The explicit mention in the first release is
-purely visual to highlight the difference.
+_Note:_ `cvmfs.deploy` and `s3csi.deploy` default to `false`. The explicit mention in the first release is
+purely to visually highlight the difference.
 
 ## Installing the chart
 

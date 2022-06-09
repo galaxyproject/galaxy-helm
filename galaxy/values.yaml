@@ -407,7 +407,7 @@ configs:
       job_config_file: "/galaxy/server/config/job_conf.yml"
       builds_file_path: |-
         {{ if .Values.refdata.enabled }}
-        {{ .Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/builds.txt
+        {{- .Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/builds.txt
         {{- end }}
       containers_resolvers_config_file: "/galaxy/server/config/container_resolvers_conf.xml"
       workflow_schedulers_config_file: "/galaxy/server/config/workflow_schedulers_conf.xml"

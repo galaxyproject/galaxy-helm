@@ -314,21 +314,21 @@ configs:
       assign:
         - "db-skip-locked"
     execution:
-      default: vortex_dispatcher
+      default: tpv_dispatcher
       environments:
         local:
           runner: local
-        vortex_dispatcher:
+        tpv_dispatcher:
           container_monitor: false
           runner: dynamic
           type: python
           function: map_tool_to_destination
-          rules_module: vortex.rules
+          rules_module: tpv.rules
           docker_enabled: true
           docker_default_container_id: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           tmp_dir: "true"
-          vortex_config_files:
-            {{ .Values.jobs.vortex.rules | toYaml | nindent 8 }}
+          tpv_config_files:
+            {{ .Values.jobs.tpv.config_files | toYaml | nindent 8 }}
     limits:
     - type: registered_user_concurrent_jobs
       value: 5
@@ -471,14 +471,35 @@ jobs:
   priorityClass:
     enabled: true
     existingClass: ""
-  vortex:
-    rule_files:
-      - https://github.com/galaxyproject/total-perspective-vortex/raw/main/vortex/tests/fixtures/mapping-rules.yml
-      # An example local override of remote rules
-      # - lib/galaxy/jobs/rules/vortex_rules_local.yml
+  tpv:
+    config_files:
+      - https://raw.githubusercontent.com/galaxyproject/tpv-shared-database/main/tools.yml
+      - lib/galaxy/jobs/rules/vortex_rules_local.yml
   rules:
     vortex_rules_local.yml:
-
+      tools:
+        Summary_Statistics1:
+          params:
+            docker_container_id_override: cloudve/gsummary:latest
+        toolshed.g2.bx.psu.edu/repos/devteam/data_manager_sam_fasta_index_builder/sam_fasta_index_builder/.*:
+          params:
+            docker_container_id_override: cloudve/sam-fasta-dm:latest
+        toolshed.g2.bx.psu.edu/repos/devteam/data_manager_bwa_mem_index_builder/bwa_mem_index_builder_data_manager/.*:
+          params:
+            docker_container_id_override: cloudve/bwa-dm:latest
+        toolshed.g2.bx.psu.edu/repos/crs4/prokka/prokka/1.14.5:
+          params:
+            docker_container_id_override: cloudve/prokka:1.14.5
+        toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.5+galaxy6:
+          params:
+            docker_container_id_override: cloudve/jbrowse:1.16.5
+        sort1:
+          params:
+            docker_container_id_override: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        Grouping1:
+          params:
+            docker_container_id_override: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        
 extraFileMappings:
   /galaxy/server/static/welcome.html:
     useSecret: false

@@ -12,6 +12,9 @@ spec:
   resources:
     requests:
       storage: {{ $entry.storage }}
+{{- if eq $.Values.refdata.type "s3csi" }}
+  volumeName: {{ include "galaxy.fullname" $ }}-refdata-gxy-pv
+{{- end }}
   storageClassName: {{ $entry.storageClassName }}
 ---
 {{- end }}

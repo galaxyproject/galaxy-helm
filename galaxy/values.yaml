@@ -417,8 +417,8 @@ configs:
       nginx_x_accel_redirect_base: >-
         {{include "galaxy.add_trailing_slash" .Values.ingress.path}}_x_accel_redirect
       len_file_path: |-
-        {{ if .Values.cvmfs.enabled -}}
-        {{ .Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/managed/len/ucsc
+        {{ if .Values.refdata.enabled -}}
+        {{- .Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/managed/len/ucsc
         {{- end }}
   container_resolvers_conf.xml: |
     <containers_resolvers>

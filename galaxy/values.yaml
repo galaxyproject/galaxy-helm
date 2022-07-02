@@ -263,6 +263,25 @@ cvmfs:
     preload:
       enabled: false
 
+s3csi:
+  deploy: true
+  images:
+    csi: cloudve/csi-s3:0.31.3
+  storageClass:
+    name: refdata-gxy-data
+    mounter: s3fs
+    singleBucket: biorefdata
+    mountOptions: "-o use_cache=/tmp -o endpoint=ap-southeast-2 -o public_bucket=1 -o enable_noobj_cache -o no_check_certificate -o kernel_cache -o ensure_diskfree=5000"
+    # additional optimizations for s3fs
+    # -o max_background=1000 -o max_stat_cache_size=1000000 -o multipart_size=52 -o parallel_count=30 -o multireq_max=30 -o dbglevel=warn
+    # future settings for geesefs
+    # mountOptions: "--memory-limit 4000 --dir-mode 0777 --file-mode 0666 --cache /tmp/geesecache --debug --debug_fuse --stat-cache-ttl 9m0s --cache-to-disk-hits 1"
+    # --no-dir-object --no-implicit-dir --stat-cache-ttl 120m0s --max-disk-cache-fd 4096
+  secret:
+    endpoint: https://s3.ap-southeast-2.amazonaws.com
+    usePrefix: true
+    prefix: /galaxy/v1/data.galaxyproject.org
+
 # When this flag is set to true, all configs will be set in secrets,
 # when it is set to false, all configs will be set in configmaps
 useSecretConfigs: false
@@ -279,9 +298,9 @@ configs:
         k8s_use_service_account: true
         k8s_persistent_volume_claims: |-
           {{ template "galaxy.pvcname" . -}}:{{ .Values.persistence.mountPath -}}
-          {{- if .Values.cvmfs.enabled -}}
-          {{- range $key, $entry := .Values.cvmfs.galaxyPersistentVolumeClaims -}}
-          ,{{- template "galaxy.fullname" $ -}}-cvmfs-gxy-{{ $key }}-pvc:{{ $entry.mountPath -}}
+          {{- if .Values.refdata.enabled -}}
+          {{- range $key, $entry := .Values.refdata.galaxyPersistentVolumeClaims -}}
+          ,{{- template "galaxy.fullname" $ -}}-refdata-gxy-{{ $key }}-pvc:{{ $entry.mountPath -}}
           {{- end -}}
           {{- end -}}
           {{- if .Values.initJob.downloadToolConfs.enabled -}}

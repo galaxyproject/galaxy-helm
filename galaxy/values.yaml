@@ -281,7 +281,7 @@ s3csi:
     name: refdata-gxy-data
     mounter: s3fs
     singleBucket: biorefdata
-    mountOptions: "-o use_cache=/tmp -o endpoint=ap-southeast-2 -o public_bucket=1 -o enable_noobj_cache -o no_check_certificate -o kernel_cache"
+    mountOptions: "-o use_cache=/tmp -o endpoint=ap-southeast-2 -o public_bucket=1 -o enable_noobj_cache -o no_check_certificate -o kernel_cache -o ensure_diskfree=5000"
     # additional optimizations for s3fs
     # -o max_background=1000 -o max_stat_cache_size=1000000 -o multipart_size=52 -o parallel_count=30 -o multireq_max=30 -o dbglevel=warn
     # future settings for geesefs
@@ -309,7 +309,7 @@ configs:
         k8s_persistent_volume_claims: |-
           {{ template "galaxy.pvcname" . -}}:{{ .Values.persistence.mountPath -}}
           {{- if .Values.refdata.enabled -}}
-          {{- range $key, $entry := .Values.cvmfs.galaxyPersistentVolumeClaims -}}
+          {{- range $key, $entry := .Values.refdata.galaxyPersistentVolumeClaims -}}
           ,{{- template "galaxy.fullname" $ -}}-refdata-gxy-{{ $key }}-pvc:{{ $entry.mountPath -}}
           {{- end -}}
           {{- end -}}

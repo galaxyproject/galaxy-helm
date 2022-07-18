@@ -392,8 +392,8 @@ configs:
       shed_tool_config_file: "/galaxy/server/config/mutable/editable_shed_tool_conf.xml"
       enable_tool_document_cache: true
       tool_data_table_config_path: |-
-        {{ if .Values.setupJob.downloadToolConfs.enabled }}
-        {{- .Values.setupJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_data_table_conf.xml
+        {{ if .Values.initJob.downloadToolConfs.enabled }}
+        {{- .Values.initJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_data_table_conf.xml
         {{- if .Values.refdata.enabled -}}
         ,{{- .Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/byhand/location/tool_data_table_conf.xml
         {{- end }}

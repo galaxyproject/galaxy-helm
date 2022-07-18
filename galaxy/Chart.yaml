@@ -1,29 +1,7 @@
-apiVersion: v2
+apiVersion: v1
 name: galaxy
 type: application
-version: 4.10.2
-appVersion: "21.09"
+version: 4.10.3
+appVersion: "21.05"
 description: Chart for Galaxy, an open, web-based platform for accessible, reproducible, and transparent computational biomedical research.
 icon: https://galaxyproject.org/images/galaxy-logos/galaxy_project_logo_square.png
-dependencies:
-  - name: postgres-operator
-    repository: https://raw.githubusercontent.com/zalando/postgres-operator/master/charts/postgres-operator/
-    version: 1.7.0
-    condition: postgresql.deploy
-    alias: postgresql
-    tags:
-      - deploy-postgres
-  - name: galaxy-cvmfs-csi
-    repository: https://raw.githubusercontent.com/cloudve/helm-charts/master/
-    version: 1.6.0
-    condition: cvmfs.deploy
-    alias: cvmfs
-    tags:
-      - deploy-cvmfs
-  - name: csi-s3
-    repository: https://raw.githubusercontent.com/cloudve/helm-charts/master/
-    version: 0.31.3
-    condition: s3csi.deploy
-    alias: s3csi
-    tags:
-      - deploy-s3csi

@@ -249,7 +249,7 @@ refdata:
   type: s3csi
   galaxyPersistentVolumeClaims:
     data:
-      storage: 1Gi
+      storage: 10Gi
       storageClassName: cvmfs-gxy-data
       mountPath: /cvmfs/data.galaxyproject.org
     # cloud:

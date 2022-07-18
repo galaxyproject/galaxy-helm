@@ -57,7 +57,7 @@ Chart](https://github.com/galaxyproject/galaxykubeman-helm).
 In a production setting, especially if the intention is to run multiple Galaxies
 in a single cluster, we recommend installing these charts separately once per
 cluster, and installing Galaxy with `--set postgresql.deploy=false --set
-cvmfs.deploy=false --set cvmfs.enabled=true`.
+refdata.enabled=true --set cvmfs.deploy=false --set s3csi.deploy=false`.
 
 ## TL;DR
 
@@ -85,7 +85,7 @@ helm install my-galaxy-release cloudve/galaxy
 ```console
 helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/master/
 helm repo update
-helm install my-galaxy-release cloudve/galaxy --set cvmfs.enabled=true --set cvmfs.deploy=true
+helm install my-galaxy-release cloudve/galaxy --set refdata.enabled=true --set cvmfs.deploy=true --set s3csi.deploy=false
 ```
 
 ### Example installation for multiple Galaxy instances on the same cluster
@@ -94,11 +94,11 @@ helm install my-galaxy-release cloudve/galaxy --set cvmfs.enabled=true --set cvm
 helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/master/
 helm repo update
 helm install cvmfs cloudve/galaxy-cvmfs-csi --namespace cvmfs --create-namespace
-helm install my-galaxy-release-1 cloudve/galaxy --set cvmfs.enabled=true --set cvmfs.deploy=false --set ingress.path="/galaxy1/"
-helm install my-galaxy-release-2 cloudve/galaxy --set cvmfs.enabled=true --set ingress.path="/galaxy2/"
+helm install my-galaxy-release-1 cloudve/galaxy --set refdata.enabled=true --set cvmfs.deploy=false --set s3csi.deploy=false --set ingress.path="/galaxy1/"
+helm install my-galaxy-release-2 cloudve/galaxy --set refdata.enabled=true --set cvmfs.deploy=false --set s3csi.deploy=false --set ingress.path="/galaxy2/"
 ```
-_Note:_ `cvmfs.deploy` defaults to `false`. The explicit mention in the first release is
-purely visual to highlight the difference.
+_Note:_ `cvmfs.deploy` and `s3csi.deploy` default to `false`. The explicit mention in the first release is
+purely to visually highlight the difference.
 
 ## Installing the chart
 
@@ -382,7 +382,7 @@ kubectl create namespace psql
 helm install psql-operator --namespace psql zalando/postgres-operator --set persistence.enabled=true
 kubectl create namespace cvmfs
 helm install galaxy-cvmfs --namespace cvmfs cloudve/galaxy-cvmfs-csi --set repositories.cvmfs-gxy-data="data.galaxyproject.org"
-helm install galaxy cloudve/galaxy --set cvmfs.enabled=true --set cvmfs.deploy=false
+helm install galaxy cloudve/galaxy --set refdata.enabled=true --set cvmfs.deploy=false --set s3csi.deploy=false
 ```
 
 If you wish to get a quick deployment of a single Galaxy instance with its own
@@ -391,7 +391,7 @@ CVMFS-CSI, you can do so by enabling the CVMFS deployment as part of this chart:
 ```console
 helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/master/
 helm repo update
-helm install galaxy cloudve/galaxy --set cvmfs.enabled=true --set cvmfs.deploy=true
+helm install galaxy cloudve/galaxy --set refdata.enabled=true --set cvmfs.deploy=true --set s3csi.deploy=false
 ```
 
 If you use the latter method, it is highly recommended that you deploy a single

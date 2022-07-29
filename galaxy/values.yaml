@@ -118,7 +118,7 @@ persistence:
   storageClass: ""
   existingClaim: null
   accessMode: ReadWriteMany
-  size: 10Gi
+  size: 5Gi
   mountPath: /galaxy/server/database
 
 extraVolumes: []
@@ -251,7 +251,7 @@ refdata:
   type: s3csi
   galaxyPersistentVolumeClaims:
     data:
-      storage: 1Gi
+      storage: 10Gi
       storageClassName: refdata-gxy-data
       mountPath: /cvmfs/data.galaxyproject.org
     # cloud:

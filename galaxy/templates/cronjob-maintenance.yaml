@@ -1,4 +1,4 @@
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: {{ include "galaxy.fullname" . }}-maintenance
@@ -24,13 +24,13 @@ spec:
             command:
               - find
               - {{ .Values.persistence.mountPath }}/tmp
-              - '!' 
-              - -newermt 
+              - '!'
+              - -newermt
               - -{{ (index .Values "configs" "job_conf.yml" "runners" "k8s" "k8s_walltime_limit" | default 604800) }} seconds
-              - -type 
+              - -type
               - f
               - -exec
-              - rm 
+              - rm
               - '{}'
               - ;
             volumeMounts:

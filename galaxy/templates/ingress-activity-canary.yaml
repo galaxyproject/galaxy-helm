@@ -33,7 +33,7 @@ spec:
     - host: {{ .host | quote }}
       http:
         paths:
-          - path: {{ trimSuffix "/" $ingressPath }}/api/users/
+          - path: {{ trimSuffix "/" $ingressPath }}/api/users
             pathType: Prefix
             backend:
               service:
@@ -41,5 +41,5 @@ spec:
                 port:
                   number: {{ $servicePort }}
     {{- end }}
-  {{- end }}
+{{- end }}
 ---

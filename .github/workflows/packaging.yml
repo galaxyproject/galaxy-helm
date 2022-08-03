@@ -19,3 +19,9 @@ jobs:
           charts-token: ${{ secrets.CHARTS_TOKEN }}
           github-labels: ${{ join(github.event.pull_request.labels.*.name, ', ') }}
           git-branch: ${{ github.event.pull_request.base.ref }}
+      - name: tag and release
+        run: |
+          version=$(cat galaxy/Chart.yaml | grep ~version: | cut -d\  -f2)
+          git tag -a $version -m "Release v$version"
+          git push origin $version
+          rh release create $version --generate-notes --draft

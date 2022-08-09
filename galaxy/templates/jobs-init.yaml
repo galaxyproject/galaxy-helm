@@ -26,7 +26,7 @@ spec:
       restartPolicy: OnFailure
       initContainers:
         - name: {{ .Chart.Name }}-init-postgres
-          image: alpine:3.7
+          image: alpine:3.16
           command: ['sh', '-c', 'chown 101:101 {{ .Values.persistence.mountPath }}; until nc -z -w3 {{ template "galaxy-postgresql.fullname" . }} 5432; do echo waiting for galaxy-postgres service; sleep 1; done;']
           volumeMounts: 
             - name: galaxy-data
@@ -54,7 +54,7 @@ spec:
           {{ include "galaxy.podEnvVars" . }}
           volumeMounts:
             {{- range $key, $entry := .Values.extraFileMappings -}}
-            {{- if $entry.applyToJob }}
+            {{- if $entry.applyToSetupJob }}
             - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
               mountPath: {{ $key }}
               subPath: {{ include "galaxy.getFilenameFromPath" $key }}
@@ -75,9 +75,9 @@ spec:
             - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/
               subPath: config
-            {{- if .Values.cvmfs.enabled }}
-            {{- range $key, $entry := .Values.cvmfs.galaxyPersistentVolumeClaims }}
-            - name: cvmfs-gxy-{{ $key }}
+            {{- if .Values.refdata.enabled }}
+            {{- range $key, $entry := .Values.refdata.galaxyPersistentVolumeClaims }}
+            - name: refdata-gxy-{{ $key }}
               mountPath: {{ $entry.mountPath }}
             {{- end -}}
             {{- end }}
@@ -115,11 +115,11 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
-        {{- if .Values.cvmfs.enabled }}
-        {{- range $key, $entry := .Values.cvmfs.galaxyPersistentVolumeClaims }}
-        - name: cvmfs-gxy-{{ $key }}
+        {{- if .Values.refdata.enabled }}
+        {{- range $key, $entry := .Values.refdata.galaxyPersistentVolumeClaims }}
+        - name: refdata-gxy-{{ $key }}
           persistentVolumeClaim:
-            claimName: {{ template "galaxy.fullname" $ -}}-cvmfs-gxy-{{ $key }}-pvc
+            claimName: {{ template "galaxy.fullname" $ -}}-refdata-gxy-{{ $key }}-pvc
         {{- end }}
         {{- end }}
         {{- if .Values.extraVolumes }}
@@ -182,9 +182,9 @@ spec:
             - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/
               subPath: config
-            {{- if .Values.cvmfs.enabled }}
-            {{- range $key, $entry := .Values.cvmfs.galaxyPersistentVolumeClaims }}
-            - name: cvmfs-gxy-{{ $key }}
+            {{- if .Values.refdata.enabled }}
+            {{- range $key, $entry := .Values.refdata.galaxyPersistentVolumeClaims }}
+            - name: refdata-gxy-{{ $key }}
               mountPath: {{ $entry.mountPath }}
             {{- end -}}
             {{- end }}
@@ -193,7 +193,7 @@ spec:
             {{- end }}
 {{ if .Values.setupJob.downloadToolConfs.enabled }}
         - name: {{ .Chart.Name }}-init-cloud-repo
-          image: alpine:3.7
+          image: alpine:3.16
           command: ['sh', '-c', '{{- include "galaxy.extract-archive-if-changed-command" (dict "extractPath" .Values.setupJob.downloadToolConfs.volume.mountPath "downloadUrl" .Values.setupJob.downloadToolConfs.archives.startup) -}} && echo "Done" > /galaxy/server/config/mutable/init_clone_done_{{.Release.Revision}}']
           volumeMounts:
             - name: galaxy-data
@@ -203,14 +203,14 @@ spec:
               mountPath: /galaxy/server/config/mutable/
               subPath: config
         - name: {{ .Chart.Name }}-init-cloud-repo-partial
-          image: alpine:3.7
+          image: alpine:3.16
           command: ['sh', '-c', '{{- include "galaxy.extract-archive-if-changed-command" (dict "extractPath" .Values.setupJob.downloadToolConfs.volume.mountPath "downloadUrl" .Values.setupJob.downloadToolConfs.archives.running) -}}']
           volumeMounts:
             - name: galaxy-data
               mountPath: {{ .Values.setupJob.downloadToolConfs.volume.mountPath }}
               subPath: {{ .Values.setupJob.downloadToolConfs.volume.subPath }}
         - name: {{ .Chart.Name }}-init-cloud-repo-full
-          image: alpine:3.7
+          image: alpine:3.16
           command: ['sh', '-c', '{{- include "galaxy.extract-archive-if-changed-command" (dict "extractPath" .Values.setupJob.downloadToolConfs.volume.mountPath "downloadUrl" .Values.setupJob.downloadToolConfs.archives.full) -}}']
           volumeMounts:
             - name: galaxy-data
@@ -248,11 +248,11 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
-        {{- if .Values.cvmfs.enabled }}
-        {{- range $key, $entry := .Values.cvmfs.galaxyPersistentVolumeClaims }}
-        - name: cvmfs-gxy-{{ $key }}
+        {{- if .Values.refdata.enabled }}
+        {{- range $key, $entry := .Values.refdata.galaxyPersistentVolumeClaims }}
+        - name: refdata-gxy-{{ $key }}
           persistentVolumeClaim:
-            claimName: {{ template "galaxy.fullname" $ -}}-cvmfs-gxy-{{ $key }}-pvc
+            claimName: {{ template "galaxy.fullname" $ -}}-refdata-gxy-{{ $key }}-pvc
         {{- end }}
         {{- end }}
         {{- if .Values.extraVolumes }}

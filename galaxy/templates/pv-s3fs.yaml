@@ -1,0 +1,33 @@
+{{- if and .Values.refdata.enabled (eq .Values.refdata.type "s3csi") }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ include "galaxy.fullname" $ }}-refdata-gxy-pv
+  labels:
+    {{- include "galaxy.labels" . | nindent 4 }}
+spec:
+  accessModes:
+  - ReadOnlyMany
+  capacity:
+    storage: 30Gi
+  csi:
+    controllerPublishSecretRef:
+      name: csi-s3-secret
+      namespace: {{ .Release.Namespace }}
+    driver: ru.yandex.s3.csi
+    nodePublishSecretRef:
+      name: csi-s3-secret
+      namespace: {{ .Release.Namespace }}
+    nodeStageSecretRef:
+      name: csi-s3-secret
+      namespace: {{ .Release.Namespace }}
+    volumeAttributes:
+      bucket: {{ .Values.s3csi.storageClass.singleBucket }}
+      capacity: "32212254720"
+      mounter: {{ .Values.s3csi.storageClass.mounter }}
+      options: {{ .Values.s3csi.storageClass.mountOptions }}
+    volumeHandle: {{ .Values.s3csi.storageClass.singleBucket }}{{ .Values.s3csi.secret.prefix }}
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: {{ .Values.s3csi.storageClass.name }}
+  volumeMode: Filesystem
+{{- end }}

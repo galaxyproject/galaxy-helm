@@ -20,3 +20,10 @@ dependencies:
     alias: cvmfs
     tags:
       - deploy-cvmfs
+  - name: csi-s3
+    repository: https://raw.githubusercontent.com/cloudve/helm-charts/master/
+    version: 0.31.3
+    condition: s3csi.deploy
+    alias: s3csi
+    tags:
+      - deploy-s3csi

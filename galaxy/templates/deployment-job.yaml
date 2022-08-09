@@ -142,9 +142,9 @@ spec:
               mountPath: {{ $.Values.setupJob.downloadToolConfs.volume.mountPath }}
               subPath: {{ $.Values.setupJob.downloadToolConfs.volume.subPath }}
             {{- end }}
-            {{- if $.Values.cvmfs.enabled }}
-            {{- range $key, $entry := $.Values.cvmfs.galaxyPersistentVolumeClaims }}
-            - name: cvmfs-gxy-{{ $key }}
+            {{- if $.Values.refdata.enabled }}
+            {{- range $key, $entry := $.Values.refdata.galaxyPersistentVolumeClaims }}
+            - name: refdata-gxy-{{ $key }}
               mountPath: {{ $entry.mountPath }}
             {{- end -}}
             {{- end }}
@@ -187,11 +187,11 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
-        {{- if $.Values.cvmfs.enabled }}
-        {{- range $key, $entry := $.Values.cvmfs.galaxyPersistentVolumeClaims }}
-        - name: cvmfs-gxy-{{ $key }}
+        {{- if $.Values.refdata.enabled }}
+        {{- range $key, $entry := $.Values.refdata.galaxyPersistentVolumeClaims }}
+        - name: refdata-gxy-{{ $key }}
           persistentVolumeClaim:
-            claimName: {{ template "galaxy.fullname" $ -}}-cvmfs-gxy-{{ $key }}-pvc
+            claimName: {{ template "galaxy.fullname" $ -}}-refdata-gxy-{{ $key }}-pvc
         {{- end }}
         {{- end }}
         {{- if $.Values.extraVolumes }}

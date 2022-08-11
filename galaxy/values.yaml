@@ -223,6 +223,7 @@ affinity: {}
 
 postgresql:
   enabled: true
+  deploy: true
   # hostname and port of an existing database to use.
   existingDatabase:
   galaxyDatabaseUser: galaxydbuser

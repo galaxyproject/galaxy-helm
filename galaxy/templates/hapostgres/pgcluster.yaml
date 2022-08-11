@@ -1,4 +1,4 @@
-{{- if and .Values.postgresql.enabled (not .Values.postgresql.existingDatabase) }}
+{{- if not (or .Values.postgresql.enabled .Values.postgresql.existingDatabase) }}
 apiVersion: acid.zalan.do/v1
 kind: postgresql
 metadata:
@@ -12,7 +12,7 @@ spec:
   databases:
     galaxy: {{ .Values.postgresql.galaxyDatabaseUser }}
   numberOfInstances: 1
-  teamId: {{ include "galaxy-postgresql.teamId" . }}
+  teamId: galaxy
   users:
     {{ .Values.postgresql.galaxyDatabaseUser }}: [ ]
   postgresql:

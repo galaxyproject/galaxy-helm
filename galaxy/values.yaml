@@ -6,8 +6,8 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
-  repository: galaxy/galaxy-min
-  tag: 21.05
+  repository: galaxyproject/galaxy-min
+  tag: 21.09
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
@@ -93,7 +93,7 @@ metrics:
   podSpecExtra: {}
   image:
     repository: cloudve/galaxy-metrics-scraper
-    tag: 2.0.0
+    tag: 2.1.0
     pullPolicy: IfNotPresent
 
 serviceAccount:
@@ -118,7 +118,7 @@ persistence:
   storageClass: ""
   existingClaim: null
   accessMode: ReadWriteMany
-  size: 10Gi
+  size: 5Gi
   mountPath: /galaxy/server/database
 
 extraVolumes: []
@@ -130,8 +130,12 @@ extraVolumeMounts: []
 #   - name: shared-data
 #     mountPath: /mnt/project/shared-data
 
-initJob:
+setupJob:
   createDatabase: true
+  securityContext:
+    runAsUser: 101
+    runAsGroup: 101
+    fsGroup: 101
   ttlSecondsAfterFinished: 10
   downloadToolConfs:
     enabled: true
@@ -182,6 +186,7 @@ extraEnv: []
 
 ingress:
   enabled: true
+  ingressClassName: nginx
   canary:
     enabled: true
   annotations:
@@ -218,6 +223,7 @@ affinity: {}
 
 postgresql:
   enabled: true
+  deploy: true
   # hostname and port of an existing database to use.
   existingDatabase:
   galaxyDatabaseUser: galaxydbuser
@@ -232,6 +238,12 @@ postgresql:
   initdbScriptsSecret: "{{ .Release.Name }}-galaxy-initdb"
   persistence:
     enabled: true
+    #storageClass:
+    #size:
+    #extra:
+    #  selector:
+    #    matchLabels:
+    #      label-key: label-value
   extraEnv:
   - name: GALAXY_DB_USER_PASSWORD
     valueFrom:
@@ -244,7 +256,7 @@ refdata:
   type: s3csi
   galaxyPersistentVolumeClaims:
     data:
-      storage: 1Gi
+      storage: 10Gi
       storageClassName: refdata-gxy-data
       mountPath: /cvmfs/data.galaxyproject.org
     # cloud:
@@ -306,8 +318,8 @@ configs:
           ,{{- template "galaxy.fullname" $ -}}-refdata-gxy-{{ $key }}-pvc:{{ $entry.mountPath -}}
           {{- end -}}
           {{- end -}}
-          {{- if .Values.initJob.downloadToolConfs.enabled -}}
-          ,{{ template "galaxy.pvcname" . -}}/{{ .Values.initJob.downloadToolConfs.volume.subPath }}:{{ .Values.initJob.downloadToolConfs.volume.mountPath -}}
+          {{- if .Values.setupJob.downloadToolConfs.enabled -}}
+          ,{{ template "galaxy.pvcname" . -}}/{{ .Values.setupJob.downloadToolConfs.volume.subPath }}:{{ .Values.setupJob.downloadToolConfs.volume.mountPath -}}
           {{- end -}}
           {{- if .Values.extraVolumes -}}
           {{- template "galaxy.extra_pvc_mounts" . -}}
@@ -388,12 +400,12 @@ configs:
       database_connection: postgresql://unused:because@overridden_by_envvar
       integrated_tool_panel_config: "/galaxy/server/config/mutable/integrated_tool_panel.xml"
       sanitize_allowlist_file: "/galaxy/server/config/mutable/sanitize_allowlist.txt"
-      tool_config_file: "/galaxy/server/config/tool_conf.xml{{if .Values.initJob.downloadToolConfs.enabled}},{{ .Values.initJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_conf.xml{{end}}"
+      tool_config_file: "/galaxy/server/config/tool_conf.xml{{if .Values.setupJob.downloadToolConfs.enabled}},{{ .Values.setupJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_conf.xml{{end}}"
       shed_tool_config_file: "/galaxy/server/config/mutable/editable_shed_tool_conf.xml"
       enable_tool_document_cache: true
       tool_data_table_config_path: |-
-        {{ if .Values.initJob.downloadToolConfs.enabled }}
-        {{- .Values.initJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_data_table_conf.xml
+        {{ if .Values.setupJob.downloadToolConfs.enabled }}
+        {{- .Values.setupJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_data_table_conf.xml
         {{- if .Values.refdata.enabled -}}
         ,{{- .Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/byhand/location/tool_data_table_conf.xml
         {{- end }}
@@ -599,6 +611,7 @@ extraFileMappings:
     useSecret: false
     applyToJob: false
     applyToWeb: true
+    applyToSetupJob: false
     applyToWorkflow: false
     applyToNginx: true
     tpl: true
@@ -645,6 +658,7 @@ nginx:
     repository: nginx
     tag: latest
     pullPolicy: IfNotPresent
+  containerPort: 7080
   conf:
     client_max_body_size: 100g
   resources:
@@ -657,3 +671,18 @@ nginx:
       cpu: 2
       memory: 3G
       ephemeral-storage: 100Gi
+
+tusd:
+  enabled: false
+  replicaCount: 1
+  annotations: {}
+  podAnnotations: {}
+  podSpecExtra: {}
+  securityContext:
+    runAsUser: 101
+    runAsGroup: 101
+    fsGroup: 101
+  image:
+    repository: tusproject/tusd
+    tag: v1.6.0
+    pullPolicy: IfNotPresent

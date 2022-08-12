@@ -1,6 +1,22 @@
-apiVersion: v1
+apiVersion: v2
 name: galaxy
-version: 4.9.0
+type: application
+version: 5.0.0-anvil.0
 appVersion: "21.09"
 description: Chart for Galaxy, an open, web-based platform for accessible, reproducible, and transparent computational biomedical research.
 icon: https://galaxyproject.org/images/galaxy-logos/galaxy_project_logo_square.png
+dependencies:
+  - name: postgresql
+    repository: https://charts.helm.sh/stable/
+    version: 8.1.4
+    condition: postgresql.enabled
+    alias: postgresql
+    tags:
+      - deploy-postgres
+  - name: csi-s3
+    repository: https://raw.githubusercontent.com/cloudve/helm-charts/master/
+    version: 0.31.3
+    condition: s3csi.deploy
+    alias: s3csi
+    tags:
+      - deploy-s3csi

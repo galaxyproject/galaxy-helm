@@ -137,7 +137,6 @@ cp -anL /galaxy/server/config/tool_data_table_conf.xml.sample /galaxy/server/con
 cp -aruL /galaxy/server/tool-data {{.Values.persistence.mountPath}}/;
 cp -aruL /galaxy/server/tools {{.Values.persistence.mountPath}}/tools | true;
 echo "Done" > /galaxy/server/config/mutable/init_mounts_done_{{.Release.Revision}};
-. /galaxy/server/.venv/bin/activate && python -c "import os; [([os.chown(os.path.join(root, each), 101, 101) for each in dirs], [os.chown(os.path.join(root, each), 101, 101) for each in files]) for root, dirs, files in os.walk(\"{{.Values.persistence.mountPath}}\")];"
 {{- end -}}
 
 {{/*
@@ -146,7 +145,7 @@ Creates the bash command for the handlers to wait for init scripts
 {{- define "galaxy.init-container-wait-command" -}}
 until [ -f /galaxy/server/config/mutable/db_init_done_{{$.Release.Revision}} ]; do echo "waiting for DB initialization"; sleep 1; done;
 until [ -f /galaxy/server/config/mutable/init_mounts_done_{{$.Release.Revision}} ]; do echo "waiting for copying onto NFS"; sleep 1; done;
-{{ if .Values.initJob.downloadToolConfs.enabled }}
+{{ if .Values.setupJob.downloadToolConfs.enabled }}
 until [ -f /galaxy/server/config/mutable/init_clone_done_{{$.Release.Revision}} ]; do echo "waiting for refdata copying"; sleep 1; done;
 {{- end }}
 {{- end -}}
@@ -234,7 +233,7 @@ Define extra persistent volumes
               {{- if $mount.name }}
                 {{- if (eq $entry.name $mount.name) }}
                   {{- if $mount.mountPath -}}
-                    ,{{- $entry.persistentVolumeClaim.claimName -}}:{{- $mount.mountPath -}}
+                    ,{{- tpl $entry.persistentVolumeClaim.claimName $ -}}:{{- tpl $mount.mountPath $ -}}
                   {{- end }}
                 {{- end }}
               {{- end }}

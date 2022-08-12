@@ -1,0 +1,47 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "galaxy.fullname" . }}-maintenance
+  labels:
+    {{- include "galaxy.labels" . | nindent 4 }}
+spec:
+  schedule: "0 2 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 16 }}
+          {{- end }}
+          containers:
+          - name: galaxy-maintenance
+            image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            # delete all tmp files older than walltime limit
+            command:
+              - find
+              - {{ .Values.persistence.mountPath }}/tmp
+              - '!'
+              - -newermt
+              - -{{ (index .Values "configs" "job_conf.yml" "runners" "k8s" "k8s_walltime_limit" | default 604800) }} seconds
+              - -type
+              - f
+              - -exec
+              - rm
+              - '{}'
+              - ;
+            volumeMounts:
+            - name: galaxy-data
+              mountPath: {{ .Values.persistence.mountPath }}
+          volumes:
+          - name: galaxy-data
+            {{- if .Values.persistence.enabled }}
+            persistentVolumeClaim:
+              claimName: {{ template "galaxy.pvcname" . }}
+            {{- else }}
+            emptyDir: {}
+            {{- end }}
+          restartPolicy: OnFailure

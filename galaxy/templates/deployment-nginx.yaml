@@ -53,7 +53,7 @@ spec:
           imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
           ports:
             - name: galaxy-nginx
-              containerPort: 80
+              containerPort: {{ .Values.nginx.containerPort }}
               protocol: TCP
           volumeMounts:
             {{- range $key, $entry := .Values.extraFileMappings -}}
@@ -74,13 +74,13 @@ spec:
             - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/
               subPath: config
-            {{- if .Values.initJob.downloadToolConfs.enabled }}
+            {{- if .Values.setupJob.downloadToolConfs.enabled }}
             - name: galaxy-data
-              mountPath: {{ .Values.initJob.downloadToolConfs.volume.mountPath }}
-              subPath: {{ .Values.initJob.downloadToolConfs.volume.subPath }}
+              mountPath: {{ .Values.setupJob.downloadToolConfs.volume.mountPath }}
+              subPath: {{ .Values.setupJob.downloadToolConfs.volume.subPath }}
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
-            {{- .Values.extraVolumeMounts | toYaml | nindent 12 }}
+            {{- tpl (.Values.extraVolumeMounts | toYaml | nindent 12) . }}
             {{- end }}
           resources:
             {{- toYaml .Values.nginx.resources | nindent 12 }}
@@ -114,7 +114,7 @@ spec:
           emptyDir: {}
           {{- end }}
         {{- if .Values.extraVolumes }}
-        {{- .Values.extraVolumes | toYaml | nindent 8 }}
+        {{- tpl (.Values.extraVolumes | toYaml | nindent 8) . }}
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

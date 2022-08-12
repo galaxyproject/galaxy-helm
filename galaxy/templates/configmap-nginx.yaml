@@ -35,7 +35,7 @@ data:
         client_max_body_size {{ .Values.nginx.conf.client_max_body_size }};
 
         server {
-            listen 80;
+            listen {{ .Values.nginx.containerPort }};
             server_name galaxy;
 
             location {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}static {
@@ -69,6 +69,21 @@ data:
                 add_header X-Content-Type-Options nosniff;
             }
 
+{{ if .Values.tusd.enabled }}
+            location {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}api/upload/resumable_upload {
+                # Disable request and response buffering
+                proxy_request_buffering  off;
+                proxy_buffering          off;
+                proxy_http_version       1.1;
+                # Add X-Forwarded-* headers
+                proxy_set_header X-Forwarded-Host $host;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_set_header         Upgrade $http_upgrade;
+                proxy_set_header         Connection "upgrade";
+                client_max_body_size     0;
+                proxy_pass http://{{ template "galaxy.fullname" . }}-tusd:1080/files;
+            }
+{{ end }}
         # end server
         }
     # end http

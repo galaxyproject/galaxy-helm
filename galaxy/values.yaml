@@ -336,18 +336,21 @@ configs:
       assign:
         - "db-skip-locked"
     execution:
-      default: dynamic_k8s_dispatcher
+      default: tpv_dispatcher
       environments:
         local:
           runner: local
-        dynamic_k8s_dispatcher:
+        tpv_dispatcher:
           container_monitor: false
           runner: dynamic
           type: python
-          function: k8s_container_mapper
+          function: map_tool_to_destination
+          rules_module: tpv.rules
           docker_enabled: true
           docker_default_container_id: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           tmp_dir: "true"
+          tpv_config_files:
+            "{{ .Values.jobs.tpv.config_files | toYaml | nindent 8 }}"
     limits:
     - type: registered_user_concurrent_jobs
       value: 5
@@ -490,117 +493,35 @@ jobs:
   priorityClass:
     enabled: true
     existingClass: ""
+  tpv:
+    config_files:
+      - https://raw.githubusercontent.com/galaxyproject/tpv-shared-database/main/tools.yml
+      - lib/galaxy/jobs/rules/vortex_rules_local.yml
   rules:
-    container_mapper_rules.yml:
-      mappings:
-        summary_stats:
-          tool_ids:
-            - Summary_Statistics1
-          docker_container_id_override: cloudve/gsummary:latest
-          resource_set: small
-        sam_fasta_dm:
-          tool_ids:
-            - toolshed.g2.bx.psu.edu/repos/devteam/data_manager_sam_fasta_index_builder/sam_fasta_index_builder/.*
-          docker_container_id_override: cloudve/sam-fasta-dm:latest
-          resource_set: small
-        bwa_dm:
-          tool_ids:
-            - toolshed.g2.bx.psu.edu/repos/devteam/data_manager_bwa_mem_index_builder/bwa_mem_index_builder_data_manager/.*
-          docker_container_id_override: cloudve/bwa-dm:latest
-          resource_set: small
-        prokka:
-          tool_ids:
-            - toolshed.g2.bx.psu.edu/repos/crs4/prokka/prokka/1.14.5
-          docker_container_id_override: cloudve/prokka:1.14.5
-        jbrowse:
-          tool_ids:
-            - toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.5+galaxy6
-          docker_container_id_override: cloudve/jbrowse:1.16.5
-        lib_galaxy:
-          tool_ids:
-            - sort1
-            - Grouping1
-          docker_container_id_override: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          resource_set: small
-        set_medium:
-          tool_ids:
-            - toolshed.g2.bx.psu.edu/repos/devteam/bowtie2/bowtie2/.*
-            - toolshed.g2.bx.psu.edu/repos/iuc/bwameth/bwameth/.*
-            - toolshed.g2.bx.psu.edu/repos/iuc/featurecounts/featurecounts/.*
-            - toolshed.g2.bx.psu.edu/repos/iuc/hisat2/hisat2/.*
-            - toolshed.g2.bx.psu.edu/repos/iuc/valet/valet/.*
-            - toolshed.g2.bx.psu.edu/repos/iuc/varscan_somatic/varscan_somatic/.*
-            - toolshed.g2.bx.psu.edu/repos/nilesh/rseqc/rseqc_bam2wig/.*
-          resource_set: medium
-        set_large:
-          tool_ids:
-            - toolshed.g2.bx.psu.edu/repos/devteam/bwa/bwa_mem/.*
-            - toolshed.g2.bx.psu.edu/repos/devteam/bwa/bwa/.*
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_bam_compare/deeptools_bam_compare/.*
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_bam_coverage/deeptools_bam_coverage/.*
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_bam_pe_fragmentsize/deeptools_bam_pe_fragmentsize/.*
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_bigwig_compare/deeptools_bigwig_compare/.*
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_compute_gc_bias/deeptools_compute_gc_bias/.*
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_compute_matrix/deeptools_compute_matrix/.*
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_correct_gc_bias/deeptools_correct_gc_bias/.*
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_multi_bam_summary/deeptools_multi_bam_summary/.*
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_multi_bigwig_summary/deeptools_multi_bigwig_summary/.*
-            - toolshed.g2.bx.psu.edu/repos/devteam/freebayes/freebayes/.*
-            - toolshed.g2.bx.psu.edu/repos/iuc/rgrnastar/rna_star/.*
-            - toolshed.g2.bx.psu.edu/repos/iuc/rnaspades/rnaspades/.*
-            - toolshed.g2.bx.psu.edu/repos/iuc/sra_tools/fasterq_dump/.*
-          resource_set: large
-        set_2xlarge:
-          tool_ids:
-            - toolshed.g2.bx.psu.edu/repos/iuc/unicycler/unicycler/.*
-            - toolshed.g2.bx.psu.edu/repos/nml/spades/spades/.*
-          resource_set: 2xlarge
-        set_mlarge:
-          tool_ids:
-            - toolshed.g2.bx.psu.edu/repos/iuc/minimap2/minimap2/.*
-            - toolshed.g2.bx.psu.edu/repos/iuc/plink/plink/.*
-          resource_set: mlarge
-      resources:
-        resource_sets:
-          small:
-            requests:
-              cpu: 1
-              memory: 2G
-            limits:
-              cpu: 2
-              memory: 5G
-          medium:
-            requests:
-              cpu: 2
-              memory: 4G
-            limits:
-              cpu: 4
-              memory: 10G
-          large:
-            requests:
-              cpu: 4
-              memory: 8G
-            limits:
-              cpu: 8
-              memory: 16G
-          2xlarge:
-            requests:
-              cpu: 12
-              memory: 20G
-            limits:
-              cpu: 12
-              memory: 24G
-          mlarge:
-            requests:
-              cpu: 2
-              memory: 16G
-            limits:
-              cpu: 4
-              memory: 20G
-        default_resource_set: small
-    k8s_container_mapper.py: |
-      {{- (.Files.Get "files/rules/k8s_container_mapper.py") }}
-
+    vortex_rules_local.yml:
+      tools:
+        Summary_Statistics1:
+          params:
+            docker_container_id_override: cloudve/gsummary:latest
+        toolshed.g2.bx.psu.edu/repos/devteam/data_manager_sam_fasta_index_builder/sam_fasta_index_builder/.*:
+          params:
+            docker_container_id_override: cloudve/sam-fasta-dm:latest
+        toolshed.g2.bx.psu.edu/repos/devteam/data_manager_bwa_mem_index_builder/bwa_mem_index_builder_data_manager/.*:
+          params:
+            docker_container_id_override: cloudve/bwa-dm:latest
+        toolshed.g2.bx.psu.edu/repos/crs4/prokka/prokka/1.14.5:
+          params:
+            docker_container_id_override: cloudve/prokka:1.14.5
+        toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.5+galaxy6:
+          params:
+            docker_container_id_override: cloudve/jbrowse:1.16.5
+        sort1:
+          params:
+            docker_container_id_override: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        Grouping1:
+          params:
+            docker_container_id_override: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        
 extraFileMappings:
   /galaxy/server/static/welcome.html:
     useSecret: false

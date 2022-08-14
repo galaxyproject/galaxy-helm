@@ -8,7 +8,7 @@ icon: https://galaxyproject.org/images/galaxy-logos/galaxy_project_logo_square.p
 dependencies:
   - name: postgres-operator
     repository: https://raw.githubusercontent.com/zalando/postgres-operator/master/charts/postgres-operator/
-    version: 1.7.0
+    version: 1.8.2
     condition: postgresql.deploy
     alias: postgresql
     tags:
@@ -20,3 +20,4 @@ dependencies:
     alias: s3csi
     tags:
       - deploy-s3csi
+

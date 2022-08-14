@@ -385,6 +385,7 @@ independently upgrade-able. In other words, upgrading the Galaxy image from
 
 | Chart version        | Galaxy version   | Description     |
 | :------------------ | :--------------- | :-------------- |
+| `5.0`               | `22.05`          | Needs at least container image 22.05 as Galaxy switched from uwsgi to gunicorn  |
 | `4.0`               | `21.05`          | Needs [Galaxy PR#11899](https://github.com/galaxyproject/galaxy/pull/11899) for eliminating the CVMFS. If running chart 4.0+ with Galaxy image `21.01` or below, use the CVMFS instead with `--set setupJob.downloadToolConfs.enabled=false --set cvmfs.repositories.cvmfs-gxy-cloud=cloud.galaxyproject.org --set cvmfs.galaxyPersistentVolumeClaims.cloud.storage=1Gi --set cvmfs.galaxyPersistentVolumeClaims.cloud.storageClassName=cvmfs-gxy-cloud --set cvmfs.galaxyPersistentVolumeClaims.cloud.mountPath=/cvmfs/cloud.galaxyproject.org` |
 
 ## Funding

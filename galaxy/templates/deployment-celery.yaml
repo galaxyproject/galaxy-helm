@@ -1,29 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "galaxy.fullname" . }}-web
+  name: {{ include "galaxy.fullname" . }}-celery
   labels:
     {{- include "galaxy.labels" . | nindent 4 }}
-{{- with .Values.webHandlers.annotations }}
+{{- with .Values.celery.annotations }}
   annotations:
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
-  replicas: {{ .Values.webHandlers.replicaCount }}
+  replicas: {{ .Values.celery.replicaCount }}
   selector:
     matchLabels:
       {{- include "galaxy.selectorLabels" $ | nindent 6 }}
-      app.kubernetes.io/component: galaxy-web-handler
+      app.kubernetes.io/component: galaxy-celery-worker
   template:
     metadata:
       labels:
         {{- include "galaxy.selectorLabels" $ | nindent 8 }}
-        app.kubernetes.io/component: galaxy-web-handler
+        app.kubernetes.io/component: galaxy-celery-worker
       annotations:
         checksum/galaxy_conf: {{ include (print $.Template.BasePath "/configs-galaxy.yaml") . | sha256sum }}
         checksum/galaxy_rules: {{ include (print $.Template.BasePath "/configmap-galaxy-rules.yaml") . | sha256sum }}
         checksum/galaxy_extras: {{ include (print $.Template.BasePath "/configmap-extra-files.yaml") . | sha256sum }}
-        {{- with .Values.webHandlers.podAnnotations }}
+        {{- with .Values.celery.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
@@ -34,8 +34,8 @@ spec:
       serviceAccountName: {{ include "galaxy.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.securityContext | nindent 8 }}
-      {{- if .Values.webHandlers.podSpecExtra -}}
-        {{- tpl (toYaml .Values.webHandlers.podSpecExtra) . | nindent 6 }}
+      {{- if .Values.celery.podSpecExtra -}}
+        {{- tpl (toYaml .Values.celery.podSpecExtra) . | nindent 6 }}
       {{- end }}
       initContainers:
         - name: {{ .Chart.Name }}-wait-db
@@ -48,20 +48,16 @@ spec:
               subPath: config
         {{- if .Values.extraInitContainers -}}
         {{- range $each := .Values.extraInitContainers -}}
-        {{- if $each.applyToWeb -}}
+        {{- if $each.applyToCelery -}}
         {{- print "- " | nindent 8 -}}
-        {{- tpl ((unset (unset (unset ($each | deepCopy) "applyToJob") "applyToWeb") "applyToWorkflow") | toYaml | indent 10 | trim) $ -}}
+        {{- tpl ((unset (unset (unset (unset ($each | deepCopy) "applyToJob") "applyToWeb") "applyToWorkflow") "applyToCelery") | toYaml | indent 10 | trim) $ -}}
         {{- end }}
         {{- end }}
         {{- end }}
       containers:
-        - name: {{ .Chart.Name }}-web
+        - name: {{ .Chart.Name }}-celery
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          ports:
-            - name: galaxy-http
-              containerPort: 8080
-              protocol: TCP
           env:
           {{ include "galaxy.podEnvVars" . }}
           args: [
@@ -69,32 +65,41 @@ spec:
             '{{- if .Values.extraInitCommands -}}
              {{- tpl .Values.extraInitCommands $ | nindent 13 }};
              {{- end -}}
-             /galaxy/server/.venv/bin/gunicorn "galaxy.webapps.galaxy.fast_factory:factory()" --timeout {{ .Values.webHandlers.gunicorn.timeout | default 300 }} --pythonpath /galaxy/server/lib -k galaxy.webapps.galaxy.workers.Worker -b 0.0.0.0:8080 --workers={{ .Values.webHandlers.gunicorn.workers | default 1 }} --config python:galaxy.web_stack.gunicorn_config --preload {{ .Values.webHandlers.gunicorn.extraArgs | default "" }}']
-          {{- if .Values.webHandlers.startupProbe.enabled }}
+             /galaxy/server/.venv/bin/celery --app galaxy.celery worker --concurrency {{ .Values.celery.concurrency | default 2 }} --loglevel {{ .Values.celery.logLevel | default "DEBUG" }} --pool threads --queues celery,galaxy.internal,galaxy.external {{ .Values.celery.extraArgs | default "" }}']
+          {{- if .Values.celery.startupProbe.enabled }}
           startupProbe:
-            httpGet:
-              path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}api/version
-              port: 8080
+            exec:
+              command: [
+                "bash",
+                "-c",
+                "/galaxy/server/.venv/bin/celery -A galaxy.celery inspect ping -d celery@$HOSTNAME"
+              ]
             initialDelaySeconds: {{ .Values.webHandlers.startupProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.webHandlers.startupProbe.periodSeconds }}
             failureThreshold: {{ .Values.webHandlers.startupProbe.failureThreshold }}
             timeoutSeconds: {{ .Values.webHandlers.startupProbe.failureThreshold }}
           {{- end }}
-          {{- if .Values.webHandlers.readinessProbe.enabled }}
+          {{- if .Values.celery.readinessProbe.enabled }}
           readinessProbe:
-            httpGet:
-              path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}api/version
-              port: 8080
+            exec:
+              command: [
+                "bash",
+                "-c",
+                "/galaxy/server/.venv/bin/celery -A galaxy.celery inspect ping -d celery@$HOSTNAME"
+              ]
             initialDelaySeconds: {{ .Values.webHandlers.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.webHandlers.readinessProbe.periodSeconds }}
             failureThreshold: {{ .Values.webHandlers.readinessProbe.failureThreshold }}
             timeoutSeconds: {{ .Values.webHandlers.readinessProbe.failureThreshold }}
           {{- end }}
-          {{- if .Values.webHandlers.livenessProbe.enabled }}
+          {{- if .Values.celery.livenessProbe.enabled }}
           livenessProbe:
-            httpGet:
-              path: {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}api/version
-              port: 8080
+            exec:
+              command: [
+                "bash",
+                "-c",
+                "/galaxy/server/.venv/bin/celery -A galaxy.celery inspect ping -d celery@$HOSTNAME"
+              ]
             initialDelaySeconds: {{ .Values.webHandlers.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.webHandlers.livenessProbe.periodSeconds }}
             failureThreshold: {{ .Values.webHandlers.livenessProbe.failureThreshold }}
@@ -102,7 +107,7 @@ spec:
           {{- end }}
           volumeMounts:
             {{- range $key, $entry := .Values.extraFileMappings -}}
-            {{- if $entry.applyToWeb }}
+            {{- if $entry.applyToCelery }}
             - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
               mountPath: {{ $key }}
               subPath: {{ include "galaxy.getFilenameFromPath" $key }}

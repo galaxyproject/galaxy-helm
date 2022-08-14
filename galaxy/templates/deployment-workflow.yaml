@@ -69,7 +69,7 @@ spec:
             '{{- if .Values.extraInitCommands -}}
              {{- tpl .Values.extraInitCommands $ | nindent 13 -}};
              {{- end -}}
-             python /galaxy/server/scripts/galaxy-main -c /galaxy/server/config/galaxy.yml --server-name workflow_scheduler0']
+             python /galaxy/server/scripts/galaxy-main -c $GALAXY_CONFIG_FILE --server-name workflow_scheduler0']
           {{- if .Values.workflowHandlers.startupProbe.enabled }}
           startupProbe:
             exec:

@@ -163,6 +163,7 @@ until [ -f /galaxy/server/config/mutable/init_mounts_done_{{$.Release.Revision}}
 {{ if .Values.setupJob.downloadToolConfs.enabled }}
 until [ -f /galaxy/server/config/mutable/init_clone_done_{{$.Release.Revision}} ]; do echo "waiting for refdata copying"; sleep 1; done;
 {{- end }}
+echo "Initialization waits complete";
 {{- end -}}
 
 {{/*
@@ -221,6 +222,10 @@ Define pod env vars
                 secretKeyRef:
                   name: "{{ .Release.Name }}-galaxy-secrets"
                   key: "galaxy-config-id-secret"
+            - name: PYTHONPATH
+              value: /galaxy/server/lib
+            - name: GALAXY_CONFIG_FILE
+              value: /galaxy/server/config/galaxy.yml
 {{- end -}}
 
 

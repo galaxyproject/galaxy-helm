@@ -141,12 +141,6 @@ spec:
             {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-        # - name: nginx
-        #   image: nginx
-        #   lifecycle:
-        #     preStop:
-        #       exec:
-        #         command: ["/usr/sbin/nginx","-s","quit"]
       volumes:
         - name: galaxy-conf-files
           {{- if .Values.useSecretConfigs }}

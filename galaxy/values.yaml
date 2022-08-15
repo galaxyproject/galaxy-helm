@@ -5,7 +5,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
-  repository: galaxy/galaxy-min
+  repository: quay.io/galaxyproject/galaxy-min
   tag: 22.05
   pullPolicy: IfNotPresent
 

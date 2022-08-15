@@ -29,12 +29,6 @@ helm upgrade --install ingress-nginx ingress-nginx \
   --namespace ingress-nginx --create-namespace
 ```
 
-After the pods are `ready`, enable port forwarding and proceed with the Galaxy
-chart installation:
-```
-kubectl port-forward --namespace=ingress-nginx service/ingress-nginx-controller 8000:80
-```
-
 ## Dependency charts
 
 This chart relies on the features of other charts for common functionality:
@@ -71,8 +65,8 @@ helm install --create-namespace -n galaxy my-galaxy . --set persistence.accessMo
 ```
 
 In several minute, Galaxy will be available at `/galaxy/` URL of your Kubernetes
-cluster. If you are running a development Kubernetes, Galaxy will be available
-at `http://localhost:8000/galaxy/`.
+cluster. If you are running the development Kubernetes, Galaxy will be available
+at `http://localhost/galaxy/` (note the trailing slash).
 
 ### Using the chart from the packaged chart repo
 

@@ -627,5 +627,5 @@ tusd:
     fsGroup: 101
   image:
     repository: tusproject/tusd
-    tag: v1.6.0
+    tag: v1.9.1
     pullPolicy: IfNotPresent

@@ -1,5 +1,4 @@
-# Default values for Galaxy working with or without CVMFS integration.
-# This is a YAML-formatted file.
+# Default values for Galaxy.
 # Declare variables to be passed into your templates.
 
 nameOverride: ""
@@ -314,20 +313,6 @@ refdata:
     #   storageClassName: cvmfs-gxy-cloud
     #   mountPath: /cvmfs/cloud.galaxyproject.org
 
-cvmfs:
-  repositories:
-    cvmfs-gxy-data: data.galaxyproject.org
-    # cvmfs-gxy-cloud: cloud.galaxyproject.org
-  deploy: false
-  cache:
-    alienCache:
-      enabled: true
-      #storageClass: "nfs"
-    localCache:
-      enabled: false
-    preload:
-      enabled: false
-
 s3csi:
   deploy: true
   images:
@@ -421,7 +406,7 @@ configs:
       interactivetools_shorten_url: true
       interactivetools_base_path: "{{$host := index .Values.ingress.hosts 0}}{{$path := index $host.paths 0}}{{$path.path}}"
       id_secret:
-      logo_src: '{{ trimSuffix "/" .Values.ingress.path }}/static/favicon.png'
+      logo_src: 'static/favicon.png'
       database_connection: postgresql://unused:because@overridden_by_envvar
       integrated_tool_panel_config: "/galaxy/server/config/mutable/integrated_tool_panel.xml"
       sanitize_allowlist_file: "/galaxy/server/config/mutable/sanitize_allowlist.txt"
@@ -548,7 +533,7 @@ jobs:
         Grouping1:
           params:
             docker_container_id_override: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        
+
 extraFileMappings:
   /galaxy/server/static/welcome.html:
     useSecret: false

@@ -25,7 +25,7 @@ spec:
       {{- end }}
       restartPolicy: OnFailure
       initContainers:
-        - name: {{ .Chart.Name }}-init-postgres
+        - name: {{ .Chart.Name }}-wait-postgres
           image: alpine:3.16
           command: ['sh', '-c', 'chown 101:101 {{ .Values.persistence.mountPath }}; until nc -z -w3 {{ template "galaxy-postgresql.fullname" . }} 5432; do echo waiting for galaxy-postgres service; sleep 1; done;']
           volumeMounts: 

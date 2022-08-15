@@ -6,8 +6,8 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
-  repository: galaxyproject/galaxy-min
-  tag: 21.09
+  repository: galaxy/galaxy-min
+  tag: 22.05
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
@@ -62,6 +62,10 @@ webHandlers:
     periodSeconds: 10
     failureThreshold: 30
     timeoutSeconds: 5
+  gunicorn:
+    timeout: 300
+    workers: 1
+    extraArgs: ""
 
 jobHandlers:
   replicaCount: 1
@@ -85,6 +89,57 @@ jobHandlers:
     periodSeconds: 10
     failureThreshold: 30
     timeoutSeconds: 5
+
+celery:
+  concurrency: 2
+  logLevel: "INFO"
+  extraArgs: ""
+  replicaCount: 1
+  startupDelay: 5 # used to avoid race conditions
+  annotations: {}
+  podAnnotations: {}
+  podSpecExtra: {}
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: 15
+    periodSeconds: 60
+    failureThreshold: 40
+    timeoutSeconds: 10
+  readinessProbe:
+    enabled: false
+    periodSeconds: 60
+    failureThreshold: 12
+    timeoutSeconds: 10
+  livenessProbe:
+    enabled: false
+    periodSeconds: 60
+    failureThreshold: 30
+    timeoutSeconds: 10
+
+celeryBeat:
+  logLevel: "INFO"
+  extraArgs: ""
+  replicaCount: 1
+  startupDelay: 5 # used to avoid race conditions
+  annotations: {}
+  podAnnotations: {}
+  podSpecExtra: {}
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: 15
+    periodSeconds: 60
+    failureThreshold: 40
+    timeoutSeconds: 10
+  readinessProbe:
+    enabled: false
+    periodSeconds: 60
+    failureThreshold: 12
+    timeoutSeconds: 10
+  livenessProbe:
+    enabled: false
+    periodSeconds: 60
+    failureThreshold: 30
+    timeoutSeconds: 10
 
 metrics:
   enabled: false
@@ -356,37 +411,9 @@ configs:
       value: 5
     - type: anonymous_user_concurrent_jobs
       value: 2
-  uwsgi.yml: |
-    uwsgi:
-      virtualenv: /galaxy/server/.venv
-      processes: 8
-      vacuum: true
-      single-interpreter: true
-      need-app: true
-      max-requests: 1000
-      max-worker-lifetime: 7200
-      reload-on-rss: 4096
-      worker-reload-mercy: 120
-      socket: 0.0.0.0:4001
-      http: 0.0.0.0:8080
-      pythonpath: /galaxy/server/lib
-      thunder-lock: true
-      manage-script-name: true
-      buffer-size: 16384
-      offload-threads: 2
-      threads: 4
-      die-on-term: true
-      master: true
-      hook-master-start: unix_signal:2 gracefully_kill_them_all
-      enable-threads: true
-      py-call-osafterfork: true
-      static-map: /static/style=/galaxy/server/static/style/blue
-      static-map: /static=/galaxy/server/static
-      static-map: /favicon.ico=/galaxy/server/static/favicon.ico
-      static-safe: /galaxy/server/client/galaxy/images
-      mount: {{.Values.ingress.path}}=galaxy.webapps.galaxy.buildapp:uwsgi_app()
   galaxy.yml:
     galaxy:
+      galaxy_url_prefix: "{{ .Values.ingress.path }}"
       interactivetools_enable: true
       interactivetools_map: database/interactivetools_map.sqlite
       interactivetools_prefix: "its"
@@ -572,7 +599,7 @@ nginx:
   galaxyStaticDir: "/galaxy/server/static"
   image:
     repository: nginx
-    tag: latest
+    tag: 1.22.0
     pullPolicy: IfNotPresent
   containerPort: 7080
   conf:
@@ -589,7 +616,7 @@ nginx:
       ephemeral-storage: 100Gi
 
 tusd:
-  enabled: false
+  enabled: true
   replicaCount: 1
   annotations: {}
   podAnnotations: {}
@@ -600,5 +627,5 @@ tusd:
     fsGroup: 101
   image:
     repository: tusproject/tusd
-    tag: v1.6.0
+    tag: v1.9.1
     pullPolicy: IfNotPresent

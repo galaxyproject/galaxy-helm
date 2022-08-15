@@ -62,9 +62,6 @@ spec:
             - name: galaxy-http
               containerPort: 8080
               protocol: TCP
-            - name: galaxy-uwsgi
-              containerPort: 4001
-              protocol: TCP
           env:
           {{ include "galaxy.podEnvVars" . }}
           args: [
@@ -72,7 +69,7 @@ spec:
             '{{- if .Values.extraInitCommands -}}
              {{- tpl .Values.extraInitCommands $ | nindent 13 }};
              {{- end -}}
-             /galaxy/server/.venv/bin/uwsgi --yaml /galaxy/server/config/uwsgi.yml --set galaxy_config_file=/galaxy/server/config/galaxy.yml']
+             /galaxy/server/.venv/bin/gunicorn "galaxy.webapps.galaxy.fast_factory:factory()" --timeout {{ .Values.webHandlers.gunicorn.timeout | default 300 }} --pythonpath /galaxy/server/lib -k galaxy.webapps.galaxy.workers.Worker -b 0.0.0.0:8080 --workers={{ .Values.webHandlers.gunicorn.workers | default 1 }} --config python:galaxy.web_stack.gunicorn_config --preload {{ .Values.webHandlers.gunicorn.extraArgs | default "" }}']
           {{- if .Values.webHandlers.startupProbe.enabled }}
           startupProbe:
             httpGet:
@@ -144,12 +141,6 @@ spec:
             {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-        # - name: nginx
-        #   image: nginx
-        #   lifecycle:
-        #     preStop:
-        #       exec:
-        #         command: ["/usr/sbin/nginx","-s","quit"]
       volumes:
         - name: galaxy-conf-files
           {{- if .Values.useSecretConfigs }}

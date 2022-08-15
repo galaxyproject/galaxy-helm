@@ -92,7 +92,7 @@ jobHandlers:
 
 celery:
   concurrency: 2
-  logLevel: "DEBUG"
+  logLevel: "INFO"
   extraArgs: ""
   replicaCount: 1
   startupDelay: 5 # used to avoid race conditions
@@ -117,7 +117,7 @@ celery:
     timeoutSeconds: 10
 
 celeryBeat:
-  logLevel: "DEBUG"
+  logLevel: "INFO"
   extraArgs: ""
   replicaCount: 1
   startupDelay: 5 # used to avoid race conditions

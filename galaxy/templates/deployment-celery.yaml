@@ -1,29 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "galaxy.fullname" . }}-workflow
+  name: {{ include "galaxy.fullname" . }}-celery
   labels:
     {{- include "galaxy.labels" . | nindent 4 }}
-{{- with .Values.workflowHandlers.annotations }}
+{{- with .Values.celery.annotations }}
   annotations:
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
-  replicas: {{ .Values.workflowHandlers.replicaCount }}
+  replicas: {{ .Values.celery.replicaCount }}
   selector:
     matchLabels:
       {{- include "galaxy.selectorLabels" $ | nindent 6 }}
-      app.kubernetes.io/component: galaxy-workflow-handler
+      app.kubernetes.io/component: galaxy-celery-worker
   template:
     metadata:
       labels:
         {{- include "galaxy.selectorLabels" $ | nindent 8 }}
-        app.kubernetes.io/component: galaxy-workflow-handler
+        app.kubernetes.io/component: galaxy-celery-worker
       annotations:
         checksum/galaxy_conf: {{ include (print $.Template.BasePath "/configs-galaxy.yaml") . | sha256sum }}
         checksum/galaxy_rules: {{ include (print $.Template.BasePath "/configmap-galaxy-rules.yaml") . | sha256sum }}
         checksum/galaxy_extras: {{ include (print $.Template.BasePath "/configmap-extra-files.yaml") . | sha256sum }}
-        {{- with .Values.workflowHandlers.podAnnotations }}
+        {{- with .Values.celery.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
@@ -34,84 +34,80 @@ spec:
       serviceAccountName: {{ include "galaxy.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.securityContext | nindent 8 }}
-      {{- if .Values.workflowHandlers.podSpecExtra -}}
-        {{- tpl (toYaml .Values.workflowHandlers.podSpecExtra) . | nindent 6 }}
+      {{- if .Values.celery.podSpecExtra -}}
+        {{- tpl (toYaml .Values.celery.podSpecExtra) . | nindent 6 }}
       {{- end }}
       initContainers:
         - name: {{ .Chart.Name }}-wait-db
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          args: ['sh', '-c', '{{ include "galaxy.init-container-wait-command" . }} sleep {{ .Values.workflowHandlers.startupDelay }};']
+          args: ['sh', '-c', '{{ include "galaxy.init-container-wait-command" . }} sleep {{ .Values.webHandlers.startupDelay }};']
           volumeMounts:
             - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/
               subPath: config
         {{- if .Values.extraInitContainers -}}
         {{- range $each := .Values.extraInitContainers -}}
-        {{- if $each.applyToWorkflow -}}
+        {{- if $each.applyToCelery -}}
         {{- print "- " | nindent 8 -}}
-        {{- tpl ((unset (unset (unset ($each | deepCopy) "applyToJob") "applyToWeb") "applyToWorkflow") | toYaml | indent 10 | trim) $ -}}
+        {{- tpl ((unset (unset (unset (unset ($each | deepCopy) "applyToJob") "applyToWeb") "applyToWorkflow") "applyToCelery") | toYaml | indent 10 | trim) $ -}}
         {{- end }}
         {{- end }}
         {{- end }}
       containers:
-        - name: {{ .Chart.Name }}-workflow
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        - name: {{ .Chart.Name }}-celery
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            - name: POD_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
           {{ include "galaxy.podEnvVars" . }}
           args: [
             'sh', '-c',
             '{{- if .Values.extraInitCommands -}}
-             {{- tpl .Values.extraInitCommands $ | nindent 13 -}};
+             {{- tpl .Values.extraInitCommands $ | nindent 13 }};
              {{- end -}}
-             python /galaxy/server/scripts/galaxy-main -c $GALAXY_CONFIG_FILE --server-name workflow_scheduler0']
-          {{- if .Values.workflowHandlers.startupProbe.enabled }}
+             /galaxy/server/.venv/bin/celery --app galaxy.celery worker --concurrency {{ .Values.celery.concurrency | default 2 }} --loglevel {{ .Values.celery.logLevel | default "DEBUG" }} --pool threads --queues celery,galaxy.internal,galaxy.external {{ .Values.celery.extraArgs | default "" }}']
+          {{- if .Values.celery.startupProbe.enabled }}
           startupProbe:
             exec:
               command: [
-                'sh', '-c',
-                'python /tmp/probedb.py -c $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -s workflow_scheduler0 -o $HOSTNAME'
+                "bash",
+                "-c",
+                "/galaxy/server/.venv/bin/celery -A galaxy.celery inspect ping -d celery@$HOSTNAME"
               ]
-            initialDelaySeconds: {{ .Values.workflowHandlers.startupProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.workflowHandlers.startupProbe.periodSeconds }}
-            failureThreshold: {{ .Values.workflowHandlers.startupProbe.failureThreshold }}
-            timeoutSeconds: {{ .Values.workflowHandlers.startupProbe.timeoutSeconds }}
+            initialDelaySeconds: {{ .Values.webHandlers.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.webHandlers.startupProbe.periodSeconds }}
+            failureThreshold: {{ .Values.webHandlers.startupProbe.failureThreshold }}
+            timeoutSeconds: {{ .Values.webHandlers.startupProbe.failureThreshold }}
           {{- end }}
-          {{- if .Values.workflowHandlers.readinessProbe.enabled }}
+          {{- if .Values.celery.readinessProbe.enabled }}
           readinessProbe:
             exec:
               command: [
-                'sh', '-c',
-                'python /tmp/probedb.py -c $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -s workflow_scheduler0 -o $HOSTNAME'
+                "bash",
+                "-c",
+                "/galaxy/server/.venv/bin/celery -A galaxy.celery inspect ping -d celery@$HOSTNAME"
               ]
-            initialDelaySeconds: {{ .Values.workflowHandlers.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.workflowHandlers.readinessProbe.periodSeconds }}
-            failureThreshold: {{ .Values.workflowHandlers.readinessProbe.failureThreshold }}
-            timeoutSeconds: {{ .Values.workflowHandlers.readinessProbe.timeoutSeconds }}
+            initialDelaySeconds: {{ .Values.webHandlers.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.webHandlers.readinessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.webHandlers.readinessProbe.failureThreshold }}
+            timeoutSeconds: {{ .Values.webHandlers.readinessProbe.failureThreshold }}
           {{- end }}
-          {{- if .Values.workflowHandlers.livenessProbe.enabled }}
+          {{- if .Values.celery.livenessProbe.enabled }}
           livenessProbe:
             exec:
               command: [
-                'sh', '-c',
-                'python /tmp/probedb.py -c $GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION -s workflow_scheduler0 -o $HOSTNAME'
+                "bash",
+                "-c",
+                "/galaxy/server/.venv/bin/celery -A galaxy.celery inspect ping -d celery@$HOSTNAME"
               ]
-            initialDelaySeconds: {{ .Values.workflowHandlers.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.workflowHandlers.livenessProbe.periodSeconds }}
-            failureThreshold: {{ .Values.workflowHandlers.livenessProbe.failureThreshold }}
-            timeoutSeconds: {{ .Values.workflowHandlers.livenessProbe.timeoutSeconds }}
+            initialDelaySeconds: {{ .Values.webHandlers.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.webHandlers.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.webHandlers.livenessProbe.failureThreshold }}
+            timeoutSeconds: {{ .Values.webHandlers.livenessProbe.failureThreshold }}
           {{- end }}
           volumeMounts:
-            - name: extra-files-probe-script
-              mountPath: /tmp/probedb.py
-              subPath: probedb.py
             {{- range $key, $entry := .Values.extraFileMappings -}}
-            {{- if $entry.applyToWorkflow }}
+            {{- if $entry.applyToCelery }}
             - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
               mountPath: {{ $key }}
               subPath: {{ include "galaxy.getFilenameFromPath" $key }}
@@ -130,10 +126,10 @@ spec:
               subPath: {{ $key }}
             {{- end }}
             - name: galaxy-data
+              mountPath: {{ .Values.persistence.mountPath }}
+            - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/
               subPath: config
-            - name: galaxy-data
-              mountPath: {{ .Values.persistence.mountPath }}
             {{- if .Values.setupJob.downloadToolConfs.enabled }}
             - name: galaxy-data
               mountPath: {{ .Values.setupJob.downloadToolConfs.volume.mountPath }}
@@ -151,9 +147,6 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
-        - name: extra-files-probe-script
-          configMap:
-            name: {{ template "galaxy.fullname" $ }}-probedb-py
         - name: galaxy-conf-files
           {{- if .Values.useSecretConfigs }}
           secret:
@@ -163,7 +156,7 @@ spec:
             name: {{ template "galaxy.fullname" . }}-configs
           {{- end }}
         {{- range $key, $entry := .Values.extraFileMappings -}}
-        {{- if $entry.applyToWorkflow }}
+        {{- if $entry.applyToWeb }}
         - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
           {{- if $entry.useSecret }}
           secret:

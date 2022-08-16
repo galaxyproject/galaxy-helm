@@ -6,8 +6,8 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
-  repository: galaxyproject/galaxy-min
-  tag: 21.09
+  repository: galaxy/galaxy-min
+  tag: 22.05
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
@@ -62,6 +62,10 @@ webHandlers:
     periodSeconds: 10
     failureThreshold: 30
     timeoutSeconds: 5
+  gunicorn:
+    timeout: 300
+    workers: 1
+    extraArgs: ""
 
 jobHandlers:
   replicaCount: 1
@@ -85,6 +89,57 @@ jobHandlers:
     periodSeconds: 10
     failureThreshold: 30
     timeoutSeconds: 5
+
+celery:
+  concurrency: 2
+  logLevel: "INFO"
+  extraArgs: ""
+  replicaCount: 1
+  startupDelay: 5 # used to avoid race conditions
+  annotations: {}
+  podAnnotations: {}
+  podSpecExtra: {}
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: 15
+    periodSeconds: 60
+    failureThreshold: 40
+    timeoutSeconds: 10
+  readinessProbe:
+    enabled: false
+    periodSeconds: 60
+    failureThreshold: 12
+    timeoutSeconds: 10
+  livenessProbe:
+    enabled: false
+    periodSeconds: 60
+    failureThreshold: 30
+    timeoutSeconds: 10
+
+celeryBeat:
+  logLevel: "INFO"
+  extraArgs: ""
+  replicaCount: 1
+  startupDelay: 5 # used to avoid race conditions
+  annotations: {}
+  podAnnotations: {}
+  podSpecExtra: {}
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: 15
+    periodSeconds: 60
+    failureThreshold: 40
+    timeoutSeconds: 10
+  readinessProbe:
+    enabled: false
+    periodSeconds: 60
+    failureThreshold: 12
+    timeoutSeconds: 10
+  livenessProbe:
+    enabled: false
+    periodSeconds: 60
+    failureThreshold: 30
+    timeoutSeconds: 10
 
 metrics:
   enabled: false
@@ -118,7 +173,7 @@ persistence:
   storageClass: ""
   existingClaim: null
   accessMode: ReadWriteMany
-  size: 10Gi
+  size: 5Gi
   mountPath: /galaxy/server/database
 
 extraVolumes: []
@@ -246,21 +301,24 @@ postgresql:
     #    matchLabels:
     #      label-key: label-value
 
-cvmfs:
-  repositories:
-    cvmfs-gxy-data: data.galaxyproject.org
-    # cvmfs-gxy-cloud: cloud.galaxyproject.org
-  enabled: false
-  deploy: false
+refdata:
+  enabled: true
+  type: s3csi
   galaxyPersistentVolumeClaims:
     data:
-      storage: 1Gi
-      storageClassName: cvmfs-gxy-data
+      storage: 10Gi
+      storageClassName: refdata-gxy-data
       mountPath: /cvmfs/data.galaxyproject.org
     # cloud:
     #   storage: 1Gi
     #   storageClassName: cvmfs-gxy-cloud
     #   mountPath: /cvmfs/cloud.galaxyproject.org
+
+cvmfs:
+  repositories:
+    cvmfs-gxy-data: data.galaxyproject.org
+    # cvmfs-gxy-cloud: cloud.galaxyproject.org
+  deploy: false
   cache:
     alienCache:
       enabled: true
@@ -269,6 +327,25 @@ cvmfs:
       enabled: false
     preload:
       enabled: false
+
+s3csi:
+  deploy: true
+  images:
+    csi: cloudve/csi-s3:0.31.3
+  storageClass:
+    name: refdata-gxy-data
+    mounter: s3fs
+    singleBucket: biorefdata
+    mountOptions: "-o use_cache=/tmp -o endpoint=ap-southeast-2 -o public_bucket=1 -o enable_noobj_cache -o no_check_certificate -o kernel_cache -o ensure_diskfree=5000"
+    # additional optimizations for s3fs
+    # -o max_background=1000 -o max_stat_cache_size=1000000 -o multipart_size=52 -o parallel_count=30 -o multireq_max=30 -o dbglevel=warn
+    # future settings for geesefs
+    # mountOptions: "--memory-limit 4000 --dir-mode 0777 --file-mode 0666 --cache /tmp/geesecache --debug --debug_fuse --stat-cache-ttl 9m0s --cache-to-disk-hits 1"
+    # --no-dir-object --no-implicit-dir --stat-cache-ttl 120m0s --max-disk-cache-fd 4096
+  secret:
+    endpoint: https://s3.ap-southeast-2.amazonaws.com
+    usePrefix: true
+    prefix: /galaxy/v1/data.galaxyproject.org
 
 # When this flag is set to true, all configs will be set in secrets,
 # when it is set to false, all configs will be set in configmaps
@@ -286,9 +363,9 @@ configs:
         k8s_use_service_account: true
         k8s_persistent_volume_claims: |-
           {{ template "galaxy.pvcname" . -}}:{{ .Values.persistence.mountPath -}}
-          {{- if .Values.cvmfs.enabled -}}
-          {{- range $key, $entry := .Values.cvmfs.galaxyPersistentVolumeClaims -}}
-          ,{{- template "galaxy.fullname" $ -}}-cvmfs-gxy-{{ $key }}-pvc:{{ $entry.mountPath -}}
+          {{- if .Values.refdata.enabled -}}
+          {{- range $key, $entry := .Values.refdata.galaxyPersistentVolumeClaims -}}
+          ,{{- template "galaxy.fullname" $ -}}-refdata-gxy-{{ $key }}-pvc:{{ $entry.mountPath -}}
           {{- end -}}
           {{- end -}}
           {{- if .Values.setupJob.downloadToolConfs.enabled -}}
@@ -314,54 +391,29 @@ configs:
       assign:
         - "db-skip-locked"
     execution:
-      default: dynamic_k8s_dispatcher
+      default: tpv_dispatcher
       environments:
         local:
           runner: local
-        dynamic_k8s_dispatcher:
+        tpv_dispatcher:
           container_monitor: false
           runner: dynamic
           type: python
-          function: k8s_container_mapper
+          function: map_tool_to_destination
+          rules_module: tpv.rules
           docker_enabled: true
           docker_default_container_id: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           tmp_dir: "true"
+          tpv_config_files:
+            "{{ .Values.jobs.tpv.config_files | toYaml | nindent 8 }}"
     limits:
     - type: registered_user_concurrent_jobs
       value: 5
     - type: anonymous_user_concurrent_jobs
       value: 2
-  uwsgi.yml: |
-    uwsgi:
-      virtualenv: /galaxy/server/.venv
-      processes: 8
-      vacuum: true
-      single-interpreter: true
-      need-app: true
-      max-requests: 1000
-      max-worker-lifetime: 7200
-      reload-on-rss: 4096
-      worker-reload-mercy: 120
-      socket: 0.0.0.0:4001
-      http: 0.0.0.0:8080
-      pythonpath: /galaxy/server/lib
-      thunder-lock: true
-      manage-script-name: true
-      buffer-size: 16384
-      offload-threads: 2
-      threads: 4
-      die-on-term: true
-      master: true
-      hook-master-start: unix_signal:2 gracefully_kill_them_all
-      enable-threads: true
-      py-call-osafterfork: true
-      static-map: /static/style=/galaxy/server/static/style/blue
-      static-map: /static=/galaxy/server/static
-      static-map: /favicon.ico=/galaxy/server/static/favicon.ico
-      static-safe: /galaxy/server/client/galaxy/images
-      mount: {{.Values.ingress.path}}=galaxy.webapps.galaxy.buildapp:uwsgi_app()
   galaxy.yml:
     galaxy:
+      galaxy_url_prefix: "{{ .Values.ingress.path }}"
       interactivetools_enable: true
       interactivetools_map: database/interactivetools_map.sqlite
       interactivetools_prefix: "its"
@@ -379,19 +431,19 @@ configs:
       tool_data_table_config_path: |-
         {{ if .Values.setupJob.downloadToolConfs.enabled }}
         {{- .Values.setupJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_data_table_conf.xml
-        {{- if .Values.cvmfs.enabled -}}
-        ,{{- .Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/byhand/location/tool_data_table_conf.xml
+        {{- if .Values.refdata.enabled -}}
+        ,{{- .Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/byhand/location/tool_data_table_conf.xml
         {{- end }}
         {{- else }}
-        {{- if .Values.cvmfs.enabled -}}
-        {{- .Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/byhand/location/tool_data_table_conf.xml
+        {{- if .Values.refdata.enabled -}}
+        {{- .Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/byhand/location/tool_data_table_conf.xml
         {{- end }}
         {{- end }}
       tool_dependency_dir: "{{.Values.persistence.mountPath}}/deps"
       job_config_file: "/galaxy/server/config/job_conf.yml"
       builds_file_path: |-
-        {{ if .Values.cvmfs.enabled }}
-        {{ .Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/builds.txt
+        {{ if .Values.refdata.enabled }}
+        {{- .Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/builds.txt
         {{- end }}
       containers_resolvers_config_file: "/galaxy/server/config/container_resolvers_conf.xml"
       workflow_schedulers_config_file: "/galaxy/server/config/workflow_schedulers_conf.xml"
@@ -405,8 +457,8 @@ configs:
       nginx_x_accel_redirect_base: >-
         {{include "galaxy.add_trailing_slash" .Values.ingress.path}}_x_accel_redirect
       len_file_path: |-
-        {{ if .Values.cvmfs.enabled -}}
-        {{ .Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath}}/managed/len/ucsc
+        {{ if .Values.refdata.enabled -}}
+        {{- .Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/managed/len/ucsc
         {{- end }}
   container_resolvers_conf.xml: |
     <containers_resolvers>
@@ -443,7 +495,7 @@ configs:
     toolshed.g2.bx.psu.edu/repos/iuc/snpeff/snpEff/4.3+T.galaxy1
   build_sites.yml:
     - type: ucsc
-      file: "{{if .Values.cvmfs.enabled}}{{.Values.cvmfs.galaxyPersistentVolumeClaims.data.mountPath -}}/managed/location/ucsc_build_sites.txt{{else}}/galaxy/server/tool-data/shared/ucsc/ucsc_build_sites.txt.sample{{end}}"
+      file: "{{if .Values.refdata.enabled}}{{.Values.refdata.galaxyPersistentVolumeClaims.data.mountPath -}}/managed/location/ucsc_build_sites.txt{{else}}/galaxy/server/tool-data/shared/ucsc/ucsc_build_sites.txt.sample{{end}}"
       display: [main,archaea,ucla]
     - type: gbrowse
       file: "/galaxy/server/tool-data/shared/gbrowse/gbrowse_build_sites.txt"
@@ -468,117 +520,35 @@ jobs:
   priorityClass:
     enabled: true
     existingClass: ""
+  tpv:
+    config_files:
+      - https://raw.githubusercontent.com/galaxyproject/tpv-shared-database/main/tools.yml
+      - lib/galaxy/jobs/rules/vortex_rules_local.yml
   rules:
-    container_mapper_rules.yml:
-      mappings:
-        summary_stats:
-          tool_ids:
-            - Summary_Statistics1
-          docker_container_id_override: cloudve/gsummary:latest
-          resource_set: small
-        sam_fasta_dm:
-          tool_ids:
-            - toolshed.g2.bx.psu.edu/repos/devteam/data_manager_sam_fasta_index_builder/sam_fasta_index_builder/.*
-          docker_container_id_override: cloudve/sam-fasta-dm:latest
-          resource_set: small
-        bwa_dm:
-          tool_ids:
-            - toolshed.g2.bx.psu.edu/repos/devteam/data_manager_bwa_mem_index_builder/bwa_mem_index_builder_data_manager/.*
-          docker_container_id_override: cloudve/bwa-dm:latest
-          resource_set: small
-        prokka:
-          tool_ids:
-            - toolshed.g2.bx.psu.edu/repos/crs4/prokka/prokka/1.14.5
-          docker_container_id_override: cloudve/prokka:1.14.5
-        jbrowse:
-          tool_ids:
-            - toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.5+galaxy6
-          docker_container_id_override: cloudve/jbrowse:1.16.5
-        lib_galaxy:
-          tool_ids:
-            - sort1
-            - Grouping1
-          docker_container_id_override: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          resource_set: small
-        set_medium:
-          tool_ids:
-            - toolshed.g2.bx.psu.edu/repos/devteam/bowtie2/bowtie2/.*
-            - toolshed.g2.bx.psu.edu/repos/iuc/bwameth/bwameth/.*
-            - toolshed.g2.bx.psu.edu/repos/iuc/featurecounts/featurecounts/.*
-            - toolshed.g2.bx.psu.edu/repos/iuc/hisat2/hisat2/.*
-            - toolshed.g2.bx.psu.edu/repos/iuc/valet/valet/.*
-            - toolshed.g2.bx.psu.edu/repos/iuc/varscan_somatic/varscan_somatic/.*
-            - toolshed.g2.bx.psu.edu/repos/nilesh/rseqc/rseqc_bam2wig/.*
-          resource_set: medium
-        set_large:
-          tool_ids:
-            - toolshed.g2.bx.psu.edu/repos/devteam/bwa/bwa_mem/.*
-            - toolshed.g2.bx.psu.edu/repos/devteam/bwa/bwa/.*
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_bam_compare/deeptools_bam_compare/.*
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_bam_coverage/deeptools_bam_coverage/.*
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_bam_pe_fragmentsize/deeptools_bam_pe_fragmentsize/.*
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_bigwig_compare/deeptools_bigwig_compare/.*
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_compute_gc_bias/deeptools_compute_gc_bias/.*
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_compute_matrix/deeptools_compute_matrix/.*
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_correct_gc_bias/deeptools_correct_gc_bias/.*
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_multi_bam_summary/deeptools_multi_bam_summary/.*
-            - toolshed.g2.bx.psu.edu/repos/bgruening/deeptools_multi_bigwig_summary/deeptools_multi_bigwig_summary/.*
-            - toolshed.g2.bx.psu.edu/repos/devteam/freebayes/freebayes/.*
-            - toolshed.g2.bx.psu.edu/repos/iuc/rgrnastar/rna_star/.*
-            - toolshed.g2.bx.psu.edu/repos/iuc/rnaspades/rnaspades/.*
-            - toolshed.g2.bx.psu.edu/repos/iuc/sra_tools/fasterq_dump/.*
-          resource_set: large
-        set_2xlarge:
-          tool_ids:
-            - toolshed.g2.bx.psu.edu/repos/iuc/unicycler/unicycler/.*
-            - toolshed.g2.bx.psu.edu/repos/nml/spades/spades/.*
-          resource_set: 2xlarge
-        set_mlarge:
-          tool_ids:
-            - toolshed.g2.bx.psu.edu/repos/iuc/minimap2/minimap2/.*
-            - toolshed.g2.bx.psu.edu/repos/iuc/plink/plink/.*
-          resource_set: mlarge
-      resources:
-        resource_sets:
-          small:
-            requests:
-              cpu: 1
-              memory: 2G
-            limits:
-              cpu: 2
-              memory: 5G
-          medium:
-            requests:
-              cpu: 2
-              memory: 4G
-            limits:
-              cpu: 4
-              memory: 10G
-          large:
-            requests:
-              cpu: 4
-              memory: 8G
-            limits:
-              cpu: 8
-              memory: 16G
-          2xlarge:
-            requests:
-              cpu: 12
-              memory: 20G
-            limits:
-              cpu: 12
-              memory: 24G
-          mlarge:
-            requests:
-              cpu: 2
-              memory: 16G
-            limits:
-              cpu: 4
-              memory: 20G
-        default_resource_set: small
-    k8s_container_mapper.py: |
-      {{- (.Files.Get "files/rules/k8s_container_mapper.py") }}
-
+    vortex_rules_local.yml:
+      tools:
+        Summary_Statistics1:
+          params:
+            docker_container_id_override: cloudve/gsummary:latest
+        toolshed.g2.bx.psu.edu/repos/devteam/data_manager_sam_fasta_index_builder/sam_fasta_index_builder/.*:
+          params:
+            docker_container_id_override: cloudve/sam-fasta-dm:latest
+        toolshed.g2.bx.psu.edu/repos/devteam/data_manager_bwa_mem_index_builder/bwa_mem_index_builder_data_manager/.*:
+          params:
+            docker_container_id_override: cloudve/bwa-dm:latest
+        toolshed.g2.bx.psu.edu/repos/crs4/prokka/prokka/1.14.5:
+          params:
+            docker_container_id_override: cloudve/prokka:1.14.5
+        toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.5+galaxy6:
+          params:
+            docker_container_id_override: cloudve/jbrowse:1.16.5
+        sort1:
+          params:
+            docker_container_id_override: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        Grouping1:
+          params:
+            docker_container_id_override: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        
 extraFileMappings:
   /galaxy/server/static/welcome.html:
     useSecret: false
@@ -629,7 +599,7 @@ nginx:
   galaxyStaticDir: "/galaxy/server/static"
   image:
     repository: nginx
-    tag: latest
+    tag: 1.22.0
     pullPolicy: IfNotPresent
   containerPort: 7080
   conf:
@@ -646,7 +616,7 @@ nginx:
       ephemeral-storage: 100Gi
 
 tusd:
-  enabled: false
+  enabled: true
   replicaCount: 1
   annotations: {}
   podAnnotations: {}
@@ -657,5 +627,5 @@ tusd:
     fsGroup: 101
   image:
     repository: tusproject/tusd
-    tag: v1.6.0
+    tag: v1.9.1
     pullPolicy: IfNotPresent

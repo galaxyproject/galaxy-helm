@@ -8,6 +8,12 @@ jobs:
     name: Package and push
     runs-on: ubuntu-latest
     steps:
+      - name: Require a label and version bump to package and release
+        uses: mheap/github-action-required-labels@v2
+        with:
+          mode: minium
+          count: 1
+          labels: "version, release, major, enhancement, feature, minor, patch, bug, values"
       - uses: actions/checkout@v2
         with:
            persist-credentials: false
@@ -21,7 +27,7 @@ jobs:
           git-branch: ${{ github.event.pull_request.base.ref }}
       - name: tag and release
         run: |
-          version=$(cat galaxy/Chart.yaml | grep ~version: | cut -d\  -f2)
-          git tag -a $version -m "Release v$version"
+          version=$(cat galaxy/Chart.yaml | awk /^version:/ { print $2 }
+          git tag -a $version -m "Automatic release of v$version"
           git push origin $version
-          rh release create $version --generate-notes --draft
+          gh release create $version --generate-notes --draft

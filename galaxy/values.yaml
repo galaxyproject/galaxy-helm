@@ -614,3 +614,17 @@ tusd:
     repository: tusproject/tusd
     tag: v1.9.1
     pullPolicy: IfNotPresent
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+      nginx.ingress.kubernetes.io/proxy-buffering: "off"
+      nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+      nginx.ingress.kubernetes.io/connection-proxy-header: "Upgrade"
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    hosts:
+      - host: ~
+        paths:
+          - path: "/galaxy/api/upload/resumable_upload"
+    tls: []

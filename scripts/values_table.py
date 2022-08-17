@@ -51,8 +51,6 @@ README_ORDER = ["fullnameOverride",
                 "refdata.deploy",
                 "refdata.enabled",
                 "refdata.",
-                "cvmfs.deploy",
-                "cvmfs.",
                 "setupJob.",
                 "ingress.",
                 "service.",
@@ -70,14 +68,18 @@ README_ORDER = ["fullnameOverride",
                 "extraInitContainers.",
                 "extraVolumeMounts.",
                 "extraVolumes.",
-                "postgresql.",
+                "celery.",
+                "celeryBeat.",
                 "influxdb.",
                 "metrics.",
                 "nginx.",
+                "postgresql.",
+                "s3csi.",
+                "tusd.",
                 ]
 
 # Entries that should be ignored.
-ignored = [ 'cvmfs.repositories', 'cvmfs.cache']
+ignored = [ ]
 
 longest_key = -1
 longest_desc = -1

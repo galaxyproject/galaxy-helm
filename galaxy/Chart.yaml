@@ -2,7 +2,7 @@ apiVersion: v2
 name: galaxy
 type: application
 version: 5.2.0
-appVersion: "21.09"
+appVersion: "22.05"
 description: Chart for Galaxy, an open, web-based platform for accessible, reproducible, and transparent computational biomedical research.
 icon: https://galaxyproject.org/images/galaxy-logos/galaxy_project_logo_square.png
 dependencies:
@@ -20,4 +20,3 @@ dependencies:
     alias: s3csi
     tags:
       - deploy-s3csi
-

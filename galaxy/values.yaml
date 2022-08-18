@@ -24,9 +24,9 @@ workflowHandlers:
   podSpecExtra: {}
   startupProbe:
     enabled: true
-    initialDelaySeconds: 15
+    initialDelaySeconds: 30
     periodSeconds: 5
-    failureThreshold: 40
+    failureThreshold: 80
     timeoutSeconds: 5
   readinessProbe:
     enabled: true
@@ -47,9 +47,9 @@ webHandlers:
   podSpecExtra: {}
   startupProbe:
     enabled: true
-    initialDelaySeconds: 15
+    initialDelaySeconds: 30
     periodSeconds: 5
-    failureThreshold: 40
+    failureThreshold: 80
     timeoutSeconds: 5
   readinessProbe:
     enabled: true
@@ -74,9 +74,9 @@ jobHandlers:
   podSpecExtra: {}
   startupProbe:
     enabled: true
-    initialDelaySeconds: 15
+    initialDelaySeconds: 30
     periodSeconds: 5
-    failureThreshold: 40
+    failureThreshold: 80
     timeoutSeconds: 5
   readinessProbe:
     enabled: true
@@ -380,17 +380,19 @@ configs:
       environments:
         local:
           runner: local
+        k8s:
+          runner: k8s
         tpv_dispatcher:
           container_monitor: false
+          docker_enabled: true
           runner: dynamic
           type: python
           function: map_tool_to_destination
           rules_module: tpv.rules
-          docker_enabled: true
           docker_default_container_id: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          tmp_dir: "true"
           tpv_config_files:
-            "{{ .Values.jobs.tpv.config_files | toYaml | nindent 8 }}"
+            - https://raw.githubusercontent.com/galaxyproject/tpv-shared-database/main/tools.yml
+            - lib/galaxy/jobs/rules/tpv_rules_local.yml
     limits:
     - type: registered_user_concurrent_jobs
       value: 5
@@ -505,13 +507,17 @@ jobs:
   priorityClass:
     enabled: true
     existingClass: ""
-  tpv:
-    config_files:
-      - https://raw.githubusercontent.com/galaxyproject/tpv-shared-database/main/tools.yml
-      - lib/galaxy/jobs/rules/vortex_rules_local.yml
   rules:
-    vortex_rules_local.yml:
+    tpv_rules_local.yml:
+      global:
+        default_inherits: default
       tools:
+        default:
+          params:
+            container_monitor: false
+            docker_enabled: "true"
+            docker_default_container_id: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            tmp_dir: "true"
         Summary_Statistics1:
           params:
             docker_container_id_override: cloudve/gsummary:latest
@@ -533,6 +539,12 @@ jobs:
         Grouping1:
           params:
             docker_container_id_override: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+      destinations:
+        k8s:
+          scheduling:
+            accept:
+              - docker
+        local:
 
 extraFileMappings:
   /galaxy/server/static/welcome.html:

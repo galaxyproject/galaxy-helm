@@ -290,7 +290,7 @@ postgresql:
   # galaxyExistingSecretKeyRef:
   operator:
     operatorSpecExtra:
-  nameOverride: galaxy-postgres
+  nameOverride: postgres
   persistence:
     enabled: true
     #storageClass:
@@ -640,3 +640,13 @@ tusd:
         paths:
           - path: "/galaxy/api/upload/resumable_upload"
     tls: []
+
+rabbitmq:
+  enabled: true
+  deploy: true
+  existingCluster:
+  existingSecret: '{{ include "galaxy-rabbitmq.fullname" . }}-default-user'
+  nameOverride: rabbitmq
+  persistence:
+    storageClassName:
+    storage:

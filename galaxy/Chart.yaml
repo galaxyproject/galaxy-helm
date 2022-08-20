@@ -20,3 +20,10 @@ dependencies:
     alias: s3csi
     tags:
       - deploy-s3csi
+  - name: rabbitmq-cluster-operator
+    repository: https://charts.bitnami.com/bitnami
+    version: 2.6.12
+    condition: rabbitmq.deploy
+    alias: rabbitmq
+    tags:
+      - deploy-rabbitmq

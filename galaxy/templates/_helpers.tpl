@@ -80,6 +80,17 @@ Return the postgresql database name to use
 {{- end -}}
 
 {{/*
+Return the rabbitmq cluster to use
+*/}}
+{{- define "galaxy-rabbitmq.fullname" -}}
+{{- if .Values.rabbitmq.existingCluster -}}
+{{- printf "%s" .Values.rabbitmq.existingCluster -}}
+{{- else -}}
+{{- printf "%s-%s-server" .Release.Name .Values.rabbitmq.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Add a trailing slash to a given path, if missing
 */}}
 {{- define "galaxy.add_trailing_slash" -}}
@@ -159,8 +170,11 @@ Creates the bash command for the handlers to wait for init scripts
 */}}
 {{- define "galaxy.init-container-wait-command" -}}
 until [ -f /galaxy/server/config/mutable/db_init_done_{{$.Release.Revision}} ]; do echo "waiting for DB initialization"; sleep 1; done;
+{{- if $.Values.rabbitmq.enabled }}
+until timeout 1 bash -c "echo > /dev/tcp/{{ template "galaxy-rabbitmq.fullname" $ }}/5672"; do echo "waiting for rabbitmq service"; sleep 1; done;
+{{- end }}
 until [ -f /galaxy/server/config/mutable/init_mounts_done_{{$.Release.Revision}} ]; do echo "waiting for copying onto NFS"; sleep 1; done;
-{{ if .Values.setupJob.downloadToolConfs.enabled }}
+{{- if .Values.setupJob.downloadToolConfs.enabled }}
 until [ -f /galaxy/server/config/mutable/init_clone_done_{{$.Release.Revision}} ]; do echo "waiting for refdata copying"; sleep 1; done;
 {{- end }}
 echo "Initialization waits complete";
@@ -226,6 +240,20 @@ Define pod env vars
               value: /galaxy/server/lib
             - name: GALAXY_CONFIG_FILE
               value: /galaxy/server/config/galaxy.yml
+{{- if .Values.rabbitmq.enabled }}
+            - name: GALAXY_RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .Values.rabbitmq.existingSecret . }}
+                  key: username
+            - name: GALAXY_RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .Values.rabbitmq.existingSecret . }}
+                  key: password
+            - name: GALAXY_CONFIG_OVERRIDE_AMQP_INTERNAL_CONNECTION
+              value: amqp://$(GALAXY_RABBITMQ_USERNAME):$(GALAXY_RABBITMQ_PASSWORD)@{{ template "galaxy-rabbitmq.fullname" . }}
+{{- end }}
 {{- end -}}
 
 

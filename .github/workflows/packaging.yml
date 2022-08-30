@@ -25,9 +25,10 @@ jobs:
           charts-token: ${{ secrets.CHARTS_TOKEN }}
           github-labels: ${{ join(github.event.pull_request.labels.*.name, ', ') }}
           git-branch: ${{ github.event.pull_request.base.ref }}
-      - name: tag and release
-        run: |
-          version=$(cat galaxy/Chart.yaml | awk /^version:/ { print $2 }
-          git tag -a $version -m "Automatic release of v$version"
-          git push origin $version
-          gh release create $version --generate-notes --draft
+      - name: Tag and release
+        uses: ksuderman/github-action-tag-release@v2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          file: galaxy/Chart.yaml
+          parser: awk

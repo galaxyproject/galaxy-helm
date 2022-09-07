@@ -8,7 +8,7 @@ updates, upgrades, and rollbacks.
 
 ## Supported software versions
 
-- Kubernetes 1.21
+- Kubernetes 1.22+
 - Helm 3.5+
 
 ## Kubernetes cluster
@@ -16,38 +16,31 @@ updates, upgrades, and rollbacks.
 You will need `kubectl` ([instructions](https://kubernetes.io/docs/tasks/tools/#kubectl))
 and `Helm` ([instructions](https://helm.sh/docs/intro/install/)) installed.
 
-In terms of getting a Kubernetes cluster, an easy option for testing and
-development purposes is to install [Rancher
-Desktop](https://rancherdesktop.io/).
+### Running Galaxy locally in a dev environment
+
+For testing and development purposes, an easy option to get Kubernetes running
+is to install [Rancher Desktop](https://rancherdesktop.io/). Once you have it
+installed, you will also need to setup an ingress controller. Rancher uses
+*Traefik* as the default one, so disable it first by unchecking `Enable Traefik`
+from the `Kubernetes Settings` page. Then deploy the NGINX ingress controller:
+```
+helm upgrade --install ingress-nginx ingress-nginx \
+  --repo https://kubernetes.github.io/ingress-nginx \
+  --namespace ingress-nginx --create-namespace
+```
 
 ## Dependency charts
 
 This chart relies on the features of other charts for common functionality:
 - [postgres-operator](https://github.com/zalando/postgres-operator) for the
   database;
-
-One of the following (while, technically, this is an optional dependency,
-  production settings will likely want it enabled.):
 - [CSI-S3 chart](https://github.com/ctrox/csi-s3/pull/75/) for linking the
   reference data to Galaxy and jobs based on S3FS.
-- [CVMFS-CSI chart](https://github.com/CloudVE/galaxy-cvmfs-csi-helm) for
-  linking the reference data to Galaxy and jobs based on CVMFS. Note that this
-  chart will only work up to K8s 1.19 and support for CVMFS is legacy for the
-  time being. Also note that this driver does not work on MacOS.
-
-_Note:_ It is not advisable to run multiple instances of the CVMFS-CSI
-simultaneously on the same cluster. If you wish to deploy multiple instances of
-Galaxy on the same cluster, please install the CVMFS-CSI chart separately as
-shown below. One exception to this is installing multiple releases of Galaxy in
-different namespaces AND running on different nodepools. In that case, it is
-possible to have each Galaxy release deploy its own CVMFS-CSI (and own NFS
-provisioner if desired). For that case, please refer to the [GalaxyKubeMan
-Chart](https://github.com/galaxyproject/galaxykubeman-helm).
 
 In a production setting, especially if the intention is to run multiple Galaxies
 in a single cluster, we recommend installing the dependency charts separately
 once per cluster, and installing Galaxy with `--set postgresql.deploy=false
---set cvmfs.deploy=false --set s3csi.deploy=false`.
+--set s3csi.deploy=false`.
 
 ---
 
@@ -71,8 +64,9 @@ helm dependency update
 helm install --create-namespace -n galaxy my-galaxy . --set persistence.accessMode="ReadWriteOnce"
 ```
 
-In a couple of minute, Galaxy will be available at the root URL of your Kubernetes
-cluster.
+In several minute, Galaxy will be available at `/galaxy/` URL of your Kubernetes
+cluster. If you are running the development Kubernetes, Galaxy will be available
+at `http://localhost/galaxy/` (note the trailing slash).
 
 ### Using the chart from the packaged chart repo
 
@@ -86,7 +80,8 @@ helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/mast
 helm repo update
 ```
 
-2. Install the chart with the release name `my-galaxy`:
+2. Install the chart with the release name `my-galaxy`. It is not advisable to
+   install Galaxy in the `default` namespace.
 
 ```console
 helm install my-galaxy-release cloudve/galaxy
@@ -385,6 +380,7 @@ independently upgrade-able. In other words, upgrading the Galaxy image from
 
 | Chart version        | Galaxy version   | Description     |
 | :------------------ | :--------------- | :-------------- |
+| `5.0`               | `22.05`          | Needs at least container image 22.05 as Galaxy switched from uwsgi to gunicorn  |
 | `4.0`               | `21.05`          | Needs [Galaxy PR#11899](https://github.com/galaxyproject/galaxy/pull/11899) for eliminating the CVMFS. If running chart 4.0+ with Galaxy image `21.01` or below, use the CVMFS instead with `--set setupJob.downloadToolConfs.enabled=false --set cvmfs.repositories.cvmfs-gxy-cloud=cloud.galaxyproject.org --set cvmfs.galaxyPersistentVolumeClaims.cloud.storage=1Gi --set cvmfs.galaxyPersistentVolumeClaims.cloud.storageClassName=cvmfs-gxy-cloud --set cvmfs.galaxyPersistentVolumeClaims.cloud.mountPath=/cvmfs/cloud.galaxyproject.org` |
 
 ## Funding

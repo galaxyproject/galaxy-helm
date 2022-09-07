@@ -1,8 +1,8 @@
 apiVersion: v2
 name: galaxy
 type: application
-version: 5.0.0-anvil.1
-appVersion: "21.09"
+version: 5.2.0-anvil.0
+appVersion: "22.05"
 description: Chart for Galaxy, an open, web-based platform for accessible, reproducible, and transparent computational biomedical research.
 icon: https://galaxyproject.org/images/galaxy-logos/galaxy_project_logo_square.png
 dependencies:
@@ -20,3 +20,10 @@ dependencies:
     alias: s3csi
     tags:
       - deploy-s3csi
+  - name: rabbitmq-cluster-operator
+    repository: https://charts.bitnami.com/bitnami
+    version: 2.6.12
+    condition: rabbitmq.deploy
+    alias: rabbitmq
+    tags:
+      - deploy-rabbitmq

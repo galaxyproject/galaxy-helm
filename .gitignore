@@ -96,3 +96,5 @@ galaxy/charts/
 
 # IDEs
 .idea
+
+Chart.lock

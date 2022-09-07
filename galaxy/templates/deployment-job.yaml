@@ -72,7 +72,7 @@ spec:
             '{{- if $.Values.extraInitCommands -}}
              {{- tpl $.Values.extraInitCommands $ | nindent 13 -}};
              {{- end -}}
-             python /galaxy/server/scripts/galaxy-main -c /galaxy/server/config/galaxy.yml --server-name job_handler_{{ $handler_num }} --attach-to-pool job-handlers']
+             python /galaxy/server/scripts/galaxy-main -c $GALAXY_CONFIG_FILE --server-name job_handler_{{ $handler_num }} --attach-to-pool job-handlers']
           {{- if $.Values.jobHandlers.startupProbe.enabled }}
           startupProbe:
             exec:

@@ -1,0 +1,14 @@
+{{- if and .Values.rabbitmq.enabled (not .Values.rabbitmq.existingCluster) }}
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  labels:
+    {{- include "galaxy.labels" . | nindent 4 }}
+    team: galaxy
+  name: {{ include "galaxy-rabbitmq.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  persistence:
+    storageClassName: {{ .Values.rabbitmq.persistence.storageClassName }}
+    storage: {{ .Values.rabbitmq.persistence.storage }}
+{{- end }}

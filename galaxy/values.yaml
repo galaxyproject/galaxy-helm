@@ -518,6 +518,10 @@ jobs:
             docker_enabled: "true"
             docker_default_container_id: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
             tmp_dir: "true"
+          scheduling:
+            reject:
+              - local
+              - offline
         Summary_Statistics1:
           params:
             docker_container_id_override: cloudve/gsummary:latest
@@ -545,6 +549,9 @@ jobs:
             accept:
               - docker
         local:
+          scheduling:
+            require:
+              - local
 
 extraFileMappings:
   /galaxy/server/static/welcome.html:

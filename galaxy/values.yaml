@@ -545,6 +545,11 @@ jobs:
             docker_container_id_override: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
       destinations:
         k8s:
+          params:
+            requests_cpu: "{cores}"
+            requests_memory: "{mem}Gi"
+            limits_cpu: "{cores}"
+            limits_memory: "{mem}Gi"
           scheduling:
             accept:
               - docker

@@ -33,7 +33,7 @@ jobs:
       - name: Start k8s locally
         uses: jupyterhub/action-k3s-helm@v1
         with:
-          k3s-version: v1.24.3+k3s1  # releases:  https://github.com/k3s-io/k3s/tags
+          k3s-version: v1.25.2+k3s1  # releases:  https://github.com/k3s-io/k3s/tags
           metrics-enabled: false
           traefik-enabled: false
       - name: Verify function of k8s, kubectl, and helm
@@ -47,9 +47,12 @@ jobs:
       - name: Helm repo add galaxy
         run: helm repo add galaxy https://github.com/CloudVE/helm-charts/raw/master
       - name: Helm install Galaxy
-        run: time bash -c 'helm install --create-namespace -n galaxy galaxy ./galaxy --set persistence.accessMode="ReadWriteOnce" --set resources.requests.memory=0Mi,resources.requests.cpu=0m --wait --timeout=600s'
+        run: time bash -c 'helm install --create-namespace -n galaxy galaxy ./galaxy --set persistence.accessMode="ReadWriteOnce" --set resources.requests.memory=0Mi,resources.requests.cpu=0m --wait --timeout=720s'
       - name: Get events
         run: kubectl get events -n galaxy; kubectl get events -n csi-drivers;
+        if: always()
+      - name: Get pods, pvc, and pv
+        run: kubectl get pods -n galaxy; kubectl get pvc -n galaxy; kubectl get pv -n galaxy
         if: always()
       - name: Print web handler log
         run: bash -c "kubectl logs -n galaxy $(kubectl -n galaxy get pods | grep -o '[^ ]*galaxy-web[^ ]*')"

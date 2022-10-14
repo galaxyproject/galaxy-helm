@@ -2,6 +2,7 @@ name: Package
 on:
   pull_request_target:
     types: [closed]
+  workflow_dispatch:
 jobs:
   package:
     if: github.event.pull_request.merged == true

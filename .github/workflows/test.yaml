@@ -31,9 +31,9 @@ jobs:
       - name: Helm dep update
         run: cd galaxy/ && helm dep update && cd ..
       - name: Start k8s locally
-        uses: jupyterhub/action-k3s-helm@v1
+        uses: jupyterhub/action-k3s-helm@v3
         with:
-          k3s-version: v1.25.2+k3s1  # releases:  https://github.com/k3s-io/k3s/tags
+          k3s-version: v1.24.6+k3s1  # releases:  https://github.com/k3s-io/k3s/tags
           metrics-enabled: false
           traefik-enabled: false
       - name: Verify function of k8s, kubectl, and helm

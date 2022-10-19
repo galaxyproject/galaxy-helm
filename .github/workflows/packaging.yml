@@ -3,9 +3,14 @@ on:
   pull_request_target:
     types: [closed]
   workflow_dispatch:
+    inputs:
+      manual-package-invocation:
+        description: 'Package (y/n)?'
+        required: true
+        default: 'y'
 jobs:
   package:
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true || github.event.inputs.manual-package-invocation == 'y'
     name: Package and push
     runs-on: ubuntu-latest
     steps:

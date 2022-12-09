@@ -190,7 +190,7 @@ setupJob:
     runAsUser: 101
     runAsGroup: 101
     fsGroup: 101
-  ttlSecondsAfterFinished: 10
+  ttlSecondsAfterFinished: 300
   downloadToolConfs:
     enabled: true
     # Uses Galaxy's shared file system volume

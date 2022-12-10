@@ -29,6 +29,11 @@ data:
         proxy_read_timeout 600;
         client_max_body_size {{ .Values.nginx.conf.client_max_body_size }};
 
+        map $http_x_forwarded_proto $proxy_x_forwarded_proto {
+          default $http_x_forwarded_proto;
+          '' $scheme;
+        }
+
         server {
             listen {{ .Values.nginx.containerPort }};
             server_name galaxy;
@@ -41,7 +46,8 @@ data:
             location {{ template "galaxy.add_trailing_slash" .Values.ingress.path }} {
                 proxy_set_header Host $http_host;
                 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_set_header X-Forwarded-Proto $proxy_x_forwarded_proto;
+                proxy_set_header X-Url-Scheme $proxy_x_forwarded_proto;
                 proxy_set_header Upgrade $http_upgrade;
                 proxy_pass http://{{ template "galaxy.fullname" . }}-galaxy:8080;
             }
@@ -49,7 +55,8 @@ data:
             location ^~ {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}admin_toolshed/static {
                 proxy_set_header Host $http_host;
                 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_set_header X-Forwarded-Proto $proxy_x_forwarded_proto;
+                proxy_set_header X-Url-Scheme $proxy_x_forwarded_proto;
                 proxy_set_header Upgrade $http_upgrade;
                 proxy_pass http://{{ template "galaxy.fullname" . }}-galaxy:8080;
                 expires 24h;
@@ -59,7 +66,8 @@ data:
                 proxy_buffering off;
                 proxy_set_header Host $http_host;
                 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_set_header X-Forwarded-Proto $proxy_x_forwarded_proto;
+                proxy_set_header X-Url-Scheme $proxy_x_forwarded_proto;
                 proxy_set_header Upgrade $http_upgrade;
                 proxy_pass http://{{ template "galaxy.fullname" . }}-galaxy:8080;
             }

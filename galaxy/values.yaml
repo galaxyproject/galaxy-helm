@@ -302,19 +302,15 @@ postgresql:
 
 refdata:
   enabled: true
-  type: s3csi
-  galaxyPersistentVolumeClaims:
-    data:
-      storage: 10Gi
-      storageClassName: refdata-gxy-data
-      mountPath: /cvmfs/data.galaxyproject.org
-    # cloud:
-    #   storage: 1Gi
-    #   storageClassName: cvmfs-gxy-cloud
-    #   mountPath: /cvmfs/cloud.galaxyproject.org
+  type: cvmfs
+  pvc:
+    size: 10Gi
+
+cvmfs:
+  deploy: true
 
 s3csi:
-  deploy: true
+  deploy: false
   images:
     csi: cloudve/csi-s3:0.31.3
   storageClass:
@@ -349,9 +345,7 @@ configs:
         k8s_persistent_volume_claims: |-
           {{ template "galaxy.pvcname" . -}}:{{ .Values.persistence.mountPath -}}
           {{- if .Values.refdata.enabled -}}
-          {{- range $key, $entry := .Values.refdata.galaxyPersistentVolumeClaims -}}
-          ,{{- template "galaxy.fullname" $ -}}-refdata-gxy-{{ $key }}-pvc:{{ $entry.mountPath -}}
-          {{- end -}}
+          ,{{- template "galaxy.fullname" $ -}}-refdata-gxy-pvc:/cvmfs
           {{- end -}}
           {{- if .Values.setupJob.downloadToolConfs.enabled -}}
           ,{{ template "galaxy.pvcname" . -}}/{{ .Values.setupJob.downloadToolConfs.volume.subPath }}:{{ .Values.setupJob.downloadToolConfs.volume.mountPath -}}
@@ -419,18 +413,18 @@ configs:
         {{ if .Values.setupJob.downloadToolConfs.enabled }}
         {{- .Values.setupJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_data_table_conf.xml
         {{- if .Values.refdata.enabled -}}
-        ,{{- .Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/byhand/location/tool_data_table_conf.xml
+        ,/cvmfs/data.galaxyproject.org/managed/location/tool_data_table_conf.xml,/cvmfs/data.galaxyproject.org/byhand/location/tool_data_table_conf.xml
         {{- end }}
         {{- else }}
         {{- if .Values.refdata.enabled -}}
-        {{- .Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/byhand/location/tool_data_table_conf.xml
+        /cvmfs/data.galaxyproject.org//managed/location/tool_data_table_conf.xml,/cvmfs/data.galaxyproject.org/byhand/location/tool_data_table_conf.xml
         {{- end }}
         {{- end }}
       tool_dependency_dir: "{{.Values.persistence.mountPath}}/deps"
       job_config_file: "/galaxy/server/config/job_conf.yml"
       builds_file_path: |-
         {{ if .Values.refdata.enabled }}
-        {{- .Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/builds.txt
+        /cvmfs/data.galaxyproject.org/managed/location/builds.txt
         {{- end }}
       containers_resolvers_config_file: "/galaxy/server/config/container_resolvers_conf.xml"
       workflow_schedulers_config_file: "/galaxy/server/config/workflow_schedulers_conf.xml"
@@ -445,7 +439,7 @@ configs:
         {{include "galaxy.add_trailing_slash" .Values.ingress.path}}_x_accel_redirect
       len_file_path: |-
         {{ if .Values.refdata.enabled -}}
-        {{- .Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/managed/len/ucsc
+        /cvmfs/data.galaxyproject.org/managed/len/ucsc
         {{- end }}
   container_resolvers_conf.xml: |
     <containers_resolvers>
@@ -482,7 +476,7 @@ configs:
     toolshed.g2.bx.psu.edu/repos/iuc/snpeff/snpEff/4.3+T.galaxy1
   build_sites.yml:
     - type: ucsc
-      file: "{{if .Values.refdata.enabled}}{{.Values.refdata.galaxyPersistentVolumeClaims.data.mountPath -}}/managed/location/ucsc_build_sites.txt{{else}}/galaxy/server/tool-data/shared/ucsc/ucsc_build_sites.txt.sample{{end}}"
+      file: "{{if .Values.refdata.enabled}}/cvmfs/data.galaxyproject.org/managed/location/ucsc_build_sites.txt{{else}}/galaxy/server/tool-data/shared/ucsc/ucsc_build_sites.txt.sample{{end}}"
       display: [main,archaea,ucla]
     - type: gbrowse
       file: "/galaxy/server/tool-data/shared/gbrowse/gbrowse_build_sites.txt"

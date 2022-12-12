@@ -659,6 +659,7 @@ rabbitmq:
   existingCluster:
   existingSecret: '{{ include "galaxy-rabbitmq.fullname" . }}-default-user'
   nameOverride: rabbitmq
+  extraSpec: {}
   terminationGracePeriodSeconds: 90
   persistence:
     storageClassName:

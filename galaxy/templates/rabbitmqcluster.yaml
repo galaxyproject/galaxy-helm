@@ -8,6 +8,9 @@ metadata:
   name: {{ include "galaxy-rabbitmq.fullname" . }}
   namespace: {{ .Release.Namespace }}
 spec:
+{{- if .Values.rabbitmq.extraSpec }}
+{{ tpl (toYaml .Values.rabbitmq.extraSpec) . | indent 2 }}
+{{- end }}
   terminationGracePeriodSeconds: {{ .Values.rabbitmq.terminationGracePeriodSeconds }}
   persistence:
     storageClassName: {{ .Values.rabbitmq.persistence.storageClassName }}

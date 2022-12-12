@@ -8,6 +8,7 @@ metadata:
   name: {{ include "galaxy-rabbitmq.fullname" . }}
   namespace: {{ .Release.Namespace }}
 spec:
+  terminationGracePeriodSeconds: {{ .Values.rabbitmq.terminationGracePeriodSeconds }}
   persistence:
     storageClassName: {{ .Values.rabbitmq.persistence.storageClassName }}
     storage: {{ .Values.rabbitmq.persistence.storage }}

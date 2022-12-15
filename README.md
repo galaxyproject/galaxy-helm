@@ -261,6 +261,8 @@ extraFileMappings:
 1. Creating a symbolic link in the chart directory to the external file, or
 2. using `--set-file` to specify the contents of the file. E.g:
    `helm upgrade --install galaxy cloudve/galaxy -n galaxy --set-file extraFileMappings."/galaxy/server/static/welcome\.html".content=/home/user/data/welcome.html`
+   
+Loading the files from external locations still requires a minimal entry in the `extraFileMappings` for that file, as shown above but with no `content:` part. Otherwise, the setup doesn't know on which pods to apply this.
 
 ## Setting parameters on the command line
 

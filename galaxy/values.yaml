@@ -409,6 +409,7 @@ configs:
       interactivetools_base_path: "{{$host := index .Values.ingress.hosts 0}}{{$path := index $host.paths 0}}{{$path.path}}"
       id_secret:
       logo_src: 'static/favicon.png'
+      mulled_resolution_cache_lock_dir: "/galaxy/server/local/mulled_cache_lock"
       database_connection: postgresql://unused:because@overridden_by_envvar
       integrated_tool_panel_config: "/galaxy/server/config/mutable/integrated_tool_panel.xml"
       sanitize_allowlist_file: "/galaxy/server/config/mutable/sanitize_allowlist.txt"

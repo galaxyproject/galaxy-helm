@@ -260,9 +260,20 @@ extraFileMappings:
 
 1. Creating a symbolic link in the chart directory to the external file, or
 2. using `--set-file` to specify the contents of the file. E.g:
-   `helm upgrade --install galaxy cloudve/galaxy -n galaxy --set-file extraFileMappings."/galaxy/server/static/welcome\.html".content=/home/user/data/welcome.html`
+   `helm upgrade --install galaxy cloudve/galaxy -n galaxy --set-file extraFileMappings."/galaxy/server/static/welcome\.html".content=/home/user/data/welcome.html --set extraFileMappings."/galaxy/server/static/welcome\.html".applyToWeb=true`
    
-Loading the files from external locations still requires a minimal entry in the `extraFileMappings` for that file, as shown above but with no `content:` part. Otherwise, the setup doesn't know on which pods to apply this.
+Alternatively, if too many `.applyTo` need to be set, the apply flags can be inserted instead to the `extraFileMappings` (in addition to the --set-file in the cli) for that file in your `values.yaml`, with no `content:` part (as that is done through the `--set-file`):
+
+```
+extraFileMappings:
+  /galaxy/server/static/welcome.html:
+    applyToJob: false
+    applyToWeb: true
+    applyToSetupJob: false
+    applyToWorkflow: false
+    applyToNginx: false
+    tpl: false
+```
 
 ## Setting parameters on the command line
 

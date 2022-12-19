@@ -108,7 +108,7 @@ it might be needed to remove the finalizer from the RabbitmqCluster if the above
 kubectl edit RabbitmqCluster/my-galaxy-rabbitmq-server
 ```
 
-and remove the finalizer in:
+remove the finalizer in:
 
 ```
 apiVersion: rabbitmq.com/v1beta1
@@ -122,6 +122,12 @@ metadata:
   deletionTimestamp: "2022-12-19T17:41:40Z"
   finalizers:
   - deletion.finalizers.rabbitmqclusters.rabbitmq.com
+```
+
+and remove the postgres secret:
+
+```
+kubectl delete secrets/standby.galaxy-galaxy-dev-postgres.credentials.postgresql.acid.zalan.do
 ```
 
 Consider as well that if you set persistence to be enabled, Postgres and Galaxy will leave their PVCs behind, which you might want to delete or not depending on your use case.

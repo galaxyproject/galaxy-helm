@@ -127,7 +127,7 @@ metadata:
 and remove the postgres secret:
 
 ```
-kubectl delete secrets/standby.galaxy-galaxy-dev-postgres.credentials.postgresql.acid.zalan.do
+kubectl delete secrets/standby.galaxy-my-galaxy-postgres.credentials.postgresql.acid.zalan.do
 ```
 
 Consider as well that if you set persistence to be enabled, Postgres and Galaxy will leave their PVCs behind, which you might want to delete or not depending on your use case.

@@ -77,7 +77,8 @@ spec:
               subPath: config
             {{- if .Values.refdata.enabled }}
             - name: refdata-gxy
-              mountPath: /cvmfs
+              mountPath: /cvmfs/data.galaxyproject.org
+              subPath: data.galaxyproject.org
             {{- if eq .Values.refdata.type "cvmfs" }}
               # CVMFS automount volumes must be mounted with HostToContainer mount propagation.
               mountPropagation: HostToContainer
@@ -184,7 +185,8 @@ spec:
               subPath: config
             {{- if .Values.refdata.enabled }}
             - name: refdata-gxy
-              mountPath: /cvmfs
+              mountPath: /cvmfs/data.galaxyproject.org
+              subPath: data.galaxyproject.org
             {{- if eq .Values.refdata.type "cvmfs" }}
               # CVMFS automount volumes must be mounted with HostToContainer mount propagation.
               mountPropagation: HostToContainer

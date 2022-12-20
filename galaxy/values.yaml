@@ -345,7 +345,7 @@ configs:
         k8s_persistent_volume_claims: |-
           {{ template "galaxy.pvcname" . -}}:{{ .Values.persistence.mountPath -}}
           {{- if .Values.refdata.enabled -}}
-          ,{{- template "galaxy.fullname" $ -}}-refdata-gxy-pvc:/cvmfs
+          ,{{- template "galaxy.fullname" $ -}}-refdata-gxy-pvc/data.galaxyproject.org:/cvmfs/data.galaxyproject.org
           {{- end -}}
           {{- if .Values.setupJob.downloadToolConfs.enabled -}}
           ,{{ template "galaxy.pvcname" . -}}/{{ .Values.setupJob.downloadToolConfs.volume.subPath }}:{{ .Values.setupJob.downloadToolConfs.volume.mountPath -}}

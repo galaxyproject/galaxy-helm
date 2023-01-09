@@ -136,10 +136,13 @@ spec:
               subPath: {{ .Values.setupJob.downloadToolConfs.volume.subPath }}
             {{- end }}
             {{- if .Values.refdata.enabled }}
-            {{- range $key, $entry := .Values.refdata.galaxyPersistentVolumeClaims }}
-            - name: refdata-gxy-{{ $key }}
-              mountPath: {{ $entry.mountPath }}
-            {{- end -}}
+            - name: refdata-gxy
+              mountPath: /cvmfs/data.galaxyproject.org
+              subPath: data.galaxyproject.org
+            {{- if eq .Values.refdata.type "cvmfs" }}
+              # CVMFS automount volumes must be mounted with HostToContainer mount propagation.
+              mountPropagation: HostToContainer
+            {{- end }}
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- tpl (.Values.extraVolumeMounts | toYaml | nindent 12) . }}
@@ -178,11 +181,9 @@ spec:
           emptyDir: {}
           {{- end }}
         {{- if .Values.refdata.enabled }}
-        {{- range $key, $entry := .Values.refdata.galaxyPersistentVolumeClaims }}
-        - name: refdata-gxy-{{ $key }}
+        - name: refdata-gxy
           persistentVolumeClaim:
-            claimName: {{ template "galaxy.fullname" $ -}}-refdata-gxy-{{ $key }}-pvc
-        {{- end }}
+            claimName: {{ template "galaxy.fullname" $ -}}-refdata-gxy-pvc
         {{- end }}
         {{- if .Values.extraVolumes }}
         {{- tpl (.Values.extraVolumes | toYaml | nindent 8) . }}

@@ -372,10 +372,6 @@ configs:
     execution:
       default: tpv_dispatcher
       environments:
-        local:
-          runner: local
-        k8s:
-          runner: k8s
         tpv_dispatcher:
           container_monitor: false
           docker_enabled: true
@@ -540,6 +536,7 @@ jobs:
             docker_container_id_override: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
       destinations:
         k8s:
+          runner: k8s
           params:
             requests_cpu: "{cores}"
             requests_memory: "{mem}Gi"
@@ -549,6 +546,7 @@ jobs:
             accept:
               - docker
         local:
+          runner: local
           scheduling:
             require:
               - local

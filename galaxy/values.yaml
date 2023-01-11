@@ -190,7 +190,7 @@ setupJob:
     runAsUser: 101
     runAsGroup: 101
     fsGroup: 101
-  ttlSecondsAfterFinished: 10
+  ttlSecondsAfterFinished: 300
   downloadToolConfs:
     enabled: true
     # Uses Galaxy's shared file system volume
@@ -308,19 +308,15 @@ postgresql:
 
 refdata:
   enabled: true
-  type: s3csi
-  galaxyPersistentVolumeClaims:
-    data:
-      storage: 10Gi
-      storageClassName: refdata-gxy-data
-      mountPath: /cvmfs/data.galaxyproject.org
-    # cloud:
-    #   storage: 1Gi
-    #   storageClassName: cvmfs-gxy-cloud
-    #   mountPath: /cvmfs/cloud.galaxyproject.org
+  type: cvmfs
+  pvc:
+    size: 10Gi
+
+cvmfs:
+  deploy: true
 
 s3csi:
-  deploy: true
+  deploy: false
   images:
     csi: cloudve/csi-s3:0.31.3
   storageClass:
@@ -355,9 +351,7 @@ configs:
         k8s_persistent_volume_claims: |-
           {{ template "galaxy.pvcname" . -}}:{{ .Values.persistence.mountPath -}}
           {{- if .Values.refdata.enabled -}}
-          {{- range $key, $entry := .Values.refdata.galaxyPersistentVolumeClaims -}}
-          ,{{- template "galaxy.fullname" $ -}}-refdata-gxy-{{ $key }}-pvc:{{ $entry.mountPath -}}
-          {{- end -}}
+          ,{{- template "galaxy.fullname" $ -}}-refdata-gxy-pvc/data.galaxyproject.org:/cvmfs/data.galaxyproject.org
           {{- end -}}
           {{- if .Values.setupJob.downloadToolConfs.enabled -}}
           ,{{ template "galaxy.pvcname" . -}}/{{ .Values.setupJob.downloadToolConfs.volume.subPath }}:{{ .Values.setupJob.downloadToolConfs.volume.mountPath -}}
@@ -384,10 +378,6 @@ configs:
     execution:
       default: tpv_dispatcher
       environments:
-        local:
-          runner: local
-        k8s:
-          runner: k8s
         tpv_dispatcher:
           container_monitor: false
           docker_enabled: true
@@ -415,6 +405,7 @@ configs:
       interactivetools_base_path: "{{$host := index .Values.ingress.hosts 0}}{{$path := index $host.paths 0}}{{$path.path}}"
       id_secret:
       logo_src: 'static/favicon.png'
+      mulled_resolution_cache_lock_dir: "/galaxy/server/local/mulled_cache_lock"
       database_connection: postgresql://unused:because@overridden_by_envvar
       integrated_tool_panel_config: "/galaxy/server/config/mutable/integrated_tool_panel.xml"
       sanitize_allowlist_file: "/galaxy/server/config/mutable/sanitize_allowlist.txt"
@@ -425,18 +416,18 @@ configs:
         {{ if .Values.setupJob.downloadToolConfs.enabled }}
         {{- .Values.setupJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_data_table_conf.xml
         {{- if .Values.refdata.enabled -}}
-        ,{{- .Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/byhand/location/tool_data_table_conf.xml
+        ,/cvmfs/data.galaxyproject.org/managed/location/tool_data_table_conf.xml,/cvmfs/data.galaxyproject.org/byhand/location/tool_data_table_conf.xml
         {{- end }}
         {{- else }}
         {{- if .Values.refdata.enabled -}}
-        {{- .Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/tool_data_table_conf.xml,{{.Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/byhand/location/tool_data_table_conf.xml
+        /cvmfs/data.galaxyproject.org//managed/location/tool_data_table_conf.xml,/cvmfs/data.galaxyproject.org/byhand/location/tool_data_table_conf.xml
         {{- end }}
         {{- end }}
       tool_dependency_dir: "{{.Values.persistence.mountPath}}/deps"
       job_config_file: "/galaxy/server/config/job_conf.yml"
       builds_file_path: |-
         {{ if .Values.refdata.enabled }}
-        {{- .Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/managed/location/builds.txt
+        /cvmfs/data.galaxyproject.org/managed/location/builds.txt
         {{- end }}
       containers_resolvers_config_file: "/galaxy/server/config/container_resolvers_conf.xml"
       workflow_schedulers_config_file: "/galaxy/server/config/workflow_schedulers_conf.xml"
@@ -451,7 +442,7 @@ configs:
         {{include "galaxy.add_trailing_slash" .Values.ingress.path}}_x_accel_redirect
       len_file_path: |-
         {{ if .Values.refdata.enabled -}}
-        {{- .Values.refdata.galaxyPersistentVolumeClaims.data.mountPath}}/managed/len/ucsc
+        /cvmfs/data.galaxyproject.org/managed/len/ucsc
         {{- end }}
   container_resolvers_conf.xml: |
     <containers_resolvers>
@@ -488,7 +479,7 @@ configs:
     toolshed.g2.bx.psu.edu/repos/iuc/snpeff/snpEff/4.3+T.galaxy1
   build_sites.yml:
     - type: ucsc
-      file: "{{if .Values.refdata.enabled}}{{.Values.refdata.galaxyPersistentVolumeClaims.data.mountPath -}}/managed/location/ucsc_build_sites.txt{{else}}/galaxy/server/tool-data/shared/ucsc/ucsc_build_sites.txt.sample{{end}}"
+      file: "{{if .Values.refdata.enabled}}/cvmfs/data.galaxyproject.org/managed/location/ucsc_build_sites.txt{{else}}/galaxy/server/tool-data/shared/ucsc/ucsc_build_sites.txt.sample{{end}}"
       display: [main,archaea,ucla]
     - type: gbrowse
       file: "/galaxy/server/tool-data/shared/gbrowse/gbrowse_build_sites.txt"
@@ -551,6 +542,7 @@ jobs:
             docker_container_id_override: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
       destinations:
         k8s:
+          runner: k8s
           params:
             requests_cpu: "{cores}"
             requests_memory: "{mem}Gi"
@@ -560,6 +552,7 @@ jobs:
             accept:
               - docker
         local:
+          runner: local
           scheduling:
             require:
               - local
@@ -665,6 +658,8 @@ rabbitmq:
   existingCluster:
   existingSecret: '{{ include "galaxy-rabbitmq.fullname" . }}-default-user'
   nameOverride: rabbitmq
+  extraSpec: {}
+  terminationGracePeriodSeconds: 90
   persistence:
     storageClassName:
     storage:

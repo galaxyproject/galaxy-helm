@@ -181,10 +181,10 @@ Creates shell commands for downloading and extracting archives if modified
 */}}
 {{- define "galaxy.extract-archive-if-changed-command" -}}
 if [ -f {{ .extractPath }}/{{ base .downloadUrl }}_timestamp ]; then
-  echo "File {{ .downloadUrl }} previously downloaded. Only downloading if changed...";
+  echo "File {{ .downloadUrl }} previously downloaded. Only downloading if changed, to {{ .extractPath }}...";
   wget -qO- --header="If-Modified-Since: `cat {{ .extractPath }}/{{ base .downloadUrl }}_timestamp`" {{ .downloadUrl }} | tar -xvz || echo File not changed, ignoring....;
 else
-  echo "File not previously downloaded. Downloading and extracting {{ .downloadUrl }}...";
+  echo "File not previously downloaded. Downloading and extracting {{ .downloadUrl }} to {{ .extractPath }}...";
   wget -qO- {{ .downloadUrl }} | tar -xvz || exit 1;
 fi;
 wget --server-response --spider {{ .downloadUrl }} 2>&1 | grep -i "Last-Modified: " | cut -c18- > {{ .extractPath }}/{{ base .downloadUrl }}_timestamp;

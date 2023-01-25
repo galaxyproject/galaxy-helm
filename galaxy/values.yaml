@@ -367,7 +367,7 @@ configs:
         k8s_pull_policy: IfNotPresent
         k8s_cleanup_job: onsuccess
         k8s_pod_priority_class: >-
-          {{ if .Values.jobs.priorityClass.enabled -}}
+          {{ if .Values.jobs.priorityClass.enabled . -}}
             {{- include "galaxy.pod-priority-class" }}
           {{- end }}
         k8s_interactivetools_use_ssl: true

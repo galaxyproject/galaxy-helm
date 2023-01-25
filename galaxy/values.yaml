@@ -368,7 +368,11 @@ configs:
         k8s_cleanup_job: onsuccess
         k8s_pod_priority_class: >-
           {{ if .Values.jobs.priorityClass.enabled -}}
-          {{- include "galaxy.fullname" . }}-job-priority
+            {{- if not .Values.jobs.priorityClass.existingClass }}
+              {{- include "galaxy.fullname" . }}-job-priority
+            {{- else }}
+              {{- .Values.jobs.priorityClass.existingClass }}
+            {{- end }}
           {{- end }}
         k8s_interactivetools_use_ssl: true
         k8s_interactivetools_ingress_annotations: |

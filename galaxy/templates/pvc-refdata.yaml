@@ -15,7 +15,7 @@ spec:
   volumeName: {{ include "galaxy.fullname" $ }}-refdata-gxy-pv
 {{- end }}
 {{- if eq $.Values.refdata.type "cvmfs" }}
-  storageClassName: {{ $.Release.Name }}-cvmfs
+  storageClassName: {{ tpl .Values.cvmfs.storageClassName $ }}
 {{- end }}
 ---
 {{- end }}

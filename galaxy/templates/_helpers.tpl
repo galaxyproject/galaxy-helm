@@ -258,7 +258,7 @@ Define pod priority class
 */}}
 {{- define "galaxy.pod-priority-class" -}}
 {{- if .Values.jobs.priorityClass.existingClass -}}
-{{- printf "%s" .Values.jobs.priorityClass.existingClass -}}
+{{- tpl .Values.jobs.priorityClass.existingClass . -}}
 {{- else -}}
 {{- printf "%s-job-priority" (include "galaxy.fullname" .) -}}
 {{- end -}}

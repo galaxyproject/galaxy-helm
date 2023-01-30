@@ -1,11 +1,23 @@
-name: Package
+name: Package and publish the chart
 on:
   pull_request_target:
     types: [closed]
+  workflow_dispatch:
+    inputs:
+      manual-package-invocation:
+        description: 'Package (y/n)?'
+        required: true
+        default: 'y'
+      version-bump:
+        description: 'Version bump: major, minor, patch'
+        required: true
+      branch-name:
+        description: 'Branch name to package'
+        required: true
 jobs:
-  package:
+  package-from-pr:
     if: github.event.pull_request.merged == true
-    name: Package and push
+    name: Package and push from PR
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -19,3 +31,19 @@ jobs:
           charts-token: ${{ secrets.CHARTS_TOKEN }}
           github-labels: ${{ join(github.event.pull_request.labels.*.name, ', ') }}
           git-branch: ${{ github.event.pull_request.base.ref }}
+  package-from-manual:
+    if: github.event.inputs.manual-package-invocation == 'y'
+    name: Package and push manual invocation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+           persist-credentials: false
+      - uses: cloudve/helm-ci@master
+        with:
+          chart-name: galaxy
+          charts-repo: cloudve/helm-charts
+          github-token: ${{ secrets.CHARTS_TOKEN }}
+          charts-token: ${{ secrets.CHARTS_TOKEN }}
+          github-labels: ${{ github.event.inputs.version-bump }}
+          git-branch: ${{ github.event.inputs.branch-name }}

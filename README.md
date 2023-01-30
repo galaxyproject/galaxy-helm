@@ -126,7 +126,7 @@ current default values can be found in `values.yaml` file.
 | `s3csi.deploy`                             | Deploy the CSI-S3 Helm Chart. This is an optional dependency, and for production scenarios it should be deployed separately as a cluster-wide resource.          |
 | `cvmfs.deploy`                             | Deploy the Galaxy-CVMFS-CSI Helm Chart. This is an optional dependency, and for production scenarios it should be deployed separately as a cluster-wide resource                                           |
 | `cvmfs.enabled`                            | Enable use of CVMFS in configs, and deployment of CVMFS Persistent Volume Claims for Galaxy                                                                                                                |
-| `cvmfs.galaxyPersistentVolumeClaims.{}`    | Persistent Volume Claims to deploy for CVMFS repositories. See <a href="galaxy/values.yaml">`values.yaml`</a> for examples.                                                                                                                 |
+| `cvmfs.pvc.{}`                             | Persistent Volume Claim to deploy for CVMFS repositories. See <a href="galaxy/values.yaml">`values.yaml`</a> for examples.                                                                                                                 |
 | `setupJob.ttlSecondsAfterFinished`          | Sets `ttlSecondsAfterFinished` for the initialization jobs. See the [Kubernetes documentation](https://kubernetes.io/docs/concepts/workloads/controllers/ttlafterfinished/#ttl-controller) for more details.       |
 | `setupJob.downloadToolConfs.enabled`        | Download configuration files and the `tools` directory from an archive via a job at startup                                                                                                                |
 | `setupJob.downloadToolConfs.archives.startup` | A URL to a `tar.gz` publicly accessible archive containing AT LEAST conf files and XML tool wrappers. Meant to be enough for Galaxy handlers to startup.                                                   |
@@ -260,7 +260,20 @@ extraFileMappings:
 
 1. Creating a symbolic link in the chart directory to the external file, or
 2. using `--set-file` to specify the contents of the file. E.g:
-   `helm upgrade --install galaxy cloudve/galaxy -n galaxy --set-file extraFileMappings."/galaxy/server/static/welcome\.html".content=/home/user/data/welcome.html`
+   `helm upgrade --install galaxy cloudve/galaxy -n galaxy --set-file extraFileMappings."/galaxy/server/static/welcome\.html".content=/home/user/data/welcome.html --set extraFileMappings."/galaxy/server/static/welcome\.html".applyToWeb=true`
+   
+Alternatively, if too many `.applyTo` need to be set, the apply flags can be inserted instead to the `extraFileMappings` (in addition to the --set-file in the cli) for that file in your `values.yaml`, with no `content:` part (as that is done through the `--set-file`):
+
+```
+extraFileMappings:
+  /galaxy/server/static/welcome.html:
+    applyToJob: false
+    applyToWeb: true
+    applyToSetupJob: false
+    applyToWorkflow: false
+    applyToNginx: false
+    tpl: false
+```
 
 ## Setting parameters on the command line
 

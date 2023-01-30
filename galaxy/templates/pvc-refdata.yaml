@@ -1,9 +1,8 @@
 {{- if .Values.refdata.enabled }}
-{{- range $key, $entry := .Values.refdata.galaxyPersistentVolumeClaims -}}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "galaxy.fullname" $ }}-refdata-gxy-{{ $key }}-pvc
+  name: {{ include "galaxy.fullname" $ }}-refdata-gxy-pvc
   labels:
     {{- include "galaxy.labels" $ | nindent 4 }}
 spec:
@@ -11,11 +10,12 @@ spec:
   - ReadOnlyMany
   resources:
     requests:
-      storage: {{ $entry.storage }}
+      storage: {{ .Values.refdata.pvc.size }}
 {{- if eq $.Values.refdata.type "s3csi" }}
   volumeName: {{ include "galaxy.fullname" $ }}-refdata-gxy-pv
 {{- end }}
-  storageClassName: {{ $entry.storageClassName }}
----
+{{- if eq $.Values.refdata.type "cvmfs" }}
+  storageClassName: {{ $.Release.Name }}-cvmfs
 {{- end }}
+---
 {{- end }}

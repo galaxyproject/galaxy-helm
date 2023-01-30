@@ -29,7 +29,6 @@ special_cases = {
     'extraInitContainers': 'extraInitContainers.[]',
     'extraEnv': 'extraInitContainers.[]',
     'jobs\\.rules\\..*': 'jobs.rules',
-    'refdata\\.galaxyPersistentVolumeClaims\\..*': 'refdata.galaxyPersistentVolumeClaims.{}',
     'jobHandlers\\..*': 'jobHandlers.{}',
     'webHandlers\\..*': 'webHandlers.{}',
     'workflowHandlers\\..*': 'workflowHandlers.{}',

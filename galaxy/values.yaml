@@ -359,6 +359,7 @@ configs:
         k8s_supplemental_group_id: "101"
         k8s_pull_policy: IfNotPresent
         k8s_cleanup_job: onsuccess
+        k8s_job_ttl_secs_after_finished: 90
         k8s_pod_priority_class: >-
           {{ if .Values.jobs.priorityClass.enabled -}}
           {{- include "galaxy.fullname" . }}-job-priority
@@ -383,11 +384,11 @@ configs:
           tpv_config_files:
             - https://raw.githubusercontent.com/galaxyproject/tpv-shared-database/main/tools.yml
             - lib/galaxy/jobs/rules/tpv_rules_local.yml
-    limits:
-    - type: registered_user_concurrent_jobs
-      value: 5
-    - type: anonymous_user_concurrent_jobs
-      value: 2
+#     limits:
+#     - type: registered_user_concurrent_jobs
+#       value: 5
+#     - type: anonymous_user_concurrent_jobs
+#       value: 2
   galaxy.yml:
     galaxy:
       galaxy_url_prefix: "{{ .Values.ingress.path }}"

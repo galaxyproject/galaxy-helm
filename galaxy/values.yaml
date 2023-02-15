@@ -12,6 +12,10 @@ image:
 
 imagePullSecrets: []
 
+trainingHook:
+  enabled: true
+  url: https://training.galaxyproject.org/training-material/
+
 service:
   type: ClusterIP
   port: 8000

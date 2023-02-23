@@ -374,7 +374,7 @@ configs:
       environments:
         tpv_dispatcher:
           container_monitor: false
-          docker_enabled: false
+          docker_enabled: true
           runner: dynamic
           type: python
           function: map_tool_to_destination

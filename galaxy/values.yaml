@@ -363,7 +363,7 @@ configs:
         k8s_job_ttl_secs_after_finished: 90
         k8s_pod_priority_class: >-
           {{ if .Values.jobs.priorityClass.enabled -}}
-          {{- include "galaxy.fullname" . }}-job-priority
+            {{- include "galaxy.pod-priority-class" . }}
           {{- end }}
         k8s_interactivetools_use_ssl: true
         k8s_interactivetools_ingress_annotations: |

@@ -308,6 +308,7 @@ refdata:
 
 cvmfs:
   deploy: true
+  storageClassName: "{{ $.Release.Name }}-cvmfs"
 
 s3csi:
   deploy: false

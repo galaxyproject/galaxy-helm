@@ -376,7 +376,6 @@ configs:
       environments:
         tpv_dispatcher:
           container_monitor: false
-          docker_enabled: true
           runner: dynamic
           type: python
           function: map_tool_to_destination
@@ -507,7 +506,6 @@ jobs:
         default:
           params:
             container_monitor: false
-            docker_enabled: "true"
             docker_default_container_id: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
             tmp_dir: "true"
           scheduling:
@@ -539,6 +537,7 @@ jobs:
         k8s:
           runner: k8s
           params:
+            docker_enabled: "true"
             requests_cpu: "{cores}"
             requests_memory: "{mem}Gi"
             limits_cpu: "{cores}"

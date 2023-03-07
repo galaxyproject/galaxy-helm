@@ -13,7 +13,7 @@ jobs:
         run: curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x ./kubectl && sudo mv ./kubectl /usr/local/bin/kubectl && kubectl version || true
       - name: Install Helm
         run: curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           persist-credentials: false
       - name: Helm dep update
@@ -25,7 +25,7 @@ jobs:
     steps:
       - name: Install Helm
         run: curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           persist-credentials: false
       - name: Helm dep update
@@ -33,7 +33,7 @@ jobs:
       - name: Start k8s locally
         uses: jupyterhub/action-k3s-helm@v3
         with:
-          k3s-version: v1.24.6+k3s1  # releases:  https://github.com/k3s-io/k3s/tags
+          k3s-version: v1.26.1+k3s1  # releases:  https://github.com/k3s-io/k3s/tags
           metrics-enabled: false
           traefik-enabled: false
       - name: Verify function of k8s, kubectl, and helm
@@ -47,7 +47,7 @@ jobs:
       - name: Helm repo add galaxy
         run: helm repo add galaxy https://github.com/CloudVE/helm-charts/raw/master
       - name: Helm install Galaxy
-        run: time bash -c 'helm install --create-namespace -n galaxy galaxy ./galaxy --set persistence.accessMode="ReadWriteOnce" --set resources.requests.memory=0Mi,resources.requests.cpu=0m,cvmfs.cvmfscsi.cache.alien.enabled=false --wait --timeout=720s'
+        run: time bash -c 'helm install --create-namespace -n galaxy galaxy ./galaxy --set persistence.accessMode="ReadWriteOnce" --set resources.requests.memory=0Mi,resources.requests.cpu=0m,cvmfs.cvmfscsi.cache.alien.enabled=false --wait --timeout=1200s'
       - name: Get events
         run: kubectl get events -n galaxy; kubectl get events -n csi-drivers;
         if: always()

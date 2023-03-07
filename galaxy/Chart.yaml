@@ -1,8 +1,8 @@
 apiVersion: v2
 name: galaxy
 type: application
-version: 5.4.0-anvil.3
-appVersion: "22.05"
+version: 5.7.0-anvil.0
+appVersion: "23.0"
 description: Chart for Galaxy, an open, web-based platform for accessible, reproducible, and transparent computational biomedical research.
 icon: https://galaxyproject.org/images/galaxy-logos/galaxy_project_logo_square.png
 dependencies:

@@ -6,7 +6,7 @@ fullnameOverride: ""
 
 image:
   repository: quay.io/galaxyproject/galaxy-min
-  tag: 22.05
+  tag: "23.0"  # Value must be quoted
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
@@ -366,6 +366,7 @@ configs:
         k8s_supplemental_group_id: "101"
         k8s_pull_policy: IfNotPresent
         k8s_cleanup_job: onsuccess
+        k8s_job_ttl_secs_after_finished: 90
         k8s_pod_priority_class: >-
           {{ if .Values.jobs.priorityClass.enabled -}}
             {{- include "galaxy.pod-priority-class" . }}
@@ -381,7 +382,6 @@ configs:
       environments:
         tpv_dispatcher:
           container_monitor: false
-          docker_enabled: true
           runner: dynamic
           type: python
           function: map_tool_to_destination
@@ -390,11 +390,11 @@ configs:
           tpv_config_files:
             - https://raw.githubusercontent.com/galaxyproject/tpv-shared-database/main/tools.yml
             - lib/galaxy/jobs/rules/tpv_rules_local.yml
-    limits:
-    - type: registered_user_concurrent_jobs
-      value: 5
-    - type: anonymous_user_concurrent_jobs
-      value: 2
+#     limits:
+#     - type: registered_user_concurrent_jobs
+#       value: 5
+#     - type: anonymous_user_concurrent_jobs
+#       value: 2
   galaxy.yml:
     galaxy:
       galaxy_url_prefix: "{{ .Values.ingress.path }}"
@@ -405,7 +405,6 @@ configs:
       interactivetools_shorten_url: true
       interactivetools_base_path: "{{$host := index .Values.ingress.hosts 0}}{{$path := index $host.paths 0}}{{$path.path}}"
       id_secret:
-      logo_src: 'static/favicon.png'
       mulled_resolution_cache_lock_dir: "/galaxy/server/local/mulled_cache_lock"
       database_connection: postgresql://unused:because@overridden_by_envvar
       integrated_tool_panel_config: "/galaxy/server/config/mutable/integrated_tool_panel.xml"
@@ -513,7 +512,6 @@ jobs:
         default:
           params:
             container_monitor: false
-            docker_enabled: "true"
             docker_default_container_id: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
             tmp_dir: "true"
           scheduling:
@@ -545,6 +543,7 @@ jobs:
         k8s:
           runner: k8s
           params:
+            docker_enabled: "true"
             requests_cpu: "{cores}"
             requests_memory: "{mem}Gi"
             limits_cpu: "{cores}"

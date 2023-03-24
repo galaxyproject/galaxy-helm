@@ -171,7 +171,7 @@ Creates the bash command for the handlers to wait for init scripts
 {{- define "galaxy.init-container-wait-command" -}}
 until [ -f /galaxy/server/config/mutable/db_init_done_{{$.Release.Revision}} ]; do echo "waiting for DB initialization"; sleep 1; done;
 {{- if $.Values.rabbitmq.enabled }}
-until timeout 1 bash -c "echo > /dev/tcp/{{ template "galaxy-rabbitmq.fullname" $ }}/5672"; do echo "waiting for rabbitmq service"; sleep 1; done;
+until timeout 1 bash -c "echo > /dev/tcp/{{ template "galaxy-rabbitmq.fullname" $ }}/{{.Values.rabbitmq.port}}"; do echo "waiting for rabbitmq service"; sleep 1; done;
 {{- end }}
 until [ -f /galaxy/server/config/mutable/init_mounts_done_{{$.Release.Revision}} ]; do echo "waiting for copying onto NFS"; sleep 1; done;
 {{- if .Values.setupJob.downloadToolConfs.enabled }}
@@ -252,7 +252,7 @@ Define pod env vars
                   name: {{ tpl .Values.rabbitmq.existingSecret . }}
                   key: password
             - name: GALAXY_CONFIG_OVERRIDE_AMQP_INTERNAL_CONNECTION
-              value: amqp://$(GALAXY_RABBITMQ_USERNAME):$(GALAXY_RABBITMQ_PASSWORD)@{{ template "galaxy-rabbitmq.fullname" . }}
+              value: {{ .Values.rabbitmq.protocol }}://$(GALAXY_RABBITMQ_USERNAME):$(GALAXY_RABBITMQ_PASSWORD)@{{ template "galaxy-rabbitmq.fullname" . }}:{{ .Values.rabbitmq.port }}
 {{- end }}
 {{- end -}}
 

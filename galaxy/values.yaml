@@ -651,6 +651,8 @@ rabbitmq:
   deploy: true
   existingCluster:
   existingSecret: '{{ include "galaxy-rabbitmq.fullname" . }}-default-user'
+  protocol: amqp
+  port: 5672
   nameOverride: rabbitmq
   extraSpec: {}
   terminationGracePeriodSeconds: 90

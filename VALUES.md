@@ -1,4 +1,5 @@
 | Key | Description |
+|-----|-------------|
 | nameOverride | Partial override of the `galaxy.fullname`.  The `.Release.Name` will be prepended to generate the fullname. |
 | fullnameOverride | Fully override the `galaxy.fullname` |
 | image.repository | Repository containing the Galaxy image. |

@@ -75,6 +75,7 @@ def main(filename: str, chars: str):
     indent_stack = [ 0 ]
     key = ''
     print("| Key | Description |")
+    print("|-----|-------------|")
     while lp.hasNext():
         line = lp.getNext().rstrip()
         if line.lstrip().startswith(chars):

@@ -49,6 +49,8 @@ README_ORDER = ["fullnameOverride",
                 "jobs.",
                 "refdata.deploy",
                 "refdata.enabled",
+                "cvmfs",
+                "s3csi",
                 "refdata.",
                 "setupJob.",
                 "ingress.",
@@ -75,10 +77,12 @@ README_ORDER = ["fullnameOverride",
                 "postgresql.",
                 "s3csi.",
                 "tusd.",
+                "rabbitmq",
+                "trainingHook",
                 ]
 
 # Entries that should be ignored.
-ignored = [ ]
+ignored = [ 'startupProbe', 'readinesProbe', 'livenessProbe' ]
 
 longest_key = -1
 longest_desc = -1
@@ -120,6 +124,8 @@ def print_table():
                 numbered_order[full_key] = i
     for key in sorted(set(key_list), key=lambda d: numbered_order[d]):
         print_table_row(key)
+    # for key in README_ORDER:
+    #     print_table_row(key)
 
 # Prints a single row in the table.
 def print_table_row(key):
@@ -156,7 +162,7 @@ def parse_value(key, value, label=None):
         record_key('postgresql.enabled')
         return
 
-    if label in ignored:
+    if label in ignored or key in ignored:
         # print(f"Ignoring {label}")
         return
 

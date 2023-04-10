@@ -161,7 +161,7 @@ cp -anL /galaxy/server/config/sanitize_allowlist.txt /galaxy/server/config/mutab
 cp -anL /galaxy/server/config/data_manager_conf.xml.sample /galaxy/server/config/mutable/shed_data_manager_conf.xml;
 cp -anL /galaxy/server/config/tool_data_table_conf.xml.sample /galaxy/server/config/mutable/shed_tool_data_table_conf.xml;
 cp -aruL /galaxy/server/tool-data {{.Values.persistence.mountPath}}/;
-cp -aruL /galaxy/server/tools {{.Values.persistence.mountPath}}/tools | true;
+cp -aruL /galaxy/server/tools {{.Values.persistence.mountPath}} | true;
 echo "Done" > /galaxy/server/config/mutable/init_mounts_done_{{.Release.Revision}};
 {{- end -}}
 

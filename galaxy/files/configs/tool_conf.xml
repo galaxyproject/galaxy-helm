@@ -38,6 +38,9 @@
     <tool file="${model_tools_path}/build_list.xml" />
     <tool file="${model_tools_path}/extract_dataset.xml" />
   </section>
+  <section id="expression_tools" name="Expression Tools">
+    <tool file="expression_tools/parse_values_from_file.xml"/>
+  </section>
   <label id="general_text_label" text="General Text Tools" />
   <section id="text_manipulation" name="Text Manipulation">
     <tool file="filters/fixedValueColumn.xml" />

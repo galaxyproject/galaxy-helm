@@ -13,7 +13,7 @@ image:
 imagePullSecrets: []
 
 trainingHook:
-  enabled: true
+  enabled: false
   url: https://training.galaxyproject.org/training-material/
 
 service:

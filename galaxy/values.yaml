@@ -518,7 +518,7 @@ jobs:
                 from galaxy.tools import GALAXY_LIB_TOOLS_UNVERSIONED
                 tool.id in GALAXY_LIB_TOOLS_UNVERSIONED or "CONVERTER_" == tool.id[:10] or tool.is_datatype_converter
               params:
-                docker_container_id_override: "{params.get('docker_default_container_id')}"
+                docker_container_id_override: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         Summary_Statistics1:
           params:
             docker_container_id_override: cloudve/gsummary:latest

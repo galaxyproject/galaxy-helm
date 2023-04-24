@@ -13,6 +13,7 @@ spec:
       storage: {{ .Values.refdata.pvc.size }}
 {{- if eq $.Values.refdata.type "s3csi" }}
   volumeName: {{ include "galaxy.fullname" $ }}-refdata-gxy-pv
+  storageClassName: {{ .Values.s3csi.storageClass.name }}
 {{- end }}
 {{- if eq $.Values.refdata.type "cvmfs" }}
   storageClassName: {{ tpl .Values.cvmfs.storageClassName . }}

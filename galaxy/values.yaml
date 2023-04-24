@@ -518,6 +518,13 @@ jobs:
             reject:
               - local
               - offline
+          rules:
+            - id: force_default_container_for_built_in_tools
+              if: |
+                from galaxy.tools import GALAXY_LIB_TOOLS_UNVERSIONED
+                tool.id in GALAXY_LIB_TOOLS_UNVERSIONED or "CONVERTER_" == tool.id[:10] or tool.is_datatype_converter
+              params:
+                docker_container_id_override: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         Summary_Statistics1:
           params:
             docker_container_id_override: cloudve/gsummary:latest
@@ -657,6 +664,8 @@ rabbitmq:
   deploy: true
   existingCluster:
   existingSecret: '{{ include "galaxy-rabbitmq.fullname" . }}-default-user'
+  protocol: amqp
+  port: 5672
   nameOverride: rabbitmq
   extraSpec: {}
   terminationGracePeriodSeconds: 90

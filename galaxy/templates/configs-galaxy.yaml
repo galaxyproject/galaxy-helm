@@ -14,7 +14,7 @@ data:
   {{- range $key, $entry := .Values.configs -}}
   {{- if $entry -}}
   {{- $key | nindent 2 }}: |
-  {{- $original := (toYaml $entry) -}}
+  {{- $original := (ternary (toYaml $entry) $entry (hasSuffix ".yml" $key)) }}
   {{- $nomultiline := (regexReplaceAll "^^\\s*\\|\\n*" $original "") -}}
   {{- $nowhitespace := (regexReplaceAll "{{\\s*([^}\\s]+)\\s*}}" $nomultiline "{{$1}}") -}}
   {{- tpl (tpl $nowhitespace $) $ | nindent 4 -}}

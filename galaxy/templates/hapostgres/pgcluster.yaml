@@ -22,6 +22,9 @@ spec:
     {{- if .Values.postgresql.persistence.storageClass }}
     storageClass: {{ .Values.postgresql.persistence.storageClass }}
     {{- end }}
+  {{- if and .Values.postgresql.persistence .Values.postgresql.persistence.extra -}}
+  {{- tpl (toYaml .Values.postgresql.persistence.extra) . | nindent 4 }}
+  {{- end }}
   {{- if and .Values.postgresql.operator .Values.postgresql.operator.operatorSpecExtra -}}
   {{- tpl (toYaml .Values.postgresql.operator.operatorSpecExtra) . | nindent 2 }}
   {{- end }}

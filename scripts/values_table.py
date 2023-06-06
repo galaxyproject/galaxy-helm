@@ -29,7 +29,6 @@ special_cases = {
     'extraInitContainers': 'extraInitContainers.[]',
     'extraEnv': 'extraInitContainers.[]',
     'jobs\\.rules\\..*': 'jobs.rules',
-    'cvmfs\\.galaxyPersistentVolumeClaims\\..*': 'cvmfs.galaxyPersistentVolumeClaims.{}',
     'jobHandlers\\..*': 'jobHandlers.{}',
     'webHandlers\\..*': 'webHandlers.{}',
     'workflowHandlers\\..*': 'workflowHandlers.{}',
@@ -48,10 +47,10 @@ README_ORDER = ["fullnameOverride",
                 "useSecretConfigs",
                 "configs.",
                 "jobs.",
-                "cvmfs.deploy",
-                "cvmfs.enabled",
-                "cvmfs.",
-                "initJob.",
+                "refdata.deploy",
+                "refdata.enabled",
+                "refdata.",
+                "setupJob.",
                 "ingress.",
                 "service.",
                 "serviceAccount.",
@@ -68,14 +67,18 @@ README_ORDER = ["fullnameOverride",
                 "extraInitContainers.",
                 "extraVolumeMounts.",
                 "extraVolumes.",
-                "postgresql.",
+                "celery.",
+                "celeryBeat.",
                 "influxdb.",
                 "metrics.",
                 "nginx.",
+                "postgresql.",
+                "s3csi.",
+                "tusd.",
                 ]
 
 # Entries that should be ignored.
-ignored = [ 'cvmfs.repositories', 'cvmfs.cache']
+ignored = [ ]
 
 longest_key = -1
 longest_desc = -1

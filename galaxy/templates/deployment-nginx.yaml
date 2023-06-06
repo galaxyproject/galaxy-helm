@@ -32,47 +32,80 @@ spec:
       {{- if .Values.webHandlers.podSpecExtra -}}
         {{- tpl (toYaml .Values.webHandlers.podSpecExtra) . | nindent 6 }}
       {{- end }}
+      initContainers:
+        - name: {{ .Chart.Name }}-init-static
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            {{- range $key, $entry := .Values.extraFileMappings -}}
+            {{- if $entry.applyToNginx }}
+            - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
+              mountPath: {{ $key }}
+              subPath: {{ include "galaxy.getFilenameFromPath" $key }}
+            {{- end }}
+            {{- end }}
+            - name: static-dir
+              mountPath: /tmp/galaxy
+          command: ['/bin/sh', '-c', 'cp -r /galaxy/server/static /tmp/galaxy/static;']
       containers:
         - name: {{ .Chart.Name }}-nginx
           image: "{{ .Values.nginx.image.repository }}:{{ .Values.nginx.image.tag }}"
           imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
           ports:
             - name: galaxy-nginx
-              containerPort: 80
+              containerPort: {{ .Values.nginx.containerPort }}
               protocol: TCP
           volumeMounts:
+            {{- range $key, $entry := .Values.extraFileMappings -}}
+            {{- if $entry.applyToNginx }}
+            - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
+              mountPath: {{ $key }}
+              subPath: {{ include "galaxy.getFilenameFromPath" $key }}
+            {{- end }}
+            {{- end }}
             - name: nginx-conf
               mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf
+            - name: static-dir
+              mountPath: {{ .Values.nginx.galaxyStaticDir }}
+              subPath: static
             - name: galaxy-data
               mountPath: {{ .Values.persistence.mountPath }}
             - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/
               subPath: config
-            {{- if .Values.initJob.downloadToolConfs.enabled }}
+            {{- if .Values.setupJob.downloadToolConfs.enabled }}
             - name: galaxy-data
-              mountPath: {{ .Values.initJob.downloadToolConfs.volume.mountPath }}
-              subPath: {{ .Values.initJob.downloadToolConfs.volume.subPath }}
-            {{- end }}
-            {{- if .Values.cvmfs.enabled }}
-            {{- range $key, $entry := .Values.cvmfs.galaxyPersistentVolumeClaims }}
-            - name: cvmfs-gxy-{{ $key }}
-              mountPath: {{ $entry.mountPath }}
-            {{- end -}}
+              mountPath: {{ .Values.setupJob.downloadToolConfs.volume.mountPath }}
+              subPath: {{ .Values.setupJob.downloadToolConfs.volume.subPath }}
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
-            {{- .Values.extraVolumeMounts | toYaml | nindent 12 }}
+            {{- tpl (.Values.extraVolumeMounts | toYaml | nindent 12) . }}
             {{- end }}
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.nginx.resources | nindent 12 }}
           lifecycle:
             preStop:
               exec:
                 command: ["/usr/sbin/nginx","-s","quit"]
       volumes:
+        {{- range $key, $entry := .Values.extraFileMappings -}}
+        {{- if $entry.applyToNginx }}
+        - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
+          {{- if $entry.useSecret }}
+          secret:
+            secretName: {{ printf "%s-%s" (include "galaxy.fullname" $) (include "galaxy.getExtraFilesUniqueName" $key) }}
+          {{- else }}
+          configMap:
+            name: {{ printf "%s-%s" (include "galaxy.fullname" $) (include "galaxy.getExtraFilesUniqueName" $key) }}
+          {{- end }}
+        {{- end }}
+        {{- end }}
         - name: nginx-conf
           configMap:
             name: {{ template "galaxy.fullname" $ }}-nginx-conf
+        - name: static-dir
+          emptyDir: {}
         - name: galaxy-data
           {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:
@@ -80,15 +113,8 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
-        {{- if .Values.cvmfs.enabled }}
-        {{- range $key, $entry := .Values.cvmfs.galaxyPersistentVolumeClaims }}
-        - name: cvmfs-gxy-{{ $key }}
-          persistentVolumeClaim:
-            claimName: {{ template "galaxy.fullname" $ -}}-cvmfs-gxy-{{ $key }}-pvc
-        {{- end }}
-        {{- end }}
         {{- if .Values.extraVolumes }}
-        {{- .Values.extraVolumes | toYaml | nindent 8 }}
+        {{- tpl (.Values.extraVolumes | toYaml | nindent 8) . }}
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

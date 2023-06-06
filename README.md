@@ -95,6 +95,43 @@ To uninstall/delete the `my-galaxy` deployment, run:
 helm delete my-galaxy
 ```
 
+if you see that some RabbitMQ and Postgres elements remain after some 10 minutes or more, you should be able to issue:
+
+```
+kubectl delete RabbitmqCluster/my-galaxy-rabbitmq-server
+kubectl delete statefulset/galaxy-my-galaxy-postgres
+```
+
+it might be needed to remove the finalizer from the RabbitmqCluster if the above doesn't seem to get rid of RabbitmqCluster, through a
+
+```
+kubectl edit RabbitmqCluster/my-galaxy-rabbitmq-server
+```
+
+remove the finalizer in:
+
+```
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  annotations:
+    meta.helm.sh/release-name: my-galaxy
+    meta.helm.sh/release-namespace: default
+  creationTimestamp: "2022-12-19T16:54:33Z"
+  deletionGracePeriodSeconds: 0
+  deletionTimestamp: "2022-12-19T17:41:40Z"
+  finalizers:
+  - deletion.finalizers.rabbitmqclusters.rabbitmq.com
+```
+
+and remove the postgres secret:
+
+```
+kubectl delete secrets/standby.galaxy-my-galaxy-postgres.credentials.postgresql.acid.zalan.do
+```
+
+Consider as well that if you set persistence to be enabled, Postgres and Galaxy will leave their PVCs behind, which you might want to delete or not depending on your use case.
+
 ## Configuration
 
 The following table lists the configurable parameters of the Galaxy chart. The

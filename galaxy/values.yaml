@@ -19,7 +19,7 @@ imagePullSecrets: []
 
 trainingHook:
   #- Enable the GTN webhook to link references to tools in tutorials to the corresponding tool panel in Galaxy.
-  enabled: true
+  enabled: false
   #- The training material server used to service the training-material webhook.
   url: https://training.galaxyproject.org/training-material/
 

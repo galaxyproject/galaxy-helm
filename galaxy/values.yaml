@@ -448,7 +448,7 @@ configs:
       sanitize_allowlist_file: "/galaxy/server/config/mutable/sanitize_allowlist.txt"
       tool_config_file: "/galaxy/server/config/tool_conf.xml{{if .Values.setupJob.downloadToolConfs.enabled}},{{ .Values.setupJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_conf.xml{{end}}"
       shed_tool_config_file: "/galaxy/server/config/mutable/editable_shed_tool_conf.xml"
-      enable_tool_document_cache: true
+      enable_tool_document_cache: false
       tool_data_table_config_path: |-
         {{ if .Values.setupJob.downloadToolConfs.enabled }}
         {{- .Values.setupJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_data_table_conf.xml

@@ -680,7 +680,7 @@ tusd:
     fsGroup: 101
   image:
     repository: tusproject/tusd
-    tag: v1.9.1
+    tag: v1.13.0
     pullPolicy: IfNotPresent
   ingress:
     enabled: true

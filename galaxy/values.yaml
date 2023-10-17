@@ -10,7 +10,7 @@ image:
   #- Repository containing the Galaxy image.
   repository: quay.io/galaxyproject/galaxy-min
   #- Galaxy Docker image tag (generally corresponds to the desired Galaxy version)
-  tag: "23.1"  # Value must be quoted
+  tag: "23.1-auto"  # Value must be quoted
   #-  Galaxy image [pull policy](https://kubernetes.io/docs/concepts/configuration/overview/#container-images)
   pullPolicy: IfNotPresent
 

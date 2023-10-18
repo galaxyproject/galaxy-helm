@@ -5,7 +5,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
-  repository: quay.io/galaxyproject/galaxy-anvil
+  repository: quay.io/galaxyproject/galaxy-min
   tag: "23.1"  # Value must be quoted
   pullPolicy: IfNotPresent
 

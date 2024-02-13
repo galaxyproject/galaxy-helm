@@ -24,11 +24,14 @@ spec:
             image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
             imagePullPolicy: {{ $.Values.image.pullPolicy }}
             # delete all tmp files older than walltime limit
-            command: {{ $cronjob.command }}
+            command:
+            {{- range $cmd := $cronjob.command }}
+              - {{ tpl $cmd $ | quote }}
+            {{- end}}
             {{- if $cronjob.args }}
             args:
               {{- range $arg := $cronjob.args }}
-              - {{ tpl $arg $ }}
+              - {{ tpl $arg $ | quote }}
               {{- end }}
             {{- end }}
             volumeMounts:

@@ -272,14 +272,16 @@ cronJobs:
     schedule: "0 2 * * *"
     securityContext:
       runAsUser: 0
-    command: /bin/bash
+    command:
+      - "/bin/bash"
     args:
       - "-c"
       - "find"
       - "{{ .Values.persistence.mountPath }}/tmp"
       - "!"
       - "-newermt"
-      - "-{{ (index .Values \"configs\" \"job_conf.yml\" \"runners\" \"k8s\" \"k8s_walltime_limit\" | default 604800) }} seconds"
+      - "-{{ (index .Values \"configs\" \"job_conf.yml\" \"runners\" \"k8s\" \"k8s_walltime_limit\" | default 604800) }}"
+      - "seconds"
       - "-type"
       - "f"
       - "-exec"
@@ -290,7 +292,8 @@ cronJobs:
     schedule: "10 2 * * *"
     securityContext:
       runAsUser: 0
-    command: /usr/bin/tmpwatch
+    command:
+      - "/usr/bin/tmpwatch"
     args:
       - "-v"
       - "--all"
@@ -302,31 +305,33 @@ cronJobs:
     schedule: "20 2 * * *"
     securityContext:
       runAsUser: 0
-    command: /galaxy/server/.venv/bin/python
+    command:
+      - "/galaxy/server/.venv/bin/python"
     args:
-    - "/galaxy/server/scripts/cleanup_datasets/pgcleanup.py"
-    - "-c"
-    - "/galaxy/server/config/galaxy.yml"
-    - "-o"
-    - "7"
-    - "-l"
-    - "{{ .Values.persistence.mountPath }}/tmp"
-    - "-w"
-    - "128MB"
-    - "delete_userless_histories"
-    - "delete_exported_histories"
+      - "/galaxy/server/scripts/cleanup_datasets/pgcleanup.py"
+      - "-c"
+      - "/galaxy/server/config/galaxy.yml"
+      - "-o"
+      - "7"
+      - "-l"
+      - "{{ .Values.persistence.mountPath }}/tmp"
+      - "-w"
+      - "128MB"
+      - "delete_userless_histories"
+      - "delete_exported_histories"
   cleanup-tusd-store:
     schedule: "30 2 * * *"
     securityContext:
       runAsUser: 0
-    command: /usr/bin/tmpwatch
+    command:
+      - "/usr/bin/tmpwatch"
     args:
-    - "-v"
-    - "--all"
-    - "--mtime"
-    - "--dirmtime"
-    - "7d"
-    - "{{ .Values.persistence.mountPath }}/tmp/tus_upload_store"
+      - "-v"
+      - "--all"
+      - "--mtime"
+      - "--dirmtime"
+      - "7d"
+      - "{{ .Values.persistence.mountPath }}/tmp/tus_upload_store"
 ingress:
   #- Should ingress be enabled. Defaults to `true`
   enabled: true

@@ -366,8 +366,7 @@ resources:
     memory: 7G
     ephemeral-storage: 10Gi
 
-#nodeSelector: {}
-nodeSelector: "cloud:google:com/gke-nodepool: default-pool"
+nodeSelector: {}
 
 tolerations: []
 

@@ -422,7 +422,7 @@ configs:
           rules_module: tpv.rules
           docker_default_container_id: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           tpv_config_files:
-            - https://raw.githubusercontent.com/galaxyproject/tpv-shared-database/main/tools.yml
+            - https://gxy.io/tpv/db.yml
             - lib/galaxy/jobs/rules/tpv_rules_local.yml
 #     limits:
 #     - type: registered_user_concurrent_jobs

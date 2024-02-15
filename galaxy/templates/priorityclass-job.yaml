@@ -12,5 +12,5 @@ value: {{ if .Values.jobs.priorityClass.value -}}
        {{- end}}
 preemptionPolicy: Never
 globalDefault: false
-description: "Galaxy jobs will not preempt existing workloads and depending on the value spin up new resources for the computation."
+description: "By default, Galaxy jobs will not preempt existing workloads but will run when cluster resources are available. Depending on the cluster setup, the preemption value can be modified to prompt scaling of the cluster for the computation."
 {{ end }}

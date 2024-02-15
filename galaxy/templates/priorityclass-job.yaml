@@ -5,7 +5,7 @@ metadata:
   name: {{ include "galaxy.pod-priority-class" . }}
   labels:
     {{- include "galaxy.labels" . | nindent 4 }}
-value: {{ default "-1000"  .Values.jobs.priorityClass.value -}} 
+value: {{ default "-1000" .Values.jobs.priorityClass.value }} 
 preemptionPolicy: Never
 globalDefault: false
 description: "By default, Galaxy jobs will not preempt existing workloads but will run when cluster resources are available. Depending on the cluster setup, the preemption value can be modified to prompt scaling of the cluster for the computation."

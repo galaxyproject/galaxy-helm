@@ -542,6 +542,7 @@ jobs:
     #- Assign a [priorityClass](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#priorityclass) to the dispatched jobs.
     enabled: true
     existingClass: ""
+    value: -1000
   rules:
     tpv_rules_local.yml:
       global:

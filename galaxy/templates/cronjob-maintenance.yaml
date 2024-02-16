@@ -70,7 +70,7 @@ spec:
             {{- toYaml . | nindent 16 }}
           {{- end }}
           containers:
-          - name: galaxy-maintenance
+          - name: galaxy-maintenance-script
             image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
             imagePullPolicy: {{ .Values.image.pullPolicy }}
             # delete all tmp files older than walltime limit

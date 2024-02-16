@@ -1,3 +1,100 @@
+{{- if .Values.maintenance.tmp.enabled }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "galaxy.fullname" . }}-maintenance-clean-tmp
+  labels:
+    {{- include "galaxy.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.maintenance.tmp.schedule | quote }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          securityContext:
+            runAsUser: 0
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 16 }}
+          {{- end }}
+          containers:
+          - name: galaxy-maintenance-clean-tmp
+            image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            # delete all tmp files older than walltime limit
+            command:
+              - find
+              - {{ .Values.persistence.mountPath }}/tmp
+              - '!'
+              - -newermt
+              - "{{ .Values.maintenance.tmp.seconds }} seconds"
+              - -type
+              - f
+              - -exec
+              - rm
+              - '{}'
+              - ;
+            volumeMounts:
+            - name: galaxy-data
+              mountPath: {{ .Values.persistence.mountPath }}
+          volumes:
+          - name: galaxy-data
+            {{- if .Values.persistence.enabled }}
+            persistentVolumeClaim:
+              claimName: {{ template "galaxy.pvcname" . }}
+            {{- else }}
+            emptyDir: {}
+            {{- end }}
+          restartPolicy: OnFailure
+{{- end }}
+{{- if .Values.maintenance.script.enabled }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "galaxy.fullname" . }}-maintenance-script
+  labels:
+    {{- include "galaxy.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.maintenance.script.schedule | quote }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          securityContext:
+            runAsUser: 0
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 16 }}
+          {{- end }}
+          containers:
+          - name: galaxy-maintenance
+            image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            # delete all tmp files older than walltime limit
+            command:
+              - "/bin/bash"
+              - "-c"
+            args:
+              - "/galaxy/server/scripts/maintenance.sh"
+              - "--no-dry-run"
+              - "--days"
+              - {{ .Values.maintenance.script.days | quote }}
+            volumeMounts:
+            - name: galaxy-data
+              mountPath: {{ .Values.persistence.mountPath }}
+          volumes:
+          - name: galaxy-data
+            {{- if .Values.persistence.enabled }}
+            persistentVolumeClaim:
+              claimName: {{ template "galaxy.pvcname" . }}
+            {{- else }}
+            emptyDir: {}
+            {{- end }}
+          restartPolicy: OnFailure
+{{- end }}
 {{ if .Values.cronJobs -}}
 {{ range $key, $cronjob := .Values.cronJobs }}
 ---
@@ -13,8 +110,10 @@ spec:
     spec:
       template:
         spec:
+          {{- if $cronjob.securityContext }}
           securityContext:
             {{- toYaml $cronjob.securityContext | nindent 12 }}
+          {{- end}}
           {{- with $.nodeSelector }}
           nodeSelector:
             {{- toYaml . | nindent 16 }}

@@ -279,19 +279,41 @@ cronJobs:
       - "-R"
       - "galaxy"
       - "/galaxy/server/database"
-#- Maintenance tasks that should be run periodically to prevent storage from being exhausted
-maintenance:
-  #- Remove files in the tmp directory.
-  tmp:
-    enabled: true
+  maintenance:
     schedule: "5 2 * * *"
-    seconds: "604800" # Default wall time for jobs
-  #- The maintenance script removes histories, datasets, and other Galaxy objects older than 7 days.
-  script:
-    enabled: true
-    schedule: "10 2 * * *"
-    days: "7"
-
+    extraSettings:
+      days: 7
+    securityContext:
+      runAsUser: 0
+    command:
+      - "/bin/bash"
+      - "-c"
+    args:
+      - "/galaxy/server/scripts/maintenance.sh"
+      - "--no-dry-run"
+      - "--days"
+      - "{{ .Values.cronJobs.maintenance.extraSettings.days }}"
+  #- Remove files from the tmp directory that are older than the allowable wall time for a job
+  tmp:
+    schedule: "15 2 * * *"
+    extraSettings:
+      seconds: 604800
+    securityContext:
+      runAsUser: 0
+    command:
+      - /usr/bin/find
+    args:
+      - "{{ .Values.persistence.mountPath }}/tmp"
+      - "!"
+      - "-newermt"
+      - "{{ .Values.cronJobs.tmp.extraSettings.seconds }}"
+      - "seconds"
+      - "-type"
+      - "f"
+      - "-exec"
+      - "rm"
+      - "{}"
+      - ";"
 ingress:
   #- Should ingress be enabled. Defaults to `true`
   enabled: true

@@ -51,6 +51,10 @@ jobs:
     needs: [ package-from-pr, package-from-manual ]
     name: Create a tag and GitHub release for this version.
     runs-on: ubuntu-latest
+    if: |
+      always() 
+      && contains(needs.*.result, 'success')
+      && !contains(needs.*.result, 'failure')
     steps:
       - name: Tag and release
         run: |

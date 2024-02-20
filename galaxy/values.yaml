@@ -307,7 +307,7 @@ cronJobs:
       - "!"
       - "-newermt"
       - "{{ tpl .Values.cronJobs.tmpdir.extraSettings.days $ }}"
-      - "seconds"
+      - "days"
       - "-type"
       - "f"
       - "-exec"

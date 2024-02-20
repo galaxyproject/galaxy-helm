@@ -282,7 +282,7 @@ cronJobs:
   maintenance:
     schedule: "5 2 * * *"
     extraSettings:
-      days: 7
+      days: '7'
     securityContext:
       runAsUser: 0
     command:
@@ -292,12 +292,12 @@ cronJobs:
       - "/galaxy/server/scripts/maintenance.sh"
       - "--no-dry-run"
       - "--days"
-      - "{{ .Values.cronJobs.maintenance.extraSettings.days }}"
+      - "{{ tpl .Values.cronJobs.maintenance.extraSettings.days $ }}"
   #- Remove files from the tmp directory that are older than the allowable wall time for a job
-  tmp:
+  tmpdir:
     schedule: "15 2 * * *"
     extraSettings:
-      seconds: 604800
+      days: '{{ div (index .Values "configs" "job_conf.yml" "runners" "k8s" "k8s_walltime_limit" | default 604800) 7 }}'
     securityContext:
       runAsUser: 0
     command:
@@ -306,7 +306,7 @@ cronJobs:
       - "{{ .Values.persistence.mountPath }}/tmp"
       - "!"
       - "-newermt"
-      - "{{ .Values.cronJobs.tmp.extraSettings.seconds }}"
+      - "{{ tpl .Values.cronJobs.tmpdir.extraSettings.days $ }}"
       - "seconds"
       - "-type"
       - "f"

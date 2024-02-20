@@ -3,7 +3,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ include "galaxy.fullname" $ }}-maintenance-{{ $key }}
+  name: {{ include "galaxy.fullname" $ }}-cron-{{ $key }}
   labels:
     {{- include "galaxy.labels" $ | nindent 4 }}
 spec:
@@ -21,7 +21,7 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           containers:
-          - name: galaxy-maintenance-{{ $key }}
+          - name: galaxy-cron-{{ $key }}
             image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
             imagePullPolicy: {{ $.Values.image.pullPolicy }}
             command:

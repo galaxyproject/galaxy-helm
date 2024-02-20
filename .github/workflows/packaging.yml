@@ -61,4 +61,4 @@ jobs:
           version=v$(cat galaxy/Chart.yaml | grep ^version: | awk '{print $2}')
           git tag -a $version -m "Automatic release of $version"
           git push origin $version
-          gh release create $version --generate-notes
+          gh release create $version --generate-notes --latest

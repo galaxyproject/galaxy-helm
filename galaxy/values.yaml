@@ -287,7 +287,7 @@ cronJobs:
   tmpdir:
     schedule: "15 2 * * *"
     extraSettings:
-      days: '{{ div (index .Values "configs" "job_conf.yml" "runners" "k8s" "k8s_walltime_limit" | default 604800) 7 }}'
+      last_modified: '{{ index .Values "configs" "job_conf.yml" "runners" "k8s" "k8s_walltime_limit" | default 604800 }}'
     securityContext:
       runAsUser: 0
     command:
@@ -296,8 +296,7 @@ cronJobs:
       - "{{ .Values.persistence.mountPath }}/tmp"
       - "!"
       - "-newermt"
-      - "{{ tpl .Values.cronJobs.tmpdir.extraSettings.days $ }}"
-      - "days"
+      - "{{ tpl .Values.cronJobs.tmpdir.extraSettings.last_modified $ }} seconds ago"
       - "-type"
       - "f"
       - "-exec"

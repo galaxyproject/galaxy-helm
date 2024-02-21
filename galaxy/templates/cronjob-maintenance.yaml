@@ -16,9 +16,12 @@ spec:
           securityContext:
             {{- toYaml $cronjob.securityContext | nindent 12 }}
           {{- end}}
-          {{- with $.nodeSelector }}
+          {{- if $cronjob.nodeSelector }}
           nodeSelector:
-            {{- toYaml . | nindent 12 }}
+            {{- toYaml $cronjob.nodeSelector | nindent 12 }}
+          {{- else if $.Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml $.Values.nodeSelector | nindent 12 }}
           {{- end }}
           containers:
           - name: galaxy-cron-{{ $key }}

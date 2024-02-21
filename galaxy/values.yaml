@@ -269,16 +269,6 @@ extraEnv: []
 
 #- User defined CronJobs
 cronJobs:
-  chown:
-    schedule: "0 * * * *"
-    securityContext:
-      runAsUser: 0
-    command:
-      - /usr/bin/chown
-    args:
-      - "-R"
-      - "galaxy"
-      - "/galaxy/server/database"
   maintenance:
     schedule: "5 2 * * *"
     extraSettings:

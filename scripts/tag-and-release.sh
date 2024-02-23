@@ -41,6 +41,8 @@ $(hi OPTIONS)
     The $(hi --latest) and $(hi --since) fields will be determined from the Git log
     if they are not provided.
 
+Press $(hi Q) to quit this help.
+
 EOF
 }
 

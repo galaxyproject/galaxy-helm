@@ -31,7 +31,7 @@ $(hi DESCRIPTION)
     GitHub action.
 
 $(hi SYNOPSIS)
-    $SCRIPT --size DATE --latest TAG_NAME
+    $SCRIPT --since DATE --latest TAG_NAME
 
 $(hi OPTIONS)
     -l|--latest   the tag name of the last commit that was tagged. Default to $LATEST
@@ -60,6 +60,10 @@ while [[ $# > 0 ]] ; do
         help
         exit
         ;;
+      *)
+        echo "Invalid option $1"
+        echo "Run $(hi $SCRIPT help) for usage information"
+        exit
     esac
     shift
 done

@@ -40,6 +40,11 @@ spec:
             volumeMounts:
             - name: galaxy-data
               mountPath: {{ $.Values.persistence.mountPath }}
+            {{- range $key, $entry := $cronjob.extraFileMappings -}}
+            - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
+              mountPath: {{ $key }}
+              subPath: {{ include "galaxy.getFilenameFromPath" $key }}
+            {{- end }}
           volumes:
           - name: galaxy-data
             {{- if $.Values.persistence.enabled }}
@@ -48,5 +53,15 @@ spec:
             {{- else }}
             emptyDir: {}
             {{- end }}
+        {{- range $key, $entry := $cronjob.extraFileMappings -}}
+        - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
+          {{- if $entry.useSecret }}
+          secret:
+            secretName: {{ printf "%s-%s" (include "galaxy.fullname" $) (include "galaxy.getExtraFilesUniqueName" $key) }}
+          {{- else }}
+          configMap:
+            name: {{ printf "%s-%s" (include "galaxy.fullname" $) (include "galaxy.getExtraFilesUniqueName" $key) }}
+          {{- end }}
+        {{- end }}
           restartPolicy: OnFailure
 {{- end }}

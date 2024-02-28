@@ -267,8 +267,9 @@ extraEnv: []
   # - name: EXAMPLE_ENV
   #   value: MY_VALUE
 
-#- User defined CronJobs
+#- CronJobs to perform periodic maintenacne tasks
 cronJobs:
+  #- Runs the maintenance.sh script to clean up the Galaxy database.
   maintenance:
     schedule: "5 2 * * *"
     extraSettings:
@@ -283,6 +284,16 @@ cronJobs:
       - "--no-dry-run"
       - "--days"
       - "{{ tpl .Values.cronJobs.maintenance.extraSettings.days $ }}"
+    extraFileMappings:
+      /galaxy/server/scripts/maintenance.sh:
+        tpl: true
+        content: |
+          {{ .Files.Get "files/source/maintenance.sh" }}
+      /galaxy/server/scripts/cleanup_datasets/cleanup_datasets.py:
+        tpl: true
+        content: |
+          {{ .Files.Get "files/source/cleanup_datasets.py" }}
+
   #- Remove files from the tmp directory that are older than the allowable wall time for a job
   tmpdir:
     schedule: "15 2 * * *"

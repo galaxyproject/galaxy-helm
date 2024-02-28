@@ -417,6 +417,10 @@ The Galaxy application can be horizontally scaled for the web, job, or workflow 
 by setting the desired values of the `webHandlers.replicaCount`,
 `jobHandlers.replicaCount`, and `workflowHandlers.replicaCount` configuration options.
 
+## Cron jobs
+
+Two Cron jobs are defined to clean up Galaxy's database and the `tmp` directory.  By default these
+jobs run at 02:05 (the database maintenance script) and 02:15 (`tmp` directyory cleanup). Users 
 ## Galaxy versions
 
 Some changes introduced in the chart sometimes rely on changes in the Galaxy

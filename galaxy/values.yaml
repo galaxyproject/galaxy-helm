@@ -267,7 +267,7 @@ extraEnv: []
   # - name: EXAMPLE_ENV
   #   value: MY_VALUE
 
-#- CronJobs to perform periodic maintenacne tasks
+#- CronJobs to perform periodic maintenance tasks
 cronJobs:
   #- Runs the maintenance.sh script to clean up the Galaxy database.
   maintenance:

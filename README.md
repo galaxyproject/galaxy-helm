@@ -269,6 +269,8 @@ jobHandlers:
     failureThreshhold: 3
 ```
 
+# Additional Configurations
+
 ## Extra File Mappings
 
 The `extraFileMappings` field can be used to inject files to arbitrary paths in the `nginx` deployment, as well as any of the `job`, `web`, or `workflow` handlers, and the `init` jobs.
@@ -420,22 +422,22 @@ by setting the desired values of the `webHandlers.replicaCount`,
 ## Cron jobs
 
 Two Cron jobs are defined to clean up Galaxy's database and the `tmp` directory.  By default these
-jobs run at 02:05 (the database maintenance script) and 02:15 (`tmp` directyory cleanup). Users 
-## Galaxy versions
+jobs run at 02:05 (the database maintenance script) and 02:15 (`tmp` directyory cleanup). Users can 
+change the times the cron jobs are run by changing the `schedule` field in the `values.yaml` file:
 
-Some changes introduced in the chart sometimes rely on changes in the Galaxy
-container image, especially in relation to the Kubernetes runner. This table
-keeps track of recommended Chart versions for particular Galaxy versions as
-breaking changes are introduced. Otherwise, the Galaxy image and chart should be
-independently upgrade-able. In other words, upgrading the Galaxy image from
-`21.05` to `21.09` should be a matter of `helm upgrade my-galaxy cloudve/galaxy
---reuse-values --set image.tag=21.09`.
+```yaml
+cronJobs:
+  maintenance:
+    schedule: "30 6 * * *" # Execute the cron job at 6:30 UTC
+```
+
+To disable a cron job after Galaxy has been deployed simply set the schedule to a date that
+can never occur such as midnight on Februrary 30th:
 
 
-| Chart version        | Galaxy version   | Description     |
-| :------------------ | :--------------- | :-------------- |
-| `5.0`               | `22.05`          | Needs at least container image 22.05 as Galaxy switched from uwsgi to gunicorn  |
-| `4.0`               | `21.05`          | Needs [Galaxy PR#11899](https://github.com/galaxyproject/galaxy/pull/11899) for eliminating the CVMFS. If running chart 4.0+ with Galaxy image `21.01` or below, use the CVMFS instead with `--set setupJob.downloadToolConfs.enabled=false --set cvmfs.repositories.cvmfs-gxy-cloud=cloud.galaxyproject.org --set cvmfs.galaxyPersistentVolumeClaims.cloud.storage=1Gi --set cvmfs.galaxyPersistentVolumeClaims.cloud.storageClassName=cvmfs-gxy-cloud --set cvmfs.galaxyPersistentVolumeClaims.cloud.mountPath=/cvmfs/cloud.galaxyproject.org` |
+```bash
+helm upgrade galaxy -n galaxy galaxy/galaxy --reuse-values --set cronJobs.maintenance.schedule="0 0 30 2 *"
+```
 
 ## Funding
 

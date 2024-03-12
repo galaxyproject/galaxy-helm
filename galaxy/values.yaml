@@ -269,31 +269,22 @@ extraEnv: []
 
 #- CronJobs to perform periodic maintenance tasks
 cronJobs:
-  #- Runs the maintenance.sh script to clean up the Galaxy database.
+  #- Runs the maintenance.sh script to purge items in the Galaxy database that
+  #- have been flagged as deleted.
   maintenance:
     schedule: "5 2 * * *"
     extraSettings:
+      #- Purge items older than this.
       days: '7'
     securityContext:
       runAsUser: 0
+    defaultEnv: true
     command:
-      - "/bin/bash"
-      - "-c"
-    args:
       - "/galaxy/server/scripts/maintenance.sh"
+    args:
       - "--no-dry-run"
       - "--days"
       - "{{ tpl .Values.cronJobs.maintenance.extraSettings.days $ }}"
-    extraFileMappings:
-      /galaxy/server/scripts/maintenance.sh:
-        tpl: true
-        content: |
-          {{ .Files.Get "files/source/maintenance.sh" }}
-      /galaxy/server/scripts/cleanup_datasets/cleanup_datasets.py:
-        tpl: true
-        content: |
-          {{ .Files.Get "files/source/cleanup_datasets.py" }}
-
   #- Remove files from the tmp directory that are older than the allowable wall time for a job
   tmpdir:
     schedule: "15 2 * * *"
@@ -317,7 +308,6 @@ cronJobs:
 ingress:
   #- Should ingress be enabled. Defaults to `true`
   enabled: true
-  #-
   ingressClassName: nginx
   canary:
     enabled: true
@@ -490,7 +480,8 @@ configs:
       interactivetools_base_path: "{{$host := index .Values.ingress.hosts 0}}{{$path := index $host.paths 0}}{{$path.path}}"
       id_secret:
       mulled_resolution_cache_lock_dir: "/galaxy/server/local/mulled_cache_lock"
-      database_connection: postgresql://unused:because@overridden_by_envvar
+      database_connection: |-
+        {{ include "galaxy-postgresql.connection-string" .}}
       integrated_tool_panel_config: "/galaxy/server/config/mutable/integrated_tool_panel.xml"
       sanitize_allowlist_file: "/galaxy/server/config/mutable/sanitize_allowlist.txt"
       tool_config_file: "/galaxy/server/config/tool_conf.xml{{if .Values.setupJob.downloadToolConfs.enabled}},{{ .Values.setupJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_conf.xml{{end}}"

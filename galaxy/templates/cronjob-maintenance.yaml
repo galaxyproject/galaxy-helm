@@ -25,7 +25,11 @@ spec:
           {{- end }}
           containers:
           - name: galaxy-cron-{{ $key }}
+            {{- if $cronjob.image }}
+            image: {{ $cronjob.image.repository }}:{{ $cronjob.image.tag }}
+            {{- else }}
             image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+            {{- end }}
             imagePullPolicy: {{ $.Values.image.pullPolicy }}
             {{- if or $cronjob.defaultEnv $cronjob.extraEnv }}
             env:

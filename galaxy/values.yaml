@@ -298,7 +298,7 @@ cronJobs:
       - "{{ .Values.persistence.mountPath }}/tmp"
       - "!"
       - "-newermt"
-      - "{{ tpl .Values.cronJobs.tmpdir.extraSettings.last_modified $ }} seconds ago"
+      - "{{ tpl .Values.cronJobs.tmpdir.extraSettings.lastModified $ }} seconds ago"
       - "-type"
       - "f"
       - "-exec"

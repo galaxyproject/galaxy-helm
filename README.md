@@ -421,7 +421,7 @@ by setting the desired values of the `webHandlers.replicaCount`,
 
 ## Cron jobs
 
-Two Cron jobs are defined to clean up Galaxy's database and the `tmp` directory.  By default these
+Two Cron jobs are defined by default.  One to clean up Galaxy's database and one to clean up the `tmp` directory.  By default, these
 jobs run at 02:05 (the database maintenance script) and 02:15 (`tmp` directyory cleanup). Users can 
 change the times the cron jobs are run by changing the `schedule` field in the `values.yaml` file:
 
@@ -430,7 +430,11 @@ cronJobs:
   maintenance:
     schedule: "30 6 * * *" # Execute the cron job at 6:30 UTC
 ```
-
+or by specifying the `schedule` on the command line when instaling Galaxy:
+```bash
+# Schedule the maintenance job to run at 06:30 on the first day of each month
+helm install galaxy -n galaxy galaxy/galaxy --set cronJobs.maintenance.schedule="30 6 1 * *"
+```
 To disable a cron job after Galaxy has been deployed simply set the schedule to a date that
 can never occur such as midnight on Februrary 30th:
 
@@ -438,6 +442,55 @@ can never occur such as midnight on Februrary 30th:
 ```bash
 helm upgrade galaxy -n galaxy galaxy/galaxy --reuse-values --set cronJobs.maintenance.schedule="0 0 30 2 *"
 ```
+
+### Run a CronJob manually
+
+Cron jobs can be invoked manually with tools such as [OpenLens](https://github.com/MuhammedKalkan/OpenLens)
+or from the command line with `kubectl`
+```bash
+kubectl create job --namespace <namespace> <job name> --from cronjob/galaxy-cron-maintenance 
+```
+This will run the cron job regardless of the `schedule` that has been set.
+
+**Note:** the name of the cron job will be `{{ .Release.Name }}-cron-<job name>` where the `<job name>`
+is the name (key) used in the `values.yaml` file.
+
+### CronJob configuration
+
+The following fields can be specified when defining cron jobs.
+
+| Name | Definition                                                                                                                                | Required |
+|---|-------------------------------------------------------------------------------------------------------------------------------------------|----------|
+| schedule | When the job will be run.  Use tools such as [crontab.guru](https://crontab.guru) for assistance determining the proper schedule string   | **Yes**  |
+| defaultEnv | `true` or `false`. See the `galaxy.podEnvVars` macro in `_helpers.tpl` for the list of variables that will be defined. Default is `false` | No       |
+| extraEnv | Define extra environment variables that will be available to the job | No       |
+| securityContext | Specifies a `securityContext` for the job. Typically used to set `runAsUser` | No       |
+| image | Specify the Docker container used to run the job | No       |
+| command | The command to run | **Yes**  |
+| args | Any command line arguments that should be passed to the `command` | No       |
+| extraFileMappings | Allow arbitrary files to be mounted from config maps | No |
+
+### Notes
+
+If specifying the Docker `image` both the `resposity` and `tag` MUST be specified.
+```yaml
+  image:
+    repository: quay.io/my-organization/my-image
+    tag: "1.0"  
+```
+
+The `extraFileMappings` block is similar to the global `extraFileMappings` except the file will only be mounted for that cron job.
+The following fields can be specified for each file.
+
+| Name | Definition | Required |
+|---|---|----------|
+| mode | The file mode (permissions) assigned to the file | No       |
+| tpl | If set to `true` the file contents will be run through Helm's templating engine. Defaults to `false` | No       |
+| content | The contents of the file | **Yes**  | 
+
+
+See the `example` cron job included in the `values.yaml` file for a full example.
+
 
 ## Funding
 

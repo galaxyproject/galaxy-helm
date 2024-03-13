@@ -1,4 +1,5 @@
 {{- if .Values.refdata.enabled }}
+---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -18,5 +19,4 @@ spec:
 {{- if eq $.Values.refdata.type "cvmfs" }}
   storageClassName: {{ tpl .Values.cvmfs.storageClassName . }}
 {{- end }}
----
 {{- end }}

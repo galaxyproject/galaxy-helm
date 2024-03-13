@@ -75,6 +75,9 @@ spec:
             configMap:
               name: {{ printf "%s-%s" (include "galaxy.fullname" $) (include "galaxy.getExtraFilesUniqueName" $key) }}
             {{- end }}
+            {{- if $entry.mode }}
+              defaultMode: {{ $entry.mode }}
+            {{- end }}
           {{- end }}
           restartPolicy: OnFailure
 {{- if $cronjob.extraFileMappings }}

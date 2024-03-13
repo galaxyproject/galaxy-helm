@@ -305,6 +305,50 @@ cronJobs:
       - "rm"
       - "{}"
       - ";"
+  #- An example cron job that showcases all available features.
+  example:
+    #- Disable the job by scheduling it for a date that never occurs, I.E. Feb 30th
+    #- The job can still be triggered manually.
+    schedule: "0 0 30 2 *"
+    #- Include the set of default environment variables. See galaxy.podEnvVars
+    #- in the Helm chart's _helpers.tpl for the variables that will be defined.
+    defaultEnv: true
+    #- Define extra environment variables that will be available to the job
+    extraEnv:
+      - name: LOGFILE
+        value: /galaxy/server/database/example.log
+    #- Run the job as root (uid 0)
+    securityContext:
+      runAsUser: 0
+    #- Specify an alternate Docker image for the CronJob container
+    image:
+      repository: ksuderman/galaxy-maintenance
+      tag: "0.7"
+    #- The command to be run
+    command:
+      - /usr/local/bin/example.sh
+    #- Command line arguments to be passed to the command, one per line.
+    args:
+      - "--option"
+      - "value"
+    #- Define extra files that will be mounted into the image. In this case we
+    #- mount a simple Bash script that will write the current environment
+    #- variables to persistent storage.
+    extraFileMappings:
+      #- Path were the file will be mounted
+      /usr/local/bin/example.sh:
+        #- Default permission on the file.  In this case 'rwxr-xr-x'
+        mode: "0755"
+        #- Run the contents through the Helm `tpl` command
+        tpl: true
+        #- The contents of the file to be mounted.  Can contain Helm template values
+        #- if `tpl` is set to true.
+        content: |-
+          #!/usr/bin/bash
+          echo {{ .Release.Name }} >> $LOGFILE
+          echo "$@" >> $LOGFILE
+          env >> $LOGFILE
+
 ingress:
   #- Should ingress be enabled. Defaults to `true`
   enabled: true

@@ -37,7 +37,10 @@ spec:
             {{- include "galaxy.podEnvVars" $}}
             {{- end }}
             {{- if $cronjob.extraEnv }}
-            {{- $cronjob.extraEnv | toYaml | nindent 12 }}
+            {{- range $env := $cronjob.extraEnv }}
+            - name: {{ $env.name }}
+              value: {{ tpl $env.value $ | quote }}
+            {{- end }}
             {{- end }}
             {{- end }}
             command:

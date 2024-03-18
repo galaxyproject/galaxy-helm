@@ -47,3 +47,18 @@ jobs:
           charts-token: ${{ secrets.CHARTS_TOKEN }}
           github-labels: ${{ github.event.inputs.version-bump }}
           git-branch: ${{ github.event.inputs.branch-name }}
+  tag-and-release:
+    needs: [ package-from-pr, package-from-manual ]
+    name: Create a tag and GitHub release for this version.
+    runs-on: ubuntu-latest
+    if: |
+      always() 
+      && contains(needs.*.result, 'success')
+      && !contains(needs.*.result, 'failure')
+    steps:
+      - name: Tag and release
+        run: |
+          version=v$(cat galaxy/Chart.yaml | grep ^version: | awk '{print $2}')
+          git tag -a $version -m "Automatic release of $version"
+          git push origin $version
+          gh release create $version --generate-notes --latest

@@ -1,19 +1,34 @@
 # Default values for Galaxy.
 # Declare variables to be passed into your templates.
 
+#- Partial override of the `galaxy.fullname`.  The `.Release.Name` will be prepended to generate the fullname.
 nameOverride: ""
+#- Fully override the `galaxy.fullname`
 fullnameOverride: ""
 
 image:
+  #- Repository containing the Galaxy image.
   repository: quay.io/galaxyproject/galaxy-min
-  tag: "23.1"  # Value must be quoted
+  #- Galaxy Docker image tag (generally corresponds to the desired Galaxy version)
+  tag: "24.0"  # Value must be quoted
+  #-  Galaxy image [pull policy](https://kubernetes.io/docs/concepts/configuration/overview/#container-images)
   pullPolicy: IfNotPresent
 
+#- Secrets used to [access a Galaxy image from a private repository](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/)
 imagePullSecrets: []
 
+trainingHook:
+  #- Enable the GTN webhook to link references to tools in tutorials to the corresponding tool panel in Galaxy.
+  enabled: false
+  #- The training material server used to service the training-material webhook.
+  url: https://training.galaxyproject.org/training-material/
+
 service:
+  #- The Galaxy service type
   type: ClusterIP
+  #- The port Galaxy is listening to
   port: 8000
+  #- The external port exposed on each node
   nodePort: 30700
 
 workflowHandlers:
@@ -141,6 +156,7 @@ celeryBeat:
     timeoutSeconds: 10
 
 metrics:
+  #- Enable the metrics server. Defaults to `false`
   enabled: false
   annotations: {}
   podAnnotations: {}
@@ -151,25 +167,32 @@ metrics:
     pullPolicy: IfNotPresent
 
 serviceAccount:
-  # Specifies whether a service account should be created
+  #- Specifies whether a service account should be created
   create: true
-  # Annotations to add to the service account
+  #- Annotations to add to the service account
   annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
+  #- The name of the service account to use.
+  #- If not set and create is true, a name is generated using the fullname template
   name: ""
 
 rbac:
+  #- Does the cluster use role based access control.
   enabled: true
 
 securityContext:
+  #- Security context and file system group used by jobs.
   fsGroup: 101
 
+#- Configure the PVC used by Galaxy for local storage.
 persistence:
+  #- Persistence is enabled by default
   enabled: true
+  #- Name of the PVC to create
   name: galaxy-pvc
   annotations: {}
+  #- StorageClass for the PVC. Must support `ReadWriteMany`.
   storageClass: ""
+  #- The name of an existing PVC to use for persistence.
   existingClaim: null
   accessMode: ReadWriteMany
   size: 5Gi
@@ -184,11 +207,16 @@ extraVolumeMounts: []
 #   - name: shared-data
 #     mountPath: /mnt/project/shared-data
 
+#- tasks to perform once after installation
 setupJob:
+  #- create the database
   createDatabase: true
   securityContext:
+    #- the setup jobs will run as this user
     runAsUser: 101
+    #- the `runAsUser` will belong to this group.
     runAsGroup: 101
+    #- the filesystem group
     fsGroup: 101
   ttlSecondsAfterFinished: 300
   downloadToolConfs:
@@ -198,18 +226,19 @@ setupJob:
       subPath: cvmfsclone # on galaxy-data volume (avoid config, tools, lib, etc...)
       mountPath: /cvmfs/cloud.galaxyproject.org
     archives:
-      # A tar.gz publicly accessible archive containing AT LEAST conf files and XML tool wrappers.
-      # Meant to be enough for Galaxy handlers to startup
+      #- A tar.gz publicly accessible archive containing AT LEAST conf files and XML tool wrappers.
+      #- Meant to be enough for Galaxy handlers to startup
       startup: https://storage.googleapis.com/cloud-cvmfs/startup.tar.gz
-      # A tar.gz publicly accessible archive containing AT LEAST confs, tool wrappers, and scripts
-      # excluding test data.
-      # Meant to be enough for Galaxy handlers to run jobs.
+      #- A tar.gz publicly accessible archive containing AT LEAST confs, tool wrappers, and scripts
+      #- excluding test data.
+      #- Meant to be enough for Galaxy handlers to run jobs.
       running: https://storage.googleapis.com/cloud-cvmfs/partial.tar.gz
-      # A tar.gz publicly accessible archive containing the full `tools` directory,
-      # including each tool's test data.
-      # Meant to be enough to run automated tool-tests, fully mimicking CVMFS setup
+      #- A tar.gz publicly accessible archive containing the full `tools` directory,
+      #- including each tool's test data.
+      #- Meant to be enough to run automated tool-tests, fully mimicking CVMFS setup
       full: https://storage.googleapis.com/cloud-cvmfs/contents.tar.gz
 
+#- Allow users to specify extra init containers
 extraInitContainers: []
 #   - name: my-first-container
 #     applyToJob: true
@@ -239,7 +268,9 @@ extraEnv: []
   #   value: MY_VALUE
 
 ingress:
+  #- Should ingress be enabled. Defaults to `true`
   enabled: true
+  #-
   ingressClassName: nginx
   canary:
     enabled: true
@@ -253,13 +284,14 @@ ingress:
     - host: ~
       paths:
         - path: "/galaxy"
+        - path: "/training-material"
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
 
 resources:
-  # We recommend updating these based on the usage levels of the server
+  #- We recommend updating these based on the usage levels of the server.
   requests:
     cpu: 100m
     memory: 1G
@@ -278,8 +310,10 @@ affinity: {}
 postgresql:
   # We are not using the Operator with AnVIL so do not enable it
   enabled: false
+  # Whether to deploy the postgresl operator.
+  # In general, we recommend installing the operator globally in production.
   deploy: true
-  # hostname and port of an existing database to use.
+  #- hostname and port of an existing database to use.
   existingDatabase:
   galaxyDatabaseUser: galaxydbuser
   galaxyConnectionParams: ""
@@ -306,17 +340,25 @@ postgresql:
         name: '{{default (printf "%s-galaxy-secrets" .Release.Name) .Values.galaxyExistingSecret}}'
         key: '{{default "galaxy-db-password" .Values.galaxyExistingSecretKeyRef}}'
 
+#- Configuration block for reference data
 refdata:
+  #- Whether or not to mount cloud-hosted Galaxy reference data and tools.
   enabled: true
+  #- `s3fs` or `cvmfs`, determines the CSI to use for mounting reference data.
+  #-`cvmfs` is the default and recommended for the time being.
   type: cvmfs
   pvc:
     size: 10Gi
 
+#- Configuration block if `cvmfs` is used as `refdata.type`
 cvmfs:
+  #- Deploy the Galaxy-CVMFS-CSI Helm Chart. This is an optional dependency, and for production scenarios it should be deployed separately as a cluster-wide resource
   deploy: true
   storageClassName: "{{ .Release.Name }}-cvmfs"
 
+#- Configuration block if `s3csi` is used as the `refdata.type`
 s3csi:
+  #- Deploy the CSI-S3 Helm Chart. This is an optional dependency, and for production scenarios it should be deployed separately as a cluster-wide resource.
   deploy: false
   images:
     csi: cloudve/csi-s3:0.31.3
@@ -335,11 +377,11 @@ s3csi:
     usePrefix: true
     prefix: /galaxy/v1/data.galaxyproject.org
 
-# When this flag is set to true, all configs will be set in secrets,
-# when it is set to false, all configs will be set in configmaps
+#- When this flag is set to true, all configs will be set in secrets,
+#- when it is set to false, all configs will be set in configmaps
 useSecretConfigs: false
 
-# All files will be relative to `/galaxy/server/config/` directory
+#- All config files will be relative to `/galaxy/server/config/` directory
 configs:
   job_conf.yml:
     runners:
@@ -388,13 +430,16 @@ configs:
           rules_module: tpv.rules
           docker_default_container_id: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           tpv_config_files:
-            - https://raw.githubusercontent.com/galaxyproject/tpv-shared-database/main/tools.yml
+            - https://gxy.io/tpv/db.yml
             - lib/galaxy/jobs/rules/tpv_rules_local.yml
 #     limits:
 #     - type: registered_user_concurrent_jobs
 #       value: 5
 #     - type: anonymous_user_concurrent_jobs
 #       value: 2
+
+  #- Galaxy configuration. See the [Galaxy documentation](https://docs.galaxyproject.org/en/master/admin/config.html)
+  #- for more information.
   galaxy.yml:
     galaxy:
       galaxy_url_prefix: "{{ .Values.ingress.path }}"
@@ -411,7 +456,7 @@ configs:
       sanitize_allowlist_file: "/galaxy/server/config/mutable/sanitize_allowlist.txt"
       tool_config_file: "/galaxy/server/config/tool_conf.xml{{if .Values.setupJob.downloadToolConfs.enabled}},{{ .Values.setupJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_conf.xml{{end}}"
       shed_tool_config_file: "/galaxy/server/config/mutable/editable_shed_tool_conf.xml"
-      enable_tool_document_cache: true
+      enable_tool_document_cache: false
       tool_data_table_config_path: |-
         {{ if .Values.setupJob.downloadToolConfs.enabled }}
         {{- .Values.setupJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_data_table_conf.xml
@@ -499,11 +544,13 @@ configs:
   tool_conf.xml: |
     {{- (.Files.Get "files/configs/tool_conf.xml") }}
 
-# Additional dynamic rules to map into the container.
+#- Additional dynamic rules to map into the container.
 jobs:
   priorityClass:
+    #- Assign a [priorityClass](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#priorityclass) to the dispatched jobs.
     enabled: true
     existingClass: ""
+    value: -1000
   rules:
     tpv_rules_local.yml:
       global:
@@ -578,7 +625,7 @@ extraFileMappings:
       <html lang="en">
           <head>
               <meta charset="utf-8">
-              <link rel="stylesheet" href="style/base.css" type="text/css" />
+              <link rel="stylesheet" href="dist/base.css" type="text/css" />
           </head>
           <body class="m-0">
               <div class="py-4">
@@ -642,7 +689,7 @@ tusd:
     fsGroup: 101
   image:
     repository: tusproject/tusd
-    tag: v1.9.1
+    tag: v1.13.0
     pullPolicy: IfNotPresent
   ingress:
     enabled: true

@@ -80,6 +80,17 @@ Return the postgresql database name to use
 {{- end -}}
 
 {{/*
+Return the rabbitmq cluster to use
+*/}}
+{{- define "galaxy-rabbitmq.fullname" -}}
+{{- if .Values.rabbitmq.existingCluster -}}
+{{- printf "%s" .Values.rabbitmq.existingCluster -}}
+{{- else -}}
+{{- printf "%s-%s-server" .Release.Name .Values.rabbitmq.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Add a trailing slash to a given path, if missing
 */}}
 {{- define "galaxy.add_trailing_slash" -}}
@@ -150,8 +161,8 @@ cp -anL /galaxy/server/config/sanitize_allowlist.txt /galaxy/server/config/mutab
 cp -anL /galaxy/server/config/data_manager_conf.xml.sample /galaxy/server/config/mutable/shed_data_manager_conf.xml;
 cp -anL /galaxy/server/config/tool_data_table_conf.xml.sample /galaxy/server/config/mutable/shed_tool_data_table_conf.xml;
 cp -aruL /galaxy/server/tool-data {{.Values.persistence.mountPath}}/;
-cp -aruL /galaxy/server/tools {{.Values.persistence.mountPath}}/tools | true;
-echo "Done" > /galaxy/server/config/mutable/init_mounts_done_{{.Release.Revision}}
+cp -aruL /galaxy/server/tools {{.Values.persistence.mountPath}}/;
+echo "Done" > /galaxy/server/config/mutable/init_mounts_done_{{.Release.Revision}};
 {{- end -}}
 
 {{/*
@@ -159,12 +170,30 @@ Creates the bash command for the handlers to wait for init scripts
 */}}
 {{- define "galaxy.init-container-wait-command" -}}
 until [ -f /galaxy/server/config/mutable/db_init_done_{{$.Release.Revision}} ]; do echo "waiting for DB initialization"; sleep 1; done;
-until [ -f /galaxy/server/config/mutable/init_mounts_done_{{$.Release.Revision}} ]; do echo "waiting for copying onto NFS"; sleep 1; done;
-{{ if .Values.initJob.downloadToolConfs.enabled }}
-until [ -f /galaxy/server/config/mutable/init_clone_done_{{$.Release.Revision}} ]; do echo "waiting for CVMFS copying"; sleep 1; done;
+{{- if $.Values.rabbitmq.enabled }}
+until timeout 1 bash -c "echo > /dev/tcp/{{ template "galaxy-rabbitmq.fullname" $ }}/{{.Values.rabbitmq.port}}"; do echo "waiting for rabbitmq service"; sleep 1; done;
 {{- end }}
+until [ -f /galaxy/server/config/mutable/init_mounts_done_{{$.Release.Revision}} ]; do echo "waiting for copying onto NFS"; sleep 1; done;
+{{- if .Values.setupJob.downloadToolConfs.enabled }}
+until [ -f /galaxy/server/config/mutable/init_clone_done_{{$.Release.Revision}} ]; do echo "waiting for refdata copying"; sleep 1; done;
+{{- end }}
+echo "Initialization waits complete";
 {{- end -}}
 
+{{/*
+Creates shell commands for downloading and extracting archives if modified
+*/}}
+{{- define "galaxy.extract-archive-if-changed-command" -}}
+if [ -f {{ .extractPath }}/{{ base .downloadUrl }}_timestamp ]; then
+  echo "File {{ .downloadUrl }} previously downloaded. Only downloading if changed, to {{ .extractPath }}...";
+  wget -qO- --header="If-Modified-Since: `cat {{ .extractPath }}/{{ base .downloadUrl }}_timestamp`" {{ .downloadUrl }} | tar -xvz || echo File not changed, ignoring....;
+else
+  echo "File not previously downloaded. Downloading and extracting {{ .downloadUrl }} to {{ .extractPath }}...";
+  wget -qO- {{ .downloadUrl }} | tar -xvz || exit 1;
+fi;
+wget --server-response --spider {{ .downloadUrl }} 2>&1 | grep -i "Last-Modified: " | cut -c18- > {{ .extractPath }}/{{ base .downloadUrl }}_timestamp;
+echo "Completed download and extraction of: {{ .downloadUrl }}"
+{{- end -}}
 
 
 {{/*
@@ -207,6 +236,24 @@ Define pod env vars
                 secretKeyRef:
                   name: "{{ .Release.Name }}-galaxy-secrets"
                   key: "galaxy-config-id-secret"
+            - name: PYTHONPATH
+              value: /galaxy/server/lib
+            - name: GALAXY_CONFIG_FILE
+              value: /galaxy/server/config/galaxy.yml
+{{- if .Values.rabbitmq.enabled }}
+            - name: GALAXY_RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .Values.rabbitmq.existingSecret . }}
+                  key: username
+            - name: GALAXY_RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl .Values.rabbitmq.existingSecret . }}
+                  key: password
+            - name: GALAXY_CONFIG_OVERRIDE_AMQP_INTERNAL_CONNECTION
+              value: {{ .Values.rabbitmq.protocol }}://$(GALAXY_RABBITMQ_USERNAME):$(GALAXY_RABBITMQ_PASSWORD)@{{ template "galaxy-rabbitmq.fullname" . }}:{{ .Values.rabbitmq.port }}
+{{- end }}
 {{- end -}}
 
 
@@ -215,7 +262,7 @@ Define pod priority class
 */}}
 {{- define "galaxy.pod-priority-class" -}}
 {{- if .Values.jobs.priorityClass.existingClass -}}
-{{- printf "%s" .Values.jobs.priorityClass.existingClass -}}
+{{- tpl .Values.jobs.priorityClass.existingClass . -}}
 {{- else -}}
 {{- printf "%s-job-priority" (include "galaxy.fullname" .) -}}
 {{- end -}}
@@ -234,7 +281,7 @@ Define extra persistent volumes
               {{- if $mount.name }}
                 {{- if (eq $entry.name $mount.name) }}
                   {{- if $mount.mountPath -}}
-                    ,{{- $entry.persistentVolumeClaim.claimName -}}:{{- $mount.mountPath -}}
+                    ,{{- tpl $entry.persistentVolumeClaim.claimName $ -}}:{{- tpl $mount.mountPath $ -}}
                   {{- end }}
                 {{- end }}
               {{- end }}

@@ -29,7 +29,6 @@ special_cases = {
     'extraInitContainers': 'extraInitContainers.[]',
     'extraEnv': 'extraInitContainers.[]',
     'jobs\\.rules\\..*': 'jobs.rules',
-    'cvmfs\\.galaxyPersistentVolumeClaims\\..*': 'cvmfs.galaxyPersistentVolumeClaims.{}',
     'jobHandlers\\..*': 'jobHandlers.{}',
     'webHandlers\\..*': 'webHandlers.{}',
     'workflowHandlers\\..*': 'workflowHandlers.{}',
@@ -48,10 +47,12 @@ README_ORDER = ["fullnameOverride",
                 "useSecretConfigs",
                 "configs.",
                 "jobs.",
-                "cvmfs.deploy",
-                "cvmfs.enabled",
-                "cvmfs.",
-                "initJob.",
+                "refdata.deploy",
+                "refdata.enabled",
+                "cvmfs",
+                "s3csi",
+                "refdata.",
+                "setupJob.",
                 "ingress.",
                 "service.",
                 "serviceAccount.",
@@ -68,14 +69,20 @@ README_ORDER = ["fullnameOverride",
                 "extraInitContainers.",
                 "extraVolumeMounts.",
                 "extraVolumes.",
-                "postgresql.",
+                "celery.",
+                "celeryBeat.",
                 "influxdb.",
                 "metrics.",
                 "nginx.",
+                "postgresql.",
+                "s3csi.",
+                "tusd.",
+                "rabbitmq",
+                "trainingHook",
                 ]
 
 # Entries that should be ignored.
-ignored = [ 'cvmfs.repositories', 'cvmfs.cache']
+ignored = [ 'startupProbe', 'readinesProbe', 'livenessProbe' ]
 
 longest_key = -1
 longest_desc = -1
@@ -117,6 +124,8 @@ def print_table():
                 numbered_order[full_key] = i
     for key in sorted(set(key_list), key=lambda d: numbered_order[d]):
         print_table_row(key)
+    # for key in README_ORDER:
+    #     print_table_row(key)
 
 # Prints a single row in the table.
 def print_table_row(key):
@@ -153,7 +162,7 @@ def parse_value(key, value, label=None):
         record_key('postgresql.enabled')
         return
 
-    if label in ignored:
+    if label in ignored or key in ignored:
         # print(f"Ignoring {label}")
         return
 

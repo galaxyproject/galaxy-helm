@@ -1,0 +1,22 @@
+{{- if .Values.refdata.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "galaxy.fullname" $ }}-refdata-gxy-pvc
+  labels:
+    {{- include "galaxy.labels" $ | nindent 4 }}
+spec:
+  accessModes:
+  - ReadOnlyMany
+  resources:
+    requests:
+      storage: {{ .Values.refdata.pvc.size }}
+{{- if eq $.Values.refdata.type "s3csi" }}
+  volumeName: {{ include "galaxy.fullname" $ }}-refdata-gxy-pv
+  storageClassName: {{ .Values.s3csi.storageClass.name }}
+{{- end }}
+{{- if eq $.Values.refdata.type "cvmfs" }}
+  storageClassName: {{ tpl .Values.cvmfs.storageClassName . }}
+{{- end }}
+---
+{{- end }}

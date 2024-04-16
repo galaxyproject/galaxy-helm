@@ -41,7 +41,7 @@ spec:
         - name: {{ .Chart.Name }}-wait-db
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ['sh', '-c', '{{ include "galaxy.init-container-wait-command" . }} sleep {{ .Values.workflowHandlers.startupDelay }};']
+          args: ['sh', '-c', '{{ include "galaxy.init-container-wait-command" . }} sleep {{ .Values.workflowHandlers.startupDelay }};']
           volumeMounts:
             - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/
@@ -64,13 +64,12 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
           {{ include "galaxy.podEnvVars" . }}
-          command: [
+          args: [
             'sh', '-c',
             '{{- if .Values.extraInitCommands -}}
              {{- tpl .Values.extraInitCommands $ | nindent 13 -}};
              {{- end -}}
-             python /galaxy/server/scripts/galaxy-main -c /galaxy/server/config/galaxy.yml --server-name workflow_scheduler0']
-          args: []
+             python /galaxy/server/scripts/galaxy-main -c $GALAXY_CONFIG_FILE --server-name workflow_scheduler0']
           {{- if .Values.workflowHandlers.startupProbe.enabled }}
           startupProbe:
             exec:
@@ -135,19 +134,22 @@ spec:
               subPath: config
             - name: galaxy-data
               mountPath: {{ .Values.persistence.mountPath }}
-            {{- if .Values.initJob.downloadToolConfs.enabled }}
+            {{- if .Values.setupJob.downloadToolConfs.enabled }}
             - name: galaxy-data
-              mountPath: {{ .Values.initJob.downloadToolConfs.volume.mountPath }}
-              subPath: {{ .Values.initJob.downloadToolConfs.volume.subPath }}
+              mountPath: {{ .Values.setupJob.downloadToolConfs.volume.mountPath }}
+              subPath: {{ .Values.setupJob.downloadToolConfs.volume.subPath }}
             {{- end }}
-            {{- if .Values.cvmfs.enabled }}
-            {{- range $key, $entry := .Values.cvmfs.galaxyPersistentVolumeClaims }}
-            - name: cvmfs-gxy-{{ $key }}
-              mountPath: {{ $entry.mountPath }}
-            {{- end -}}
+            {{- if .Values.refdata.enabled }}
+            - name: refdata-gxy
+              mountPath: /cvmfs/data.galaxyproject.org
+              subPath: data.galaxyproject.org
+            {{- if eq .Values.refdata.type "cvmfs" }}
+              # CVMFS automount volumes must be mounted with HostToContainer mount propagation.
+              mountPropagation: HostToContainer
+            {{- end }}
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
-            {{- .Values.extraVolumeMounts | toYaml | nindent 12 }}
+            {{- tpl (.Values.extraVolumeMounts | toYaml | nindent 12) . }}
             {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
@@ -185,15 +187,13 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
-        {{- if .Values.cvmfs.enabled }}
-        {{- range $key, $entry := .Values.cvmfs.galaxyPersistentVolumeClaims }}
-        - name: cvmfs-gxy-{{ $key }}
+        {{- if .Values.refdata.enabled }}
+        - name: refdata-gxy
           persistentVolumeClaim:
-            claimName: {{ template "galaxy.fullname" $ -}}-cvmfs-gxy-{{ $key }}-pvc
-        {{- end }}
+            claimName: {{ template "galaxy.fullname" $ -}}-refdata-gxy-pvc
         {{- end }}
         {{- if .Values.extraVolumes }}
-        {{- .Values.extraVolumes | toYaml | nindent 8 }}
+        {{- tpl (.Values.extraVolumes | toYaml | nindent 8) . }}
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

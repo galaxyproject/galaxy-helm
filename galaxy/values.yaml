@@ -524,6 +524,9 @@ configs:
     toolshed.g2.bx.psu.edu/repos/iuc/snpeff/snpEff/4.3r.1
     toolshed.g2.bx.psu.edu/repos/iuc/snpeff/snpEff/4.3+T.galaxy2
     toolshed.g2.bx.psu.edu/repos/iuc/snpeff/snpEff/4.3+T.galaxy1
+    toolshed.g2.bx.psu.edu/repos/bgruening/plotly_regression_performance_plots/plotly_regression_performance_plots/0.1
+    toolshed.g2.bx.psu.edu/repos/bgruening/plotly_parallel_coordinates_plot/plotly_parallel_coordinates_plot/0.2
+    toolshed.g2.bx.psu.edu/repos/bgruening/plotly_parallel_coordinates_plot/plotly_parallel_coordinates_plot/0.1
   build_sites.yml:
     - type: ucsc
       file: "{{if .Values.refdata.enabled}}/cvmfs/data.galaxyproject.org/managed/location/ucsc_build_sites.txt{{else}}/galaxy/server/tool-data/shared/ucsc/ucsc_build_sites.txt.sample{{end}}"

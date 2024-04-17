@@ -20,7 +20,7 @@ jobs:
     name: Package and push from PR
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
            persist-credentials: false
       - uses: cloudve/helm-ci@master
@@ -36,7 +36,7 @@ jobs:
     name: Package and push manual invocation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
            persist-credentials: false
       - uses: cloudve/helm-ci@master

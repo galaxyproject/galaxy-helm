@@ -56,6 +56,9 @@ jobs:
       && contains(needs.*.result, 'success')
       && !contains(needs.*.result, 'failure')
     steps:
+      - uses: actions/checkout@v2
+        with:
+           persist-credentials: false
       - name: Tag and release
         run: |
           version=v$(cat galaxy/Chart.yaml | grep ^version: | awk '{print $2}')

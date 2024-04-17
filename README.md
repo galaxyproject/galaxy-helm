@@ -1,4 +1,4 @@
-# Galaxy Helm Chart (v4)
+# Galaxy Helm Chart (v5)
 
 [Galaxy](https://galaxyproject.org/) is a data analysis platform focusing on
 accessibility, reproducibility, and transparency of primarily bioinformatics
@@ -8,7 +8,7 @@ updates, upgrades, and rollbacks.
 
 ## Supported software versions
 
-- Kubernetes 1.22+
+- Kubernetes 1.27+
 - Helm 3.5+
 
 ## Kubernetes cluster
@@ -495,12 +495,3 @@ The following fields can be specified for each file.
 See the `example` cron job included in the `values.yaml` file for a full example.
 
 
-## Funding
-
-- _Version 3+_: Galaxy Project, Genomics Virtual Laboratory (GVL)
-
-- _Version 2_: Genomics Virtual Laboratory (GVL), Galaxy Project, and European
-  Commission (EC) H2020 Project PhenoMeNal, grant agreement number 654241.
-
-- _Version 1_: European Commission (EC) H2020 Project PhenoMeNal, grant
-  agreement number 654241.

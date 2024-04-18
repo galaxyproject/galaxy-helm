@@ -1,6 +1,6 @@
 {{- if and .Values.refdata.enabled (eq .Values.refdata.type "cvmfs") }}
-  # Include the code you want to run when both conditions are met
 ---
+# Include the code you want to run when both conditions are met
 apiVersion: batch/v1
 kind: Job
 metadata:

@@ -61,6 +61,8 @@ jobs:
            persist-credentials: false
       - name: Tag and release
         run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
           version=v$(cat galaxy/Chart.yaml | grep ^version: | awk '{print $2}')
           git tag -a $version -m "Automatic release of $version"
           git push origin $version

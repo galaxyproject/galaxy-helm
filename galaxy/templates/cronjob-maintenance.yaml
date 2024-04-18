@@ -7,7 +7,11 @@ metadata:
   labels:
     {{- include "galaxy.labels" $ | nindent 4 }}
 spec:
+  {{- if $cronjob.enabled }}
   schedule: {{ $cronjob.schedule | quote }}
+  {{- else }}
+  schedule: "0 0 30 2 *"
+  {{- end }}
   jobTemplate:
     spec:
       template:

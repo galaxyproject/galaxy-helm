@@ -272,6 +272,7 @@ cronJobs:
   #- Runs the maintenance.sh script to purge items in the Galaxy database that
   #- have been flagged as deleted.
   maintenance:
+    enabled: true
     schedule: "5 2 * * *"
     extraSettings:
       #- Purge items older than this.
@@ -287,6 +288,7 @@ cronJobs:
       - "{{ tpl .Values.cronJobs.maintenance.extraSettings.days $ }}"
   #- Remove files from the tmp directory that are older than the allowable wall time for a job
   tmpdir:
+    enabled: true
     schedule: "15 2 * * *"
     extraSettings:
       lastModified: '{{ index .Values "configs" "job_conf.yml" "runners" "k8s" "k8s_walltime_limit" | default 604800 }}'

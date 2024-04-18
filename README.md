@@ -34,17 +34,39 @@ helm upgrade --install ingress-nginx ingress-nginx \
 This chart relies on the features of other charts for common functionality:
 - [postgres-operator](https://github.com/zalando/postgres-operator) for the
   database;
-- [CSI-S3 chart](https://github.com/ctrox/csi-s3/pull/75/) for linking the
-  reference data to Galaxy and jobs based on S3FS.
+- [galaxy-cvmfs-csi](https://github.com/CloudVE/galaxy-cvmfs-csi-helm) for linking the
+  reference data to Galaxy and jobs based on CVMFS (default).
+- [csi-s3](https://github.com/ctrox/csi-s3/pull/75/) for linking
+  reference data to Galaxy and jobs based on S3FS (optional/alternative to CVMFS).
+- [rabbitmq-cluster-operator](https://github.com/rabbitmq/cluster-operator) for deploying
+  the message queue.
 
 In a production setting, especially if the intention is to run multiple Galaxies
 in a single cluster, we recommend installing the dependency charts separately
 once per cluster, and installing Galaxy with `--set postgresql.deploy=false
---set s3csi.deploy=false`.
+--set s3csi.deploy=false --set cvmfs.deploy=false --set rabbitmq.deploy=false`.
 
 ---
 
 ## Installing the chart
+
+### Using the chart from the packaged chart repo
+
+1. The chart is automatically packaged, versioned and uploaded to a helm repository
+on each accepted PR. Therefore, the latest version of the chart can be downloaded
+from this repository.
+
+```console
+helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/master/
+helm repo update
+```
+
+2. Install the chart with the release name `my-galaxy`. It is not advisable to
+   install Galaxy in the `default` namespace.
+
+```console
+helm install my-galaxy-release cloudve/galaxy
+```
 
 ### Using the chart from GitHub repo
 
@@ -67,25 +89,6 @@ helm install --create-namespace -n galaxy my-galaxy . --set persistence.accessMo
 In several minute, Galaxy will be available at `/galaxy/` URL of your Kubernetes
 cluster. If you are running the development Kubernetes, Galaxy will be available
 at `http://localhost/galaxy/` (note the trailing slash).
-
-### Using the chart from the packaged chart repo
-
-1. Instead of using the source code repo, you can install the packaged version
-of the chart and hence not need to clone this GitHub repo. The packaged version
-may contain a bit older but possibly more stable code than what is the GitHub
-repo at any a given point in time.
-
-```console
-helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/master/
-helm repo update
-```
-
-2. Install the chart with the release name `my-galaxy`. It is not advisable to
-   install Galaxy in the `default` namespace.
-
-```console
-helm install my-galaxy-release cloudve/galaxy
-```
 
 ## Uninstalling the chart
 

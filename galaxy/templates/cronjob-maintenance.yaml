@@ -10,6 +10,8 @@ spec:
   {{- if $cronjob.enabled }}
   schedule: {{ $cronjob.schedule | quote }}
   {{- else }}
+  # Set an impossible date so that the cronjob is still defined, but effectively disabled. 
+  #  This will allow the cronjob to be run manually if needed.
   schedule: "0 0 30 2 *"
   {{- end }}
   jobTemplate:

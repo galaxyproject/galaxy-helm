@@ -51,14 +51,14 @@ jobs:
     needs: [ package-from-pr, package-from-manual ]
     name: Create a tag and GitHub release for this version.
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
     if: |
       always() 
       && contains(needs.*.result, 'success')
       && !contains(needs.*.result, 'failure')
     steps:
       - uses: actions/checkout@v4
-        with:
-           persist-credentials: false
       - name: Tag and release
         run: |
           git config user.name "GitHub Actions Bot"

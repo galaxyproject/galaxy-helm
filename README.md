@@ -438,12 +438,11 @@ or by specifying the `schedule` on the command line when instaling Galaxy:
 # Schedule the maintenance job to run at 06:30 on the first day of each month
 helm install galaxy -n galaxy galaxy/galaxy --set cronJobs.maintenance.schedule="30 6 1 * *"
 ```
-To disable a cron job after Galaxy has been deployed simply set the schedule to a date that
-can never occur such as midnight on Februrary 30th:
+To disable a cron job after Galaxy has been deployed simply set the enabled flag for that job to false:
 
 
 ```bash
-helm upgrade galaxy -n galaxy galaxy/galaxy --reuse-values --set cronJobs.maintenance.schedule="0 0 30 2 *"
+helm upgrade galaxy -n galaxy galaxy/galaxy --reuse-values --set cronJobs.maintenance.enabled=false
 ```
 
 ### Run a CronJob manually
@@ -464,6 +463,7 @@ The following fields can be specified when defining cron jobs.
 
 | Name | Definition                                                                                                                                | Required |
 |---|-------------------------------------------------------------------------------------------------------------------------------------------|----------|
+| enabled | `true` or `false`.  If `false` the cron job will not be run.  Default is `true` | **Yes**  |
 | schedule | When the job will be run.  Use tools such as [crontab.guru](https://crontab.guru) for assistance determining the proper schedule string   | **Yes**  |
 | defaultEnv | `true` or `false`. See the `galaxy.podEnvVars` macro in `_helpers.tpl` for the list of variables that will be defined. Default is `false` | No       |
 | extraEnv | Define extra environment variables that will be available to the job | No       |
@@ -471,7 +471,7 @@ The following fields can be specified when defining cron jobs.
 | image | Specify the Docker container used to run the job | No       |
 | command | The command to run | **Yes**  |
 | args | Any command line arguments that should be passed to the `command` | No       |
-| extraFileMappings | Allow arbitrary files to be mounted from config maps | No |
+| extraFileMappings | Allow arbitrary files to be mounted from config maps | No       |
 
 ### Notes
 

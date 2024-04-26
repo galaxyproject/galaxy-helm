@@ -59,6 +59,8 @@ jobs:
       && !contains(needs.*.result, 'failure')
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
       - name: Tag and release
         run: |
           git config user.name "GitHub Actions Bot"

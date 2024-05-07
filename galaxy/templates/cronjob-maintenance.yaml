@@ -1,47 +1,118 @@
+{{ range $key, $cronjob := .Values.cronJobs }}
+---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ include "galaxy.fullname" . }}-maintenance
+  name: {{ include "galaxy.fullname" $ }}-cron-{{ $key }}
   labels:
-    {{- include "galaxy.labels" . | nindent 4 }}
+    {{- include "galaxy.labels" $ | nindent 4 }}
 spec:
-  schedule: "0 2 * * *"
+  {{- if $cronjob.enabled }}
+  schedule: {{ $cronjob.schedule | quote }}
+  {{- else }}
+  # Set an impossible date so that the cronjob is still defined, but effectively disabled. 
+  #  This will allow the cronjob to be run manually if needed.
+  schedule: "0 0 30 2 *"
+  {{- end }}
   jobTemplate:
     spec:
       template:
         spec:
+          {{- if $cronjob.securityContext }}
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          {{- with .Values.nodeSelector }}
+            {{- toYaml $cronjob.securityContext | nindent 12 }}
+          {{- end}}
+          {{- if $cronjob.nodeSelector }}
           nodeSelector:
-            {{- toYaml . | nindent 16 }}
+            {{- toYaml $cronjob.nodeSelector | nindent 12 }}
+          {{- else if $.Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml $.Values.nodeSelector | nindent 12 }}
           {{- end }}
           containers:
-          - name: galaxy-maintenance
-            image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-            imagePullPolicy: {{ .Values.image.pullPolicy }}
-            # delete all tmp files older than walltime limit
+          - name: galaxy-cron-{{ $key }}
+            {{- if $cronjob.image }}
+            image: {{ $cronjob.image.repository }}:{{ $cronjob.image.tag }}
+            {{- else }}
+            image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+            {{- end }}
+            imagePullPolicy: {{ $.Values.image.pullPolicy }}
+            {{- if or $cronjob.defaultEnv $cronjob.extraEnv }}
+            env:
+            {{- if $cronjob.defaultEnv }}
+            {{- include "galaxy.podEnvVars" $}}
+            {{- end }}
+            {{- if $cronjob.extraEnv }}
+            {{- range $env := $cronjob.extraEnv }}
+            - name: {{ $env.name }}
+              value: {{ tpl $env.value $ | quote }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
             command:
-              - find
-              - {{ .Values.persistence.mountPath }}/tmp
-              - '!'
-              - -newermt
-              - -{{ (index .Values "configs" "job_conf.yml" "runners" "k8s" "k8s_walltime_limit" | default 604800) }} seconds
-              - -type
-              - f
-              - -exec
-              - rm
-              - '{}'
-              - ;
+            {{- range $cmd := $cronjob.command }}
+              - {{ tpl $cmd $ | quote }}
+            {{- end}}
+            {{- if $cronjob.args }}
+            args:
+              {{- range $arg := $cronjob.args }}
+              - {{ tpl $arg $ | quote }}
+              {{- end }}
+            {{- end }}
             volumeMounts:
             - name: galaxy-data
-              mountPath: {{ .Values.persistence.mountPath }}
+              mountPath: {{ $.Values.persistence.mountPath }}
+            {{- range $key, $entry := $cronjob.extraFileMappings }}
+            - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
+              mountPath: {{ $key }}
+              subPath: {{ include "galaxy.getFilenameFromPath" $key }}
+            {{- end }}
           volumes:
           - name: galaxy-data
-            {{- if .Values.persistence.enabled }}
+            {{- if $.Values.persistence.enabled }}
             persistentVolumeClaim:
-              claimName: {{ template "galaxy.pvcname" . }}
+              claimName: {{ template "galaxy.pvcname" $ }}
             {{- else }}
             emptyDir: {}
             {{- end }}
+          {{- range $key, $entry := $cronjob.extraFileMappings }}
+          - name: {{ include "galaxy.getExtraFilesUniqueName" $key }}
+            {{- if $entry.useSecret }}
+            secret:
+              secretName: {{ printf "%s-%s" (include "galaxy.fullname" $) (include "galaxy.getExtraFilesUniqueName" $key) }}
+            {{- else }}
+            configMap:
+              name: {{ printf "%s-%s" (include "galaxy.fullname" $) (include "galaxy.getExtraFilesUniqueName" $key) }}
+            {{- end }}
+            {{- if $entry.mode }}
+              defaultMode: {{ $entry.mode }}
+            {{- end }}
+          {{- end }}
           restartPolicy: OnFailure
+{{- if $cronjob.extraFileMappings }}
+{{- range $name, $entry := $cronjob.extraFileMappings }}
+---
+apiVersion: v1
+metadata:
+  # Extract the filename portion only
+  name: {{ printf "%s-%s" (include "galaxy.fullname" $) (include "galaxy.getExtraFilesUniqueName" $name) }}
+  labels:
+    {{- include "galaxy.labels" $ | nindent 4 }}
+{{- if $entry.useSecret }}
+kind: Secret
+type: Opaque
+stringData:
+{{- else }}
+kind: ConfigMap
+data:
+{{- end }}
+  {{- include "galaxy.getFilenameFromPath" $name | nindent 2 }}: |
+  {{- if $entry.tpl }}
+    {{- tpl (tpl $entry.content $) $ | nindent 4 }}
+  {{- else }}
+    {{- $entry.content | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }}
+
+{{- end }}

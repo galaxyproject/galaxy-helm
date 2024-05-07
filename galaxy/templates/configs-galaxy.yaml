@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 metadata:
   name: {{ include "galaxy.fullname" . }}-configs

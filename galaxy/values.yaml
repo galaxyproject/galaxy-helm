@@ -474,7 +474,8 @@ configs:
           {{ template "galaxy.pvcname" . -}}/config:{{ .Values.persistence.mountPath -}}/config:r,
           {{- template "galaxy.pvcname" . -}}/tmp:{{ .Values.persistence.mountPath -}}/tmp:rw,
           {{- template "galaxy.pvcname" . -}}/tool-data:{{ .Values.persistence.mountPath -}}/tool-data:r,
-          {{- template "galaxy.pvcname" . -}}/tools:{{ .Values.persistence.mountPath -}}/tools:r
+          {{- template "galaxy.pvcname" . -}}/tools:{{ .Values.persistence.mountPath -}}/tools:r,
+          {{- template "galaxy.pvcname" . -}}/shed_tools:{{ .Values.persistence.mountPath -}}/shed_tools:r
           {{- if .Values.refdata.enabled -}}
           ,{{- template "galaxy.fullname" $ -}}-refdata-gxy-pvc/data.galaxyproject.org:/cvmfs/data.galaxyproject.org:r
           {{- end -}}

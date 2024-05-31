@@ -466,6 +466,28 @@ configs:
       k8s:
         load: galaxy.jobs.runners.kubernetes:KubernetesJobRunner
         k8s_use_service_account: true
+#        k8s_persistent_volume_claims: |-
+#          {{ template "galaxy.pvcname" . -}}:{{ .Values.persistence.mountPath -}}
+#          {{- if .Values.refdata.enabled -}}
+#          ,{{- template "galaxy.fullname" $ -}}-refdata-gxy-pvc/data.galaxyproject.org:/cvmfs/data.galaxyproject.org
+#          {{- end -}}
+#          {{- if .Values.setupJob.downloadToolConfs.enabled -}}
+#          ,{{ template "galaxy.pvcname" . -}}/{{ .Values.setupJob.downloadToolConfs.volume.subPath }}:{{ .Values.setupJob.downloadToolConfs.volume.mountPath -}}
+#          {{- end -}}
+#          {{- if .Values.extraVolumes -}}
+#          {{- template "galaxy.extra_pvc_mounts" . -}}
+#          {{- end }}
+#          {{- template "galaxy.pvcname" . -}}/celery-beat-schedule:{{ .Values.persistence.mountPath -}}/celery-beat-schedule,
+#          {{- template "galaxy.pvcname" . -}}/cache:{{ .Values.persistence.mountPath -}}/cache,
+#          {{- template "galaxy.pvcname" . -}}/cvmfsclone:{{ .Values.persistence.mountPath -}}/cvmfsclone,
+#          {{- template "galaxy.pvcname" . -}}/deps:{{ .Values.persistence.mountPath -}}/deps,
+#          {{- template "galaxy.pvcname" . -}}/jobs_directory:{{ .Values.persistence.mountPath -}}/jobs_directory
+#          {{- template "galaxy.pvcname" . -}}/objects:{{ .Values.persistence.mountPath -}}/objects,
+#          {{- template "galaxy.pvcname" . -}}/tool_search_index:{{ .Values.persistence.mountPath -}}/tool_search_index
+#          {{- template "galaxy.pvcname" . -}}/object_store_cache:{{ .Values.persistence.mountPath -}}/object_store_cache
+#          {{- template "galaxy.pvcname" . -}}/jobs_directory:{{ .Values.persistence.mountPath -}}/jobs_directory,
+
+
         k8s_data_volume_claim: |-
           {{ template "galaxy.pvcname" . -}}:{{ .Values.persistence.mountPath -}}
         k8s_working_volume_claim: |-
@@ -473,9 +495,10 @@ configs:
         k8s_persistent_volume_claims: |-
           {{ template "galaxy.pvcname" . -}}/config:{{ .Values.persistence.mountPath -}}/config:r,
           {{- template "galaxy.pvcname" . -}}/tmp:{{ .Values.persistence.mountPath -}}/tmp:rw,
-          {{- template "galaxy.pvcname" . -}}/tool-data:{{ .Values.persistence.mountPath -}}/tool-data:r,
+          {{- template "galaxy.pvcname" . -}}/tool-data:{{ .Values.persistence.mountPath -}}/tool-data:rw,
           {{- template "galaxy.pvcname" . -}}/tools:{{ .Values.persistence.mountPath -}}/tools:r,
-          {{- template "galaxy.pvcname" . -}}/shed_tools:{{ .Values.persistence.mountPath -}}/shed_tools:r
+          {{- template "galaxy.pvcname" . -}}/shed_tools:{{ .Values.persistence.mountPath -}}/shed_tools:r,
+          {{- template "galaxy.pvcname" . -}}/objects:{{ .Values.persistence.mountPath -}}/objects
           {{- if .Values.refdata.enabled -}}
           ,{{- template "galaxy.fullname" $ -}}-refdata-gxy-pvc/data.galaxyproject.org:/cvmfs/data.galaxyproject.org:r
           {{- end -}}

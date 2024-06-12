@@ -466,20 +466,13 @@ configs:
       k8s:
         load: galaxy.jobs.runners.kubernetes:KubernetesJobRunner
         k8s_use_service_account: true
-        k8s_data_volume_claim: |-
-          {{ template "galaxy.pvcname" . -}}:{{ .Values.persistence.mountPath -}}:r
-        k8s_working_volume_claim: |-
-          {{ template "galaxy.pvcname" . -}}:{{ .Values.persistence.mountPath -}}
         k8s_persistent_volume_claims: |-
-          {{ template "galaxy.pvcname" . -}}/config:{{ .Values.persistence.mountPath -}}/config:r,
-          {{- template "galaxy.pvcname" . -}}/tmp:{{ .Values.persistence.mountPath -}}/tmp:rw,
-          {{- template "galaxy.pvcname" . -}}/tool-data:{{ .Values.persistence.mountPath -}}/tool-data:r,
-          {{- template "galaxy.pvcname" . -}}/tools:{{ .Values.persistence.mountPath -}}/tools:r
+          {{ template "galaxy.pvcname" . -}}:{{ .Values.persistence.mountPath -}}
           {{- if .Values.refdata.enabled -}}
-          ,{{- template "galaxy.fullname" $ -}}-refdata-gxy-pvc/data.galaxyproject.org:/cvmfs/data.galaxyproject.org:r
+          ,{{- template "galaxy.fullname" $ -}}-refdata-gxy-pvc/data.galaxyproject.org:/cvmfs/data.galaxyproject.org
           {{- end -}}
           {{- if .Values.setupJob.downloadToolConfs.enabled -}}
-          ,{{ template "galaxy.pvcname" . -}}/{{ .Values.setupJob.downloadToolConfs.volume.subPath }}:{{ .Values.setupJob.downloadToolConfs.volume.mountPath -}}:r
+          ,{{ template "galaxy.pvcname" . -}}/{{ .Values.setupJob.downloadToolConfs.volume.subPath }}:{{ .Values.setupJob.downloadToolConfs.volume.mountPath -}}
           {{- end -}}
           {{- if .Values.extraVolumes -}}
           {{- template "galaxy.extra_pvc_mounts" . -}}

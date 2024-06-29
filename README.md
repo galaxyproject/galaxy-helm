@@ -395,6 +395,9 @@ wildcard DNS mapping to `*.its.<host_name>`. To make Interactive Tools work on
 localhost, you can use `dnsmasq` or similar to handle wildcard DNS mappings for
 `*.localhost`.
 
+For linux:
+Follow the instructions here to configure dnsmasq on Linux: https://superuser.com/a/1718296
+
 For mac:
 ```bash
   $ brew install dnsmasq

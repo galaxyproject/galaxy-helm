@@ -416,6 +416,31 @@ For mac:
   $ sudo brew services restart dnsmasq
 ```
 
+For Debian and Ubuntu:
+```bash
+  $ sudo apt update
+  $ sudo apt install -y dnsmasq
+  $ sudo cp /etc/dnsmasq.conf /etc/dnsmasq.conf.backup
+  $ sudo sh -c 'echo "address=/localhost/127.0.0.1" >> /etc/dnsmasq.conf'
+  $ sudo systemctl start dnsmasq
+  $ sudo systemctl enable dnsmasq
+  $ sudo mkdir -p /etc/resolver
+  $ sudo sh -c 'echo "nameserver 127.0.0.1" > /etc/resolver/localhost'
+  $ sudo systemctl restart dnsmasq
+```
+
+For RHEL, Fedora, and Rocky Linux:
+```bash
+  $ sudo dnf install dnsmasq -y
+  $ sudo cp /etc/dnsmasq.conf /etc/dnsmasq.conf.backup
+  $ sudo sh -c 'echo "address=/localhost/127.0.0.1" >> /etc/dnsmasq.conf'
+  $ sudo systemctl start dnsmasq
+  $ sudo systemctl enable dnsmasq
+  $ sudo mkdir -p /etc/resolver
+  $ sudo sh -c 'echo "nameserver 127.0.0.1" > /etc/resolver/localhost'
+  $ sudo systemctl restart dnsmasq
+```
+
 This should make all *.localhost and *.its.localhost map to 127.0.0.1, and ITs
 should work with a regular helm install on localhost.
 

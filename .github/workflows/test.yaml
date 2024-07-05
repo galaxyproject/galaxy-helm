@@ -33,7 +33,7 @@ jobs:
       - name: Start k8s locally
         uses: jupyterhub/action-k3s-helm@v3
         with:
-          k3s-version: v1.26.1+k3s1  # releases:  https://github.com/k3s-io/k3s/tags
+          k3s-version: v1.24.6+k3s1  # releases:  https://github.com/k3s-io/k3s/tags
           metrics-enabled: false
           traefik-enabled: false
       - name: Verify function of k8s, kubectl, and helm

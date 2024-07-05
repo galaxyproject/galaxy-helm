@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 metadata:
   name: {{ include "galaxy.fullname" . }}-configs
@@ -13,10 +14,11 @@ data:
 {{- end }}
   {{- range $key, $entry := .Values.configs -}}
   {{- if $entry -}}
-  {{- $key | nindent 2 }}: |
-  {{- $original := (toYaml $entry) -}}
-  {{- $nomultiline := (regexReplaceAll "^^\\s*\\|\\n*" $original "") -}}
-  {{- $nowhitespace := (regexReplaceAll "{{\\s*([^}\\s]+)\\s*}}" $nomultiline "{{$1}}") -}}
+  {{- $key | nindent 2 -}}: |
+  {{- /* Don't call toYaml on string objects, only on maps or other complex objects. */}}
+  {{- $isStringObject := (kindIs "string" $entry) -}}
+  {{- $original := (ternary $entry (toYaml $entry) $isStringObject) -}}
+  {{- $nowhitespace := (regexReplaceAll "{{\\s*([^}\\s]+)\\s*}}" $original "{{$1}}") -}}
   {{- tpl (tpl $nowhitespace $) $ | nindent 4 -}}
   {{- end -}}
   {{- end -}}

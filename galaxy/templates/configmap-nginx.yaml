@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -78,7 +79,11 @@ data:
                 add_header X-Frame-Options SAMEORIGIN;
                 add_header X-Content-Type-Options nosniff;
             }
-
+{{- if .Values.trainingHook.enabled }}
+            location /training-material/ {
+                proxy_pass {{ .Values.trainingHook.url }};
+            }
+{{- end }}
 
         # end server
         }

@@ -5,6 +5,7 @@ on:
       - master
       - anvil
   pull_request: {}
+  workflow_dispatch: {}
 jobs:
   linting:
     runs-on: ubuntu-latest

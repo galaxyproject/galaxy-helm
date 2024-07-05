@@ -80,6 +80,13 @@ Return the postgresql database name to use
 {{- end -}}
 
 {{/*
+Generate the connection string needed to connect to a Postres database
+*/}}
+{{- define "galaxy-postgresql.connection-string" -}}
+{{- printf "postgresql://%s:%s@%s/galaxy%s" .Values.postgresql.galaxyDatabaseUser (include "galaxy.galaxyDbPassword" .) (include "galaxy-postgresql.fullname" .) .Values.postgresql.galaxyConnectionParams -}}
+{{- end -}}
+
+{{/*
 Return the rabbitmq cluster to use
 */}}
 {{- define "galaxy-rabbitmq.fullname" -}}
@@ -161,7 +168,7 @@ cp -anL /galaxy/server/config/sanitize_allowlist.txt /galaxy/server/config/mutab
 cp -anL /galaxy/server/config/data_manager_conf.xml.sample /galaxy/server/config/mutable/shed_data_manager_conf.xml;
 cp -anL /galaxy/server/config/tool_data_table_conf.xml.sample /galaxy/server/config/mutable/shed_tool_data_table_conf.xml;
 cp -aruL /galaxy/server/tool-data {{.Values.persistence.mountPath}}/;
-cp -aruL /galaxy/server/tools {{.Values.persistence.mountPath}}/tools | true;
+cp -aruL /galaxy/server/tools {{.Values.persistence.mountPath}}/;
 echo "Done" > /galaxy/server/config/mutable/init_mounts_done_{{.Release.Revision}};
 {{- end -}}
 
@@ -171,7 +178,7 @@ Creates the bash command for the handlers to wait for init scripts
 {{- define "galaxy.init-container-wait-command" -}}
 until [ -f /galaxy/server/config/mutable/db_init_done_{{$.Release.Revision}} ]; do echo "waiting for DB initialization"; sleep 1; done;
 {{- if $.Values.rabbitmq.enabled }}
-until timeout 1 bash -c "echo > /dev/tcp/{{ template "galaxy-rabbitmq.fullname" $ }}/5672"; do echo "waiting for rabbitmq service"; sleep 1; done;
+until timeout 1 bash -c "echo > /dev/tcp/{{ template "galaxy-rabbitmq.fullname" $ }}/{{.Values.rabbitmq.port}}"; do echo "waiting for rabbitmq service"; sleep 1; done;
 {{- end }}
 until [ -f /galaxy/server/config/mutable/init_mounts_done_{{$.Release.Revision}} ]; do echo "waiting for copying onto NFS"; sleep 1; done;
 {{- if .Values.setupJob.downloadToolConfs.enabled }}
@@ -252,7 +259,7 @@ Define pod env vars
                   name: {{ tpl .Values.rabbitmq.existingSecret . }}
                   key: password
             - name: GALAXY_CONFIG_OVERRIDE_AMQP_INTERNAL_CONNECTION
-              value: amqp://$(GALAXY_RABBITMQ_USERNAME):$(GALAXY_RABBITMQ_PASSWORD)@{{ template "galaxy-rabbitmq.fullname" . }}
+              value: {{ .Values.rabbitmq.protocol }}://$(GALAXY_RABBITMQ_USERNAME):$(GALAXY_RABBITMQ_PASSWORD)@{{ template "galaxy-rabbitmq.fullname" . }}:{{ .Values.rabbitmq.port }}
 {{- end }}
 {{- end -}}
 
@@ -262,7 +269,7 @@ Define pod priority class
 */}}
 {{- define "galaxy.pod-priority-class" -}}
 {{- if .Values.jobs.priorityClass.existingClass -}}
-{{- printf "%s" .Values.jobs.priorityClass.existingClass -}}
+{{- tpl .Values.jobs.priorityClass.existingClass . -}}
 {{- else -}}
 {{- printf "%s-job-priority" (include "galaxy.fullname" .) -}}
 {{- end -}}

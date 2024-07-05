@@ -1,4 +1,4 @@
-# Galaxy Helm Chart (v4)
+# Galaxy Helm Chart (v5)
 
 [Galaxy](https://galaxyproject.org/) is a data analysis platform focusing on
 accessibility, reproducibility, and transparency of primarily bioinformatics
@@ -8,7 +8,7 @@ updates, upgrades, and rollbacks.
 
 ## Supported software versions
 
-- Kubernetes 1.22+
+- Kubernetes 1.27+
 - Helm 3.5+
 
 ## Kubernetes cluster
@@ -34,17 +34,39 @@ helm upgrade --install ingress-nginx ingress-nginx \
 This chart relies on the features of other charts for common functionality:
 - [postgres-operator](https://github.com/zalando/postgres-operator) for the
   database;
-- [CSI-S3 chart](https://github.com/ctrox/csi-s3/pull/75/) for linking the
-  reference data to Galaxy and jobs based on S3FS.
+- [galaxy-cvmfs-csi](https://github.com/CloudVE/galaxy-cvmfs-csi-helm) for linking the
+  reference data to Galaxy and jobs based on CVMFS (default).
+- [csi-s3](https://github.com/ctrox/csi-s3/pull/75/) for linking
+  reference data to Galaxy and jobs based on S3FS (optional/alternative to CVMFS).
+- [rabbitmq-cluster-operator](https://github.com/rabbitmq/cluster-operator) for deploying
+  the message queue.
 
 In a production setting, especially if the intention is to run multiple Galaxies
 in a single cluster, we recommend installing the dependency charts separately
 once per cluster, and installing Galaxy with `--set postgresql.deploy=false
---set s3csi.deploy=false`.
+--set s3csi.deploy=false --set cvmfs.deploy=false --set rabbitmq.deploy=false`.
 
 ---
 
 ## Installing the chart
+
+### Using the chart from the packaged chart repo
+
+1. The chart is automatically packaged, versioned and uploaded to a helm repository
+on each accepted PR. Therefore, the latest version of the chart can be downloaded
+from this repository.
+
+```console
+helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/master/
+helm repo update
+```
+
+2. Install the chart with the release name `my-galaxy`. It is not advisable to
+   install Galaxy in the `default` namespace.
+
+```console
+helm install my-galaxy-release cloudve/galaxy
+```
 
 ### Using the chart from GitHub repo
 
@@ -68,25 +90,6 @@ In several minute, Galaxy will be available at `/galaxy/` URL of your Kubernetes
 cluster. If you are running the development Kubernetes, Galaxy will be available
 at `http://localhost/galaxy/` (note the trailing slash).
 
-### Using the chart from the packaged chart repo
-
-1. Instead of using the source code repo, you can install the packaged version
-of the chart and hence not need to clone this GitHub repo. The packaged version
-may contain a bit older but possibly more stable code than what is the GitHub
-repo at any a given point in time.
-
-```console
-helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/master/
-helm repo update
-```
-
-2. Install the chart with the release name `my-galaxy`. It is not advisable to
-   install Galaxy in the `default` namespace.
-
-```console
-helm install my-galaxy-release cloudve/galaxy
-```
-
 ## Uninstalling the chart
 
 To uninstall/delete the `my-galaxy` deployment, run:
@@ -94,6 +97,43 @@ To uninstall/delete the `my-galaxy` deployment, run:
 ```console
 helm delete my-galaxy
 ```
+
+if you see that some RabbitMQ and Postgres elements remain after some 10 minutes or more, you should be able to issue:
+
+```
+kubectl delete RabbitmqCluster/my-galaxy-rabbitmq-server
+kubectl delete statefulset/galaxy-my-galaxy-postgres
+```
+
+it might be needed to remove the finalizer from the RabbitmqCluster if the above doesn't seem to get rid of RabbitmqCluster, through a
+
+```
+kubectl edit RabbitmqCluster/my-galaxy-rabbitmq-server
+```
+
+remove the finalizer in:
+
+```
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  annotations:
+    meta.helm.sh/release-name: my-galaxy
+    meta.helm.sh/release-namespace: default
+  creationTimestamp: "2022-12-19T16:54:33Z"
+  deletionGracePeriodSeconds: 0
+  deletionTimestamp: "2022-12-19T17:41:40Z"
+  finalizers:
+  - deletion.finalizers.rabbitmqclusters.rabbitmq.com
+```
+
+and remove the postgres secret:
+
+```
+kubectl delete secrets/standby.galaxy-my-galaxy-postgres.credentials.postgresql.acid.zalan.do
+```
+
+Consider as well that if you set persistence to be enabled, Postgres and Galaxy will leave their PVCs behind, which you might want to delete or not depending on your use case.
 
 ## Configuration
 
@@ -232,6 +272,8 @@ jobHandlers:
     failureThreshhold: 3
 ```
 
+# Additional Configurations
+
 ## Extra File Mappings
 
 The `extraFileMappings` field can be used to inject files to arbitrary paths in the `nginx` deployment, as well as any of the `job`, `web`, or `workflow` handlers, and the `init` jobs.
@@ -353,6 +395,9 @@ wildcard DNS mapping to `*.its.<host_name>`. To make Interactive Tools work on
 localhost, you can use `dnsmasq` or similar to handle wildcard DNS mappings for
 `*.localhost`.
 
+For linux:
+Follow the instructions here to configure dnsmasq on Linux: https://superuser.com/a/1718296
+
 For mac:
 ```bash
   $ brew install dnsmasq
@@ -380,28 +425,76 @@ The Galaxy application can be horizontally scaled for the web, job, or workflow 
 by setting the desired values of the `webHandlers.replicaCount`,
 `jobHandlers.replicaCount`, and `workflowHandlers.replicaCount` configuration options.
 
-## Galaxy versions
+## Cron jobs
 
-Some changes introduced in the chart sometimes rely on changes in the Galaxy
-container image, especially in relation to the Kubernetes runner. This table
-keeps track of recommended Chart versions for particular Galaxy versions as
-breaking changes are introduced. Otherwise, the Galaxy image and chart should be
-independently upgrade-able. In other words, upgrading the Galaxy image from
-`21.05` to `21.09` should be a matter of `helm upgrade my-galaxy cloudve/galaxy
---reuse-values --set image.tag=21.09`.
+Two Cron jobs are defined by default.  One to clean up Galaxy's database and one to clean up the `tmp` directory.  By default, these
+jobs run at 02:05 (the database maintenance script) and 02:15 (`tmp` directyory cleanup). Users can 
+change the times the cron jobs are run by changing the `schedule` field in the `values.yaml` file:
+
+```yaml
+cronJobs:
+  maintenance:
+    schedule: "30 6 * * *" # Execute the cron job at 6:30 UTC
+```
+or by specifying the `schedule` on the command line when instaling Galaxy:
+```bash
+# Schedule the maintenance job to run at 06:30 on the first day of each month
+helm install galaxy -n galaxy galaxy/galaxy --set cronJobs.maintenance.schedule="30 6 1 * *"
+```
+To disable a cron job after Galaxy has been deployed simply set the enabled flag for that job to false:
 
 
-| Chart version        | Galaxy version   | Description     |
-| :------------------ | :--------------- | :-------------- |
-| `5.0`               | `22.05`          | Needs at least container image 22.05 as Galaxy switched from uwsgi to gunicorn  |
-| `4.0`               | `21.05`          | Needs [Galaxy PR#11899](https://github.com/galaxyproject/galaxy/pull/11899) for eliminating the CVMFS. If running chart 4.0+ with Galaxy image `21.01` or below, use the CVMFS instead with `--set setupJob.downloadToolConfs.enabled=false --set cvmfs.repositories.cvmfs-gxy-cloud=cloud.galaxyproject.org --set cvmfs.galaxyPersistentVolumeClaims.cloud.storage=1Gi --set cvmfs.galaxyPersistentVolumeClaims.cloud.storageClassName=cvmfs-gxy-cloud --set cvmfs.galaxyPersistentVolumeClaims.cloud.mountPath=/cvmfs/cloud.galaxyproject.org` |
+```bash
+helm upgrade galaxy -n galaxy galaxy/galaxy --reuse-values --set cronJobs.maintenance.enabled=false
+```
 
-## Funding
+### Run a CronJob manually
 
-- _Version 3+_: Galaxy Project, Genomics Virtual Laboratory (GVL)
+Cron jobs can be invoked manually with tools such as [OpenLens](https://github.com/MuhammedKalkan/OpenLens)
+or from the command line with `kubectl`
+```bash
+kubectl create job --namespace <namespace> <job name> --from cronjob/galaxy-cron-maintenance 
+```
+This will run the cron job regardless of the `schedule` that has been set.
 
-- _Version 2_: Genomics Virtual Laboratory (GVL), Galaxy Project, and European
-  Commission (EC) H2020 Project PhenoMeNal, grant agreement number 654241.
+**Note:** the name of the cron job will be `{{ .Release.Name }}-cron-<job name>` where the `<job name>`
+is the name (key) used in the `values.yaml` file.
 
-- _Version 1_: European Commission (EC) H2020 Project PhenoMeNal, grant
-  agreement number 654241.
+### CronJob configuration
+
+The following fields can be specified when defining cron jobs.
+
+| Name | Definition                                                                                                                                | Required |
+|---|-------------------------------------------------------------------------------------------------------------------------------------------|----------|
+| enabled | `true` or `false`.  If `false` the cron job will not be run.  Default is `true` | **Yes**  |
+| schedule | When the job will be run.  Use tools such as [crontab.guru](https://crontab.guru) for assistance determining the proper schedule string   | **Yes**  |
+| defaultEnv | `true` or `false`. See the `galaxy.podEnvVars` macro in `_helpers.tpl` for the list of variables that will be defined. Default is `false` | No       |
+| extraEnv | Define extra environment variables that will be available to the job | No       |
+| securityContext | Specifies a `securityContext` for the job. Typically used to set `runAsUser` | No       |
+| image | Specify the Docker container used to run the job | No       |
+| command | The command to run | **Yes**  |
+| args | Any command line arguments that should be passed to the `command` | No       |
+| extraFileMappings | Allow arbitrary files to be mounted from config maps | No       |
+
+### Notes
+
+If specifying the Docker `image` both the `resposity` and `tag` MUST be specified.
+```yaml
+  image:
+    repository: quay.io/my-organization/my-image
+    tag: "1.0"  
+```
+
+The `extraFileMappings` block is similar to the global `extraFileMappings` except the file will only be mounted for that cron job.
+The following fields can be specified for each file.
+
+| Name | Definition | Required |
+|---|---|----------|
+| mode | The file mode (permissions) assigned to the file | No       |
+| tpl | If set to `true` the file contents will be run through Helm's templating engine. Defaults to `false` | No       |
+| content | The contents of the file | **Yes**  | 
+
+
+See the `example` cron job included in the `values.yaml` file for a full example.
+
+

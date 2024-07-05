@@ -1,4 +1,5 @@
 {{ if .Values.rbac.enabled }}
+---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -9,7 +10,7 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["pods", "pods/log"]
-  verbs: ["get", "list", "watch"]
+  verbs: ["get", "list", "watch", "delete"]
 - apiGroups: ["batch", "extensions"]
   resources: ["jobs"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]

@@ -64,15 +64,11 @@ jobs:
       - name: Print workflow handler log
         run: bash -c "kubectl logs -n galaxy $(kubectl -n galaxy get pods | grep -o '[^ ]*galaxy-workflow[^ ]*')"
         if: always()
-      - name: Print service info
-        run: kubectl get svc -n galaxy
-        if: always()
-      - name: Print nginx service info
-        run: kubectl describe svc -n galaxy galaxy-nginx
-        if: always()
       - name: Check appVersion
         if: always()
         run: |
+          kubectl get svc -n galaxy
+          kubectl describe svc -n galaxy galaxy-nginx
           appVersion=$(cat galaxy/Chart.yaml | grep ^appVersion: | awk '{print $2}' | tr -d '"')
           address=$(kubectl get svc -n galaxy galaxy-nginx -o jsonpath="http://{.spec.clusterIP}:{.spec.ports[0].port}/galaxy/api/version")
           echo "Address is $address"

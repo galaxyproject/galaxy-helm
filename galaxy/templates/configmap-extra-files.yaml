@@ -1,5 +1,6 @@
 {{- range $key, $entry := .Values.extraFileMappings -}}
 {{- if $entry }}
+---
 apiVersion: v1
 metadata:
   # Extract the filename portion only
@@ -20,9 +21,9 @@ data:
   {{- else }}
     {{- $entry.content | nindent 4 }}
   {{- end }}
+{{- end }}
+{{- end }}
 ---
-{{- end }}
-{{- end }}
 apiVersion: v1
 metadata:
   name: {{ include "galaxy.fullname" $ }}-probedb-py
@@ -32,5 +33,3 @@ kind: ConfigMap
 data:
   probedb.py: |
     {{- (.Files.Get "scripts/probedb.py") | nindent 4 }}
-
----

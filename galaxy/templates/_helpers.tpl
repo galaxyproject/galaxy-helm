@@ -84,6 +84,13 @@ postgresql.fullname string and then prepend the release name to form the service
 {{- end -}}
 
 {{/*
+Generate the connection string needed to connect to a Postres database
+*/}}
+{{- define "galaxy-postgresql.connection-string" -}}
+{{- printf "postgresql://%s:%s@%s/galaxy%s" .Values.postgresql.galaxyDatabaseUser (include "galaxy.galaxyDbPassword" .) (include "galaxy-postgresql.fullname" .) .Values.postgresql.galaxyConnectionParams -}}
+{{- end -}}
+
+{{/*
 Return the rabbitmq cluster to use
 */}}
 {{- define "galaxy-rabbitmq.fullname" -}}

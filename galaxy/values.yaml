@@ -429,6 +429,8 @@ refdata:
 cvmfs:
   #- Deploy the Galaxy-CVMFS-CSI Helm Chart. This is an optional dependency, and for production scenarios it should be deployed separately as a cluster-wide resource
   deploy: true
+  #- Deploy the CVMF post install fix,
+  deployPostInstallFix: false
   storageClassName: "{{ $.Release.Name }}-cvmfs"
 
 #- Configuration block if `s3csi` is used as the `refdata.type`

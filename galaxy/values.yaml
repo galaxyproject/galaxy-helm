@@ -419,7 +419,7 @@ postgresql:
 refdata:
   #- Whether or not to mount cloud-hosted Galaxy reference data and tools.
   enabled: true
-  #- `s3fs` or `cvmfs`, determines the CSI to use for mounting reference data.
+  #- `s3csi` or `cvmfs`, determines the CSI to use for mounting reference data.
   #-`cvmfs` is the default and recommended for the time being.
   type: cvmfs
   pvc:
@@ -477,7 +477,11 @@ configs:
           {{- template "galaxy.pvcname" . -}}/tools:{{ .Values.persistence.mountPath -}}/tools:r,
           {{- template "galaxy.pvcname" . -}}/shed_tools:{{ .Values.persistence.mountPath -}}/shed_tools:r
           {{- if .Values.refdata.enabled -}}
+          {{- if eq .Values.refdata.type "cvmfs" -}}
           ,{{- template "galaxy.fullname" $ -}}-refdata-gxy-pvc/data.galaxyproject.org:/cvmfs/data.galaxyproject.org:r
+          {{- else -}}
+          ,{{- template "galaxy.fullname" $ -}}-refdata-gxy-pvc:/cvmfs/data.galaxyproject.org:r
+          {{- end -}}
           {{- end -}}
           {{- if .Values.setupJob.downloadToolConfs.enabled -}}
           ,{{ template "galaxy.pvcname" . -}}/{{ .Values.setupJob.downloadToolConfs.volume.subPath }}:{{ .Values.setupJob.downloadToolConfs.volume.mountPath -}}:r

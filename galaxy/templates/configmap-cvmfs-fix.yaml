@@ -1,5 +1,5 @@
 {{- if and .Values.cvmfs.deployPostInstallFix .Values.refdata.enabled (eq .Values.refdata.type "cvmfs") }}
-
+{{ $Namespace := .Values.cvmfs.deploy | ternary .Release.Namespace .Values.cvmfs.externalCvmfsNamespace }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -10,13 +10,13 @@ metadata:
 data:
   cvmfs-fix.sh: |
     sleep 10;
-    status=`kubectl get pods -n {{ .Release.Namespace }} -l 'app=cvmfscsi' -l 'component=nodeplugin' -o custom-columns=STATUS:.status.phase --no-headers | sort | uniq | tr -d '\n'`
+    status=`kubectl get pods -n {{ $Namespace }} -l 'app=cvmfscsi' -l 'component=nodeplugin' -o custom-columns=STATUS:.status.phase --no-headers | sort | uniq | tr -d '\n'`
     while [ "$status" != "Running" ]; do
       echo "Waiting on nodeplugin pod to enter 'Running' status. Currently '$status'.";
       sleep 1;
-      status=`kubectl get pods -n {{ .Release.Namespace }} -l 'app=cvmfscsi' -l 'component=nodeplugin' -o custom-columns=STATUS:.status.phase --no-headers | sort | uniq | tr -d '\n'`
+      status=`kubectl get pods -n {{ $Namespace }} -l 'app=cvmfscsi' -l 'component=nodeplugin' -o custom-columns=STATUS:.status.phase --no-headers | sort | uniq | tr -d '\n'`
     done && \
     echo "Deleting nodeplugin pods..."
-    kubectl get pods -n {{ .Release.Namespace }} -l 'app=cvmfscsi' -l 'component=nodeplugin' -o name | xargs kubectl -n {{ .Release.Namespace }} delete && \
+    kubectl get pods -n {{ $Namespace }} -l 'app=cvmfscsi' -l 'component=nodeplugin' -o name | xargs kubectl -n {{ $Namespace }} delete && \
     echo "Deleted nodeplugin pods."
-  {{- end }}
+{{- end }}

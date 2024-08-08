@@ -1,4 +1,4 @@
-{{- if and .Values.cvmfs.deployPostInstallFix .Values.refdata.enabled (eq .Values.refdata.type "cvmfs") }}
+{{- if and .Values.cvmfs.deployPostInstallFix .Values.refdata.enabled (eq .Values.refdata.type "cvmfs")  }}
 ---
 # Include the code you want to run when both conditions are met
 apiVersion: batch/v1
@@ -19,7 +19,7 @@ spec:
       labels:
         {{- include "galaxy.labels" . | nindent 8 }}
     spec:
-      serviceAccountName: {{ include "galaxy.serviceAccountName" . }}
+      serviceAccountName: {{ .Values.cvmfs.deploy | ternary ( include "galaxy.serviceAccountName" . )  (printf "%s-cvmfs-fix" (include "galaxy.fullname" .))  }}
       securityContext:
         {{- toYaml .Values.securityContext | nindent 8 }}
       restartPolicy: Never

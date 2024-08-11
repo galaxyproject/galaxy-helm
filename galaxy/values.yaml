@@ -430,6 +430,11 @@ cvmfs:
   #- Deploy the Galaxy-CVMFS-CSI Helm Chart. This is an optional dependency, and for production scenarios it should be deployed separately as a cluster-wide resource
   deploy: true
   storageClassName: "{{ $.Release.Name }}-cvmfs"
+  cvmfscsi:
+    cache:
+      alien:
+        pvc:
+          name: cvmfs-alien-cache
 
 #- Configuration block if `s3csi` is used as the `refdata.type`
 s3csi:

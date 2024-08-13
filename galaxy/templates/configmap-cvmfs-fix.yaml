@@ -1,3 +1,4 @@
+{{- if and .Values.cvmfs.deployPostInstallFix .Values.refdata.enabled (eq .Values.refdata.type "cvmfs") }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -17,3 +18,4 @@ data:
     echo "Deleting nodeplugin pods..."
     kubectl get pods -n {{ .Release.Namespace }} -l 'app=cvmfscsi' -l 'component=nodeplugin' -o name | xargs kubectl -n {{ .Release.Namespace }} delete && \
     echo "Deleted nodeplugin pods."
+{{- end }}

@@ -431,8 +431,6 @@ cvmfs:
   deploy: true
   #- Deploy the CVMF post install fix,
   deployPostInstallFix: true
-  #- Define the namespace where the cvmfs NodePlugin is deployed, if cvmfs.deploy is true, this isn't used.
-  externalCvmfsNamespace:
   storageClassName: "{{ $.Release.Name }}-cvmfs"
 
 #- Configuration block if `s3csi` is used as the `refdata.type`

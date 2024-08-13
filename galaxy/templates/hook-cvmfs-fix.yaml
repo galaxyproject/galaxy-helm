@@ -19,7 +19,7 @@ spec:
       labels:
         {{- include "galaxy.labels" . | nindent 8 }}
     spec:
-      serviceAccountName: {{ .Values.cvmfs.deploy | ternary ( include "galaxy.serviceAccountName" . )  (printf "%s-cvmfs-fix" (include "galaxy.fullname" .))  }}
+      serviceAccountName: {{ include "galaxy.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.securityContext | nindent 8 }}
       restartPolicy: Never

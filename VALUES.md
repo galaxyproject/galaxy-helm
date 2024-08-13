@@ -42,7 +42,6 @@
 | cvmfs | Configuration block if `cvmfs` is used as `refdata.type` |
 | cvmfs.deploy | Deploy the Galaxy-CVMFS-CSI Helm Chart. This is an optional dependency, and for production scenarios it should be deployed separately as a cluster-wide resource |
 | cvmfs.deployPostInstallFix| Deploy the fix for Galaxy-CVMFS-CSI Helm Chart. |
-| cvmfs.externalCvmfsNamespace|Define the namespace where the cvmfs NodePlugin is deployed, if cvmfs.deploy is true, this isn't used. |
 | s3csi | Configuration block if `s3csi` is used as the `refdata.type` |
 | s3csi.deploy | Deploy the CSI-S3 Helm Chart. This is an optional dependency, and for production scenarios it should be deployed separately as a cluster-wide resource. |
 | useSecretConfigs | When this flag is set to true, all configs will be set in secrets, when it is set to false, all configs will be set in configmaps |

@@ -654,6 +654,12 @@ configs:
 
 #- Additional dynamic rules to map into the container.
 jobs:
+  init:
+    #- The Docker image to use for the init containers
+    image:
+      repository: alpine
+      tag: 3.16
+      pullPolicy: IfNotPresent
   priorityClass:
     #- Assign a [priorityClass](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#priorityclass) to the dispatched jobs.
     enabled: true

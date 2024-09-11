@@ -29,7 +29,7 @@ dependencies:
       - deploy-cvmfs
   - name: rabbitmq-cluster-operator
     repository: https://charts.bitnami.com/bitnami
-    version: 2.10.0
+    version: 4.3.22
     condition: rabbitmq.deploy
     alias: rabbitmq
     tags:

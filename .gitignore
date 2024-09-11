@@ -96,5 +96,6 @@ galaxy/charts/
 
 # IDEs
 .idea
+.vscode
 
 Chart.lock

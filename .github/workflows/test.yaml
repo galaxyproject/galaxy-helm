@@ -34,7 +34,7 @@ jobs:
       - name: Start k8s locally
         uses: jupyterhub/action-k3s-helm@v3
         with:
-          k3s-version: v1.28.7+k3s1  # releases:  https://github.com/k3s-io/k3s/tags
+          k3s-version: v1.30.4+k3s1  # releases:  https://github.com/k3s-io/k3s/tags
           metrics-enabled: false
           traefik-enabled: false
       - name: Verify function of k8s, kubectl, and helm
@@ -73,8 +73,8 @@ jobs:
           address=$(kubectl get svc -n galaxy galaxy-nginx -o jsonpath="http://{.spec.clusterIP}:{.spec.ports[0].port}/galaxy/api/version")
           echo "Address is $address"
           apiVersion=$(curl $address | jq -r '"\(.version_major).\(.version_minor)"')
-          echo "appVersion: $appVersion"          
+          echo "appVersion: $appVersion"
           echo "apiVersion: $apiVersion"
           if [ "$appVersion" != "$apiVersion" ]; then
             exit 1
-          fi  
+          fi

@@ -8,7 +8,7 @@ icon: https://galaxyproject.org/images/galaxy-logos/galaxy_project_logo_square.p
 dependencies:
   - name: postgres-operator
     repository: https://raw.githubusercontent.com/zalando/postgres-operator/master/charts/postgres-operator/
-    version: 1.9.0
+    version: 1.13.0
     condition: postgresql.deploy
     alias: postgresql
     tags:
@@ -22,14 +22,14 @@ dependencies:
       - deploy-s3csi
   - name: galaxy-cvmfs-csi
     repository: https://raw.githubusercontent.com/cloudve/helm-charts/master/
-    version: 2.4.0
+    version: 2.5.1
     condition: cvmfs.deploy
     alias: cvmfs
     tags:
       - deploy-cvmfs
   - name: rabbitmq-cluster-operator
     repository: https://charts.bitnami.com/bitnami
-    version: 2.6.12
+    version: 4.3.25
     condition: rabbitmq.deploy
     alias: rabbitmq
     tags:

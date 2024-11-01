@@ -565,6 +565,7 @@ configs:
         {{- end }}
       tool_dependency_dir: "{{.Values.persistence.mountPath}}/deps"
       job_config_file: "/galaxy/server/config/job_conf.yml"
+      outputs_to_working_directory: true
       builds_file_path: |-
         {{ if .Values.refdata.enabled }}
         /cvmfs/data.galaxyproject.org/managed/location/builds.txt

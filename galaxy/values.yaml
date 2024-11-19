@@ -599,48 +599,23 @@ configs:
       </handlers>
     </workflow_schedulers>
   sanitize_allowlist.txt: |
-    toolshed.g2.bx.psu.edu/repos/bgruening/diff/diff/3.7+galaxy0
-    toolshed.g2.bx.psu.edu/repos/bgruening/pharmcat/pharmcat/1.7.0+galaxy0
-    toolshed.g2.bx.psu.edu/repos/bgruening/pharmcat/pharmcat/1.3.1+galaxy0
-    toolshed.g2.bx.psu.edu/repos/crs4/taxonomy_krona_chart/taxonomy_krona_chart/2.7.1+galaxy0
-    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.74+galaxy1
-    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.74+galaxy0
-    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.73+galaxy0
-    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.72+galaxy1
-    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.72
-    toolshed.g2.bx.psu.edu/repos/iuc/dexseq/dexseq/1.48+galaxy0
-    toolshed.g2.bx.psu.edu/repos/iuc/dexseq/dexseq/1.44+galaxy0
-    toolshed.g2.bx.psu.edu/repos/iuc/dexseq/dexseq/1.28.1+galaxy2
-    toolshed.g2.bx.psu.edu/repos/iuc/fastp/fastp/0.23.4+galaxy1
-    toolshed.g2.bx.psu.edu/repos/iuc/fastp/fastp/0.23.2+galaxy0
-    toolshed.g2.bx.psu.edu/repos/iuc/fastp/fastp/0.20.1+galaxy0
-    toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse_to_standalone/1.16.11+galaxy1
-    toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse_to_standalone/1.16.11+galaxy0
-    toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.11+galaxy1
-    toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/jbrowse/1.16.11+galaxy0
-    toolshed.g2.bx.psu.edu/repos/iuc/macs2/macs2_callpeak/2.2.9.1+galaxy0
-    toolshed.g2.bx.psu.edu/repos/iuc/macs2/macs2_callpeak/2.1.1.20160309.6
-    toolshed.g2.bx.psu.edu/repos/iuc/meme_meme/meme_meme/5.5.6+galaxy0
-    toolshed.g2.bx.psu.edu/repos/iuc/meme_meme/meme_meme/5.0.5.0
-    toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.24.1+galaxy0
-    toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.11+galaxy1
-    toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.11+galaxy0
-    toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.9+galaxy1
-    toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.8+galaxy1
-    toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.6
-    toolshed.g2.bx.psu.edu/repos/iuc/multiqc/multiqc/1.5.0
-    toolshed.g2.bx.psu.edu/repos/iuc/prestor_abseq3/prestor_abseq3/0.6.2+galaxy0
-    toolshed.g2.bx.psu.edu/repos/iuc/quast/quast/5.2.0+galaxy1
-    toolshed.g2.bx.psu.edu/repos/iuc/quast/quast/5.0.2+galaxy3
-    toolshed.g2.bx.psu.edu/repos/iuc/seurat/seurat/4.3.0.1+galaxy1
-    toolshed.g2.bx.psu.edu/repos/iuc/seurat/seurat/4.1.0+galaxy0
-    toolshed.g2.bx.psu.edu/repos/iuc/snpeff/snpEff/5.2+galaxy0
-    toolshed.g2.bx.psu.edu/repos/iuc/snpeff/snpEff/4.3r.1
-    toolshed.g2.bx.psu.edu/repos/iuc/snpeff/snpEff/4.3+T.galaxy2
-    toolshed.g2.bx.psu.edu/repos/iuc/snpeff/snpEff/4.3+T.galaxy1
-    toolshed.g2.bx.psu.edu/repos/bgruening/plotly_regression_performance_plots/plotly_regression_performance_plots/0.1
-    toolshed.g2.bx.psu.edu/repos/bgruening/plotly_parallel_coordinates_plot/plotly_parallel_coordinates_plot/0.2
-    toolshed.g2.bx.psu.edu/repos/bgruening/plotly_parallel_coordinates_plot/plotly_parallel_coordinates_plot/0.1
+    toolshed.g2.bx.psu.edu/repos/bgruening/diff/
+    toolshed.g2.bx.psu.edu/repos/bgruening/pharmcat/
+    toolshed.g2.bx.psu.edu/repos/crs4/taxonomy_krona_chart/
+    toolshed.g2.bx.psu.edu/repos/devteam/fastqc/
+    toolshed.g2.bx.psu.edu/repos/iuc/dexseq/
+    toolshed.g2.bx.psu.edu/repos/iuc/fastp/
+    toolshed.g2.bx.psu.edu/repos/iuc/jbrowse/
+    toolshed.g2.bx.psu.edu/repos/iuc/macs2/
+    toolshed.g2.bx.psu.edu/repos/iuc/meme_meme/
+    toolshed.g2.bx.psu.edu/repos/iuc/multiqc/
+    toolshed.g2.bx.psu.edu/repos/iuc/prestor_abseq3/
+    toolshed.g2.bx.psu.edu/repos/iuc/quast/
+    toolshed.g2.bx.psu.edu/repos/iuc/seurat/
+    toolshed.g2.bx.psu.edu/repos/iuc/snpeff/
+    toolshed.g2.bx.psu.edu/repos/bgruening/plotly_regression_performance_plots/
+    toolshed.g2.bx.psu.edu/repos/bgruening/plotly_parallel_coordinates_plot/
+    toolshed.g2.bx.psu.edu/repos/bgruening/plotly_parallel_coordinates_plot/
   build_sites.yml:
     - type: ucsc
       file: "{{if .Values.refdata.enabled}}/cvmfs/data.galaxyproject.org/managed/location/ucsc_build_sites.txt{{else}}/galaxy/server/tool-data/shared/ucsc/ucsc_build_sites.txt.sample{{end}}"

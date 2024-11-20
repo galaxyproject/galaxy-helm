@@ -615,7 +615,6 @@ configs:
     toolshed.g2.bx.psu.edu/repos/iuc/snpeff/
     toolshed.g2.bx.psu.edu/repos/bgruening/plotly_regression_performance_plots/
     toolshed.g2.bx.psu.edu/repos/bgruening/plotly_parallel_coordinates_plot/
-    toolshed.g2.bx.psu.edu/repos/bgruening/plotly_parallel_coordinates_plot/
   build_sites.yml:
     - type: ucsc
       file: "{{if .Values.refdata.enabled}}/cvmfs/data.galaxyproject.org/managed/location/ucsc_build_sites.txt{{else}}/galaxy/server/tool-data/shared/ucsc/ucsc_build_sites.txt.sample{{end}}"

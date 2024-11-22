@@ -392,9 +392,6 @@ affinity: {}
 
 postgresql:
   enabled: true
-  #- Whether to deploy the postgresl operator.
-  #- In general, we recommend installing the operator globally in production.
-  deploy: true
   #- hostname and port of an existing database to use.
   existingDatabase:
   galaxyDatabaseUser: galaxydbuser
@@ -431,19 +428,10 @@ cvmfs:
   deploy: true
   #- Deploy the CVMF post install fix,
   deployPostInstallFix: true
-  storageClassName: "{{ $.Release.Name }}-cvmfs"
-  cvmfscsi:
-    cache:
-      alien:
-        pvc:
-          name: cvmfs-alien-cache
+  storageClassName: "galaxy-cvmfs"
 
 #- Configuration block if `s3csi` is used as the `refdata.type`
 s3csi:
-  #- Deploy the CSI-S3 Helm Chart. This is an optional dependency, and for production scenarios it should be deployed separately as a cluster-wide resource.
-  deploy: false
-  images:
-    csi: cloudve/csi-s3:0.31.3
   storageClass:
     name: refdata-gxy-data
     mounter: s3fs
@@ -455,8 +443,6 @@ s3csi:
     # mountOptions: "--memory-limit 4000 --dir-mode 0777 --file-mode 0666 --cache /tmp/geesecache --debug --debug_fuse --stat-cache-ttl 9m0s --cache-to-disk-hits 1"
     # --no-dir-object --no-implicit-dir --stat-cache-ttl 120m0s --max-disk-cache-fd 4096
   secret:
-    endpoint: https://s3.ap-southeast-2.amazonaws.com
-    usePrefix: true
     prefix: /galaxy/v1/data.galaxyproject.org
 
 #- When this flag is set to true, all configs will be set in secrets,
@@ -807,7 +793,6 @@ tusd:
 
 rabbitmq:
   enabled: true
-  deploy: true
   existingCluster:
   existingSecret: '{{ include "galaxy-rabbitmq.fullname" . }}-default-user'
   protocol: amqp

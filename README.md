@@ -43,8 +43,10 @@ This chart relies on the features of other charts for common functionality:
 
 In a production setting, especially if the intention is to run multiple Galaxies
 in a single cluster, we recommend installing the dependency charts separately
-once per cluster, and installing Galaxy with `--set postgresql.deploy=false
---set s3csi.deploy=false --set cvmfs.deploy=false --set rabbitmq.deploy=false`.
+once per cluster. For convenience, we provide a `galaxy-deps` helm chart that will
+install all of these general dependencies (often installable cluster-wide) for you.
+Simply install using
+`helm install --create-namespace -n galaxy-deps galaxy-deps galaxyproject/galaxy-deps`.
 
 ---
 
@@ -61,28 +63,41 @@ helm repo add cloudve https://raw.githubusercontent.com/CloudVE/helm-charts/mast
 helm repo update
 ```
 
-2. Install the chart with the release name `my-galaxy`. It is not advisable to
+2. Install global dependencies such as the postgres operator.
+
+```console
+helm install --create-namespace -n galaxy-deps galaxy-deps galaxyproject/galaxy-deps
+```
+
+3. Install the chart with the release name `my-galaxy`. It is not advisable to
    install Galaxy in the `default` namespace.
 
 ```console
-helm install my-galaxy-release cloudve/galaxy
+helm install -n my-namespace my-galaxy-release cloudve/galaxy
 ```
 
 ### Using the chart from GitHub repo
 
-1. Clone this repository and add required dependency charts:
+1. Clone this repository:
 
 ```console
 git clone https://github.com/galaxyproject/galaxy-helm.git
-cd galaxy-helm/galaxy
-helm dependency update
 ```
 
-2. To install the chart with the release name `my-galaxy`. See [Data
+2. Setup cluster-wide operators and dependencies:
+
+```console
+cd galaxy-helm/galaxy-deps
+helm dependency update
+helm install --create-namespace -n galaxy-deps galaxy-deps .
+```
+
+3. To install the chart with the release name `my-galaxy`. See [Data
    persistence](#data-persistence) section below about the use of persistence
    flag that is suitable for your Kubernetes environment.
 
 ```console
+cd ../galaxy
 helm install --create-namespace -n galaxy my-galaxy . --set persistence.accessMode="ReadWriteOnce"
 ```
 
@@ -98,42 +113,12 @@ To uninstall/delete the `my-galaxy` deployment, run:
 helm delete my-galaxy
 ```
 
-if you see that some RabbitMQ and Postgres elements remain after some 10 minutes or more, you should be able to issue:
+If you no longer require cluster-wide operators, you can optionally uninstall them, although,
+in general, we recommend installing them once and leaving them as is.
 
+```console
+helm delete -n galaxy-deps galaxy-deps
 ```
-kubectl delete RabbitmqCluster/my-galaxy-rabbitmq-server
-kubectl delete statefulset/galaxy-my-galaxy-postgres
-```
-
-it might be needed to remove the finalizer from the RabbitmqCluster if the above doesn't seem to get rid of RabbitmqCluster, through a
-
-```
-kubectl edit RabbitmqCluster/my-galaxy-rabbitmq-server
-```
-
-remove the finalizer in:
-
-```
-apiVersion: rabbitmq.com/v1beta1
-kind: RabbitmqCluster
-metadata:
-  annotations:
-    meta.helm.sh/release-name: my-galaxy
-    meta.helm.sh/release-namespace: default
-  creationTimestamp: "2022-12-19T16:54:33Z"
-  deletionGracePeriodSeconds: 0
-  deletionTimestamp: "2022-12-19T17:41:40Z"
-  finalizers:
-  - deletion.finalizers.rabbitmqclusters.rabbitmq.com
-```
-
-and remove the postgres secret:
-
-```
-kubectl delete secrets/standby.galaxy-my-galaxy-postgres.credentials.postgresql.acid.zalan.do
-```
-
-Consider as well that if you set persistence to be enabled, Postgres and Galaxy will leave their PVCs behind, which you might want to delete or not depending on your use case.
 
 ## Configuration
 
@@ -163,8 +148,6 @@ current default values can be found in `values.yaml` file.
 | `jobs.priorityClass.existingClass`         | Use an existing [priorityClass](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass) to assign if `jobs.priorityClass.enabled=true`                                   |
 | `refdata.enabled`                          | Whether or not to mount cloud-hosted Galaxy reference data and tools.                                           |
 | `refdata.type`                             | `s3csi` or `cvmfs`, determines the CSI to use for mounting reference data. `cvmfs` is the default type for reference data. |
-| `s3csi.deploy`                             | Deploy the CSI-S3 Helm Chart. This is an optional dependency, and for production scenarios it should be deployed separately as a cluster-wide resource.          |
-| `cvmfs.deploy`                             | Deploy the Galaxy-CVMFS-CSI Helm Chart. This is an optional dependency, and for production scenarios it should be deployed separately as a cluster-wide resource                                           |
 | `cvmfs.enabled`                            | Enable use of CVMFS in configs, and deployment of CVMFS Persistent Volume Claims for Galaxy                                                                                                                |
 | `cvmfs.pvc.{}`                             | Persistent Volume Claim to deploy for CVMFS repositories. See <a href="galaxy/values.yaml">`values.yaml`</a> for examples.                                                                                                                 |
 | `cvmfs.deployPostInstallFix`                             |Deploy the fix for Galaxy-CVMFS-CSI Helm Chart. |

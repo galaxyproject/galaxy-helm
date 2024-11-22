@@ -17,10 +17,15 @@ jobs:
       - uses: actions/checkout@v3
         with:
           persist-credentials: false
-      - name: Helm dep update
+      - name: Helm dep update for galaxy-deps
+        run: cd galaxy-deps/ && helm dep update && cd ..
+      - name: Helm linting for galaxy-deps
+        run: helm lint galaxy-deps/
+      - name: Helm dep update for galaxy
         run: cd galaxy/ && helm dep update && cd ..
-      - name: Helm linting
+      - name: Helm linting for galaxy
         run: helm lint galaxy/
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -29,7 +34,9 @@ jobs:
       - uses: actions/checkout@v3
         with:
           persist-credentials: false
-      - name: Helm dep update
+      - name: Helm dep update for galaxy-deps
+        run: cd galaxy-deps/ && helm dep update && cd ..
+      - name: Helm dep update for galaxy
         run: cd galaxy/ && helm dep update && cd ..
       - name: Start k8s locally
         uses: jupyterhub/action-k3s-helm@v3
@@ -47,6 +54,8 @@ jobs:
           helm list
       - name: Helm repo add galaxy
         run: helm repo add galaxy https://github.com/CloudVE/helm-charts/raw/master
+      - name: Helm install galaxy-deps
+        run: time bash -c 'helm install --create-namespace -n "galaxy-deps" "galaxy-deps" ./galaxy-deps --set cvmfs.cvmfscsi.cache.alien.enabled=false --wait --timeout=1200s'
       - name: Helm install Galaxy
         run: time bash -c 'helm install --create-namespace -n galaxy galaxy ./galaxy --set persistence.accessMode="ReadWriteOnce" --set resources.requests.memory=0Mi,resources.requests.cpu=0m,cvmfs.cvmfscsi.cache.alien.enabled=false --wait --timeout=1200s'
       - name: Get events

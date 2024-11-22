@@ -1,4 +1,4 @@
-# Galaxy Helm Chart (v5)
+# Galaxy Helm Chart (v6)
 
 [Galaxy](https://galaxyproject.org/) is a data analysis platform focusing on
 accessibility, reproducibility, and transparency of primarily bioinformatics
@@ -98,6 +98,7 @@ helm install --create-namespace -n galaxy-deps galaxy-deps .
 
 ```console
 cd ../galaxy
+helm dependency update
 helm install --create-namespace -n galaxy my-galaxy . --set persistence.accessMode="ReadWriteOnce"
 ```
 
@@ -507,3 +508,17 @@ The following fields can be specified for each file.
 See the `example` cron job included in the `values.yaml` file for a full example.
 
 
+## Upgrading
+
+## From v5 to v6
+
+* v6 splits all global dependencies such as the postgres and rabbitbq operators into a separate `galaxy-deps` chart, in contrast to v5, which
+  had all dependencies bundled in for convenience. This bundling caused problems during uninstallation in particular, because for example,
+  the postgres operator could be uninstalled before postgres itself was uninstalled, leaving various artefacts behind. This made reinstallation
+  particularly tricky, as all such left-over resources had to be cleaned up manually. Therefore, our production installation notes specified
+  installing these dependencies separately anyway. v6 makes this separation explicit by specifically debundling these dependencies into a separate
+  chart.
+
+  If upgrading in production scenarios, you may simply omit installing the `galaxy-deps` chart and continue as usual. If upgrading in development
+  scenarios, there is no straightforward upgrade path. The galaxy chart will have to be uninstalled, the `galaxy-deps` chart installed, and subsequently,
+  galaxy can be reinstalled.

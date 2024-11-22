@@ -25,6 +25,14 @@ jobs:
            persist-credentials: false
       - uses: cloudve/helm-ci@master
         with:
+          chart-name: galaxy-deps
+          charts-repo: cloudve/helm-charts
+          github-token: ${{ secrets.CHARTS_TOKEN }}
+          charts-token: ${{ secrets.CHARTS_TOKEN }}
+          github-labels: ${{ join(github.event.pull_request.labels.*.name, ', ') }}
+          git-branch: ${{ github.event.pull_request.base.ref }}
+      - uses: cloudve/helm-ci@master
+        with:
           chart-name: galaxy
           charts-repo: cloudve/helm-charts
           github-token: ${{ secrets.CHARTS_TOKEN }}
@@ -39,6 +47,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
            persist-credentials: false
+      - uses: cloudve/helm-ci@master
+        with:
+          chart-name: galaxy-deps
+          charts-repo: cloudve/helm-charts
+          github-token: ${{ secrets.CHARTS_TOKEN }}
+          charts-token: ${{ secrets.CHARTS_TOKEN }}
+          github-labels: ${{ github.event.inputs.version-bump }}
+          git-branch: ${{ github.event.inputs.branch-name }}
       - uses: cloudve/helm-ci@master
         with:
           chart-name: galaxy

@@ -1,7 +1,0 @@
-The dependencies required to install the Galaxy helm chart have been installed.
-
-You can now run:
-
-  helm install -n my-namespace my-galaxy-release cloudve/galaxy
-
-to install Galaxy.

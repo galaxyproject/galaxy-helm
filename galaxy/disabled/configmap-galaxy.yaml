@@ -1,9 +1,0 @@
-apiVersion: v1
-metadata:
-  name: {{ .Release.Name }}-galaxy-config
-  labels:
-    {{- include "galaxy.labels" $ | nindent 4 }}
-kind: ConfigMap
-data:
-  galaxy.yml: |
-    {{- .Values.galaxy | toYaml | nindent 4 }}

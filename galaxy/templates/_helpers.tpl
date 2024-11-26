@@ -72,11 +72,19 @@ Return the postgresql database name to use
 {{- end -}}
 {{- end -}}
 
+{{- define "galaxy-postgresql.servicename" -}}
+{{- if .Values.postgresql.existingDatabase -}}
+{{- printf "%s" .Values.postgresql.existingDatabase -}}
+{{- else -}}
+{{- printf "%s-rw" (include "galaxy-postgresql.fullname" .) -}}
+{{- end -}}
+{{- end -}}
+
 {{/*
 Generate the connection string needed to connect to a Postres database
 */}}
 {{- define "galaxy-postgresql.connection-string" -}}
-{{- printf "postgresql://%s:%s@%s-rw/galaxy%s" .Values.postgresql.galaxyDatabaseUser (include "galaxy.galaxyDbPassword" .) (include "galaxy-postgresql.fullname" .) .Values.postgresql.galaxyConnectionParams -}}
+{{- printf "postgresql://%s:%s@%s/galaxy%s" .Values.postgresql.galaxyDatabaseUser (include "galaxy.galaxyDbPassword" .) (include "galaxy-postgresql.servicename" .) .Values.postgresql.galaxyConnectionParams -}}
 {{- end -}}
 
 {{/*
@@ -230,7 +238,7 @@ Define pod env vars
                   name: '{{ include "galaxy.galaxyDbSecretName" . }}'
                   key: '{{ include "galaxy.galaxyDbSecretKey" . }}'
             - name: GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION
-              value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}-r/galaxy{{- .Values.postgresql.galaxyConnectionParams }}
+              value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.servicename" . }}/galaxy{{- .Values.postgresql.galaxyConnectionParams }}
             - name: GALAXY_CONFIG_OVERRIDE_ID_SECRET
               valueFrom:
                 secretKeyRef:

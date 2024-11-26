@@ -62,20 +62,13 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
-Define TeamID for the postgresql name
-*/}}
-{{- define "galaxy-postgresql.teamId" -}}
-{{- printf "%s" .Chart.Name -}}
-{{- end }}
-
-{{/*
 Return the postgresql database name to use
 */}}
 {{- define "galaxy-postgresql.fullname" -}}
 {{- if .Values.postgresql.existingDatabase -}}
 {{- printf "%s" .Values.postgresql.existingDatabase -}}
 {{- else -}}
-{{- printf "%s-%s-%s" (include "galaxy-postgresql.teamId" .) .Release.Name .Values.postgresql.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-%s" .Release.Name .Values.postgresql.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
 
@@ -83,7 +76,7 @@ Return the postgresql database name to use
 Generate the connection string needed to connect to a Postres database
 */}}
 {{- define "galaxy-postgresql.connection-string" -}}
-{{- printf "postgresql://%s:%s@%s/galaxy%s" .Values.postgresql.galaxyDatabaseUser (include "galaxy.galaxyDbPassword" .) (include "galaxy-postgresql.fullname" .) .Values.postgresql.galaxyConnectionParams -}}
+{{- printf "postgresql://%s:%s@%s-rw/galaxy%s" .Values.postgresql.galaxyDatabaseUser (include "galaxy.galaxyDbPassword" .) (include "galaxy-postgresql.fullname" .) .Values.postgresql.galaxyConnectionParams -}}
 {{- end -}}
 
 {{/*
@@ -121,7 +114,7 @@ Return which PVC to use
 
 
 {{- define "galaxy.operatorUserSecretName" -}}
-{{- printf "%s.%s.credentials.postgresql.acid.zalan.do" .Values.postgresql.galaxyDatabaseUser (include "galaxy-postgresql.fullname" .) -}}
+{{- printf "%s.%s.credentials.postgresql.cnpg.io" .Values.postgresql.galaxyDatabaseUser (include "galaxy-postgresql.fullname" .) -}}
 {{- end -}}
 
 {{- define "galaxy.galaxyDbSecretName" -}}
@@ -237,7 +230,7 @@ Define pod env vars
                   name: '{{ include "galaxy.galaxyDbSecretName" . }}'
                   key: '{{ include "galaxy.galaxyDbSecretKey" . }}'
             - name: GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION
-              value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}/galaxy{{- .Values.postgresql.galaxyConnectionParams }}
+              value: postgresql://{{ .Values.postgresql.galaxyDatabaseUser }}:$(GALAXY_DB_USER_PASSWORD)@{{ template "galaxy-postgresql.fullname" . }}-r/galaxy{{- .Values.postgresql.galaxyConnectionParams }}
             - name: GALAXY_CONFIG_OVERRIDE_ID_SECRET
               valueFrom:
                 secretKeyRef:

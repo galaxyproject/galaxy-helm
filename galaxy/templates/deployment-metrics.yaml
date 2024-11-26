@@ -44,7 +44,7 @@ spec:
         imagePullPolicy: {{ .Values.metrics.image.pullPolicy }}
         env:
           - name: PGHOST
-            value: {{ include "galaxy-postgresql.fullname" . }}
+            value: {{ include "galaxy-postgresql.servicename" . }}
           - name: PGDATABASE
             value: galaxy
           - name: PGUSER

@@ -1,23 +1,23 @@
 {{- if and .Values.postgresql.enabled (not .Values.postgresql.existingDatabase) }}
-apiVersion: acid.zalan.do/v1
-kind: postgresql
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
 metadata:
   labels:
     {{- include "galaxy.labels" . | nindent 4 }}
-    team: galaxy
   name: {{ include "galaxy-postgresql.fullname" . }}
   namespace: {{ .Release.Namespace }}
 spec:
-  allowedSourceRanges: []
-  databases:
-    galaxy: {{ .Values.postgresql.galaxyDatabaseUser }}
-  numberOfInstances: 1
-  teamId: {{ include "galaxy-postgresql.teamId" . }}
-  users:
-    {{ .Values.postgresql.galaxyDatabaseUser }}: [ ]
-  postgresql:
-    version: '13'
-  volume:
+  instances: {{ default "1" .Values.postgresql.instances }}
+  bootstrap:
+    initdb:
+      database: galaxy
+      owner: {{ .Values.postgresql.galaxyDatabaseUser }}
+      secret:
+        name: '{{ include "galaxy.galaxyDbSecretName" . }}'
+  enableSuperuserAccess: true
+  superuserSecret:
+    name: 'postgres.{{ include "galaxy-postgresql.fullname" . }}.credentials.postgresql.cnpg.io'
+  storage:
     size: {{ default "10Gi" .Values.postgresql.persistence.size }}
     {{- if .Values.postgresql.persistence.storageClass }}
     storageClass: {{ .Values.postgresql.persistence.storageClass }}

@@ -32,11 +32,11 @@ helm upgrade --install ingress-nginx ingress-nginx \
 ## Dependency charts
 
 This chart relies on the features of other charts for common functionality:
-- [postgres-operator](https://github.com/zalando/postgres-operator) for the
+- [postgres-operator](https://cloudnative-pg.io/documentation/current/) for the
   database;
 - [galaxy-cvmfs-csi](https://github.com/CloudVE/galaxy-cvmfs-csi-helm) for linking the
   reference data to Galaxy and jobs based on CVMFS (default).
-- [csi-s3](https://github.com/ctrox/csi-s3/pull/75/) for linking
+- [csi-s3](https://github.com/yandex-cloud/k8s-csi-s3/tree/master/deploy/helm/csi-s3) for linking
   reference data to Galaxy and jobs based on S3FS (optional/alternative to CVMFS).
 - [rabbitmq-cluster-operator](https://github.com/rabbitmq/cluster-operator) for deploying
   the message queue.
@@ -511,12 +511,22 @@ See the `example` cron job included in the `values.yaml` file for a full example
 
 ## From v5 to v6
 
-* v6 splits all global dependencies such as the postgres and rabbitbq operators into a separate `galaxy-deps` chart, in contrast to v5, which
-  had all dependencies bundled in for convenience. This bundling caused problems during uninstallation in particular, because for example,
-  the postgres operator could be uninstalled before postgres itself was uninstalled, leaving various artefacts behind. This made reinstallation
-  particularly tricky, as all such left-over resources had to be cleaned up manually. Therefore, our production installation notes specified
-  installing these dependencies separately anyway. v6 makes this separation explicit by specifically debundling these dependencies into a separate
-  chart.
+### Breaking changes
+
+* v6 replaces the zalando postgres operator with cloudnative-pg. This decision was made because cloudnative-pg is meant to be a CNCF project,
+  has increasing popularity and the avoidance of StatefulSets makes management easier. However, there is no direct upgrade path from zalando
+  to cloudnative-pg. Therefore, simply upgrading the helm chart could result in your existing database being deleted and possible data loss.
+
+  Therefore, we recommend first creating a [logical backup](https://github.com/zalando/postgres-operator/blob/master/docs/administrator.md#logical-backups)
+  of the existing database, and then reimporting that backup to the new database following instructions
+  [here](https://cloudnative-pg.io/documentation/1.16/database_import/).
+
+* v6 splits all global dependencies such as the postgres and rabbitbq operators into a separate `galaxy-deps` chart. This is in contrast to v5,
+  which had all dependencies bundled in for convenience. This bundling caused problems during uninstallation in particular, because the postgres
+  operator could be uninstalled before postgres itself was uninstalled, leaving various artefacts behind. This made reinstallation
+  particularly tricky, as all such left-over resources had to be cleaned up manually. Therefore, our production installation notes already contained
+  a recommendation that these dependencies be installed separately. v6 makes this separation explicit by specifically debundling the dependencies into
+  a separate chart.
 
   If upgrading in production scenarios, you may simply omit installing the `galaxy-deps` chart and continue as usual. If upgrading in development
   scenarios, there is no straightforward upgrade path. The galaxy chart will have to be uninstalled, the `galaxy-deps` chart installed, and subsequently,

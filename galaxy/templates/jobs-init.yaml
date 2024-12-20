@@ -29,7 +29,7 @@ spec:
         - name: {{ .Chart.Name }}-wait-postgres
           image: {{ .Values.jobs.init.image.repository }}:{{ .Values.jobs.init.image.tag }}
           imagePullPolicy: {{ .Values.jobs.init.image.pullPolicy }}
-          command: ['sh', '-c', 'echo Chown mount path; chown 101:101 {{ .Values.persistence.mountPath }}; echo Begin waiting for postgres; until nc -z -w3 {{ template "galaxy-postgresql.fullname" . }} 5432; do echo waiting for galaxy-postgres service; sleep 1; done; echo done;']
+          command: ['sh', '-c', 'echo Chown mount path; chown 101:101 {{ .Values.persistence.mountPath }}; echo Begin waiting for postgres; until nc -z -w3 {{ template "galaxy-postgresql.servicename" . }} 5432; do echo waiting for galaxy-postgres service; sleep 1; done; echo done;']
           volumeMounts:
             - name: galaxy-data
               mountPath: {{ .Values.persistence.mountPath }}

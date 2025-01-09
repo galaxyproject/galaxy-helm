@@ -181,7 +181,7 @@ rbac:
 
 securityContext:
   #- Security context and file system group used by jobs.
-  fsGroup: 101
+  fsGroup: 10001
 
 #- Configure the PVC used by Galaxy for local storage.
 persistence:
@@ -213,11 +213,11 @@ setupJob:
   createDatabase: true
   securityContext:
     #- the setup jobs will run as this user
-    runAsUser: 101
+    runAsUser: 10001
     #- the `runAsUser` will belong to this group.
-    runAsGroup: 101
+    runAsGroup: 10001
     #- the filesystem group
-    fsGroup: 101
+    fsGroup: 10001
   ttlSecondsAfterFinished: 300
   downloadToolConfs:
     enabled: true
@@ -362,7 +362,6 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-  path: /galaxy
   hosts:
     - host: ~
       paths:
@@ -482,8 +481,8 @@ configs:
           {{- end }}
         k8s_namespace: "{{ .Release.Namespace }}"
         k8s_galaxy_instance_id: "{{ .Release.Name }}"
-        k8s_fs_group_id: "101"
-        k8s_supplemental_group_id: "101"
+        k8s_fs_group_id: "10001"
+        k8s_supplemental_group_id: "10001"
         k8s_pull_policy: IfNotPresent
         k8s_cleanup_job: onsuccess
         k8s_job_ttl_secs_after_finished: 90
@@ -767,9 +766,9 @@ tusd:
   podAnnotations: {}
   podSpecExtra: {}
   securityContext:
-    runAsUser: 101
-    runAsGroup: 101
-    fsGroup: 101
+    runAsUser: 10001
+    runAsGroup: 10001
+    fsGroup: 10001
   image:
     repository: tusproject/tusd
     tag: v1.13.0

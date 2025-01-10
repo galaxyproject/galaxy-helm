@@ -32,7 +32,9 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "galaxy.serviceAccountName" . }}
       securityContext:
-        {{- toYaml .Values.tusd.securityContext | nindent 8 }}
+        runAsUser: {{ default .Values.securityContext.runAsUser .Values.tusd.securityContext.runAsUser }}
+        runAsGroup: {{ default .Values.securityContext.runAsGroup .Values.tusd.securityContext.runAsGroup }}
+        fsGroup: {{ default .Values.securityContext.fsGroup .Values.tusd.securityContext.fsGroup }}
       {{- if .Values.tusd.podSpecExtra -}}
         {{- tpl (toYaml .Values.webHandlers.podSpecExtra) . | nindent 6 }}
       {{- end }}

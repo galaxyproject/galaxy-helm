@@ -360,6 +360,7 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
+  path: /galaxy
   hosts:
     - host: ~
       paths:

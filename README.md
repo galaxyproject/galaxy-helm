@@ -66,7 +66,7 @@ helm repo update
 2. Install global dependencies such as the postgres operator.
 
 ```console
-helm install --create-namespace -n galaxy-deps galaxy-deps galaxyproject/galaxy-deps
+helm install --create-namespace -n galaxy-deps galaxy-deps cloudve/galaxy-deps
 ```
 
 3. Install the chart with the release name `my-galaxy`. It is not advisable to
@@ -111,7 +111,7 @@ at `http://localhost/galaxy/` (note the trailing slash).
 To uninstall/delete the `my-galaxy` deployment, run:
 
 ```console
-helm delete my-galaxy
+helm delete my-galaxy -n galaxy
 ```
 
 If you no longer require cluster-wide operators, you can optionally uninstall them, although,
@@ -287,7 +287,7 @@ extraFileMappings:
 1. Creating a symbolic link in the chart directory to the external file, or
 2. using `--set-file` to specify the contents of the file. E.g:
    `helm upgrade --install galaxy cloudve/galaxy -n galaxy --set-file extraFileMappings."/galaxy/server/static/welcome\.html".content=/home/user/data/welcome.html --set extraFileMappings."/galaxy/server/static/welcome\.html".applyToWeb=true`
-   
+
 Alternatively, if too many `.applyTo` need to be set, the apply flags can be inserted instead to the `extraFileMappings` (in addition to the --set-file in the cli) for that file in your `values.yaml`, with no `content:` part (as that is done through the `--set-file`):
 
 ```
@@ -437,7 +437,7 @@ by setting the desired values of the `webHandlers.replicaCount`,
 ## Cron jobs
 
 Two Cron jobs are defined by default.  One to clean up Galaxy's database and one to clean up the `tmp` directory.  By default, these
-jobs run at 02:05 (the database maintenance script) and 02:15 (`tmp` directyory cleanup). Users can 
+jobs run at 02:05 (the database maintenance script) and 02:15 (`tmp` directyory cleanup). Users can
 change the times the cron jobs are run by changing the `schedule` field in the `values.yaml` file:
 
 ```yaml
@@ -462,7 +462,7 @@ helm upgrade galaxy -n galaxy galaxy/galaxy --reuse-values --set cronJobs.mainte
 Cron jobs can be invoked manually with tools such as [OpenLens](https://github.com/MuhammedKalkan/OpenLens)
 or from the command line with `kubectl`
 ```bash
-kubectl create job --namespace <namespace> <job name> --from cronjob/galaxy-cron-maintenance 
+kubectl create job --namespace <namespace> <job name> --from cronjob/galaxy-cron-maintenance
 ```
 This will run the cron job regardless of the `schedule` that has been set.
 
@@ -491,7 +491,7 @@ If specifying the Docker `image` both the `resposity` and `tag` MUST be specifie
 ```yaml
   image:
     repository: quay.io/my-organization/my-image
-    tag: "1.0"  
+    tag: "1.0"
 ```
 
 The `extraFileMappings` block is similar to the global `extraFileMappings` except the file will only be mounted for that cron job.
@@ -501,7 +501,7 @@ The following fields can be specified for each file.
 |---|---|----------|
 | mode | The file mode (permissions) assigned to the file | No       |
 | tpl | If set to `true` the file contents will be run through Helm's templating engine. Defaults to `false` | No       |
-| content | The contents of the file | **Yes**  | 
+| content | The contents of the file | **Yes**  |
 
 
 See the `example` cron job included in the `values.yaml` file for a full example.
@@ -513,21 +513,58 @@ See the `example` cron job included in the `values.yaml` file for a full example
 
 ### Breaking changes
 
-* v6 replaces the zalando postgres operator with cloudnative-pg. This decision was made because cloudnative-pg is meant to be a CNCF project,
-  has increasing popularity and the avoidance of StatefulSets makes management easier. However, there is no direct upgrade path from zalando
-  to cloudnative-pg. Therefore, simply upgrading the helm chart could result in your existing database being deleted and possible data loss.
+* v6 replaces the [Zalando Postgres
+  operator](https://github.com/zalando/postgres-operator) with
+  [CloudNativePG](https://cloudnative-pg.io/) operator for Postgres. This
+  decision was made because CloudNativePG is a [CNCF](https://www.cncf.io/)
+  project, has increasing popularity, and the avoidance of StatefulSets makes
+  management easier. However, there is no direct upgrade path from Zalando to
+  CloudNativePG. Therefore, **simply upgrading the Galaxy Helm chart could
+  result in your existing database being deleted and possible data loss**.
 
-  Therefore, we recommend first creating a [logical backup](https://github.com/zalando/postgres-operator/blob/master/docs/administrator.md#logical-backups)
-  of the existing database, and then reimporting that backup to the new database following instructions
+  We recommend first creating a [logical
+  backup](https://github.com/zalando/postgres-operator/blob/master/docs/administrator.md#logical-backups)
+  of the existing Galaxy database, and then reimporting that backup to the new
+  database following instructions
   [here](https://cloudnative-pg.io/documentation/1.16/database_import/).
 
-* v6 splits all global dependencies such as the postgres and rabbitbq operators into a separate `galaxy-deps` chart. This is in contrast to v5,
-  which had all dependencies bundled in for convenience. This bundling caused problems during uninstallation in particular, because the postgres
-  operator could be uninstalled before postgres itself was uninstalled, leaving various artefacts behind. This made reinstallation
-  particularly tricky, as all such left-over resources had to be cleaned up manually. Therefore, our production installation notes already contained
-  a recommendation that these dependencies be installed separately. v6 makes this separation explicit by specifically debundling the dependencies into
-  a separate chart.
+  You can also choose not to upgrade the Postgres operator and continue using
+  your existing database service. In this case, set `postgresql.enabled: false`
+  in the `values.yaml` file and configure the `galaxy.yml` file to point to your
+  existing database.
 
-  If upgrading in production scenarios, you may simply omit installing the `galaxy-deps` chart and continue as usual. If upgrading in development
-  scenarios, there is no straightforward upgrade path. The galaxy chart will have to be uninstalled, the `galaxy-deps` chart installed, and subsequently,
-  galaxy can be reinstalled.
+* v6 chart also changes the default uid of the system Galaxy user. Previously
+  this uid was 101, which is a privileged uid and has caused conflicts. Starting
+  with v6, the default uid is 10001. This value needs to be matched between the
+  container and the chart, and during this transition period, there is a
+  dedicated galaxy-min image that uses the new uid. This image is available at
+  `quay.io/galaxyproject/galaxy-min:24.2-uid`, and it is set as the default in
+  the values file.
+
+  As a result of this change, when upgrading from a previous version, it is
+  necessary to also update the file system permissions to match the new uid.
+  This can be done by running the following commands:
+
+  ```bash
+  kubectl apply -n galaxy -f https://gist.githubusercontent.com/afgane/f82703727c6ca22a695f4eb022fdccd6/raw/3ec72508f15fdaf2ac3af3eac54f05ae7cd1a164/galaxy-debug-pod.yml
+  kubectl exec -n galaxy -it gxy-debug-pod -- sh
+  cd /server/galaxy/database/
+  find . -user 101 -exec chown 10001:10001 {} +
+  ```
+
+* v6 splits all global dependencies, such as the Postgres and RabbitMQ
+  operators, into a separate `galaxy-deps` chart. This is in contrast to v5,
+  which had all dependencies bundled with the Galaxy chart. This bundling caused
+  problems during uninstallation in particular, because the Postgres operator
+  could be uninstalled before Postgres itself was uninstalled, leaving various
+  artifacts behind. This made reinstallation particularly tricky, as all such
+  left-over resources had to be cleaned up manually. Chart installation notes
+  already contained a recommendation that these dependencies be installed
+  separately. v6 makes this separation explicit by specifically separating the
+  dependencies into a separate chart.
+
+  If upgrading in production scenarios, you may simply omit installing the
+  `galaxy-deps` chart and continue as usual. If upgrading in development
+  scenarios, there is no straightforward upgrade path. The Galaxy chart will
+  have to be uninstalled, the `galaxy-deps` chart installed, and subsequently,
+  Galaxy can be reinstalled.

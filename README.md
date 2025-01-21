@@ -534,7 +534,7 @@ See the `example` cron job included in the `values.yaml` file for a full example
   existing database.
 
 * v6 chart also changes the default uid of the system Galaxy user. Previously
-  this uid was 101, which is a privileged uid and has caused conflicts. Starting
+  this uid was 101, which is a system reserved uid and can cause conflicts with system installed packages. Starting
   with v6, the default uid is 10001. This value needs to be matched between the
   container and the chart, and during this transition period, there is a
   dedicated galaxy-min image that uses the new uid. This image is available at

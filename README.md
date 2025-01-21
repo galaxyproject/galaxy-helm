@@ -516,11 +516,12 @@ See the `example` cron job included in the `values.yaml` file for a full example
 * v6 replaces the [Zalando Postgres
   operator](https://github.com/zalando/postgres-operator) with
   [CloudNativePG](https://cloudnative-pg.io/) operator for Postgres. This
-  decision was made because CloudNativePG is a [CNCF](https://www.cncf.io/)
-  project, has increasing popularity, and the avoidance of StatefulSets makes
-  management easier. However, there is no direct upgrade path from Zalando to
-  CloudNativePG. Therefore, **simply upgrading the Galaxy Helm chart could
-  result in your existing database being deleted and possible data loss**.
+  decision was made because CloudNativePG is meant to become a
+  [CNCF](https://www.cncf.io/) project, has increasing popularity, and the
+  avoidance of StatefulSets makes management easier. However, there is no direct
+  upgrade path from Zalando to CloudNativePG. Therefore, **simply upgrading the
+  Galaxy Helm chart could result in your existing database being deleted and
+  possible data loss**.
 
   We recommend first creating a [logical
   backup](https://github.com/zalando/postgres-operator/blob/master/docs/administrator.md#logical-backups)

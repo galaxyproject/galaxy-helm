@@ -180,8 +180,12 @@ rbac:
   enabled: true
 
 securityContext:
+  #- UID of the system user used by jobs. This user must exist in the container.
+  runAsUser: 10001
+  #- GID of the system group used by jobs. This group must exist in the container.
+  runAsGroup: 10001
   #- Security context and file system group used by jobs.
-  fsGroup: 101
+  fsGroup: 10001
 
 #- Configure the PVC used by Galaxy for local storage.
 persistence:
@@ -211,13 +215,7 @@ extraVolumeMounts: []
 setupJob:
   #- create the database
   createDatabase: true
-  securityContext:
-    #- the setup jobs will run as this user
-    runAsUser: 101
-    #- the `runAsUser` will belong to this group.
-    runAsGroup: 101
-    #- the filesystem group
-    fsGroup: 101
+  securityContext: {}
   ttlSecondsAfterFinished: 300
   downloadToolConfs:
     enabled: true
@@ -482,8 +480,8 @@ configs:
           {{- end }}
         k8s_namespace: "{{ .Release.Namespace }}"
         k8s_galaxy_instance_id: "{{ .Release.Name }}"
-        k8s_fs_group_id: "101"
-        k8s_supplemental_group_id: "101"
+        k8s_fs_group_id: "{{ .Values.securityContext.fsGroup }}"
+        k8s_supplemental_group_id: "{{ .Values.securityContext.fsGroup }}"
         k8s_pull_policy: IfNotPresent
         k8s_cleanup_job: onsuccess
         k8s_job_ttl_secs_after_finished: 90
@@ -766,10 +764,7 @@ tusd:
   annotations: {}
   podAnnotations: {}
   podSpecExtra: {}
-  securityContext:
-    runAsUser: 101
-    runAsGroup: 101
-    fsGroup: 101
+  securityContext: {}
   image:
     repository: tusproject/tusd
     tag: v1.13.0

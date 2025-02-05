@@ -555,6 +555,7 @@ configs:
       containers_resolvers_config_file: "/galaxy/server/config/container_resolvers_conf.xml"
       workflow_schedulers_config_file: "/galaxy/server/config/workflow_schedulers_conf.xml"
       build_sites_config_file: "/galaxy/server/config/build_sites.yml"
+      data_manager_config_file: "{{if .Values.setupJob.downloadToolConfs.enabled }}{{ .Values.setupJob.downloadToolConfs.volume.mountPath }}/config/shed_data_manager_conf.xml{{ else }}/galaxy/server/config/data_manager_conf.xml.sample{{ end }}"
       shed_data_manager_config_file: "/galaxy/server/config/mutable/shed_data_manager_conf.xml"
       shed_tool_data_table_config: "/galaxy/server/config/mutable/shed_tool_data_table_conf.xml"
       enable_data_manager_user_view: true

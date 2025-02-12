@@ -167,12 +167,9 @@ Creates the bash command for the init container used to place files and change p
 cp -anL /galaxy/server/config/integrated_tool_panel.xml /galaxy/server/config/mutable/integrated_tool_panel.xml;
 cp -anL /galaxy/server/config/sanitize_allowlist.txt /galaxy/server/config/mutable/sanitize_allowlist.txt;
 cp -anL /galaxy/server/config/data_manager_conf.xml.sample /galaxy/server/config/mutable/shed_data_manager_conf.xml;
+cp -anL /galaxy/server/config/shed_tool_data_table_conf.xml /galaxy/server/config/mutable/shed_tool_data_table_conf.xml;
 cp -aruL /galaxy/server/tool-data {{.Values.persistence.mountPath}}/;
 cp -aruL /galaxy/server/tools {{.Values.persistence.mountPath}}/;
-echo "<tables></tables>" > /galaxy/server/config/mutable/tool_data_table_conf.xml;
-echo "<tables></tables>" > /galaxy/server/config/mutable/shed_tool_data_table_conf.xml;
-chown 10001:10001 /galaxy/server/config/mutable/tool_data_table_conf.xml;
-chown 10001:10001 /galaxy/server/config/mutable/shed_tool_data_table_conf.xml;
 echo "Done" > /galaxy/server/config/mutable/init_mounts_done_{{.Release.Revision}};
 {{- end -}}
 

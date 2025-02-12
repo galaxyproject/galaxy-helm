@@ -650,8 +650,8 @@ jobs:
                 docker_container_id_override: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         .*data_manager.*:
           params:
-            k8s_run_as_group_id: 10001
-            k8s_run_as_user_id: 10001
+            k8s_run_as_group_id: "{{ .Values.securityContext.runAsGroup }}"
+            k8s_run_as_user_id: "{{ .Values.securityContext.runAsUser }}"
         Summary_Statistics1:
           params:
             docker_container_id_override: cloudve/gsummary:latest

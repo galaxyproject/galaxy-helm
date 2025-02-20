@@ -167,7 +167,7 @@ Creates the bash command for the init container used to place files and change p
 cp -anL /galaxy/server/config/integrated_tool_panel.xml /galaxy/server/config/mutable/integrated_tool_panel.xml;
 cp -anL /galaxy/server/config/sanitize_allowlist.txt /galaxy/server/config/mutable/sanitize_allowlist.txt;
 cp -anL /galaxy/server/config/data_manager_conf.xml.sample /galaxy/server/config/mutable/shed_data_manager_conf.xml;
-cp -anL /galaxy/server/config/tool_data_table_conf.xml.sample /galaxy/server/config/mutable/shed_tool_data_table_conf.xml;
+cp -anL /galaxy/server/config/shed_tool_data_table_conf.xml /galaxy/server/config/mutable/shed_tool_data_table_conf.xml;
 cp -aruL /galaxy/server/tool-data {{.Values.persistence.mountPath}}/;
 cp -aruL /galaxy/server/tools {{.Values.persistence.mountPath}}/;
 echo "Done" > /galaxy/server/config/mutable/init_mounts_done_{{.Release.Revision}};
@@ -177,15 +177,15 @@ echo "Done" > /galaxy/server/config/mutable/init_mounts_done_{{.Release.Revision
 Creates the bash command for the handlers to wait for init scripts
 */}}
 {{- define "galaxy.init-container-wait-command" -}}
-until [ -f /galaxy/server/config/mutable/db_init_done_{{$.Release.Revision}} ]; do echo "waiting for DB initialization"; sleep 1; done;
+until [ -f /galaxy/server/config/mutable/db_init_done_{{$.Release.Revision}} ]; do echo "[`date`] Waiting for DB initialization..."; sleep 1; done;
 {{- if $.Values.rabbitmq.enabled }}
-until timeout 1 bash -c "echo > /dev/tcp/{{ template "galaxy-rabbitmq.fullname" $ }}/{{.Values.rabbitmq.port}}"; do echo "waiting for rabbitmq service"; sleep 1; done;
+until timeout 1 bash -c "echo > /dev/tcp/{{ template "galaxy-rabbitmq.fullname" $ }}/{{.Values.rabbitmq.port}}"; do echo "[`date`] Waiting for rabbitmq service..."; sleep 1; done;
 {{- end }}
-until [ -f /galaxy/server/config/mutable/init_mounts_done_{{$.Release.Revision}} ]; do echo "waiting for copying onto NFS"; sleep 1; done;
+until [ -f /galaxy/server/config/mutable/init_mounts_done_{{$.Release.Revision}} ]; do echo "[`date`] Waiting for copying onto NFS..."; sleep 1; done;
 {{- if .Values.setupJob.downloadToolConfs.enabled }}
-until [ -f /galaxy/server/config/mutable/init_clone_done_{{$.Release.Revision}} ]; do echo "waiting for refdata copying"; sleep 1; done;
+until [ -f /galaxy/server/config/mutable/init_clone_done_{{$.Release.Revision}} ]; do echo "[`date`] Waiting for refdata copying..."; sleep 1; done;
 {{- end }}
-echo "Initialization waits complete";
+echo "[`date`] Initialization waits complete.";
 {{- end -}}
 
 {{/*

@@ -535,26 +535,21 @@ configs:
       shed_tool_config_file: "/galaxy/server/config/mutable/editable_shed_tool_conf.xml"
       enable_tool_document_cache: false
       tool_data_table_config_path: |-
-        {{ if .Values.setupJob.downloadToolConfs.enabled }}
-        {{- .Values.setupJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_data_table_conf.xml
-        {{- if .Values.refdata.enabled -}}
+        /galaxy/server/config/mutable/shed_tool_data_table_conf.xml
+        {{ if .Values.refdata.enabled -}}
         ,/cvmfs/data.galaxyproject.org/managed/location/tool_data_table_conf.xml,/cvmfs/data.galaxyproject.org/byhand/location/tool_data_table_conf.xml
-        {{- end }}
-        {{- else }}
-        {{- if .Values.refdata.enabled -}}
-        /cvmfs/data.galaxyproject.org//managed/location/tool_data_table_conf.xml,/cvmfs/data.galaxyproject.org/byhand/location/tool_data_table_conf.xml
-        {{- end }}
         {{- end }}
       tool_dependency_dir: "{{.Values.persistence.mountPath}}/deps"
       job_config_file: "/galaxy/server/config/job_conf.yml"
       outputs_to_working_directory: true
       builds_file_path: |-
-        {{ if .Values.refdata.enabled }}
+        {{ if .Values.refdata.enabled -}}
         /cvmfs/data.galaxyproject.org/managed/location/builds.txt
         {{- end }}
       containers_resolvers_config_file: "/galaxy/server/config/container_resolvers_conf.xml"
       workflow_schedulers_config_file: "/galaxy/server/config/workflow_schedulers_conf.xml"
       build_sites_config_file: "/galaxy/server/config/build_sites.yml"
+      data_manager_config_file: "{{if .Values.setupJob.downloadToolConfs.enabled }}{{ .Values.setupJob.downloadToolConfs.volume.mountPath }}/config/shed_data_manager_conf.xml{{ else }}/galaxy/server/config/data_manager_conf.xml.sample{{ end }}"
       shed_data_manager_config_file: "/galaxy/server/config/mutable/shed_data_manager_conf.xml"
       shed_tool_data_table_config: "/galaxy/server/config/mutable/shed_tool_data_table_conf.xml"
       enable_data_manager_user_view: true
@@ -618,6 +613,8 @@ configs:
     {{- (.Files.Get "files/configs/integrated_tool_panel.xml") }}
   tool_conf.xml: |
     {{- (.Files.Get "files/configs/tool_conf.xml") }}
+  shed_tool_data_table_conf.xml: |
+    {{- (.Files.Get "files/configs/shed_tool_data_table_conf.xml") }}
 
 #- Additional dynamic rules to map into the container.
 jobs:
@@ -653,6 +650,10 @@ jobs:
                 tool.id in GALAXY_LIB_TOOLS_UNVERSIONED or "CONVERTER_" == tool.id[:10] or tool.is_datatype_converter
               params:
                 docker_container_id_override: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        .*data_manager.*:
+          params:
+            k8s_run_as_group_id: "{{ .Values.securityContext.runAsGroup }}"
+            k8s_run_as_user_id: "{{ .Values.securityContext.runAsUser }}"
         Summary_Statistics1:
           params:
             docker_container_id_override: cloudve/gsummary:latest

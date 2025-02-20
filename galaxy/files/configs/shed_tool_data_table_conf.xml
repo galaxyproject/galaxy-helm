@@ -1,0 +1,151 @@
+<?xml version="1.0" ?>
+<tables>
+    <table name="all_fasta" comment_char="#">
+        <columns>value, dbkey, name, path</columns>
+        <file path="/galaxy/server/config/mutable/all_fasta.loc" />
+    </table>
+    <table name="__dbkeys__" comment_char="#">
+        <columns>value, name, len_path</columns>
+        <file path="/galaxy/server/config/mutable/dbkeys.loc" />
+    </table>
+    <table name="bowtie2_indexes" comment_char="#">
+        <columns>value, dbkey, name, path</columns>
+        <file path="/galaxy/server/config/mutable/bowtie2_indices.loc"/>
+    </table>
+    <table name="bwa_mem_indexes" comment_char="#">
+        <columns>value, dbkey, name, path</columns>
+        <file path="/galaxy/server/config/mutable/bwa_mem_index.loc"/>
+    </table>
+    <table name="twobit" comment_char="#">
+        <columns>value, path</columns>
+        <file path="/galaxy/server/config/mutable/twobit.loc"/>
+    </table>
+    <table name="lastz_seqs" comment_char="#">
+        <columns>value, name, path</columns>
+        <file path="/galaxy/server/config/mutable/lastz_seqs.loc" />
+    </table>
+    <table name="alignseq_seq" comment_char="#">
+        <columns>type, value, path</columns>
+        <file path="/galaxy/server/config/mutable/alignseq.loc"/>
+    </table>
+    <table name="picard_indexes" comment_char="#">
+        <columns>value, dbkey, name, path</columns>
+        <file path="/galaxy/server/config/mutable/picard_index.loc"/>
+    </table>
+    <table name="fasta_indexes" comment_char="#">
+        <columns>value, dbkey, name, path</columns>
+        <file path="/galaxy/server/config/mutable/fasta_indexes.loc"/>
+    </table>
+    <table name="hisat2_indexes" comment_char="#" allow_duplicate_entries="False">
+        <columns>value, dbkey, name, path</columns>
+        <file path="/galaxy/server/config/mutable/hisat2_indexes.loc"/>
+    </table>
+    <table name="rnastar_index2x_versioned" comment_char="#" allow_duplicate_entries="False">
+        <columns>value, dbkey, name, path, with_gene_model, version</columns>
+        <file path="/galaxy/server/config/mutable/rnastar_index2x_versioned.loc"/>
+    </table>
+    <table name="bowtie_indexes" comment_char="#" allow_duplicate_entries="False">
+        <columns>value, dbkey, name, path</columns>
+        <file path="/galaxy/server/config/mutable/bowtie_indices.loc"/>
+    </table>
+    <table name="kallisto_indexes" comment_char="#" allow_duplicate_entries="False">
+        <columns>value, dbkey, name, path</columns>
+        <file path="/galaxy/server/config/mutable/kallisto_indexes.loc"/>
+    </table>
+    <table name="snpeffv_genomedb" comment_char="#" allow_duplicate_entries="False">
+        <columns>key, version, value, name, path</columns>
+        <file path="/galaxy/server/config/mutable/snpeffv_genomedb.loc"/>
+    </table>
+    <table name="snpeffv_regulationdb" comment_char="#" allow_duplicate_entries="False">
+        <columns>key, version, genome, value, name</columns>
+        <file path="/galaxy/server/config/mutable/snpeffv_regulationdb.loc"/>
+    </table>
+    <table name="snpeffv_databases" comment_char="#" allow_duplicate_entries="False">
+        <columns>key, version, value, name</columns>
+        <file path="/galaxy/server/config/mutable/snpeffv_databases.loc"/>
+    </table>
+    <table name="plant_tribes_scaffolds" comment_char="#">
+        <columns>value, name, path, description</columns>
+        <file path="/galaxy/server/config/mutable/plant_tribes_scaffolds.loc"/>
+    </table>
+    <table name="ncbi_taxonomy" comment_char="#">
+        <columns>value, name, path</columns>
+        <file path="/galaxy/server/config/mutable/ncbi_taxonomy.loc"/>
+    </table>
+    <table name="ncbi_accession2taxid" comment_char="#">
+        <columns>value, name, path</columns>
+        <file path="/galaxy/server/config/mutable/ncbi_accession2taxid.loc"/>
+    </table>
+    <table name="gemini_versioned_databases" comment_char="#" allow_duplicate_entries="False">
+        <columns>value, dbkey, version, name, path</columns>
+        <file path="/galaxy/server/config/mutable/gemini_versioned_databases.loc"/>
+    </table>
+    <table name="kraken2_databases" comment_char="#">
+        <columns>value, name, path</columns>
+        <file path="/galaxy/server/config/mutable/kraken2_databases.loc"/>
+    </table>
+    <table name="bracken_databases" comment_char="#">
+        <columns>value, name, path</columns>
+        <file path="/galaxy/server/config/mutable/bracken_databases.loc"/>
+    </table>
+    <table name="plasmidfinder_database" comment_char="#">
+        <columns>value, name, date, path</columns>
+        <file path="/galaxy/server/config/mutable/plasmidfinder_database.loc"/>
+    </table>
+    <table name="primer_scheme_bedfiles" comment_char="#">
+        <columns>value, description, path</columns>
+        <file path="/galaxy/server/config/mutable/primer_scheme_bedfiles.loc"/>
+    </table>
+    <table name="all_gff" comment_char="#">
+        <columns>value, dbkey, name, path</columns>
+        <file path="/galaxy/server/config/mutable/all_gff.loc"/>
+    </table>
+    <table name="adapters" comment_char="#" allow_duplicate_entries="False">
+        <columns>value, name</columns>
+        <file path="/galaxy/server/config/mutable/adapters.loc"/>
+    </table>
+    <table name="bwameth_indexes" comment_char="#" allow_duplicate_entries="False">
+        <columns>value, dbkey, name, path</columns>
+        <file path="/galaxy/server/config/mutable/bwameth_indexes.loc"/>
+    </table>
+    <table name="salmon_indexes_versioned" comment_char="#" allow_duplicate_entries="False">
+        <columns>value, dbkey, name, path, version</columns>
+        <file path="/galaxy/server/config/mutable/salmon_indexes_versioned.loc"/>
+    </table>
+    <table name="sailfish_indexes" comment_char="#">
+        <columns>value, name, path</columns>
+        <file path="/galaxy/server/config/mutable/sailfish_indexes.loc"/>
+    </table>
+    <table name="gene_sets" comment_char="#" allow_duplicate_entries="False">
+        <columns>value, dbkey, name, path</columns>
+        <file path="/galaxy/server/config/mutable/gene_sets.loc"/>
+    </table>
+    <table name="sam_fa_indexes" comment_char="#">
+        <columns>line_type, value, path</columns>
+        <file path="/galaxy/server/config/mutable/sam_fa_indices.loc"/>
+    </table>
+    <table name="snpeff_msigdb_database" comment_char="#" allow_duplicate_entries="False">
+        <columns>value, name, path</columns>
+        <file path="/galaxy/server/config/mutable/snpeff_msigdb_database.loc"/>
+    </table>
+    <table name="snpsift_dbnsfps" comment_char="#" allow_duplicate_entries="False">
+        <columns>key, build, name, value, annotations</columns>
+        <file path="/galaxy/server/config/mutable/snpsift_dbnsfp.loc"/>
+    </table>
+    <table name="snpeffv_genomedb" comment_char="#" allow_duplicate_entries="False">
+        <columns>key, version, value, name, path</columns>
+        <file path="/galaxy/server/config/mutable/snpeffv_genomedb.loc"/>
+    </table>
+    <table name="snpeffv_regulationdb" comment_char="#" allow_duplicate_entries="False">
+        <columns>key, version, genome, value, name</columns>
+        <file path="/galaxy/server/config/mutable/snpeffv_regulationdb.loc"/>
+    </table>
+    <table name="featurecounts_anno" comment_char="#">
+        <columns>value, dbkey</columns>
+        <file path="/galaxy/server/config/mutable/featurecounts_anno.loc"/>
+    </table>
+    <table name="gemini_databases" comment_char="#" allow_duplicate_entries="False">
+        <columns>value, dbkey, name, path</columns>
+        <file path="/galaxy/server/config/mutable/gemini_databases.loc"/>
+    </table>
+</tables>

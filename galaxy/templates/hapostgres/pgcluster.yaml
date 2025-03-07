@@ -7,6 +7,10 @@ metadata:
   name: {{ include "galaxy-postgresql.fullname" . }}
   namespace: {{ .Release.Namespace }}
 spec:
+{{- with $.Values.postgresql.affinity }}
+  affinity:
+    {{- toYaml . | nindent 4 }}
+{{- end }}
   instances: {{ default "1" .Values.postgresql.instances }}
   bootstrap:
     initdb:

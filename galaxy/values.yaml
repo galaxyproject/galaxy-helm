@@ -390,6 +390,8 @@ affinity: {}
 
 postgresql:
   enabled: true
+  # affinity for galaxy's pgcluster resource
+  affinity: {}
   #- hostname and port of an existing database to use.
   existingDatabase:
   galaxyDatabaseUser: galaxydbuser

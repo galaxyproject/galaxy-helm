@@ -9,11 +9,22 @@ metadata:
 spec:
   instances: {{ default "1" .Values.postgresql.instances }}
   bootstrap:
+{{- if .Values.postgresql.recovery.enabled }}
+    recovery:
+      backup:
+        name: {{ .Values.postgresql.recovery.name }}
+{{- else }}
     initdb:
       database: galaxy
       owner: {{ .Values.postgresql.galaxyDatabaseUser }}
       secret:
         name: '{{ include "galaxy.galaxyDbSecretName" . }}'
+{{- end}}
+  backup:
+    barmanObjectStore:
+      destinationPath: {{ .Values.postgresql.recovery.path }}
+      googleCredentials:
+        gkeEnvironment: true
   enableSuperuserAccess: true
   superuserSecret:
     name: 'postgres.{{ include "galaxy-postgresql.fullname" . }}.credentials.postgresql.cnpg.io'

@@ -1,4 +1,12 @@
 {{- if and .Values.postgresql.enabled (not .Values.postgresql.existingDatabase) }}
+---
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshotClass
+metadata:
+  name: cnpg-snapshot-class
+driver: pd.csi.storage.gke.io
+deletionPolicy: Retain
+---
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
@@ -8,28 +16,62 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   instances: {{ default "1" .Values.postgresql.instances }}
+  imageName: {{ .Values.postgresql.image }}
   bootstrap:
 {{- if .Values.postgresql.recovery.enabled }}
     recovery:
-      backup:
-        name: {{ .Values.postgresql.recovery.name }}
+{{- if .Values.postgresql.recovery.snapshot }}
+      volumeSnapshots:
+        storage:
+          name: {{ .Values.postgresql.recovery.snapshot }}
+          kind: VolumeSnapshot
+          apiGroup: snapshot.storage.k8s.io
+{{- else }}
+      source: clusterBackup
+  externalClusters:
+  - name: clusterBackup
+    barmanObjectStore:
+      destinationPath: {{ .Values.postgresql.recovery.path }}
+      googleCredentials:
+        gkeEnvironment: true
+      wal:
+        maxParallel: 8
+{{- end }}
+      database: galaxy
+      owner: {{ .Values.postgresql.galaxyDatabaseUser }}
+      secret:
+        name: '{{ include "galaxy.galaxyDbSecretName" . }}'
 {{- else }}
     initdb:
       database: galaxy
       owner: {{ .Values.postgresql.galaxyDatabaseUser }}
       secret:
         name: '{{ include "galaxy.galaxyDbSecretName" . }}'
-{{- end}}
+{{- end }}
+{{- if .Values.postgresql.backup.enabled }}
   backup:
+    volumeSnapshot:
+      className: cnpg-snapshot-class
+      snapshotOwnerReference: none
     barmanObjectStore:
-      destinationPath: {{ .Values.postgresql.recovery.path }}
+      destinationPath: {{ .Values.postgresql.backup.path }}
       googleCredentials:
         gkeEnvironment: true
+{{- end }}
+  serviceAccountTemplate:
+    metadata:
+      annotations:
+        iam.gke.io/gcp-service-account: cnpg-backup-sa@anvil-and-terra-development.iam.gserviceaccount.com
   enableSuperuserAccess: true
   superuserSecret:
     name: 'postgres.{{ include "galaxy-postgresql.fullname" . }}.credentials.postgresql.cnpg.io'
   storage:
     size: {{ default "10Gi" .Values.postgresql.persistence.size }}
+    {{- if .Values.postgresql.persistence.storageClass }}
+    storageClass: {{ .Values.postgresql.persistence.storageClass }}
+    {{- end }}
+  walStorage:
+    size: {{ default "10Gi" .Values.postgresql.persistence.walSize }}
     {{- if .Values.postgresql.persistence.storageClass }}
     storageClass: {{ .Values.postgresql.persistence.storageClass }}
     {{- end }}

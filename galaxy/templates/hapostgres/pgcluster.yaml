@@ -32,6 +32,7 @@ spec:
   - name: clusterBackup
     barmanObjectStore:
       destinationPath: {{ .Values.postgresql.recovery.path }}
+      serverName: {{ include "galaxy-postgresql.fullname" . }}
       googleCredentials:
         gkeEnvironment: true
       wal:

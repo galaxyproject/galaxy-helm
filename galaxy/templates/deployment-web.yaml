@@ -79,7 +79,7 @@ spec:
             initialDelaySeconds: {{ .Values.webHandlers.startupProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.webHandlers.startupProbe.periodSeconds }}
             failureThreshold: {{ .Values.webHandlers.startupProbe.failureThreshold }}
-            timeoutSeconds: {{ .Values.webHandlers.startupProbe.failureThreshold }}
+            timeoutSeconds: {{ .Values.webHandlers.startupProbe.timeoutSeconds }}
           {{- end }}
           {{- if .Values.webHandlers.readinessProbe.enabled }}
           readinessProbe:
@@ -89,7 +89,7 @@ spec:
             initialDelaySeconds: {{ .Values.webHandlers.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.webHandlers.readinessProbe.periodSeconds }}
             failureThreshold: {{ .Values.webHandlers.readinessProbe.failureThreshold }}
-            timeoutSeconds: {{ .Values.webHandlers.readinessProbe.failureThreshold }}
+            timeoutSeconds: {{ .Values.webHandlers.readinessProbe.timeoutSeconds }}
           {{- end }}
           {{- if .Values.webHandlers.livenessProbe.enabled }}
           livenessProbe:
@@ -99,7 +99,7 @@ spec:
             initialDelaySeconds: {{ .Values.webHandlers.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.webHandlers.livenessProbe.periodSeconds }}
             failureThreshold: {{ .Values.webHandlers.livenessProbe.failureThreshold }}
-            timeoutSeconds: {{ .Values.webHandlers.livenessProbe.failureThreshold }}
+            timeoutSeconds: {{ .Values.webHandlers.livenessProbe.timeoutSeconds }}
           {{- end }}
           volumeMounts:
             {{- range $key, $entry := .Values.extraFileMappings -}}

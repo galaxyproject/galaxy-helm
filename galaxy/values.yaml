@@ -10,7 +10,7 @@ image:
   #- Repository containing the Galaxy image.
   repository: quay.io/galaxyproject/galaxy-min
   #- Galaxy Docker image tag (generally corresponds to the desired Galaxy version)
-  tag: "25.0.rc1"  # Galaxy versions prior to 24.1.1 contain a bug mapping the extra_files directory
+  tag: "25.0.rc2"  # Galaxy versions prior to 24.1.1 contain a bug mapping the extra_files directory
   #-  Galaxy image [pull policy](https://kubernetes.io/docs/concepts/configuration/overview/#container-images)
   pullPolicy: IfNotPresent
 

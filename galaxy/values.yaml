@@ -10,7 +10,7 @@ image:
   #- Repository containing the Galaxy image.
   repository: quay.io/galaxyproject/galaxy-min
   #- Galaxy Docker image tag (generally corresponds to the desired Galaxy version)
-  tag: "25.0.rc2"  # Galaxy versions prior to 24.1.1 contain a bug mapping the extra_files directory
+  tag: "25.0.rc1"  # Galaxy versions prior to 24.1.1 contain a bug mapping the extra_files directory
   #-  Galaxy image [pull policy](https://kubernetes.io/docs/concepts/configuration/overview/#container-images)
   pullPolicy: IfNotPresent
 
@@ -377,10 +377,6 @@ resources:
     cpu: 100m
     memory: 1G
     ephemeral-storage: 1Gi
-  limits:
-    cpu: 3
-    memory: 7G
-    ephemeral-storage: 10Gi
 
 nodeSelector: {}
 
@@ -686,8 +682,6 @@ jobs:
             docker_enabled: "true"
             requests_cpu: "{cores}"
             requests_memory: "{mem}Gi"
-            limits_cpu: "{cores}"
-            limits_memory: "{mem}Gi"
           scheduling:
             accept:
               - docker
@@ -758,10 +752,6 @@ nginx:
       cpu: 100m
       memory: 500M
       ephemeral-storage: 10Gi
-    limits:
-      cpu: 2
-      memory: 3G
-      ephemeral-storage: 100Gi
 
 tusd:
   enabled: true

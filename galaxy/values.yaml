@@ -377,6 +377,9 @@ resources:
     cpu: 100m
     memory: 1G
     ephemeral-storage: 1Gi
+  limits:
+    memory: 7G
+    ephemeral-storage: 10Gi
 
 nodeSelector: {}
 
@@ -682,6 +685,7 @@ jobs:
             docker_enabled: "true"
             requests_cpu: "{cores}"
             requests_memory: "{mem}Gi"
+            limits_memory: "{mem}Gi"
           scheduling:
             accept:
               - docker
@@ -752,6 +756,9 @@ nginx:
       cpu: 100m
       memory: 500M
       ephemeral-storage: 10Gi
+    limits:
+      memory: 3G
+      ephemeral-storage: 100Gi
 
 tusd:
   enabled: true

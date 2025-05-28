@@ -10,7 +10,7 @@ image:
   #- Repository containing the Galaxy image.
   repository: quay.io/galaxyproject/galaxy-min
   #- Galaxy Docker image tag (generally corresponds to the desired Galaxy version)
-  tag: "24.2-uid"  # Galaxy versions prior to 24.1.1 contain a bug mapping the extra_files directory
+  tag: "25.0.rc1"  # Galaxy versions prior to 24.1.1 contain a bug mapping the extra_files directory
   #-  Galaxy image [pull policy](https://kubernetes.io/docs/concepts/configuration/overview/#container-images)
   pullPolicy: IfNotPresent
 
@@ -378,7 +378,6 @@ resources:
     memory: 1G
     ephemeral-storage: 1Gi
   limits:
-    cpu: 3
     memory: 7G
     ephemeral-storage: 10Gi
 
@@ -480,6 +479,8 @@ configs:
           {{- end }}
         k8s_namespace: "{{ .Release.Namespace }}"
         k8s_galaxy_instance_id: "{{ .Release.Name }}"
+        k8s_run_as_user_id: "{{ .Values.securityContext.runAsUser }}"
+        k8s_run_as_group_id: "{{ .Values.securityContext.runAsGroup }}"
         k8s_fs_group_id: "{{ .Values.securityContext.fsGroup }}"
         k8s_supplemental_group_id: "{{ .Values.securityContext.fsGroup }}"
         k8s_pull_policy: IfNotPresent
@@ -556,6 +557,8 @@ configs:
       tool_path: "{{.Values.persistence.mountPath}}/tools"
       tool_data_path: "{{.Values.persistence.mountPath}}/tool-data"
       conda_auto_init: false
+      install_tool_dependencies: false
+      install_resolver_dependencies: false
       nginx_x_accel_redirect_base: >-
         {{include "galaxy.add_trailing_slash" .Values.ingress.path}}_x_accel_redirect
       len_file_path: |-
@@ -682,7 +685,6 @@ jobs:
             docker_enabled: "true"
             requests_cpu: "{cores}"
             requests_memory: "{mem}Gi"
-            limits_cpu: "{cores}"
             limits_memory: "{mem}Gi"
           scheduling:
             accept:
@@ -755,7 +757,6 @@ nginx:
       memory: 500M
       ephemeral-storage: 10Gi
     limits:
-      cpu: 2
       memory: 3G
       ephemeral-storage: 100Gi
 

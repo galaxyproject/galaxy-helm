@@ -534,6 +534,7 @@ configs:
       sanitize_allowlist_file: "/galaxy/server/config/mutable/sanitize_allowlist.txt"
       tool_config_file: "/galaxy/server/config/tool_conf.xml{{if .Values.setupJob.downloadToolConfs.enabled}},{{ .Values.setupJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_conf.xml{{end}}"
       shed_tool_config_file: "/galaxy/server/config/mutable/editable_shed_tool_conf.xml"
+      tool_sheds_config_file: "/galaxy/server/config/tool_sheds_conf.xml"
       enable_tool_document_cache: false
       tool_data_table_config_path: |-
         /galaxy/server/config/mutable/shed_tool_data_table_conf.xml
@@ -578,6 +579,12 @@ configs:
           <handler id="workflow_scheduler0" tags="schedulers"/>
       </handlers>
     </workflow_schedulers>
+  tool_sheds_conf.xml: |
+    <?xml version="1.0"?>
+    <tool_sheds>
+        <tool_shed name="Galaxy Main Tool Shed" url="https://toolshed.g2.bx.psu.edu/"/>
+        <tool_shed name="Galaxy Test Tool Shed" url="https://testtoolshed.g2.bx.psu.edu/"/>
+    </tool_sheds>
   sanitize_allowlist.txt: |
     toolshed.g2.bx.psu.edu/repos/bgruening/diff/
     toolshed.g2.bx.psu.edu/repos/bgruening/pharmcat/

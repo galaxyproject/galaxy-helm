@@ -17,6 +17,11 @@ image:
 #- Secrets used to [access a Galaxy image from a private repository](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/)
 imagePullSecrets: []
 
+#- Configure the CNPG operator to reuse an existing PGDATA directory if it exists,
+#- otherwise the operator will rename the existing directory.
+reuseExistingDirectory: true
+
+#- Configure the GTN webhook
 trainingHook:
   #- Enable the GTN webhook to link references to tools in tutorials to the corresponding tool panel in Galaxy.
   enabled: false

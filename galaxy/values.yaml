@@ -508,7 +508,7 @@ configs:
           docker_default_container_id: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           tpv_config_files:
             - https://gxy.io/tpv/db-latest.yml
-            - https://raw.githubusercontent.com/CloudVE/tpv-db-helm/refs/heads/main/tools.yml
+            # - https://raw.githubusercontent.com/CloudVE/tpv-db-helm/refs/heads/main/tools.yml
             - lib/galaxy/jobs/rules/tpv_rules_local.yml
 #     limits:
 #     - type: registered_user_concurrent_jobs

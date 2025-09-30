@@ -79,6 +79,8 @@ webHandlers:
   gunicorn:
     timeout: 300
     workers: 1
+    maxRequests: 50000
+    maxRequestsJitter: 10000
     extraArgs: ""
 
 jobHandlers:

@@ -25,7 +25,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: post-install-kubectl
-        image: bitnami/kubectl
+        image: bitnamilegacy/kubectl
         command:
           - "sh"
           - "/script/cvmfs-fix.sh"

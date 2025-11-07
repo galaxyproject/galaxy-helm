@@ -437,7 +437,7 @@ by setting the desired values of the `webHandlers.replicaCount`,
 ## Cron jobs
 
 Two Cron jobs are defined by default.  One to clean up Galaxy's database and one to clean up the `tmp` directory.  By default, these
-jobs run at 02:05 (the database maintenance script) and 02:15 (`tmp` directyory cleanup). Users can
+jobs run at 02:05 (the database maintenance script) and 02:15 (`tmp` directory cleanup). Users can
 change the times the cron jobs are run by changing the `schedule` field in the `values.yaml` file:
 
 ```yaml
@@ -445,7 +445,7 @@ cronJobs:
   maintenance:
     schedule: "30 6 * * *" # Execute the cron job at 6:30 UTC
 ```
-or by specifying the `schedule` on the command line when instaling Galaxy:
+or by specifying the `schedule` on the command line when installing Galaxy:
 ```bash
 # Schedule the maintenance job to run at 06:30 on the first day of each month
 helm install galaxy -n galaxy galaxy/galaxy --set cronJobs.maintenance.schedule="30 6 1 * *"

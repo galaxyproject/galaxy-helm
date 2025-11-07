@@ -99,3 +99,5 @@ galaxy/charts/
 .vscode
 
 Chart.lock
+
+.DS_Store

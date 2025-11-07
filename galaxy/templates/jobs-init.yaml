@@ -18,41 +18,52 @@ spec:
         checksum/galaxy_rules: {{ include (print $.Template.BasePath "/configmap-galaxy-rules.yaml") . | sha256sum }}
         checksum/galaxy_extras: {{ include (print $.Template.BasePath "/configmap-extra-files.yaml") . | sha256sum }}
     spec:
-      securityContext:
-        runAsUser: {{ default .Values.securityContext.runAsUser .Values.setupJob.securityContext.runAsUser }}
-        runAsGroup: {{ default .Values.securityContext.runAsGroup .Values.setupJob.securityContext.runAsGroup }}
-        fsGroup: {{ default .Values.securityContext.fsGroup .Values.setupJob.securityContext.fsGroup }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+        fsGroup: {{ .Values.securityContext.fsGroup }}
       restartPolicy: OnFailure
       initContainers:
         - name: {{ .Chart.Name }}-wait-postgres
-          image: {{ .Values.jobs.init.image.repository }}:{{ .Values.jobs.init.image.tag }}
-          imagePullPolicy: {{ .Values.jobs.init.image.pullPolicy }}
-          command: ['sh', '-c', 'echo [`date`] - Chown mount path; chown {{ .Values.securityContext.fsUser}}:{{ .Values.securityContext.fsGroup }} {{ .Values.persistence.mountPath }}; echo [`date`] - Begin waiting for postgres.; until nc -z -w3 {{ template "galaxy-postgresql.servicename" . }} 5432; do echo [`date`] - Waiting for galaxy-postgres service...; sleep 2; done; echo [`date`] - Postgres connection OK.;']
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ['sh', '-c', 'echo [`date`][wait-postgres] - Wait for postgres init container starting. Running as `id`.; echo [`date`][wait-postgres] - Chown mount path: {{ .Values.securityContext.fsGroup }}:{{ .Values.securityContext.fsGroup }} {{ .Values.persistence.mountPath }}; chown {{ .Values.securityContext.fsGroup }}:{{ .Values.securityContext.fsGroup }} {{ .Values.persistence.mountPath }}; echo [`date`][wait-postgres] - Begin waiting for postgres.; until nc -z -w3 {{ template "galaxy-postgresql.servicename" . }} 5432; do echo [`date`][wait-postgres] - Waiting for galaxy-postgres service...; sleep 2; done; echo [`date`][wait-postgres] - Postgres connection OK.;']
           volumeMounts:
             - name: galaxy-data
               mountPath: {{ .Values.persistence.mountPath }}
       containers:
-        - name: {{ .Chart.Name }}-db-init
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        - name: {{ .Chart.Name }}-init-db
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if .Values.setupJob.createDatabase }}
           args:
             - 'sh'
             - '-c'
             - >
-              if (ls /galaxy/server/config/mutable/ | grep -q "db_init_done*");
-                then /galaxy/server/manage_db.sh upgrade && echo "Done" > /galaxy/server/config/mutable/db_init_done_{{.Release.Revision}};
-                else (/galaxy/server/manage_db.sh init && echo "Done" > /galaxy/server/config/mutable/db_init_done_{{.Release.Revision}};);
+              echo "[`date`][init-db] - Starting Galaxy database init. Running as `id`.";
+              if (ls /galaxy/server/config/mutable/ | grep -q "init_db_done*");
+                then /galaxy/server/manage_db.sh upgrade && echo "[`date`][init-db] - Manage DB upgrade done." > /galaxy/server/config/mutable/init_db_done_{{.Release.Revision}};
+                else (/galaxy/server/manage_db.sh init && echo "[`date`][init-db] - Manage DB init done." > /galaxy/server/config/mutable/init_db_done_{{.Release.Revision}};);
               fi;
+              echo "[`date`][init-db] - Database init complete. Created file /galaxy/server/config/mutable/init_db_done_{{.Release.Revision}}.";
+              echo "[`date`][init-db] - Chown configs mutable path: {{ .Values.securityContext.fsGroup }}:{{ .Values.securityContext.fsGroup }} /galaxy/server/config/mutable/";
+              chown -R {{ .Values.securityContext.fsGroup }}:{{ .Values.securityContext.fsGroup }} /galaxy/server/config/mutable/;
+              echo "[`date`][init-db] - init-db container complete.";
           {{- else }}
           args:
             - 'sh'
             - '-c'
-            - '/galaxy/server/manage_db.sh upgrade && echo "Done" > /galaxy/server/config/mutable/db_init_done_{{.Release.Revision}};'
+            - >
+              echo "[`date`][upgrade-db] - Starting Galaxy database upgrade. Running as `id`.";
+              /galaxy/server/manage_db.sh upgrade && echo "[`date`][upgrade-db] - Manage DB upgrade ran." > /galaxy/server/config/mutable/init_db_done_{{.Release.Revision}};
+              echo "[`date`][upgrade-db] - Database upgrade complete.";
+              echo "[`date`][upgrade-db] - Chown configs mutable path: {{ .Values.securityContext.fsGroup }}:{{ .Values.securityContext.fsGroup }} /galaxy/server/config/mutable/";
+              chown -R {{ .Values.securityContext.fsGroup }}:{{ .Values.securityContext.fsGroup }} /galaxy/server/config/mutable/;
+              echo "[`date`][upgrade-db] - init-db container complete.";
           {{- end }}
           env:
           {{ include "galaxy.podEnvVars" . }}
@@ -155,11 +166,13 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       securityContext:
-        {{- toYaml .Values.setupJob.securityContext | nindent 8 }}
+        runAsUser: 0
+        runAsGroup: 0
+        fsGroup: {{ .Values.securityContext.fsGroup }}
       restartPolicy: OnFailure
       containers:
         - name: {{ .Chart.Name }}-init-mounts
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args: ['sh', '-c', {{ include "galaxy.init-container-commands" . | squote }}]
           volumeMounts:
@@ -201,8 +214,8 @@ spec:
             {{- end }}
 {{ if .Values.setupJob.downloadToolConfs.enabled }}
         - name: {{ .Chart.Name }}-init-cloud-repo
-          image: {{ .Values.jobs.init.image.repository }}:{{ .Values.jobs.init.image.tag }}
-          imagePullPolicy: {{ .Values.jobs.init.image.pullPolicy }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ['sh', '-c', '{{- include "galaxy.extract-archive-if-changed-command" (dict "extractPath" .Values.setupJob.downloadToolConfs.volume.mountPath "downloadUrl" .Values.setupJob.downloadToolConfs.archives.startup) -}} && echo "Done" > /galaxy/server/config/mutable/init_clone_done_{{.Release.Revision}}']
           volumeMounts:
             - name: galaxy-data
@@ -212,16 +225,16 @@ spec:
               mountPath: /galaxy/server/config/mutable/
               subPath: config
         - name: {{ .Chart.Name }}-init-cloud-repo-partial
-          image: {{ .Values.jobs.init.image.repository }}:{{ .Values.jobs.init.image.tag }}
-          imagePullPolicy: {{ .Values.jobs.init.image.pullPolicy }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ['sh', '-c', '{{- include "galaxy.extract-archive-if-changed-command" (dict "extractPath" .Values.setupJob.downloadToolConfs.volume.mountPath "downloadUrl" .Values.setupJob.downloadToolConfs.archives.running) -}}']
           volumeMounts:
             - name: galaxy-data
               mountPath: {{ .Values.setupJob.downloadToolConfs.volume.mountPath }}
               subPath: {{ .Values.setupJob.downloadToolConfs.volume.subPath }}
         - name: {{ .Chart.Name }}-init-cloud-repo-full
-          image: {{ .Values.jobs.init.image.repository }}:{{ .Values.jobs.init.image.tag }}
-          imagePullPolicy: {{ .Values.jobs.init.image.pullPolicy }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ['sh', '-c', '{{- include "galaxy.extract-archive-if-changed-command" (dict "extractPath" .Values.setupJob.downloadToolConfs.volume.mountPath "downloadUrl" .Values.setupJob.downloadToolConfs.archives.full) -}}']
           volumeMounts:
             - name: galaxy-data

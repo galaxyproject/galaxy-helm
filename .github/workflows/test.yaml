@@ -14,7 +14,7 @@ jobs:
         run: curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x ./kubectl && sudo mv ./kubectl /usr/local/bin/kubectl && kubectl version || true
       - name: Install Helm
         run: curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           persist-credentials: false
       - name: Helm linting for galaxy
@@ -25,13 +25,13 @@ jobs:
     steps:
       - name: Install Helm
         run: curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           persist-credentials: false
       - name: Start k8s locally
-        uses: jupyterhub/action-k3s-helm@v3
+        uses: jupyterhub/action-k3s-helm@v4
         with:
-          k3s-version: v1.32.0+k3s1  # releases:  https://github.com/k3s-io/k3s/tags
+          k3s-version: v1.34.1+k3s1  # releases:  https://github.com/k3s-io/k3s/tags
           metrics-enabled: false
           traefik-enabled: false
       - name: Verify function of k8s, kubectl, and helm

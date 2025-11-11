@@ -179,8 +179,6 @@ cp -aruL /galaxy/server/tool-data {{.Values.persistence.mountPath}}/;
 echo "[`date`] - Copying tools directory";
 cp -aruL /galaxy/server/tools {{.Values.persistence.mountPath}}/;
 echo "[`date`] - Init mounts container copy commands done.";
-echo "[`date`] - Chown mutable path {{ .Values.securityContext.fsGroup }}:{{ .Values.securityContext.fsGroup }} /galaxy/server/config/mutable/";
-chown -R {{ .Values.securityContext.fsGroup }}:{{ .Values.securityContext.fsGroup }} /galaxy/server/config/mutable/;
 echo "[`date`] - Init mounts container done." > /galaxy/server/config/mutable/init_mounts_done_{{.Release.Revision}};
 {{- end -}}
 

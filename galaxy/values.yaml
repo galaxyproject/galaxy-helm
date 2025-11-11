@@ -215,7 +215,10 @@ extraVolumeMounts: []
 setupJob:
   #- create the database
   createDatabase: true
-  securityContext: {}
+  securityContext:
+    runAsUser: 0
+    runAsGroup: 0
+    fsGroup: 10001
   ttlSecondsAfterFinished: 1800
   downloadToolConfs:
     enabled: true

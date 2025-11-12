@@ -214,7 +214,7 @@ Galaxy defines three handler types: `jobHandlers`, `webHandlers`, and
 
 | Parameter        | Description                                                  |
 | :--------------- | :----------------------------------------------------------- |
-| `replicaCount`   | The number of handlers to be spawned.                        |
+| `replicaCount`   | The number of handlers to be spawned. **Note**: Because of a potential race condition with initializing the database, it is recommended to set this to 1 for the webHandler when Galaxy is first deployed. |
 | `startupDelay`   | Delay in seconds for handler startup. Used to offset handlers and avoid race conditions at first startup |
 | `annotations`    | Dictionary of annotations to add to this handler's metadata at the deployment level   |
 | `podAnnotations` | Dictionary of annotations to add to this handler's metadata at the pod level |
@@ -430,9 +430,14 @@ should work with a regular helm install on localhost.
 
 ## Horizontal scaling
 
-The Galaxy application can be horizontally scaled for the web, job, or workflow handlers
-by setting the desired values of the `webHandlers.replicaCount`,
-`jobHandlers.replicaCount`, and `workflowHandlers.replicaCount` configuration options.
+The Galaxy application can be horizontally scaled for the web, job, or workflow
+handlers by setting the desired values of the `webHandlers.replicaCount`,
+`jobHandlers.replicaCount`, and `workflowHandlers.replicaCount` configuration
+options. This is not tested option and there may be issues with scaling so
+unless really critical, the recommendation is to have a single handler for each
+type. Also, because of a potential race condition with initializing the
+database, it is recommended to set the `webHandlers.replicaCount` to 1 for the
+webHandler when Galaxy is first deployed.
 
 ## Cron jobs
 

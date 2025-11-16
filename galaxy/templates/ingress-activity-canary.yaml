@@ -2,7 +2,7 @@
 # on activity. A 200 on this endpoint indicates that a user
 # is active on the system, and the cluster can be autoscaled
 # in anticipation of jobs
-{{ if .Values.ingress.canary.enabled -}}
+{{ if and .Values.ingress.canary.enabled (not .Values.gateway.enabled) -}}
 {{- $fullName := include "galaxy.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 {{- $servicePort := .Values.service.port -}}

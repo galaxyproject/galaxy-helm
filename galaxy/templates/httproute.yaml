@@ -1,0 +1,47 @@
+{{- if .Values.gateway.enabled -}}
+{{- $fullName := include "galaxy.fullname" . -}}
+{{- $servicePort := .Values.service.port -}}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullName }}
+  labels:
+    {{- include "galaxy.labels" . | nindent 4 }}
+  {{- with .Values.gateway.httpRouteAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+    - name: {{ .Values.gateway.existingGateway | default (printf "%s-gateway" $fullName) }}
+      {{- if .Values.gateway.existingGatewayNamespace }}
+      namespace: {{ .Values.gateway.existingGatewayNamespace }}
+      {{- else }}
+      namespace: {{ .Release.Namespace }}
+      {{- end }}
+  {{- if .Values.gateway.hostname }}
+  hostnames:
+    - {{ .Values.gateway.hostname | quote }}
+  {{- end }}
+  rules:
+    {{- range .Values.ingress.hosts }}
+    {{- range .paths }}
+    - matches:
+        - path:
+            type: PathPrefix
+            value: {{ .path }}
+      backendRefs:
+        - name: {{ $fullName }}-nginx
+          port: {{ $servicePort }}
+      {{- if $.Values.gateway.requestTimeout }}
+      timeouts:
+        request: {{ $.Values.gateway.requestTimeout }}
+      {{- end }}
+      {{- if $.Values.gateway.filters }}
+      filters:
+        {{- toYaml $.Values.gateway.filters | nindent 8 }}
+      {{- end }}
+    {{- end }}
+    {{- end }}
+{{- end }}

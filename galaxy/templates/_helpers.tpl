@@ -164,24 +164,34 @@ Lookup the existing secret values if they exist, or generate a random value
 Creates the bash command for the init container used to place files and change permissions in the galaxy pods
 */}}
 {{- define "galaxy.init-container-commands" -}}
+echo "[`date`] - Init mounts container starting. Running as user `id`.";
+echo "[`date`] - Copying Galaxy configuration files to /galaxy/server/config/mutable/...";
+echo "[`date`] - Copying integrated_tool_panel.xml";
 cp -anL /galaxy/server/config/integrated_tool_panel.xml /galaxy/server/config/mutable/integrated_tool_panel.xml;
+echo "[`date`] - Copying sanitize_allowlist.txt";
 cp -anL /galaxy/server/config/sanitize_allowlist.txt /galaxy/server/config/mutable/sanitize_allowlist.txt;
+echo "[`date`] - Copying data_manager_conf.xml";
 cp -anL /galaxy/server/config/data_manager_conf.xml.sample /galaxy/server/config/mutable/shed_data_manager_conf.xml;
+echo "[`date`] - Copying tool_data_table_conf.xml";
 cp -anL /galaxy/server/config/shed_tool_data_table_conf.xml /galaxy/server/config/mutable/shed_tool_data_table_conf.xml;
+echo "[`date`] - Copying tool-data directory";
 cp -aruL /galaxy/server/tool-data {{.Values.persistence.mountPath}}/;
+echo "[`date`] - Copying tools directory";
 cp -aruL /galaxy/server/tools {{.Values.persistence.mountPath}}/;
-echo "Done" > /galaxy/server/config/mutable/init_mounts_done_{{.Release.Revision}};
+echo "[`date`] - Init mounts container copy commands done.";
+echo "[`date`] - Init mounts container done." > /galaxy/server/config/mutable/init_mounts_done_{{.Release.Revision}};
 {{- end -}}
 
 {{/*
 Creates the bash command for the handlers to wait for init scripts
 */}}
 {{- define "galaxy.init-container-wait-command" -}}
-until [ -f /galaxy/server/config/mutable/db_init_done_{{$.Release.Revision}} ]; do echo "[`date`] Waiting for DB initialization..."; sleep 1; done;
+echo "[`date`] Initialization waits starting. Running as user `id`.";
+until [ -f /galaxy/server/config/mutable/init_db_done_{{$.Release.Revision}} ]; do echo "[`date`] Waiting for DB initialization..."; sleep 1; done;
 {{- if $.Values.rabbitmq.enabled }}
 until timeout 1 bash -c "echo > /dev/tcp/{{ template "galaxy-rabbitmq.fullname" $ }}/{{.Values.rabbitmq.port}}"; do echo "[`date`] Waiting for rabbitmq service..."; sleep 1; done;
 {{- end }}
-until [ -f /galaxy/server/config/mutable/init_mounts_done_{{$.Release.Revision}} ]; do echo "[`date`] Waiting for copying onto NFS..."; sleep 1; done;
+until [ -f /galaxy/server/config/mutable/init_mounts_done_{{$.Release.Revision}} ]; do echo "[`date`] Waiting for copying onto NFS (looking for file /galaxy/server/config/mutable/init_mounts_done_{{$.Release.Revision}})..."; sleep 1; done;
 {{- if .Values.setupJob.downloadToolConfs.enabled }}
 until [ -f /galaxy/server/config/mutable/init_clone_done_{{$.Release.Revision}} ]; do echo "[`date`] Waiting for refdata copying..."; sleep 1; done;
 {{- end }}
@@ -193,14 +203,14 @@ Creates shell commands for downloading and extracting archives if modified
 */}}
 {{- define "galaxy.extract-archive-if-changed-command" -}}
 if [ -f {{ .extractPath }}/{{ base .downloadUrl }}_timestamp ]; then
-  echo "File {{ .downloadUrl }} previously downloaded. Only downloading if changed, to {{ .extractPath }}...";
-  wget -qO- --header="If-Modified-Since: `cat {{ .extractPath }}/{{ base .downloadUrl }}_timestamp`" {{ .downloadUrl }} | tar -xvz || echo File not changed, ignoring....;
+  echo "[`date`] - Running as `id`. File {{ .downloadUrl }} previously downloaded. Only downloading if changed, to {{ .extractPath }}...";
+  wget -qO- --header="If-Modified-Since: `cat {{ .extractPath }}/{{ base .downloadUrl }}_timestamp`" {{ .downloadUrl }} | tar -xvz -C / || echo File not changed, ignoring....;
 else
-  echo "File not previously downloaded. Downloading and extracting {{ .downloadUrl }} to {{ .extractPath }}...";
-  wget -qO- {{ .downloadUrl }} | tar -xvz || exit 1;
+  echo "[`date`] - Running as `id`. File not previously downloaded. Downloading and extracting {{ .downloadUrl }} to {{ .extractPath }}...";
+  wget -qO- {{ .downloadUrl }} | tar -xvz -C / || exit 1;
 fi;
 wget --server-response --spider {{ .downloadUrl }} 2>&1 | grep -i "Last-Modified: " | cut -c18- > {{ .extractPath }}/{{ base .downloadUrl }}_timestamp;
-echo "Completed download and extraction of: {{ .downloadUrl }}"
+echo "[`date`] - Completed download and extraction of {{ .downloadUrl }};"
 {{- end -}}
 
 

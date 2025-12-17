@@ -214,7 +214,7 @@ Galaxy defines three handler types: `jobHandlers`, `webHandlers`, and
 
 | Parameter        | Description                                                  |
 | :--------------- | :----------------------------------------------------------- |
-| `replicaCount`   | The number of handlers to be spawned.                        |
+| `replicaCount`   | The number of handlers to be spawned. **Note**: Because of a potential race condition with initializing the database, it is recommended to set this to 1 for the webHandler when Galaxy is first deployed. |
 | `startupDelay`   | Delay in seconds for handler startup. Used to offset handlers and avoid race conditions at first startup |
 | `annotations`    | Dictionary of annotations to add to this handler's metadata at the deployment level   |
 | `podAnnotations` | Dictionary of annotations to add to this handler's metadata at the pod level |
@@ -430,14 +430,19 @@ should work with a regular helm install on localhost.
 
 ## Horizontal scaling
 
-The Galaxy application can be horizontally scaled for the web, job, or workflow handlers
-by setting the desired values of the `webHandlers.replicaCount`,
-`jobHandlers.replicaCount`, and `workflowHandlers.replicaCount` configuration options.
+The Galaxy application can be horizontally scaled for the web, job, or workflow
+handlers by setting the desired values of the `webHandlers.replicaCount`,
+`jobHandlers.replicaCount`, and `workflowHandlers.replicaCount` configuration
+options. This is not tested option and there may be issues with scaling so
+unless really critical, the recommendation is to have a single handler for each
+type. Also, because of a potential race condition with initializing the
+database, it is recommended to set the `webHandlers.replicaCount` to 1 for the
+webHandler when Galaxy is first deployed.
 
 ## Cron jobs
 
 Two Cron jobs are defined by default.  One to clean up Galaxy's database and one to clean up the `tmp` directory.  By default, these
-jobs run at 02:05 (the database maintenance script) and 02:15 (`tmp` directyory cleanup). Users can
+jobs run at 02:05 (the database maintenance script) and 02:15 (`tmp` directory cleanup). Users can
 change the times the cron jobs are run by changing the `schedule` field in the `values.yaml` file:
 
 ```yaml
@@ -445,7 +450,7 @@ cronJobs:
   maintenance:
     schedule: "30 6 * * *" # Execute the cron job at 6:30 UTC
 ```
-or by specifying the `schedule` on the command line when instaling Galaxy:
+or by specifying the `schedule` on the command line when installing Galaxy:
 ```bash
 # Schedule the maintenance job to run at 06:30 on the first day of each month
 helm install galaxy -n galaxy galaxy/galaxy --set cronJobs.maintenance.schedule="30 6 1 * *"

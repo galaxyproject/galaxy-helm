@@ -1,7 +1,7 @@
 apiVersion: v2
 name: galaxy
 type: application
-version: 6.5.0
+version: 6.6.0
 appVersion: "25.1.0"
 description: Chart for Galaxy, an open, web-based platform for accessible, reproducible, and transparent computational biomedical research.
 icon: https://galaxyproject.org/images/galaxy-logos/galaxy_project_logo_square.png

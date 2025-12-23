@@ -4,6 +4,10 @@ kind: Cluster
 metadata:
   labels:
     {{- include "galaxy.labels" . | nindent 4 }}
+  {{- if and .Values.postgresql.cluster .Values.postgresql.cluster.annotations }}
+  annotations:
+    {{- toYaml .Values.postgresql.cluster.annotations | nindent 4 }}
+  {{- end }}
   name: {{ include "galaxy-postgresql.fullname" . }}
   namespace: {{ .Release.Namespace }}
 spec:

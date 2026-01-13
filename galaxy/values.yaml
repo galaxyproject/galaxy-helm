@@ -352,8 +352,89 @@ cronJobs:
 #          echo "$@" >> $LOGFILE
 #          env >> $LOGFILE
 
+#- Gateway API configuration (recommended for new deployments)
+#- Gateway API is the successor to Ingress and provides more advanced routing capabilities
+gateway:
+  #- Enable Gateway API (set to true to use Gateway API instead of Ingress)
+  #- When enabled, traditional Ingress resources will not be created
+  enabled: false
+  #- Use an existing Gateway instead of creating one
+  #- If specified, the chart will create HTTPRoute resources pointing to this Gateway
+  existingGateway: ""
+  #- Namespace of the existing Gateway (if different from release namespace)
+  existingGatewayNamespace: ""
+  #- Gateway class to use (e.g., "istio", "kong", "envoy-gateway")
+  #- The Gateway class must be installed in your cluster before using it
+  gatewayClassName: "istio"
+  #- Hostname for the gateway (optional, leave empty for wildcard)
+  hostname: ""
+  #- Annotations for the Gateway resource
+  annotations: {}
+  #- Annotations for HTTPRoute resources
+  httpRouteAnnotations: {}
+  #- TLS configuration for the Gateway
+  tls:
+    enabled: false
+    #- Name of the Secret containing TLS certificate in the Gateway's namespace
+    certificateRef: ""
+  #- Request timeout for all routes (Gateway API standard)
+  requestTimeout: "600s"
+  #- HTTPRoute filters (Gateway API standard, applied to all routes)
+  filters: []
+    # - type: RequestHeaderModifier
+    #   requestHeaderModifier:
+    #     set:
+    #       - name: X-Custom-Header
+    #         value: "value"
+  #- TUSD-specific configuration
+  tusd:
+    extraFilters: []
+  #- Istio-specific configuration (only used when gatewayClassName: istio)
+  istio:
+    timeout: "600s"
+    maxRequestHeadersKb: 96
+    streamIdleTimeout: "600s"
+    retries: {}
+      # attempts: 3
+      # perTryTimeout: 2s
+      # retryOn: 5xx,reset,connect-failure,refused-stream
+  #- Kong-specific configuration (only used when gatewayClassName: kong)
+  kong:
+    timeout: 600000  # milliseconds
+    cors:
+      enabled: false
+      origins:
+        - "*"
+      methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - PATCH
+      headers:
+        - Accept
+        - Authorization
+        - Content-Type
+      credentials: true
+      maxAge: 3600
+    rateLimit:
+      enabled: false
+      minute: 100
+      hour: 10000
+      policy: "local"
+  #- Envoy Gateway-specific configuration (only used when gatewayClassName: envoy-gateway)
+  envoy:
+    requestTimeout: "600s"
+    requestReceivedTimeout: "300s"
+    loadBalancer:
+      type: "RoundRobin"
+    http10:
+      useDefaultHost: false
+
+#- Traditional Ingress configuration (legacy, use Gateway API instead for new deployments)
 ingress:
   #- Should ingress be enabled. Defaults to `true`
+  #- Set to false when using Gateway API (gateway.enabled: true)
   enabled: true
   ingressClassName: nginx
   canary:

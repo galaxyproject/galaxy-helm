@@ -1,0 +1,49 @@
+{{- if and .Values.gateway.enabled (eq .Values.gateway.gatewayClassName "kong") -}}
+{{- $fullName := include "galaxy.fullname" . -}}
+---
+# Kong-specific timeout plugin
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: {{ $fullName }}-timeout
+  labels:
+    {{- include "galaxy.labels" . | nindent 4 }}
+plugin: request-timeout
+config:
+  http_timeout: {{ .Values.gateway.kong.timeout | default 600000 }}
+---
+# Kong-specific CORS plugin (if enabled)
+{{- if .Values.gateway.kong.cors.enabled }}
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: {{ $fullName }}-cors
+  labels:
+    {{- include "galaxy.labels" . | nindent 4 }}
+plugin: cors
+config:
+  origins:
+    {{- toYaml .Values.gateway.kong.cors.origins | nindent 4 }}
+  methods:
+    {{- toYaml .Values.gateway.kong.cors.methods | nindent 4 }}
+  headers:
+    {{- toYaml .Values.gateway.kong.cors.headers | nindent 4 }}
+  credentials: {{ .Values.gateway.kong.cors.credentials }}
+  max_age: {{ .Values.gateway.kong.cors.maxAge | default 3600 }}
+{{- end }}
+---
+# Kong-specific rate limiting (if enabled)
+{{- if .Values.gateway.kong.rateLimit.enabled }}
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: {{ $fullName }}-rate-limit
+  labels:
+    {{- include "galaxy.labels" . | nindent 4 }}
+plugin: rate-limiting
+config:
+  minute: {{ .Values.gateway.kong.rateLimit.minute }}
+  hour: {{ .Values.gateway.kong.rateLimit.hour }}
+  policy: {{ .Values.gateway.kong.rateLimit.policy | default "local" }}
+{{- end }}
+{{- end }}

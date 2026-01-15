@@ -402,6 +402,13 @@ postgresql:
   # galaxyExistingSecretKeyRef:
   operator:
     operatorSpecExtra:
+  #- CNPG cluster configuration
+  cluster:
+    #- List of CNPG plugins to enable (e.g., skip-initdb for data reuse)
+    #- Example:
+    #-   plugins:
+    #-     - name: cnpg-i-skip-initdb.leonardoce.github.com
+    plugins: []
   nameOverride: postgres
   persistence:
     enabled: true

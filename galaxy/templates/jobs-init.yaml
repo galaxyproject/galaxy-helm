@@ -32,7 +32,7 @@ spec:
           securityContext:
             runAsUser: 0
             runAsGroup: 0
-          command: ['sh', '-c', 'echo [`date`][wait-postgres] - wait-postgres init container starting. Running as `id`.; echo [`date`][wait-postgres] - Chown mount path: {{ .Values.securityContext.fsGroup }}:{{ .Values.securityContext.fsGroup }} {{ .Values.persistence.mountPath }}; chown {{ .Values.securityContext.fsGroup }}:{{ .Values.securityContext.fsGroup }} {{ .Values.persistence.mountPath }}; echo [`date`][wait-postgres] - Begin waiting for postgres.; until nc -z -w3 {{ template "galaxy-postgresql.servicename" . }} 5432; do echo [`date`][wait-postgres] - Waiting for galaxy-postgres service...; sleep 2; done; echo [`date`][wait-postgres] - Postgres connection OK.;']
+          command: ['sh', '-c', 'echo [`date`][wait-postgres] - wait-postgres init container starting. Running as `id`.; echo [`date`][wait-postgres] - Chown mount path: {{ .Values.securityContext.fsGroup }}:{{ .Values.securityContext.fsGroup }} {{ .Values.persistence.mountPath }}; chown {{ .Values.securityContext.fsGroup }}:{{ .Values.securityContext.fsGroup }} {{ .Values.persistence.mountPath }}; echo [`date`][wait-postgres] - Begin waiting for postgres.; until nc -z -w3 {{ template "galaxy-postgresql.servicename" . }} 5432; do echo [`date`][wait-postgres] - Waiting for galaxy-postgres service...; sleep 2; done; echo [`date`][wait-postgres] - Postgres connection OK. Waiting for database to be fully ready...; sleep 20; echo [`date`][wait-postgres] - Database ready.;']
           volumeMounts:
             - name: galaxy-data
               mountPath: {{ .Values.persistence.mountPath }}

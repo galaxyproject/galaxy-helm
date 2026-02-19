@@ -74,7 +74,7 @@ spec:
             {{- .Values.extraVolumeMounts | toYaml | nindent 12 }}
             {{- end }}
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.tusd.resources | nindent 12 }}
       volumes:
         - name: galaxy-data
           {{- if .Values.persistence.enabled }}

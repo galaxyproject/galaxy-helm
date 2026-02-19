@@ -32,7 +32,32 @@ spec:
           securityContext:
             runAsUser: 0
             runAsGroup: 0
-          command: ['sh', '-c', 'echo [`date`][wait-postgres] - wait-postgres init container starting. Running as `id`.; echo [`date`][wait-postgres] - Chown mount path: {{ .Values.securityContext.fsGroup }}:{{ .Values.securityContext.fsGroup }} {{ .Values.persistence.mountPath }}; chown {{ .Values.securityContext.fsGroup }}:{{ .Values.securityContext.fsGroup }} {{ .Values.persistence.mountPath }}; echo [`date`][wait-postgres] - Begin waiting for postgres.; until nc -z -w3 {{ template "galaxy-postgresql.servicename" . }} 5432; do echo [`date`][wait-postgres] - Waiting for galaxy-postgres service...; sleep 2; done; echo [`date`][wait-postgres] - Postgres connection OK. Waiting for database to be fully ready...; sleep 20; echo [`date`][wait-postgres] - Database ready.;']
+          env:
+          {{ include "galaxy.podEnvVars" . }}
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              echo "[`date`][wait-postgres] - wait-postgres init container starting. Running as `id`."
+              echo "[`date`][wait-postgres] - Chown mount path: {{ .Values.securityContext.fsGroup }}:{{ .Values.securityContext.fsGroup }} {{ .Values.persistence.mountPath }}"
+              chown {{ .Values.securityContext.fsGroup }}:{{ .Values.securityContext.fsGroup }} {{ .Values.persistence.mountPath }}
+              echo "[`date`][wait-postgres] - Waiting for database to accept connections..."
+              /galaxy/server/.venv/bin/python3 - <<'PYEOF'
+              import os, sys, time, psycopg2
+              dsn = os.environ['GALAXY_CONFIG_OVERRIDE_DATABASE_CONNECTION']
+              for _ in range(60):
+                  try:
+                      with psycopg2.connect(dsn, connect_timeout=2) as c:
+                          c.cursor().execute('SELECT 1')
+                      sys.exit(0)
+                  except Exception as e:
+                      print('[`date`][wait-postgres] Waiting for database...', e)
+                      time.sleep(2)
+              print('[`date`][wait-postgres] Timed out waiting for database.')
+              sys.exit(1)
+              PYEOF
+              echo "[`date`][wait-postgres] - Database ready."
           volumeMounts:
             - name: galaxy-data
               mountPath: {{ .Values.persistence.mountPath }}

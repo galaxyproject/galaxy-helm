@@ -42,8 +42,10 @@ spec:
         - name: {{ .Chart.Name }}-wait-db
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          args: ['sh', '-c', '{{ include "galaxy.init-container-wait-command" . }} sleep {{ .Values.webHandlers.startupDelay }};']
+          args: ['sh', '-c', '{{ include "galaxy.init-container-wait-command" . }} sleep {{ .Values.webHandlers.startupDelay }}; echo "Cleaning cache..."; rm -rf /galaxy/server/database/cache/*; echo "Cache cleaned.";']
           volumeMounts:
+            - name: galaxy-data
+              mountPath: {{ .Values.persistence.mountPath }}
             - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/
               subPath: config
@@ -70,7 +72,6 @@ spec:
             '{{- if .Values.extraInitCommands -}}
              {{- tpl .Values.extraInitCommands $ | nindent 13 }};
              {{- end -}}
-             echo "Cleaning compiled templates cache..."; rm -rf /galaxy/server/database/cache/compiled_templates/*; echo "Template cache cleaned.";
              /galaxy/server/.venv/bin/gunicorn "galaxy.webapps.galaxy.fast_factory:factory()" --timeout {{ .Values.webHandlers.gunicorn.timeout | default 300 }} --pythonpath /galaxy/server/lib -k galaxy.webapps.galaxy.workers.Worker -b 0.0.0.0:8080 --workers={{ .Values.webHandlers.gunicorn.workers | default 1 }} --config python:galaxy.web_stack.gunicorn_config --preload {{ .Values.webHandlers.gunicorn.extraArgs | default "" }}']
           {{- if .Values.webHandlers.startupProbe.enabled }}
           startupProbe:

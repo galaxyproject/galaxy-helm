@@ -25,6 +25,10 @@ spec:
   {{- if and .Values.postgresql.persistence .Values.postgresql.persistence.extra -}}
   {{- tpl (toYaml .Values.postgresql.persistence.extra) . | nindent 4 }}
   {{- end }}
+  {{- if .Values.postgresql.resources }}
+  resources:
+    {{- toYaml .Values.postgresql.resources | nindent 4 }}
+  {{- end }}
   {{- if and .Values.postgresql.cluster .Values.postgresql.cluster.plugins }}
   plugins:
     {{- toYaml .Values.postgresql.cluster.plugins | nindent 4 }}

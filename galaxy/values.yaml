@@ -53,6 +53,14 @@ workflowHandlers:
     periodSeconds: 10
     failureThreshold: 30
     timeoutSeconds: 5
+  resources:
+    requests:
+      cpu: 200m
+      memory: 1G
+      ephemeral-storage: 1Gi
+    limits:
+      memory: 7G
+      ephemeral-storage: 10Gi
 
 webHandlers:
   replicaCount: 1
@@ -80,6 +88,14 @@ webHandlers:
     timeout: 300
     workers: 1
     extraArgs: ""
+  resources:
+    requests:
+      cpu: 250m
+      memory: 2G
+      ephemeral-storage: 1Gi
+    limits:
+      memory: 7G
+      ephemeral-storage: 10Gi
 
 jobHandlers:
   replicaCount: 1
@@ -103,6 +119,14 @@ jobHandlers:
     periodSeconds: 10
     failureThreshold: 30
     timeoutSeconds: 5
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1G
+      ephemeral-storage: 1Gi
+    limits:
+      memory: 7G
+      ephemeral-storage: 10Gi
 
 celery:
   concurrency: 2
@@ -129,6 +153,14 @@ celery:
     periodSeconds: 60
     failureThreshold: 30
     timeoutSeconds: 10
+  resources:
+    requests:
+      cpu: 100m
+      memory: 500M
+      ephemeral-storage: 1Gi
+    limits:
+      memory: 2G
+      ephemeral-storage: 10Gi
 
 celeryBeat:
   logLevel: "INFO"
@@ -154,6 +186,14 @@ celeryBeat:
     periodSeconds: 60
     failureThreshold: 30
     timeoutSeconds: 10
+  resources:
+    requests:
+      cpu: 50m
+      memory: 500M
+      ephemeral-storage: 1Gi
+    limits:
+      memory: 2G
+      ephemeral-storage: 10Gi
 
 metrics:
   #- Enable the metrics server. Defaults to `false`
@@ -374,16 +414,6 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-resources:
-  #- We recommend updating these based on the usage levels of the server.
-  requests:
-    cpu: 100m
-    memory: 1G
-    ephemeral-storage: 1Gi
-  limits:
-    memory: 7G
-    ephemeral-storage: 10Gi
-
 nodeSelector: {}
 
 tolerations: []
@@ -418,6 +448,12 @@ postgresql:
     #  selector:
     #    matchLabels:
     #      label-key: label-value
+  resources:
+   requests:
+     memory: 250M
+     cpu: 200m
+   limits:
+     memory: 2Gi
 
 #- Configuration block for reference data
 refdata:
@@ -797,6 +833,14 @@ tusd:
         paths:
           - path: "/galaxy/api/upload/resumable_upload"
     tls: []
+  resources:
+    requests:
+      cpu: 100m
+      memory: 500M
+      ephemeral-storage: 1Gi
+    limits:
+      memory: 7G
+      ephemeral-storage: 10Gi
 
 rabbitmq:
   enabled: true
@@ -805,7 +849,13 @@ rabbitmq:
   protocol: amqp
   port: 5672
   nameOverride: rabbitmq
-  extraSpec: {}
+  extraSpec:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 250M
+      limits:
+        memory: 2G
   terminationGracePeriodSeconds: 90
   persistence:
     storageClassName:

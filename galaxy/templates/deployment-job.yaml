@@ -156,7 +156,7 @@ spec:
             {{- tpl ($.Values.extraVolumeMounts | toYaml | nindent 12) $ }}
             {{- end }}
           resources:
-            {{- toYaml $.Values.resources | nindent 12 }}
+            {{- toYaml $.Values.jobHandlers.resources | nindent 12 }}
       volumes:
         - name: extra-files-probe-script
           configMap:

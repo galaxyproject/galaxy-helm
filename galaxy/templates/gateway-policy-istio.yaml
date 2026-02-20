@@ -1,0 +1,62 @@
+{{- if and .Values.gateway.enabled (eq .Values.gateway.gatewayClassName "istio") -}}
+{{- $fullName := include "galaxy.fullname" . -}}
+---
+# Istio-specific timeout configuration
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ $fullName }}-timeouts
+  labels:
+    {{- include "galaxy.labels" . | nindent 4 }}
+spec:
+  gateways:
+    - {{ .Values.gateway.existingGateway | default (printf "%s-gateway" $fullName) }}
+  {{- if .Values.gateway.hostname }}
+  hosts:
+    - {{ .Values.gateway.hostname | quote }}
+  {{- else }}
+  hosts:
+    - "*"
+  {{- end }}
+  http:
+    - match:
+        - uri:
+            prefix: {{ .Values.ingress.path }}
+      timeout: {{ .Values.gateway.istio.timeout | default "600s" }}
+      route:
+        - destination:
+            host: {{ $fullName }}-nginx
+            port:
+              number: {{ .Values.service.port }}
+{{- if .Values.gateway.istio.retries }}
+      retries:
+        {{- toYaml .Values.gateway.istio.retries | nindent 8 }}
+{{- end }}
+---
+# Istio-specific request size configuration
+apiVersion: networking.istio.io/v1beta1
+kind: EnvoyFilter
+metadata:
+  name: {{ $fullName }}-request-size
+  labels:
+    {{- include "galaxy.labels" . | nindent 4 }}
+spec:
+  workloadSelector:
+    labels:
+      istio: ingressgateway
+  configPatches:
+    - applyTo: NETWORK_FILTER
+      match:
+        context: GATEWAY
+        listener:
+          filterChain:
+            filter:
+              name: envoy.filters.network.http_connection_manager
+      patch:
+        operation: MERGE
+        value:
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+            max_request_headers_kb: {{ .Values.gateway.istio.maxRequestHeadersKb | default 96 }}
+            stream_idle_timeout: {{ .Values.gateway.istio.streamIdleTimeout | default "600s" }}
+{{- end }}

@@ -1,0 +1,40 @@
+{{- if and .Values.gateway.enabled (eq .Values.gateway.gatewayClassName "envoy-gateway") -}}
+{{- $fullName := include "galaxy.fullname" . -}}
+---
+# Envoy Gateway-specific BackendTrafficPolicy for timeouts and request size
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: {{ $fullName }}-backend-policy
+  labels:
+    {{- include "galaxy.labels" . | nindent 4 }}
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: {{ $fullName }}
+  timeout:
+    http:
+      requestTimeout: {{ .Values.gateway.envoy.requestTimeout | default "600s" }}
+  loadBalancer:
+    type: {{ .Values.gateway.envoy.loadBalancer.type | default "RoundRobin" }}
+---
+# Envoy Gateway-specific ClientTrafficPolicy for client settings
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: ClientTrafficPolicy
+metadata:
+  name: {{ $fullName }}-client-policy
+  labels:
+    {{- include "galaxy.labels" . | nindent 4 }}
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: {{ .Values.gateway.existingGateway | default (printf "%s-gateway" $fullName) }}
+  http1:
+    http10:
+      useDefaultHost: {{ .Values.gateway.envoy.http10.useDefaultHost | default false }}
+  timeout:
+    http:
+      requestReceivedTimeout: {{ .Values.gateway.envoy.requestReceivedTimeout | default "300s" }}
+{{- end }}

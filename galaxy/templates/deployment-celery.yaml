@@ -149,7 +149,7 @@ spec:
             {{- tpl (.Values.extraVolumeMounts | toYaml | nindent 12) . }}
             {{- end }}
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.celery.resources | nindent 12 }}
       volumes:
         - name: galaxy-conf-files
           {{- if .Values.useSecretConfigs }}

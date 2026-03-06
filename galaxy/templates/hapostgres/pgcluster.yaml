@@ -8,6 +8,9 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   instances: {{ default "1" .Values.postgresql.instances }}
+  {{- if or (not .Values.postgresql.instances) (eq (toString .Values.postgresql.instances) "1") }}
+  enablePDB: false
+  {{- end }}
   bootstrap:
     initdb:
       database: galaxy

@@ -1,0 +1,79 @@
+{{- if .Values.postInstallJob.galaxyUser -}}
+{{- $galaxyUrl := printf "http://%s-nginx.%s.svc.cluster.local:%d" (include "galaxy.fullname" .) .Release.Namespace (int .Values.service.port) -}}
+{{- $masterKey := .Values.configs | dig "galaxy.yml" "galaxy" "master_api_key" (.Values.configs | dig "galaxy.yml" "galaxy" "bootstrap_admin_api_key" "") -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "galaxy.fullname" . }}-post-install-{{ toJson .Values.postInstallJob.imports | sha256sum | trunc 8 }}
+  labels:
+    {{- include "galaxy.labels" . | nindent 4 }}
+spec:
+  {{- if .Values.postInstallJob.ttlSecondsAfterFinished }}
+  ttlSecondsAfterFinished: {{ .Values.postInstallJob.ttlSecondsAfterFinished }}
+  {{- end }}
+  backoffLimit: {{ .Values.postInstallJob.backoffLimit }}
+  template:
+    metadata:
+      labels:
+        {{- include "galaxy.labels" . | nindent 8 }}
+    spec:
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      restartPolicy: OnFailure
+      serviceAccountName: {{ include "galaxy.serviceAccountName" . }}
+      initContainers:
+        - name: galaxy-wait-ready
+          image: curlimages/curl:latest
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Galaxy to be ready at {{ $galaxyUrl }}/api/version ..."
+              i=0
+              until curl -sf {{ $galaxyUrl }}/api/version; do
+                i=$((i + 1))
+                if [ $i -ge 120 ]; then
+                  echo "Timed out waiting for Galaxy." >&2
+                  exit 1
+                fi
+                echo "  Not ready yet, retrying in 10s (attempt $i/120)..."
+                sleep 10
+              done
+              echo "Galaxy is ready."
+      containers:
+        - name: abm-import
+          image: "{{ .Values.postInstallJob.image.repository }}:{{ .Values.postInstallJob.image.tag }}"
+          imagePullPolicy: {{ .Values.postInstallJob.image.pullPolicy }}
+          command:
+            - sh
+            - /scripts/run_imports.sh
+          env:
+            - name: GALAXY_URL
+              value: {{ $galaxyUrl | quote }}
+            - name: GALAXY_USER
+              value: {{ .Values.postInstallJob.galaxyUser | quote }}
+            - name: GALAXY_MASTER_KEY
+              value: {{ $masterKey | quote }}
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+            - name: imports
+              mountPath: /imports
+      volumes:
+        - name: scripts
+          configMap:
+            name: {{ include "galaxy.fullname" . }}-post-install
+            items:
+              - key: run_imports.sh
+                path: run_imports.sh
+        - name: imports
+          configMap:
+            name: {{ include "galaxy.fullname" . }}-post-install
+            items:
+              - key: workflows.txt
+                path: workflows.txt
+              - key: datasets.tsv
+                path: datasets.tsv
+{{- end }}

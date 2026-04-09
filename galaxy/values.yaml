@@ -279,6 +279,20 @@ setupJob:
       #- Meant to be enough to run automated tool-tests, fully mimicking CVMFS setup
       full: https://storage.googleapis.com/cloud-cvmfs/contents.tar.gz
 
+postInstallJob:
+  image:
+    repository: quay.io/galaxyproject/abm
+    tag: "2.12.0"
+    pullPolicy: IfNotPresent
+  ttlSecondsAfterFinished: 1800
+  backoffLimit: 10
+  galaxyUser: ""  # email of Galaxy user to import into; job is skipped when empty
+  imports:
+    workflows: []  # list of .ga file URLs
+    datasets: []   # list of {url: str, fileType: str, history: str}
+                   # fileType defaults to "auto"
+                   # history defaults to "Imported Datasets"
+
 #- Allow users to specify extra init containers
 extraInitContainers: []
 #   - name: my-first-container

@@ -1,4 +1,4 @@
-{{- if .Values.gateway.enabled -}}
+{{- if and .Values.gateway.enabled .Values.gateway.create (not .Values.gateway.existingGateway) -}}
 {{- $fullName := include "galaxy.fullname" . -}}
 ---
 apiVersion: gateway.networking.k8s.io/v1

@@ -13,13 +13,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  parentRefs:
-    - name: {{ .Values.gateway.existingGateway | default (printf "%s-gateway" $fullName) }}
-      {{- if .Values.gateway.existingGatewayNamespace }}
-      namespace: {{ .Values.gateway.existingGatewayNamespace }}
-      {{- else }}
-      namespace: {{ .Release.Namespace }}
-      {{- end }}
+  {{- include "galaxy.gateway.parentRefs" . | trim | nindent 2 }}
   {{- if .Values.gateway.hostname }}
   hostnames:
     - {{ .Values.gateway.hostname | quote }}

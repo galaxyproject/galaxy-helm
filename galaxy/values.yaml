@@ -392,8 +392,69 @@ cronJobs:
 #          echo "$@" >> $LOGFILE
 #          env >> $LOGFILE
 
+#- Gateway API configuration (recommended for new deployments)
+#- Gateway API is the successor to Ingress and provides more advanced routing capabilities
+gateway:
+  #- Enable Gateway API (set to true to use Gateway API instead of Ingress)
+  #- When enabled, traditional Ingress resources will not be created
+  enabled: false
+  #- Whether the chart should create a Gateway resource.
+  #- Set to false to rely on a cluster-shared Gateway (via `existingGateway`)
+  #- or on the cluster's default Gateway (Gateway API v1.4+, see
+  #- https://kubernetes.io/blog/2025/11/06/gateway-api-v1-4/#introducing-default-gateways).
+  #- When false and `existingGateway` is empty, HTTPRoutes are emitted without
+  #- parentRefs so the cluster default Gateway can attach them.
+  create: true
+  #- Use an existing Gateway instead of creating one
+  #- If specified, the chart will create HTTPRoute resources pointing to this Gateway
+  existingGateway: ""
+  #- Namespace of the existing Gateway (if different from release namespace)
+  existingGatewayNamespace: ""
+  #- Gateway class to use (e.g., "istio", "cilium", "traefik", "nginx")
+  #- The Gateway class must be installed in your cluster before using it.
+  #- Only consulted when `create: true`.
+  gatewayClassName: "istio"
+  #- Hostname for the gateway (optional, leave empty for wildcard)
+  hostname: ""
+  #- Annotations for the Gateway resource
+  annotations: {}
+  #- Annotations for HTTPRoute resources
+  httpRouteAnnotations: {}
+  #- TLS configuration for the Gateway
+  tls:
+    enabled: false
+    #- Name of the Secret containing TLS certificate in the Gateway's namespace
+    certificateRef: ""
+  #- Request timeout for all routes (Gateway API standard)
+  requestTimeout: "600s"
+  #- HTTPRoute filters (Gateway API standard, applied to all routes)
+  filters: []
+    # - type: RequestHeaderModifier
+    #   requestHeaderModifier:
+    #     set:
+    #       - name: X-Custom-Header
+    #         value: "value"
+  #- TUSD-specific configuration
+  tusd:
+    extraFilters: []
+  #- Istio-specific configuration (only used when gatewayClassName: istio).
+  #- Other gateway implementations (kong, envoy-gateway, cilium, traefik, nginx, ...)
+  #- require their own vendor-specific policy resources for things like request
+  #- timeouts and body size limits. The chart intentionally does not ship those;
+  #- see docs/gateway-api.md for example snippets you can apply alongside this chart.
+  istio:
+    timeout: "600s"
+    maxRequestHeadersKb: 96
+    streamIdleTimeout: "600s"
+    retries: {}
+      # attempts: 3
+      # perTryTimeout: 2s
+      # retryOn: 5xx,reset,connect-failure,refused-stream
+
+#- Traditional Ingress configuration (legacy, use Gateway API instead for new deployments)
 ingress:
   #- Should ingress be enabled. Defaults to `true`
+  #- Set to false when using Gateway API (gateway.enabled: true)
   enabled: true
   ingressClassName: nginx
   canary:

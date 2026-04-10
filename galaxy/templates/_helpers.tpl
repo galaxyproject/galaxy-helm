@@ -310,3 +310,21 @@ Define extra persistent volumes
     {{- end }}
   {{- end -}}
 {{- end -}}
+
+{{/*
+Render the `parentRefs:` block for an HTTPRoute, or nothing at all when neither
+`gateway.create` nor `gateway.existingGateway` is set (lets a Gateway API v1.4+
+default Gateway attach the route).
+*/}}
+{{- define "galaxy.gateway.parentRefs" -}}
+{{- $fullName := include "galaxy.fullname" . -}}
+{{- if .Values.gateway.existingGateway }}
+parentRefs:
+  - name: {{ .Values.gateway.existingGateway }}
+    namespace: {{ .Values.gateway.existingGatewayNamespace | default .Release.Namespace }}
+{{- else if .Values.gateway.create }}
+parentRefs:
+  - name: {{ printf "%s-gateway" $fullName }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}
+{{- end -}}

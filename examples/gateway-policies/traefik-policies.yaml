@@ -1,0 +1,94 @@
+# Traefik-specific policies for Galaxy Gateway API deployment
+#
+# These Traefik middlewares provide timeout configuration and other features
+# that complement the standard Gateway API resources created by the chart.
+#
+# Usage:
+#   1. Customize the values marked with # CUSTOMIZE
+#   2. Apply after installing Galaxy with Gateway API:
+#      kubectl apply -f traefik-policies.yaml -n <your-galaxy-namespace>
+
+---
+# Traefik timeout middleware
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: galaxy-timeout
+  namespace: galaxy  # CUSTOMIZE: match your Galaxy namespace
+spec:
+  forwardAuth:
+    timeout: 600s
+
+---
+# Traefik request size limiting middleware
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: galaxy-request-size
+  namespace: galaxy  # CUSTOMIZE: match your Galaxy namespace
+spec:
+  buffering:
+    maxRequestBodyBytes: 52428800  # 50MB (adjust for your uploads)
+
+---
+# Traefik CORS middleware (optional)
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: galaxy-cors
+  namespace: galaxy  # CUSTOMIZE: match your Galaxy namespace
+spec:
+  headers:
+    accessControlAllowMethods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+    accessControlAllowOriginList:
+      - "https://galaxy.example.com"  # CUSTOMIZE: match your hostname
+    accessControlAllowCredentials: true
+    accessControlAllowHeaders:
+      - "Accept"
+      - "Content-Type"
+      - "X-Auth-Token"
+    accessControlExposeHeaders:
+      - "X-Auth-Token"
+    accessControlMaxAge: 3600
+
+---
+# Traefik rate limiting middleware (optional)
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: galaxy-rate-limit
+  namespace: galaxy  # CUSTOMIZE: match your Galaxy namespace
+spec:
+  rateLimit:
+    period: 1m
+    burst: 100
+    average: 1000
+
+---
+# Apply middlewares to the HTTPRoute
+# Add these annotations to your Galaxy HTTPRoutes:
+#
+# apiVersion: gateway.networking.k8s.io/v1
+# kind: HTTPRoute
+# metadata:
+#   name: my-galaxy
+#   annotations:
+#     traefik.ingress.kubernetes.io/router.middlewares: galaxy@kubernetescrd-galaxy-timeout,galaxy@kubernetescrd-galaxy-request-size,galaxy@kubernetescrd-galaxy-cors,galaxy@kubernetescrd-galaxy-rate-limit
+# spec:
+#   # ... rest of HTTPRoute configuration
+#
+# Or reference them in the HTTPRoute filters (Gateway API v1.1+):
+#
+# spec:
+#   rules:
+#     - filters:
+#         - type: ExtensionRef
+#           extensionRef:
+#             group: traefik.containo.us
+#             kind: Middleware
+#             name: galaxy-timeout

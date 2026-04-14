@@ -76,4 +76,6 @@ spec:
                 path: workflows.txt
               - key: datasets.tsv
                 path: datasets.tsv
+              - key: histories.txt
+                path: histories.txt
 {{- end }}

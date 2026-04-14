@@ -292,6 +292,7 @@ postInstallJob:
     datasets: []   # list of {url: str, fileType: str, history: str}
                    # fileType defaults to "auto"
                    # history defaults to "Imported Datasets"
+    histories: []  # list of history archive URLs (.tar.gz or Galaxy export URL)
 
 #- Allow users to specify extra init containers
 extraInitContainers: []

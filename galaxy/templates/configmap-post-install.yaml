@@ -59,6 +59,13 @@ data:
       esac
     done < /imports/datasets.tsv
 
+    echo "Importing histories..."
+    while IFS= read -r url; do
+      [ -z "${url}" ] && continue
+      echo "  Importing history: ${url}"
+      abm main history import "${url}"
+    done < /imports/histories.txt
+
     echo "Post-install imports complete."
 
   workflows.txt: |
@@ -69,5 +76,10 @@ data:
   datasets.tsv: |
     {{- range .Values.postInstallJob.imports.datasets }}
     {{ .url }}	{{ .fileType | default "auto" }}	{{ .history | default "Imported Datasets" }}
+    {{- end }}
+
+  histories.txt: |
+    {{- range .Values.postInstallJob.imports.histories }}
+    {{ . }}
     {{- end }}
 {{- end }}

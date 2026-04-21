@@ -872,6 +872,8 @@ postInstallJob:
   image: "quay.io/galaxyproject/abm:2.12.0"
   #- TTL in seconds for job cleanup after completion
   ttlSecondsAfterFinished: 300
+  #- Number of retries before marking job as failed
+  backoffLimit: 3
   #- ABM bootstrap configuration in YAML format
   #- See https://github.com/galaxyproject/gxabm for configuration details
   bootstrapConfig: |

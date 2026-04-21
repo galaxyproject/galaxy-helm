@@ -860,3 +860,27 @@ rabbitmq:
   persistence:
     storageClassName:
     storage:
+
+# PostInstall Job Configuration
+# Enables automatic import of datasets, histories, and workflows after Galaxy deployment
+postInstallJob:
+  #- Enable the post-install job to automatically import data and workflows
+  enabled: false
+  #- Galaxy user email for imports (job only runs when this is populated)
+  galaxyUser: ""
+  #- Container image for the post-install job (must include ABM 2.12.0+)
+  image: "quay.io/galaxyproject/abm:2.12.0"
+  #- TTL in seconds for job cleanup after completion
+  ttlSecondsAfterFinished: 300
+  #- ABM bootstrap configuration in YAML format
+  #- See https://github.com/galaxyproject/gxabm for configuration details
+  bootstrapConfig: |
+    # Example configuration:
+    # datasets:
+    #   "Imported Datasets":
+    #     - "https://zenodo.org/records/1324070/files/SRR891268_1.fastq.gz"
+    #     - "https://zenodo.org/records/1324070/files/SRR891268_2.fastq.gz"
+    # workflows:
+    #   - "https://raw.githubusercontent.com/galaxyproject/iwc/main/workflows/example.ga"
+    # histories:
+    #   - "https://example.com/exported-history.tar.gz"

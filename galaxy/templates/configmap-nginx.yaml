@@ -82,6 +82,7 @@ data:
 {{- if .Values.trainingHook.enabled }}
             location /training-material/ {
                 proxy_pass {{ .Values.trainingHook.url }};
+                proxy_ssl_server_name on;
             }
 {{- end }}
 

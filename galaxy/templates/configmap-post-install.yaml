@@ -1,0 +1,41 @@
+{{- if .Values.postInstallJob.enabled }}
+{{- $galaxyUrl := printf "http://%s-nginx.%s.svc.cluster.local:%d" (include "galaxy.fullname" .) .Release.Namespace (int .Values.service.port) -}}
+{{- $masterKey := .Values.configs | dig "galaxy.yml" "galaxy" "master_api_key" (.Values.configs | dig "galaxy.yml" "galaxy" "bootstrap_admin_api_key" "") -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "galaxy.fullname" . }}-post-install
+  labels:
+    {{- include "galaxy.labels" . | nindent 4 }}
+data:
+  bootstrap.yaml: |
+{{- .Values.postInstallJob.bootstrapConfig | nindent 4 }}
+  post-install.sh: |
+    #!/bin/bash
+    set -e
+
+    # Wait for Galaxy to be ready
+    echo "Waiting for Galaxy to be ready at {{ $galaxyUrl }}/api/version ..."
+    until curl -s "{{ $galaxyUrl }}/api/version" > /dev/null; do
+      echo "Galaxy not ready yet, waiting..."
+      sleep 10
+    done
+    echo "Galaxy is ready!"
+
+    echo "Configuring ABM"
+    mkdir -p ~/.abm
+    cat > ~/.abm/profile.yml <<PROFILE
+    galaxy:
+      url: $GALAXY_URL
+      key: $GALAXY_MASTER_KEY
+    PROFILE
+    
+    # Get/create an API key for the Galaxy user
+    USER_KEY=$(abm galaxy user key $GALAXY_USER)
+    abm config key galaxy $USER_KEY
+    
+    # Run bootstrap configuration
+    echo "Starting ABM bootstrap configuration..."
+    abm config bootstrap galaxy /tmp/bootstrap.yaml
+    echo "Bootstrap configuration completed successfully!"
+{{- end }}

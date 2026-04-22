@@ -442,14 +442,6 @@ gateway:
   #- require their own vendor-specific policy resources for things like request
   #- timeouts and body size limits. The chart intentionally does not ship those;
   #- see docs/gateway-api.md for example snippets you can apply alongside this chart.
-  istio:
-    timeout: "600s"
-    maxRequestHeadersKb: 96
-    streamIdleTimeout: "600s"
-    retries: {}
-      # attempts: 3
-      # perTryTimeout: 2s
-      # retryOn: 5xx,reset,connect-failure,refused-stream
 
 #- Traditional Ingress configuration (legacy, use Gateway API instead for new deployments)
 ingress:

@@ -1,6 +1,7 @@
 {{- if .Values.postInstallJob.enabled }}
 {{- $galaxyUrl := printf "http://%s-nginx.%s.svc.cluster.local:%d" (include "galaxy.fullname" .) .Release.Namespace (int .Values.service.port) -}}
 {{- $masterKey := .Values.configs | dig "galaxy.yml" "galaxy" "master_api_key" (.Values.configs | dig "galaxy.yml" "galaxy" "bootstrap_admin_api_key" "") -}}
+{{- $singleUser := .Values.configs | dig "galaxy.yml" "galaxy" "single_user" "" -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -31,7 +32,14 @@ data:
     PROFILE
     
     # Get/create an API key for the Galaxy user
+    {{- if $singleUser }}
+    # Single-user Galaxy instance - use existing user key approach
     USER_KEY=$(abm galaxy user key $GALAXY_USER)
+    {{- else }}
+    # Multi-user Galaxy instance - create user first, then get key
+    USERNAME=$(echo "$GALAXY_USER" | cut -d'@' -f1)
+    USER_KEY=$(abm galaxy user create username $USERNAME $GALAXY_USER $GALAXY_MASTER_KEY | jq -r .key)
+    {{- end }}
     abm config key galaxy $USER_KEY
     
     # Run bootstrap configuration

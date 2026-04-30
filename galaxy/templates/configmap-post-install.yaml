@@ -21,6 +21,9 @@ data:
       echo "Galaxy not ready yet, waiting..."
       sleep 10
     done
+    for deployment in $(kubectl get deployments -n galaxy | grep galaxy | awk '{print $1}') ; do
+      kubectl rollout status deployment/$deployment -n galaxy --watch --timeout=10m
+    done
     echo "Galaxy is ready!"
 
     echo "Configuring ABM"
@@ -38,7 +41,7 @@ data:
     {{- else }}
     # Multi-user Galaxy instance - create user first, then get key
     USERNAME=$(echo "$GALAXY_USER" | cut -d'@' -f1)
-    USER_KEY=$(abm galaxy user create username $USERNAME $GALAXY_USER $GALAXY_MASTER_KEY | jq -r .key)
+    USER_KEY=$(abm galaxy user create $USERNAME $GALAXY_USER $GALAXY_MASTER_KEY | jq -r .key)
     {{- end }}
     abm config key galaxy $USER_KEY
     

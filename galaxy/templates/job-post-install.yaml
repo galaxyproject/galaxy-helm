@@ -20,7 +20,7 @@ spec:
         {{- include "galaxy.selectorLabels" . | nindent 8 }}
     spec:
       restartPolicy: OnFailure
-      serviceAccountName: {{ include "galaxy.serviceAccountName" . }}
+      serviceAccountName: {{ include "galaxy.serviceAccountName" . }}-trusted
       containers:
       - name: post-install
         image: {{ .Values.postInstallJob.image | default "quay.io/galaxyproject/abm:2.12.0" }}

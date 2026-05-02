@@ -36,10 +36,13 @@ data:
     
     # Get/create an API key for the Galaxy user
     {{- if $singleUser }}
-    # Single-user Galaxy instance - use existing user key approach
+    # Single-user - hitting the url causes the web handler to create the default user.
+    echo "Single user instance. User is $GALAXY_USER"
+    curl {{ $galaxyUrl }} > /dev/null
     USER_KEY=$(abm galaxy user key $GALAXY_USER)
     {{- else }}
-    # Multi-user Galaxy instance - create user first, then get key
+    # Multi-user Galaxy instance - create user and get their key
+    echo "Multi user instance. User is $GALAXY_USER    
     USERNAME=$(echo "$GALAXY_USER" | cut -d'@' -f1)
     USER_KEY=$(abm galaxy user create $USERNAME $GALAXY_USER $GALAXY_MASTER_KEY | jq -r .key)
     {{- end }}

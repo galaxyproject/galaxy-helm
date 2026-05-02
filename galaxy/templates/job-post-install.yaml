@@ -1,0 +1,47 @@
+{{- if .Values.postInstallJob.enabled }}
+{{- $galaxyUrl := printf "http://%s-nginx.%s.svc.cluster.local:%d" (include "galaxy.fullname" .) .Release.Namespace (int .Values.service.port) -}}
+{{- $masterKey := .Values.configs | dig "galaxy.yml" "galaxy" "master_api_key" (.Values.configs | dig "galaxy.yml" "galaxy" "bootstrap_admin_api_key" "") -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "galaxy.fullname" . }}-post-install
+  labels:
+    {{- include "galaxy.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  ttlSecondsAfterFinished: {{ .Values.postInstallJob.ttlSecondsAfterFinished | default 3600 }}
+  backoffLimit: {{ .Values.postInstallJob.backoffLimit | default 3 }}
+  template:
+    metadata:
+      labels:
+        {{- include "galaxy.selectorLabels" . | nindent 8 }}
+    spec:
+      restartPolicy: OnFailure
+      serviceAccountName: {{ include "galaxy.serviceAccountName" . }}-trusted
+      containers:
+      - name: post-install
+        image: {{ .Values.postInstallJob.image | default "quay.io/galaxyproject/abm:2.12.0" }}
+        command: ["/bin/bash", "/tmp/post-install.sh"]
+        env:
+        - name: GALAXY_URL
+          value: {{ $galaxyUrl | quote }}
+        - name: GALAXY_USER
+          value: {{ .Values.postInstallJob.galaxyUser | quote }}
+        - name: GALAXY_MASTER_KEY
+          value: {{ $masterKey | quote }}
+        volumeMounts:
+        - name: post-install-config
+          mountPath: /tmp/bootstrap.yaml
+          subPath: bootstrap.yaml
+        - name: post-install-config
+          mountPath: /tmp/post-install.sh
+          subPath: post-install.sh
+      volumes:
+      - name: post-install-config
+        configMap:
+          name: {{ include "galaxy.fullname" . }}-post-install
+          defaultMode: 0755
+{{- end }}

@@ -1,0 +1,194 @@
+name: Release
+on:
+  pull_request:
+    types: [closed]
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      version-bump:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+
+jobs:
+  # Job 1: Run smoke tests
+  smoke-test:
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/test.yaml
+
+  # Job 2: Prepare release (calculate version, etc.)
+  prepare:
+    needs: smoke-test
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.bump.outputs.new_version }}
+      bump_type: ${{ steps.determine.outputs.bump_type }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Determine bump type
+        id: determine
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "bump_type=${{ inputs.version-bump }}" >> $GITHUB_OUTPUT
+          else
+            LABELS='${{ toJson(github.event.pull_request.labels.*.name) }}'
+            if echo "$LABELS" | grep -q '"major"'; then
+              echo "bump_type=major" >> $GITHUB_OUTPUT
+            elif echo "$LABELS" | grep -q '"minor"'; then
+              echo "bump_type=minor" >> $GITHUB_OUTPUT
+            else
+              echo "bump_type=patch" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Calculate new version
+        id: bump
+        run: |
+          CURRENT=$(grep '^version:' galaxy/Chart.yaml | awk '{print $2}')
+          IFS='.' read -r major minor patch <<< "$CURRENT"
+
+          case "${{ steps.determine.outputs.bump_type }}" in
+            major) NEW_VERSION="$((major + 1)).0.0" ;;
+            minor) NEW_VERSION="${major}.$((minor + 1)).0" ;;
+            patch) NEW_VERSION="${major}.${minor}.$((patch + 1))" ;;
+          esac
+
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "Bumping $CURRENT -> $NEW_VERSION"
+
+  # Job 3: Manual approval gate
+  approve-release:
+    needs: prepare
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - name: Approval gate
+        run: |
+          echo "Release v${{ needs.prepare.outputs.new_version }} approved"
+          echo "Proceeding with release..."
+
+  # Job 4: Execute release
+  release:
+    needs: [prepare, approve-release]
+    runs-on: ubuntu-latest
+    env:
+      NEW_VERSION: ${{ needs.prepare.outputs.new_version }}
+    steps:
+      # Generate token from GitHub App (bypasses branch protection rulesets)
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          repositories: galaxy-helm,helm-charts,galaxy-k8s-boot
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+          ref: master  # Explicitly checkout master to get merge commit
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Update Chart.yaml version
+        run: |
+          git pull origin master  # Ensure we have latest (including merge commit)
+          sed -i "s/^version:.*/version: $NEW_VERSION/" galaxy/Chart.yaml
+          git add galaxy/Chart.yaml
+          git commit -m "chore(release): bump version to $NEW_VERSION"
+          git push origin master
+
+      - name: Install Helm
+        run: curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+
+      - name: Package Helm chart
+        run: |
+          helm package galaxy/
+          mv galaxy-${NEW_VERSION}.tgz /tmp/
+
+      - name: Push to CloudVE/helm-charts
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          git clone https://x-access-token:${APP_TOKEN}@github.com/CloudVE/helm-charts.git /tmp/helm-charts
+          cp /tmp/galaxy-${NEW_VERSION}.tgz /tmp/helm-charts/
+          cd /tmp/helm-charts
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          helm repo index . --merge index.yaml
+          git add .
+          git commit -m "Add galaxy-${NEW_VERSION}"
+          git push
+
+      - name: Create tag and release
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          git tag -a "v${NEW_VERSION}" -m "Release v${NEW_VERSION}"
+          git push origin "v${NEW_VERSION}"
+          /usr/local/bin/gh release create "v${NEW_VERSION}" \
+            --title "release_${NEW_VERSION}" \
+            --generate-notes \
+            --latest
+
+      - name: Merge master to dev
+        run: |
+          git checkout dev
+          git merge master -m "Merge master back to dev after release v${NEW_VERSION}"
+          git push origin dev
+
+  # Job 5: Trigger downstream updates
+  trigger-downstream:
+    needs: [prepare, release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          repositories: galaxy-k8s-boot
+
+      - name: Trigger galaxy-k8s-boot update
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          repository: galaxyproject/galaxy-k8s-boot
+          event-type: update-galaxy-chart
+          client-payload: '{"version": "${{ needs.prepare.outputs.new_version }}"}'
+
+  # Job 6: Send notifications
+  notify:
+    needs: [prepare, release]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Slack notification
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          payload: |
+            {
+              "text": "Galaxy Helm Chart Release",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Galaxy Helm Chart v${{ needs.prepare.outputs.new_version }}* has been released!\n<${{ github.server_url }}/${{ github.repository }}/releases/tag/v${{ needs.prepare.outputs.new_version }}|View Release>"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

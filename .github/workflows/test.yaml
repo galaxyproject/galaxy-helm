@@ -1,11 +1,10 @@
 name: Linting and deployment test on K3S
 on:
   push:
-    branches:
-      - master
-      - anvil
+    branches: [master, dev]
   pull_request: {}
   workflow_dispatch: {}
+  workflow_call: {}  # Allow calling from release workflow
 jobs:
   linting:
     runs-on: ubuntu-latest

@@ -1,0 +1,26 @@
+name: Enable Auto-Merge on Approval
+on:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  enable-auto-merge:
+    # Only run when PR is approved and targeting master
+    if: github.event.review.state == 'approved' && github.event.pull_request.base.ref == 'master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
+      - name: Enable auto-merge
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          echo "PR #${PR_NUMBER} approved by ${{ github.event.review.user.login }}"
+          echo "Enabling auto-merge..."
+          /usr/local/bin/gh pr merge "${PR_NUMBER}" --auto --merge --repo "${{ github.repository }}" || echo "Auto-merge may already be enabled or not available"

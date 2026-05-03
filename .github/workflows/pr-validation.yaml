@@ -1,0 +1,22 @@
+name: PR Validation
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  validate-release-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check source branch
+        if: github.head_ref != 'dev'
+        run: |
+          echo "::error::Release PRs must come from the 'dev' branch"
+          exit 1
+
+      - name: Check for version label
+        uses: mheap/github-action-required-labels@v5
+        with:
+          mode: exactly
+          count: 1
+          labels: "major, minor, patch"
+          message: "PR must have exactly one label: major, minor, or patch"

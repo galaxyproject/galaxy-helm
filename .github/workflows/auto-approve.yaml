@@ -1,0 +1,90 @@
+name: Auto Approve
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  approve:
+    # Only run on PR comments (not issue comments) with /approve command
+    # Use startsWith to handle trailing whitespace from GitHub's comment body
+    if: github.event.issue.pull_request && startsWith(github.event.comment.body, '/approve')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check user permissions
+        id: check-permission
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: permission } = await github.rest.repos.getCollaboratorPermissionLevel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              username: context.payload.comment.user.login
+            });
+
+            const allowed = ['admin', 'write'].includes(permission.permission);
+            console.log(`User ${context.payload.comment.user.login} has permission: ${permission.permission}`);
+            console.log(`Allowed to approve: ${allowed}`);
+
+            if (!allowed) {
+              // Add thumbs down reaction
+              await github.rest.reactions.createForIssueComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: context.payload.comment.id,
+                content: '-1'
+              });
+
+              // Add comment explaining the denial
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                body: `@${context.payload.comment.user.login} You do not have permission to approve pull requests. Only users with write access or higher can use the \`/approve\` command.`
+              });
+
+              core.setFailed(`User ${context.payload.comment.user.login} does not have write access to this repository`);
+            }
+
+            core.setOutput('allowed', allowed);
+            return allowed;
+
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
+      - name: Approve PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            const prNumber = context.payload.issue.number;
+
+            // Submit approval review
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+              event: 'APPROVE',
+              body: `Approved by @${context.payload.comment.user.login} via \`/approve\` command.`
+            });
+
+            console.log(`PR #${prNumber} approved`);
+
+            // Add a reaction to the comment to confirm
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: '+1'
+            });
+
+      - name: Enable auto-merge
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          PR_NUMBER=${{ github.event.issue.number }}
+          echo "Enabling auto-merge for PR #${PR_NUMBER}..."
+          /usr/local/bin/gh pr merge "${PR_NUMBER}" --auto --merge --repo "${{ github.repository }}" || echo "Auto-merge may already be enabled or not available"

@@ -1,4 +1,5 @@
 name: Release
+
 on:
   pull_request:
     types: [closed]
@@ -13,6 +14,15 @@ on:
           - major
           - minor
           - patch
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: read
+  actions: read
 
 jobs:
   # Job 1: Run smoke tests
@@ -101,14 +111,39 @@ jobs:
 
       - name: Update Chart.yaml version
         run: |
-          git pull origin master  # Ensure we have latest (including merge commit)
+          set -e
+          echo "Updating Chart.yaml version to $NEW_VERSION"
+
+          # Ensure we have latest (including merge commit)
+          git pull origin master || { echo "Failed to pull latest master"; exit 1; }
+
+          # Backup before modification
+          cp galaxy/Chart.yaml galaxy/Chart.yaml.bak
+
+          # Update version with validation
           sed -i "s/^version:.*/version: $NEW_VERSION/" galaxy/Chart.yaml
+
+          # Verify the change worked
+          NEW_VER_CHECK=$(grep '^version:' galaxy/Chart.yaml | awk '{print $2}' | tr -d '"')
+          if [ "$NEW_VER_CHECK" != "$NEW_VERSION" ]; then
+            echo "Version update failed. Expected: $NEW_VERSION, Got: $NEW_VER_CHECK"
+            exit 1
+          fi
+
+          echo "Version successfully updated to $NEW_VERSION"
+
+          # Commit and push changes
           git add galaxy/Chart.yaml
           git commit -m "chore(release): bump version to $NEW_VERSION"
-          git push origin master
+          git push origin master || { echo "Failed to push version update"; exit 1; }
 
       - name: Install Helm
-        run: curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+        id: install-helm
+        run: |
+          if ! command -v helm &> /dev/null; then
+            curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+          fi
+          helm version
 
       - name: Package Helm chart
         run: |
@@ -135,16 +170,34 @@ jobs:
         run: |
           git tag -a "v${NEW_VERSION}" -m "Release v${NEW_VERSION}"
           git push origin "v${NEW_VERSION}"
-          /usr/local/bin/gh release create "v${NEW_VERSION}" \
+          gh release create "v${NEW_VERSION}" \
             --title "release_${NEW_VERSION}" \
             --generate-notes \
             --latest
 
       - name: Merge master to dev
         run: |
-          git checkout dev
-          git merge master -m "Merge master back to dev after release v${NEW_VERSION}"
-          git push origin dev
+          set -e
+          echo "Merging master back to dev after release v${NEW_VERSION}"
+
+          # Check if dev branch exists
+          if git ls-remote --heads origin dev | grep -q dev; then
+            git checkout dev || { echo "Failed to checkout dev branch"; exit 1; }
+            git pull origin dev || { echo "Failed to pull latest dev"; exit 1; }
+
+            # Attempt merge
+            if ! git merge master -m "Merge master back to dev after release v${NEW_VERSION}"; then
+              echo "Merge conflict detected. Manual resolution required."
+              git merge --abort
+              echo "::warning::Merge conflicts detected when merging master to dev. Please resolve manually."
+              exit 1
+            fi
+
+            git push origin dev || { echo "Failed to push merge to dev"; exit 1; }
+            echo "Successfully merged master to dev"
+          else
+            echo "Dev branch does not exist yet. Skipping merge back to dev."
+          fi
 
   # Job 5: Trigger downstream updates
   trigger-downstream:

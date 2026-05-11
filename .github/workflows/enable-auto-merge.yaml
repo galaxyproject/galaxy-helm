@@ -1,7 +1,12 @@
 name: Enable Auto-Merge on Approval
+
 on:
   pull_request_review:
     types: [submitted]
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   enable-auto-merge:
@@ -23,4 +28,4 @@ jobs:
           PR_NUMBER=${{ github.event.pull_request.number }}
           echo "PR #${PR_NUMBER} approved by ${{ github.event.review.user.login }}"
           echo "Enabling auto-merge..."
-          /usr/local/bin/gh pr merge "${PR_NUMBER}" --auto --merge --repo "${{ github.repository }}" || echo "Auto-merge may already be enabled or not available"
+          gh pr merge "${PR_NUMBER}" --auto --merge --repo "${{ github.repository }}" || echo "Auto-merge may already be enabled or not available"

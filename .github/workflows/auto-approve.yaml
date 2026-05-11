@@ -1,7 +1,13 @@
 name: Auto Approve
+
 on:
   issue_comment:
     types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
 
 jobs:
   approve:
@@ -87,4 +93,4 @@ jobs:
         run: |
           PR_NUMBER=${{ github.event.issue.number }}
           echo "Enabling auto-merge for PR #${PR_NUMBER}..."
-          /usr/local/bin/gh pr merge "${PR_NUMBER}" --auto --merge --repo "${{ github.repository }}" || echo "Auto-merge may already be enabled or not available"
+          gh pr merge "${PR_NUMBER}" --auto --merge --repo "${{ github.repository }}" || echo "Auto-merge may already be enabled or not available"

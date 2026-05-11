@@ -18,8 +18,8 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v1
         with:
-          app-id: ${{ secrets.RELEASE_APP_ID }}
-          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          app-id: ${{ secrets.HELM_UPDATER_APP_ID }}
+          private-key: ${{ secrets.HELM_UPDATER_PKEY }}
 
       - name: Enable auto-merge
         env:

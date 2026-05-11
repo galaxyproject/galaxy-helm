@@ -94,8 +94,8 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v1
         with:
-          app-id: ${{ secrets.RELEASE_APP_ID }}
-          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          app-id: ${{ secrets.HELM_UPDATER_APP_ID }}
+          private-key: ${{ secrets.HELM_UPDATER_PKEY }}
           repositories: galaxy-helm,helm-charts,galaxy-k8s-boot
 
       - uses: actions/checkout@v4
@@ -208,8 +208,8 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v1
         with:
-          app-id: ${{ secrets.RELEASE_APP_ID }}
-          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          app-id: ${{ secrets.HELM_UPDATER_APP_ID }}
+          private-key: ${{ secrets.HELM_UPDATER_PKEY }}
           repositories: galaxy-k8s-boot
 
       - name: Trigger galaxy-k8s-boot update
@@ -243,5 +243,5 @@ jobs:
               ]
             }
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.K8S_SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

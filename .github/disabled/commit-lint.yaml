@@ -1,0 +1,81 @@
+name: Commit Lint
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  lint-pr-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR title follows Conventional Commits
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Configure allowed types
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+          # Configure allowed scopes (optional)
+          scopes: |
+            helm
+            deps
+            k8s
+            ansible
+            gcp
+            ci
+            release
+          # Require scope to be provided
+          requireScope: false
+          # Disable validation for WIP PRs
+          ignoreLabels: |
+            work-in-progress
+            wip
+          # Custom error message
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            The subject "{subject}" found in the pull request title "{title}"
+            must not start with an uppercase character.
+
+  lint-commits:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install commitlint
+        run: npm install -g @commitlint/cli @commitlint/config-conventional
+
+      - name: Create commitlint config
+        run: |
+          cat > commitlint.config.js << 'EOF'
+          module.exports = {
+            extends: ['@commitlint/config-conventional'],
+            rules: {
+              'type-enum': [2, 'always', [
+                'feat', 'fix', 'docs', 'style', 'refactor',
+                'perf', 'test', 'build', 'ci', 'chore', 'revert'
+              ]],
+              'scope-enum': [1, 'always', [
+                'helm', 'deps', 'k8s', 'ansible', 'gcp', 'ci', 'release'
+              ]],
+              'subject-case': [2, 'never', ['start-case', 'pascal-case', 'upper-case']],
+              'header-max-length': [2, 'always', 100]
+            }
+          };
+          EOF
+
+      - name: Lint commits
+        run: |
+          # Lint all commits in the PR
+          npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose

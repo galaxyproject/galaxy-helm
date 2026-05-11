@@ -17,8 +17,6 @@
     <tool file="data_source/zebrafishmine.xml" />
     <tool file="data_source/eupathdb.xml" />
     <tool file="data_source/hbvar.xml" />
-    <tool file="genomespace/genomespace_importer.xml" />
-    <tool file="genomespace/genomespace_push.xml" />
   </section>
   <section id="send" name="Send Data">
     <tool file="data_export/export_remote.xml" />
@@ -112,9 +110,6 @@
   </section>
   <label id="genomics_analysis_label" text="Genomics Analysis" />
   <section id="phenotype_association" name="Phenotype Association">
-    <tool file="evolution/codingSnps.xml" />
-    <tool file="evolution/add_scores.xml" />
-    <tool file="phenotype_association/sift.xml" />
     <tool file="phenotype_association/linkToGProfile.xml" />
     <tool file="phenotype_association/linkToDavid.xml" />
     <tool file="phenotype_association/ldtools.xml" />

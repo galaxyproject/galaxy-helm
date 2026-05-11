@@ -10,7 +10,7 @@ image:
   #- Repository containing the Galaxy image.
   repository: quay.io/galaxyproject/galaxy-min
   #- Galaxy Docker image tag (generally corresponds to the desired Galaxy version)
-  tag: "25.1.0"  # Galaxy versions prior to 24.1.1 contain a bug mapping the extra_files directory
+  tag: "26.0.0"  # Galaxy versions prior to 24.1.1 contain a bug mapping the extra_files directory
   #-  Galaxy image [pull policy](https://kubernetes.io/docs/concepts/configuration/overview/#container-images)
   pullPolicy: IfNotPresent
 
@@ -568,7 +568,7 @@ configs:
     galaxy:
       galaxy_url_prefix: "{{ .Values.ingress.path }}"
       interactivetools_enable: true
-      interactivetools_map: database/interactivetools_map.sqlite
+      interactivetools_map: interactivetools_map.sqlite
       interactivetools_prefix: "its"
       interactivetools_proxy_host: '{{ $host := index .Values.ingress.hosts 0 }}{{ default "localhost" $host.host}}'
       interactivetools_shorten_url: true
@@ -595,7 +595,7 @@ configs:
         {{ if .Values.refdata.enabled -}}
         /cvmfs/data.galaxyproject.org/managed/location/builds.txt
         {{- end }}
-      containers_resolvers_config_file: "/galaxy/server/config/container_resolvers_conf.xml"
+      container_resolvers_config_file: "/galaxy/server/config/container_resolvers_conf.xml"
       workflow_schedulers_config_file: "/galaxy/server/config/workflow_schedulers_conf.xml"
       build_sites_config_file: "/galaxy/server/config/build_sites.yml"
       data_manager_config_file: "{{if .Values.setupJob.downloadToolConfs.enabled }}{{ .Values.setupJob.downloadToolConfs.volume.mountPath }}/config/shed_data_manager_conf.xml{{ else }}/galaxy/server/config/data_manager_conf.xml.sample{{ end }}"

@@ -1,22 +1,35 @@
 name: Linting and deployment test on K3S
+
 on:
   push:
-    branches:
-      - master
-      - anvil
+    branches: [master, dev]
   pull_request: {}
   workflow_dispatch: {}
+  workflow_call: {}  # Allow calling from release workflow
+
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   linting:
     runs-on: ubuntu-latest
     steps:
       - name: Install Kubectl
         run: curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x ./kubectl && sudo mv ./kubectl /usr/local/bin/kubectl && kubectl version || true
+
       - name: Install Helm
-        run: curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+        id: install-helm
+        run: |
+          if ! command -v helm &> /dev/null; then
+            curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+          fi
+          helm version
+
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
+
       - name: Helm linting for galaxy
         run: helm lint galaxy/
 
@@ -24,14 +37,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install Helm
-        run: curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+        id: install-helm
+        run: |
+          if ! command -v helm &> /dev/null; then
+            curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+          fi
+          helm version
+
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
+
       - name: Start k8s locally
         uses: jupyterhub/action-k3s-helm@v4
         with:
-          k3s-version: v1.34.1+k3s1  # releases:  https://github.com/k3s-io/k3s/tags
+          k3s-version: v1.34.7+k3s1 # releases:  https://github.com/k3s-io/k3s/tags
           metrics-enabled: false
           traefik-enabled: false
       - name: Verify function of k8s, kubectl, and helm
@@ -54,14 +74,27 @@ jobs:
       - name: Get pods, pvc, and pv
         run: kubectl get pods -n galaxy; kubectl get pvc -n galaxy; kubectl get pv -n galaxy
         if: always()
-      - name: Print web handler log
-        run: bash -c "kubectl logs -n galaxy $(kubectl -n galaxy get pods | grep -o '[^ ]*galaxy-web[^ ]*')"
-        if: always()
-      - name: Print job handler log
-        run: bash -c "kubectl logs -n galaxy $(kubectl -n galaxy get pods | grep -o '[^ ]*galaxy-job[^ ]*')"
-        if: always()
-      - name: Print workflow handler log
-        run: bash -c "kubectl logs -n galaxy $(kubectl -n galaxy get pods | grep -o '[^ ]*galaxy-workflow[^ ]*')"
+      - name: Print handler logs
+        run: |
+          echo "=== Collecting Galaxy handler logs ==="
+          for handler in web job workflow; do
+            echo "--- ${handler} handler logs ---"
+            POD_NAME=$(kubectl get pods -n galaxy -l "app.kubernetes.io/component=galaxy-${handler}-handler" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+            if [[ -n "$POD_NAME" ]]; then
+              echo "Pod: $POD_NAME"
+              kubectl logs -n galaxy "$POD_NAME" --tail=100 || echo "Failed to get logs for $POD_NAME"
+            else
+              # Fallback to old method if label selector doesn't work
+              POD_NAME=$(kubectl get pods -n galaxy -o name | grep "galaxy-${handler}" | head -1 | cut -d/ -f2 2>/dev/null || echo "")
+              if [[ -n "$POD_NAME" ]]; then
+                echo "Pod (fallback): $POD_NAME"
+                kubectl logs -n galaxy "$POD_NAME" --tail=100 || echo "Failed to get logs for $POD_NAME"
+              else
+                echo "No ${handler} handler pod found"
+              fi
+            fi
+            echo ""
+          done
         if: always()
       - name: Check appVersion
         if: always()

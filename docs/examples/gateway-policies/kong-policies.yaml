@@ -1,0 +1,87 @@
+# Kong-specific policies for Galaxy Gateway API deployment
+#
+# These Kong plugins provide timeout configuration and other features
+# that complement the standard Gateway API resources created by the chart.
+#
+# Usage:
+#   1. Customize the values marked with # CUSTOMIZE
+#   2. Apply after installing Galaxy with Gateway API:
+#      kubectl apply -f kong-policies.yaml -n <your-galaxy-namespace>
+
+---
+# Kong timeout plugin
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: galaxy-timeout
+  namespace: galaxy  # CUSTOMIZE: match your Galaxy namespace
+config:
+  timeout: 600000  # 600 seconds in milliseconds
+plugin: request-timeout
+
+---
+# Kong request size limiting plugin
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: galaxy-request-size
+  namespace: galaxy  # CUSTOMIZE: match your Galaxy namespace
+config:
+  allowed_payload_size: 52428800  # 50MB in bytes (adjust for your uploads)
+plugin: request-size-limiting
+
+---
+# Optional: Kong CORS plugin for browser access
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: galaxy-cors
+  namespace: galaxy  # CUSTOMIZE: match your Galaxy namespace
+config:
+  origins:
+    - "https://galaxy.example.com"  # CUSTOMIZE: match your hostname
+  methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+  headers:
+    - Accept
+    - Accept-Version
+    - Content-Length
+    - Content-MD5
+    - Content-Type
+    - Date
+    - X-Auth-Token
+  exposed_headers:
+    - X-Auth-Token
+  credentials: true
+  max_age: 3600
+plugin: cors
+
+---
+# Optional: Kong rate limiting plugin
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: galaxy-rate-limit
+  namespace: galaxy  # CUSTOMIZE: match your Galaxy namespace
+config:
+  minute: 1000    # Requests per minute
+  hour: 50000     # Requests per hour
+  policy: local
+plugin: rate-limiting
+
+---
+# Apply plugins to the HTTPRoute
+# Add these annotations to your Galaxy HTTPRoutes:
+#
+# apiVersion: gateway.networking.k8s.io/v1
+# kind: HTTPRoute
+# metadata:
+#   name: my-galaxy
+#   annotations:
+#     konghq.com/plugins: galaxy-timeout,galaxy-request-size,galaxy-cors,galaxy-rate-limit
+# spec:
+#   # ... rest of HTTPRoute configuration

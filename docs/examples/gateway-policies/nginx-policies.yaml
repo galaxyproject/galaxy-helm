@@ -1,0 +1,99 @@
+# Nginx Gateway Fabric policies for Galaxy Gateway API deployment
+#
+# These Nginx Gateway Fabric policies provide timeout configuration and
+# request size limits that complement the standard Gateway API resources.
+#
+# Usage:
+#   1. Customize the values marked with # CUSTOMIZE
+#   2. Apply after installing Galaxy with Gateway API:
+#      kubectl apply -f nginx-policies.yaml -n <your-galaxy-namespace>
+
+---
+# Nginx Gateway Fabric timeout policy
+apiVersion: gateway.nginx.org/v1alpha1
+kind: ClientSettingsPolicy
+metadata:
+  name: galaxy-client-settings
+  namespace: galaxy  # CUSTOMIZE: match your Galaxy namespace
+spec:
+  # Apply to specific Gateway
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: my-galaxy-gateway  # CUSTOMIZE: match your Gateway name
+  # Client timeout settings
+  clientMaxBodySize: "50m"  # Max request body size (adjust for uploads)
+  clientBodyTimeout: "60s"  # Client body timeout
+  clientHeaderTimeout: "60s"  # Client header timeout
+  keepaliveTimeout: "75s"   # Keep-alive timeout
+
+---
+# Nginx Gateway Fabric backend timeout policy
+apiVersion: gateway.nginx.org/v1alpha1
+kind: BackendTLSPolicy
+metadata:
+  name: galaxy-backend-settings
+  namespace: galaxy  # CUSTOMIZE: match your Galaxy namespace
+spec:
+  # Apply to specific HTTPRoute
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: my-galaxy  # CUSTOMIZE: match your HTTPRoute name
+  # Backend connection settings
+  tls:
+    verify:
+      caCertRefs:
+        - name: galaxy-ca-cert  # CUSTOMIZE: if using backend TLS
+          kind: Secret
+
+---
+# Example: Custom Gateway with Nginx-specific annotations
+# (Alternative to chart-created Gateway)
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: galaxy-gateway-nginx
+  namespace: galaxy  # CUSTOMIZE: match your Galaxy namespace
+  annotations:
+    # Nginx-specific configuration annotations
+    nginx.org/proxy-connect-timeout: "60s"
+    nginx.org/proxy-read-timeout: "600s"
+    nginx.org/proxy-send-timeout: "600s"
+    nginx.org/client-max-body-size: "50m"
+spec:
+  gatewayClassName: nginx
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: "galaxy.example.com"  # CUSTOMIZE: match your hostname
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "galaxy.example.com"  # CUSTOMIZE: match your hostname
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: galaxy-tls-cert  # CUSTOMIZE: match your TLS secret
+
+---
+# Notes for Nginx Gateway Fabric configuration:
+#
+# 1. Policy Application:
+#    Nginx Gateway Fabric uses policies that attach to Gateway/HTTPRoute
+#    resources rather than middleware applied to routes.
+#
+# 2. Timeout Configuration:
+#    - ClientSettingsPolicy: Client-facing timeouts
+#    - BackendTLSPolicy: Backend connection settings
+#    - Annotations: Can also be used on Gateway resource
+#
+# 3. Request Size Limits:
+#    Set via ClientSettingsPolicy.clientMaxBodySize or Gateway annotations.
+#
+# 4. TLS Configuration:
+#    BackendTLSPolicy handles backend TLS verification if needed.
+#
+# For more details, see:
+# https://docs.nginx.com/nginx-gateway-fabric/how-to/traffic-management/

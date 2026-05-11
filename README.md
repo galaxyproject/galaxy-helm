@@ -121,6 +121,39 @@ in general, we recommend installing them once and leaving them as is.
 helm delete -n galaxy-deps galaxy-deps
 ```
 
+## Gateway API Support
+
+The Galaxy Helm chart supports **Gateway API** as a modern alternative to Kubernetes Ingress for routing traffic to Galaxy.
+
+### Quick Setup
+
+1. **Install Gateway API CRDs** (if not already present):
+   ```bash
+   # Check if already installed (many clusters include these)
+   kubectl api-resources | grep gateway.networking.k8s.io
+   
+   # If not found, install via galaxy-deps (easiest):
+   helm install galaxy-deps -n galaxy-deps galaxy-deps/ --create-namespace --set gateway.deploy=true
+   
+   # Or install manually:
+   kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.0.0/standard-install.yaml
+   ```
+
+2. **Install a Gateway Controller** (choose one):
+   - **Istio**: `istioctl install --set profile=default`
+   - **Cilium**: Follow [Cilium Gateway API guide](https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/)
+   - **Traefik**: `helm install traefik traefik/traefik --set gatewayAPI.enabled=true`
+
+3. **Deploy Galaxy with Gateway API**:
+   ```bash
+   helm install -n galaxy my-galaxy galaxy/ \
+     --set gateway.enabled=true \
+     --set gateway.gatewayClassName=<controller-installed-above> \
+     --set ingress.enabled=false \
+     --set persistence.accessMode="ReadWriteOnce"
+   ```
+More information can be found in the [Galaxy Helm Gateway API](docs/gateway-api.md) documentation.
+
 ## Configuration
 
 The following table lists the configurable parameters of the Galaxy chart. The

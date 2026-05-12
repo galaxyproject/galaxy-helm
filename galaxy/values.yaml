@@ -879,7 +879,7 @@ tusd:
       nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
       nginx.ingress.kubernetes.io/proxy-buffering: "off"
       nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
-      nginx.ingress.kubernetes.io/connection-proxy-header: "Upgrade"
+      nginx.ingress.kubernetes.io/connection-proxy-header: "upgrade"
       nginx.ingress.kubernetes.io/proxy-body-size: "0"
     hosts:
       - host: ~

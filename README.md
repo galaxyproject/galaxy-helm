@@ -575,10 +575,9 @@ See the `example` cron job included in the `values.yaml` file for a full example
 * v6 chart also changes the default uid of the system Galaxy user. Previously
   this uid was 101, which is a system reserved uid and can cause conflicts with system installed packages. Starting
   with v6, the default uid is 10001. This value needs to be matched between the
-  container and the chart, and during this transition period, there is a
-  dedicated galaxy-min image that uses the new uid. This image is available at
-  `quay.io/galaxyproject/galaxy-min:24.2-uid`, and it is set as the default in
-  the values file.
+  container and the chart. The new uid is now baked into the standard
+  `galaxy-min` images, and the chart defaults to
+  `quay.io/galaxyproject/galaxy-min:26.0.0` in the values file.
 
   As a result of this change, when upgrading from a previous version, it is
   necessary to also update the file system permissions to match the new uid.
@@ -607,3 +606,10 @@ See the `example` cron job included in the `values.yaml` file for a full example
   scenarios, there is no straightforward upgrade path. The Galaxy chart will
   have to be uninstalled, the `galaxy-deps` chart installed, and subsequently,
   Galaxy can be reinstalled.
+
+## Releasing
+
+Releases are automated via GitHub Actions and gated by a manual approval step.
+Maintainers should see [`docs/release-process.md`](docs/release-process.md) for
+the full release workflow, versioning rules, and required repository
+configuration.

@@ -1,0 +1,71 @@
+# Istio-specific policies for Galaxy Gateway API deployment
+#
+# These resources provide timeout configuration and request size limits
+# that complement the standard Gateway API resources created by the chart.
+#
+# Usage:
+#   1. Customize the values marked with # CUSTOMIZE
+#   2. Apply after installing Galaxy with Gateway API:
+#      kubectl apply -f istio-policies.yaml -n <your-galaxy-namespace>
+
+---
+# Istio VirtualService for timeout and retry configuration
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: my-galaxy-timeouts  # CUSTOMIZE: match your release name
+  namespace: galaxy         # CUSTOMIZE: match your Galaxy namespace
+  labels:
+    app.kubernetes.io/name: galaxy
+    app.kubernetes.io/instance: my-galaxy  # CUSTOMIZE: match your release name
+spec:
+  gateways:
+    - my-galaxy-gateway  # CUSTOMIZE: match your Gateway name (chart-created or existing)
+  hosts:
+    - "galaxy.example.com"  # CUSTOMIZE: match your hostname
+  http:
+    - match:
+        - uri:
+            prefix: /galaxy  # CUSTOMIZE: match your ingress.path value
+      timeout: 600s  # Timeout for Galaxy requests (adjust for your upload sizes)
+      route:
+        - destination:
+            host: my-galaxy-nginx  # CUSTOMIZE: match your Galaxy nginx service name
+            port:
+              number: 80
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: 5xx,reset,connect-failure,refused-stream
+
+---
+# Istio EnvoyFilter for request size and connection limits
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: my-galaxy-request-size  # CUSTOMIZE: match your release name
+  namespace: galaxy             # CUSTOMIZE: match your Galaxy namespace
+  labels:
+    app.kubernetes.io/name: galaxy
+    app.kubernetes.io/instance: my-galaxy  # CUSTOMIZE: match your release name
+spec:
+  workloadSelector:
+    labels:
+      istio: ingressgateway  # Targets Istio ingress gateway pods
+  configPatches:
+    - applyTo: NETWORK_FILTER
+      match:
+        context: GATEWAY
+        listener:
+          filterChain:
+            filter:
+              name: envoy.filters.network.http_connection_manager
+      patch:
+        operation: MERGE
+        value:
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+            # Allow larger request headers (Galaxy can send large headers)
+            max_request_headers_kb: 96
+            # Extended idle timeout for long file uploads
+            stream_idle_timeout: 600s

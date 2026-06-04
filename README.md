@@ -121,6 +121,39 @@ in general, we recommend installing them once and leaving them as is.
 helm delete -n galaxy-deps galaxy-deps
 ```
 
+## Gateway API Support
+
+The Galaxy Helm chart supports **Gateway API** as a modern alternative to Kubernetes Ingress for routing traffic to Galaxy.
+
+### Quick Setup
+
+1. **Install Gateway API CRDs** (if not already present):
+   ```bash
+   # Check if already installed (many clusters include these)
+   kubectl api-resources | grep gateway.networking.k8s.io
+   
+   # If not found, install via galaxy-deps (easiest):
+   helm install galaxy-deps -n galaxy-deps galaxy-deps/ --create-namespace --set gateway.deploy=true
+   
+   # Or install manually:
+   kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.0.0/standard-install.yaml
+   ```
+
+2. **Install a Gateway Controller** (choose one):
+   - **Istio**: `istioctl install --set profile=default`
+   - **Cilium**: Follow [Cilium Gateway API guide](https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/)
+   - **Traefik**: `helm install traefik traefik/traefik --set gatewayAPI.enabled=true`
+
+3. **Deploy Galaxy with Gateway API**:
+   ```bash
+   helm install -n galaxy my-galaxy galaxy/ \
+     --set gateway.enabled=true \
+     --set gateway.gatewayClassName=<controller-installed-above> \
+     --set ingress.enabled=false \
+     --set persistence.accessMode="ReadWriteOnce"
+   ```
+More information can be found in the [Galaxy Helm Gateway API](docs/gateway-api.md) documentation.
+
 ## Configuration
 
 The following table lists the configurable parameters of the Galaxy chart. The
@@ -542,10 +575,9 @@ See the `example` cron job included in the `values.yaml` file for a full example
 * v6 chart also changes the default uid of the system Galaxy user. Previously
   this uid was 101, which is a system reserved uid and can cause conflicts with system installed packages. Starting
   with v6, the default uid is 10001. This value needs to be matched between the
-  container and the chart, and during this transition period, there is a
-  dedicated galaxy-min image that uses the new uid. This image is available at
-  `quay.io/galaxyproject/galaxy-min:24.2-uid`, and it is set as the default in
-  the values file.
+  container and the chart. The new uid is now baked into the standard
+  `galaxy-min` images, and the chart defaults to
+  `quay.io/galaxyproject/galaxy-min:26.0.0` in the values file.
 
   As a result of this change, when upgrading from a previous version, it is
   necessary to also update the file system permissions to match the new uid.
@@ -574,3 +606,10 @@ See the `example` cron job included in the `values.yaml` file for a full example
   scenarios, there is no straightforward upgrade path. The Galaxy chart will
   have to be uninstalled, the `galaxy-deps` chart installed, and subsequently,
   Galaxy can be reinstalled.
+
+## Releasing
+
+Releases are automated via GitHub Actions and gated by a manual approval step.
+Maintainers should see [`docs/release-process.md`](docs/release-process.md) for
+the full release workflow, versioning rules, and required repository
+configuration.

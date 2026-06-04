@@ -1,0 +1,87 @@
+# Cilium-specific policies for Galaxy Gateway API deployment
+#
+# Cilium Gateway Controller uses standard Gateway API with some
+# vendor-specific extensions for advanced features.
+#
+# Usage:
+#   1. Customize the values marked with # CUSTOMIZE
+#   2. Apply after installing Galaxy with Gateway API:
+#      kubectl apply -f cilium-policies.yaml -n <your-galaxy-namespace>
+
+---
+# Cilium Network Policy for request rate limiting (optional)
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: galaxy-rate-limit
+  namespace: galaxy  # CUSTOMIZE: match your Galaxy namespace
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: galaxy
+  ingress:
+    - fromEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+          rules:
+            http:
+              - method: GET
+              - method: POST
+              - method: PUT
+              - method: DELETE
+      # Basic rate limiting at network level
+      # For more advanced rate limiting, use service mesh features
+
+---
+# Example: Custom Gateway with timeout configuration
+# (Alternative to chart-created Gateway with Cilium-specific settings)
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: galaxy-gateway-cilium
+  namespace: galaxy  # CUSTOMIZE: match your Galaxy namespace
+  annotations:
+    # Cilium-specific timeout annotation
+    cilium.io/request-timeout: "600s"
+spec:
+  gatewayClassName: cilium
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: "galaxy.example.com"  # CUSTOMIZE: match your hostname
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "galaxy.example.com"  # CUSTOMIZE: match your hostname
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: galaxy-tls-cert  # CUSTOMIZE: match your TLS secret
+
+---
+# Notes for Cilium Gateway configuration:
+#
+# 1. Timeout Configuration:
+#    Cilium uses standard Gateway API with some annotations.
+#    For advanced timeout control, configure at the service mesh level.
+#
+# 2. Request Size Limits:
+#    Configure via Cilium service mesh policies or Envoy configuration.
+#    Default limits are usually sufficient for Galaxy.
+#
+# 3. Load Balancing:
+#    Cilium uses eBPF for efficient load balancing.
+#    No additional configuration typically needed.
+#
+# 4. Service Mesh Features:
+#    If using Cilium Service Mesh, additional policies available:
+#    - L7 policies for HTTP-level control
+#    - Encryption policies for mTLS
+#    - Observability features
+#
+# For more details, see:
+# https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/

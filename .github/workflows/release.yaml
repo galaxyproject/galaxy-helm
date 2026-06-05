@@ -89,14 +89,29 @@ jobs:
     env:
       NEW_VERSION: ${{ needs.prepare.outputs.new_version }}
     steps:
-      # Generate token from GitHub App (bypasses branch protection rulesets)
-      - name: Generate GitHub App token
+      # Token for galaxyproject repos: push to master/dev, create tag + release.
+      # No `owner:` → defaults to this repo's owner (galaxyproject). Bypasses
+      # branch protection rulesets.
+      - name: Generate GitHub App token (galaxyproject)
         id: app-token
         uses: actions/create-github-app-token@v1
         with:
           app-id: ${{ secrets.HELM_UPDATER_APP_ID }}
           private-key: ${{ secrets.HELM_UPDATER_PKEY }}
-          repositories: galaxy-helm,helm-charts,galaxy-k8s-boot
+          repositories: galaxy-helm
+
+      # Separate token for the CloudVE org, used only to publish the packaged
+      # chart. A single installation token cannot span two orgs, so this is its
+      # own call with `owner: CloudVE`. Requires the App to be installed on the
+      # CloudVE org with access to helm-charts.
+      - name: Generate GitHub App token (CloudVE)
+        id: helm-charts-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.HELM_UPDATER_APP_ID }}
+          private-key: ${{ secrets.HELM_UPDATER_PKEY }}
+          owner: CloudVE
+          repositories: helm-charts
 
       - uses: actions/checkout@v4
         with:
@@ -152,7 +167,7 @@ jobs:
 
       - name: Push to CloudVE/helm-charts
         env:
-          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_TOKEN: ${{ steps.helm-charts-token.outputs.token }}
         run: |
           git clone https://x-access-token:${APP_TOKEN}@github.com/CloudVE/helm-charts.git /tmp/helm-charts
           cp /tmp/galaxy-${NEW_VERSION}.tgz /tmp/helm-charts/

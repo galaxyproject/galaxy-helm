@@ -226,7 +226,8 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     steps:
-      - name: Slack notification
+      - name: Slack notification (success)
+        if: needs.release.result == 'success'
         uses: slackapi/slack-github-action@v1.26.0
         with:
           payload: |
@@ -238,6 +239,27 @@ jobs:
                   "text": {
                     "type": "mrkdwn",
                     "text": "*Galaxy Helm Chart v${{ needs.prepare.outputs.new_version }}* has been released!\n<${{ github.server_url }}/${{ github.repository }}/releases/tag/v${{ needs.prepare.outputs.new_version }}|View Release>"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.K8S_SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Slack notification (failure)
+        if: needs.release.result != 'success'
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          payload: |
+            {
+              "text": "Galaxy Helm Chart Release FAILED",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":x: *Galaxy Helm Chart release failed* (release job result: `${{ needs.release.result }}`).\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>"
                   }
                 }
               ]

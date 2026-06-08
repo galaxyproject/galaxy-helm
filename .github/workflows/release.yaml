@@ -8,8 +8,9 @@ on:
     inputs:
       version-bump:
         description: 'Version bump type'
-        required: true
+        required: false
         type: choice
+        default: minor
         options:
           - major
           - minor

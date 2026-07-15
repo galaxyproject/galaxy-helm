@@ -22,7 +22,7 @@ data:
       sleep 10
     done
     for deployment in $(kubectl get deployments -n galaxy | grep galaxy | awk '{print $1}') ; do
-      kubectl rollout status deployment/$deployment -n galaxy --watch --timeout=10m
+      kubectl rollout status deployment/$deployment -n galaxy --watch --timeout={{ .Values.postInstallJob.rolloutTimeout | default "20m" }}
     done
     echo "Galaxy is ready!"
 

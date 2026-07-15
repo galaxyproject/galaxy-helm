@@ -10,6 +10,11 @@ metadata:
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
+  # Must exceed the startupProbe budget. Galaxy's first boot loads the full toolset and
+  # can take >10m; the Kubernetes default progressDeadlineSeconds of 600s marks the
+  # Deployment ProgressDeadlineExceeded mid-load, which makes `kubectl rollout status`
+  # (used by the post-install job) exit with an error and fail the install.
+  progressDeadlineSeconds: {{ .Values.progressDeadlineSeconds | default 1800 }}
   replicas: {{ .Values.webHandlers.replicaCount }}
   selector:
     matchLabels:

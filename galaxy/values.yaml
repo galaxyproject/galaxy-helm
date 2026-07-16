@@ -928,7 +928,7 @@ postInstallJob:
   #- Galaxy user email for imports (job only runs when this is populated)
   galaxyUser: ""
   #- Container image for the post-install job (must include ABM 2.12.0+)
-  image: "quay.io/galaxyproject/abm:2.12.0"
+  image: "quay.io/galaxyproject/abm:2.13.0"
   #- TTL in seconds for job cleanup after completion
   ttlSecondsAfterFinished: 300
   #- Per-deployment timeout for the `kubectl rollout status` readiness wait. Galaxy's

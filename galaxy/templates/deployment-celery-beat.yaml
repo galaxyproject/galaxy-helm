@@ -10,6 +10,7 @@ metadata:
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
+  progressDeadlineSeconds: {{ .Values.progressDeadlineSeconds | default 1800 }}
   replicas: {{ .Values.celeryBeat.replicaCount }}
   selector:
     matchLabels:

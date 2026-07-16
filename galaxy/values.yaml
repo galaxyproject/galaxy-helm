@@ -17,6 +17,12 @@ image:
 #- Secrets used to [access a Galaxy image from a private repository](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/)
 imagePullSecrets: []
 
+#- `progressDeadlineSeconds` applied to the Galaxy Deployments (web/job/workflow/celery/
+#- celery-beat). Galaxy's first boot loads the full toolset and can exceed the Kubernetes
+#- default of 600s, which would mark the Deployment `ProgressDeadlineExceeded` mid-load and
+#- fail the post-install `kubectl rollout status`. Keep this above the web startupProbe budget.
+progressDeadlineSeconds: 1800
+
 trainingHook:
   #- Enable the GTN webhook to link references to tools in tutorials to the corresponding tool panel in Galaxy.
   enabled: false
@@ -914,7 +920,7 @@ rabbitmq:
     storageClassName:
     storage:
 
-# PostInstall Job Configuration
+#- PostInstall Job Configuration
 # Enables automatic import of datasets, histories, and workflows after Galaxy deployment
 postInstallJob:
   #- Enable the post-install job to automatically import data and workflows
@@ -925,6 +931,10 @@ postInstallJob:
   image: "quay.io/galaxyproject/abm:2.12.0"
   #- TTL in seconds for job cleanup after completion
   ttlSecondsAfterFinished: 300
+  #- Per-deployment timeout for the `kubectl rollout status` readiness wait. Galaxy's
+  #- first boot loads the full toolset (can take >10m), so keep this generous; it must
+  #- also stay within the Helm post-install hook timeout set by the installer.
+  rolloutTimeout: "20m"
   #- Number of retries before marking job as failed
   backoffLimit: 3
   #- ABM bootstrap configuration in YAML format

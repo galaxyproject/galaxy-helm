@@ -47,6 +47,20 @@ jobs:
           - mode: single-user
             extra_args: "--set 'configs.galaxy\\.yml.galaxy.single_user=admin@galaxy.org'"
     steps:
+      - name: Free up disk space
+        run: |
+          echo "Disk space before cleanup:"
+          df -h /
+          # Remove large preinstalled toolchains we don't need; the K3S node
+          # only has ~14GB otherwise, and pulling the Galaxy images plus
+          # provisioning PVs pushes it into ephemeral-storage pressure.
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android \
+            /usr/local/share/boost /usr/local/share/powershell \
+            /usr/local/lib/node_modules "$AGENT_TOOLSDIRECTORY" || true
+          sudo docker image prune --all --force || true
+          echo "Disk space after cleanup:"
+          df -h /
+
       - name: Install Helm
         id: install-helm
         run: |
@@ -82,6 +96,7 @@ jobs:
           time helm install --create-namespace -n galaxy galaxy ./galaxy \
             --set persistence.accessMode="ReadWriteOnce" \
             --set resources.requests.memory=0Mi,resources.requests.cpu=0m \
+            --set refdata.enabled=false \
             ${{ matrix.extra_args }} \
             --wait --timeout=1200s
       - name: Get events

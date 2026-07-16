@@ -178,6 +178,15 @@ echo "[`date`] - Copying tool-data directory";
 cp -aruL /galaxy/server/tool-data {{.Values.persistence.mountPath}}/;
 echo "[`date`] - Copying tools directory";
 cp -aruL /galaxy/server/tools {{.Values.persistence.mountPath}}/;
+echo "[`date`] - Pre-creating Galaxy database directories...";
+mkdir -p /galaxy/server/database/cache/compiled_templates;
+mkdir -p /galaxy/server/database/tmp;
+mkdir -p /galaxy/server/database/object_store_cache;
+mkdir -p /galaxy/server/database/jobs_directory;
+mkdir -p /galaxy/server/database/files;
+chown -R {{ .Values.securityContext.runAsUser }}:{{ .Values.securityContext.runAsUser }} /galaxy/server/database/cache /galaxy/server/database/tmp /galaxy/server/database/object_store_cache /galaxy/server/database/jobs_directory /galaxy/server/database/files;
+echo "[`date`] - Syncing file system...";
+sync;
 echo "[`date`] - Init mounts container copy commands done.";
 echo "[`date`] - Init mounts container done." > /galaxy/server/config/mutable/init_mounts_done_{{.Release.Revision}};
 {{- end -}}
@@ -192,6 +201,7 @@ until [ -f /galaxy/server/config/mutable/init_db_done_{{$.Release.Revision}} ]; 
 until timeout 1 bash -c "echo > /dev/tcp/{{ template "galaxy-rabbitmq.fullname" $ }}/{{.Values.rabbitmq.port}}"; do echo "[`date`] Waiting for rabbitmq service..."; sleep 1; done;
 {{- end }}
 until [ -f /galaxy/server/config/mutable/init_mounts_done_{{$.Release.Revision}} ]; do echo "[`date`] Waiting for copying onto NFS (looking for file /galaxy/server/config/mutable/init_mounts_done_{{$.Release.Revision}})..."; sleep 1; done;
+until [ -s /galaxy/server/config/mutable/shed_tool_data_table_conf.xml ] && grep -q "<tables>" /galaxy/server/config/mutable/shed_tool_data_table_conf.xml; do echo "[`date`] Waiting for shed_tool_data_table_conf.xml to be synced and readable..."; sleep 1; done;
 {{- if .Values.setupJob.downloadToolConfs.enabled }}
 until [ -f /galaxy/server/config/mutable/init_clone_done_{{$.Release.Revision}} ]; do echo "[`date`] Waiting for refdata copying..."; sleep 1; done;
 {{- end }}

@@ -23,7 +23,7 @@ spec:
       serviceAccountName: {{ include "galaxy.serviceAccountName" . }}-trusted
       containers:
       - name: post-install
-        image: {{ .Values.postInstallJob.image | default "quay.io/galaxyproject/abm:2.12.0" }}
+        image: {{ .Values.postInstallJob.image | default "quay.io/galaxyproject/abm:2.13.0" }}
         command: ["/bin/bash", "/tmp/post-install.sh"]
         env:
         - name: GALAXY_URL

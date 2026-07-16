@@ -90,17 +90,84 @@ The release workflow can also be started by hand via
 
 ## Configuration prerequisites
 
-These are configured once per repository:
+These are configured once per repository. **If the GitHub App and secrets below
+are not set up, the `release` job will fail** (e.g. token generation or the push
+to `master`/`helm-charts` will be denied).
 
 - **Branch protection rulesets** — see [`REPOSITORY_RULESETS_GUIDE.md`](./REPOSITORY_RULESETS_GUIDE.md).
   Status checks `linting` and `test` must match the job names in `test.yaml`.
 - **`release` environment** — a GitHub Environment named `release` with required
   reviewers, providing the manual approval gate.
-- **GitHub App secrets** — `HELM_UPDATER_APP_ID` and `HELM_UPDATER_PKEY` for a
-  GitHub App that can bypass branch protection to push the version bump, tag,
-  and downstream updates. The App needs access to `galaxy-helm`, `helm-charts`,
-  and `galaxy-k8s-boot`.
-- **`K8S_SLACK_WEBHOOK_URL`** — Slack incoming webhook for release notifications.
+- **Repository secrets** (Settings → Secrets and variables → Actions):
+  - `HELM_UPDATER_APP_ID` — the GitHub App's **App ID** (a number).
+  - `HELM_UPDATER_PKEY` — the GitHub App's **private key** (the full contents of
+    the downloaded `.pem` file, including the `-----BEGIN/END-----` lines).
+  - `K8S_SLACK_WEBHOOK_URL` — Slack incoming webhook for release notifications.
+
+### Creating the release GitHub App
+
+The release workflow uses a GitHub App (rather than the default `GITHUB_TOKEN`)
+because it must **bypass branch protection** to push the version-bump commit and
+tag to `master`, publish to another repository, and trigger a downstream repo.
+The default `GITHUB_TOKEN` cannot do these things.
+
+1. **Create the App.** Go to the organization's
+   **Settings → Developer settings → GitHub Apps → New GitHub App** (an
+   org-owned App is recommended over a personal one so ownership survives
+   maintainer changes). Set:
+   - **GitHub App name**: e.g. `galaxy-helm-release-bot`.
+   - **Homepage URL**: the repo URL (any valid URL works).
+   - **Webhook**: uncheck **Active** — this App does not need to receive
+     webhooks.
+
+2. **Set repository permissions.** Under **Permissions → Repository permissions**,
+   grant the minimum the workflows need:
+
+   | Permission       | Access         | Why |
+   |------------------|----------------|-----|
+   | **Contents**     | Read and write | Push the version bump + tag to `master`, create the GitHub release, push the packaged chart to `CloudVE/helm-charts`, and send the `repository_dispatch` to `galaxy-k8s-boot` |
+   | **Pull requests**| Read and write | Approve PRs and enable auto-merge (`auto-approve.yaml`, `enable-auto-merge.yaml`) |
+   | **Issues**       | Read and write | Add the comment + reaction when `/approve` is used (PR comments are issues) |
+   | **Metadata**     | Read-only      | Mandatory; selected automatically |
+
+   Leave everything else as **No access**.
+
+3. **Create the App**, then **generate a private key** (App settings → *Private
+   keys* → **Generate a private key**). This downloads a `.pem` file — its
+   contents become the `HELM_UPDATER_PKEY` secret. Note the **App ID** shown at
+   the top of the App settings page — that becomes `HELM_UPDATER_APP_ID`.
+
+4. **Install the App** on the repositories it touches (App settings →
+   **Install App** → choose the account → **Only select repositories**):
+   - `galaxyproject/galaxy-helm`
+   - `galaxyproject/galaxy-k8s-boot`
+   - `CloudVE/helm-charts`
+
+   > **Cross-organization note:** `release.yaml` requests a token for
+   > `galaxy-helm,helm-charts,galaxy-k8s-boot`. `helm-charts` lives in the
+   > **CloudVE** org while the others are under **galaxyproject**, so the App
+   > must be installed in **both** organizations. A single installation token
+   > only covers repositories owned by one account, so if a future change can't
+   > see `CloudVE/helm-charts`, confirm the App is installed in the CloudVE org
+   > and that `actions/create-github-app-token` is requesting the right owner.
+
+5. **Add the App to the branch-protection ruleset bypass list** so it can push
+   to protected `master`. See [`REPOSITORY_RULESETS_GUIDE.md`](./REPOSITORY_RULESETS_GUIDE.md)
+   — set `actor_id` to the App's integration ID (`gh api /app` after
+   authenticating as the App, or read it from the ruleset guide's instructions)
+   and `actor_type` to `Integration`.
+
+6. **Verify.** Trigger a dry run via **Actions → Release → Run workflow**
+   (`workflow_dispatch`) with a `patch` bump and watch the `release` job. If the
+   App is misconfigured the failure will surface at the *Generate GitHub App
+   token* step or the first `git push`.
+
+### Notifications
+
+The `notify` job sends a **success** message only when the `release` job
+succeeds, and a distinct **failure** message otherwise (including when the
+release is skipped because an earlier job failed). A failed or skipped release
+will therefore *not* post a "has been released" message.
 
 ## Workflow reference
 

@@ -72,8 +72,8 @@ spec:
             - >
               echo "[`date`][init-db] - Starting Galaxy database init. Running as `id`.";
               if (ls /galaxy/server/config/mutable/ | grep -qE "(init_db_done|db_init_done)");
-                then (echo "[`date`][init-db] - Running manage_db upgrade..."; /galaxy/server/manage_db.sh upgrade && echo "[`date`][init-db] - Manage DB upgrade done." > /galaxy/server/config/mutable/init_db_done_{{.Release.Revision}});
-                else (echo "[`date`][init-db] - No Galaxy database exists; startup will create it."; echo "[`date`][init-db] - Manage DB init done." > /galaxy/server/config/mutable/init_db_done_{{.Release.Revision}};);
+                then (echo "[`date`][init-db] - Existing database detected; running manage_db upgrade..."; /galaxy/server/manage_db.sh upgrade && echo "[`date`][init-db] - Manage DB upgrade done." > /galaxy/server/config/mutable/init_db_done_{{.Release.Revision}});
+                else (echo "[`date`][init-db] - No existing Galaxy database; initializing schema (manage_db init creates all tables and stamps the alembic version)..."; /galaxy/server/manage_db.sh init && echo "[`date`][init-db] - Manage DB init done." > /galaxy/server/config/mutable/init_db_done_{{.Release.Revision}};);
               fi;
               echo "[`date`][init-db] - Database init complete. Created file /galaxy/server/config/mutable/init_db_done_{{.Release.Revision}}.";
               echo "`ls -la /galaxy/server/config/mutable/`";

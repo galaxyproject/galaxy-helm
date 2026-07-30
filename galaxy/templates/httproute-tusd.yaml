@@ -22,8 +22,10 @@ spec:
     {{- range .paths }}
     - matches:
         - path:
-            type: Exact
-            value: {{ .path }}
+            #- PathPrefix, not Exact: tusd serves the creation POST on the base path but
+            #- every PATCH/HEAD for a given upload on `<base path>/<upload id>`.
+            type: PathPrefix
+            value: {{ tpl .path $ }}
       backendRefs:
         - name: {{ $fullName }}-tusd
           port: 1080

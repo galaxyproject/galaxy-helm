@@ -22,9 +22,12 @@ spec:
     {{- range .paths }}
     - matches:
         - path:
-            #- PathPrefix, not Exact: tusd serves the creation POST on the base path but
-            #- every PATCH/HEAD for a given upload on `<base path>/<upload id>`.
-            type: PathPrefix
+            #- Overridable per path, but defaults to PathPrefix: tusd serves the creation
+            #- POST on the base path and every PATCH/HEAD for a given upload on
+            #- `<base path>/<upload id>`, so Exact matches only the POST and silently
+            #- breaks resumable uploads. PathPrefix matches on path element boundaries,
+            #- so it will not match unrelated paths that merely share the prefix string.
+            type: {{ .type | default "PathPrefix" }}
             value: {{ tpl .path $ }}
       backendRefs:
         - name: {{ $fullName }}-tusd

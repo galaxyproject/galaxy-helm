@@ -1,5 +1,5 @@
 {{- if .Values.postInstallJob.enabled }}
-{{- $galaxyUrl := printf "http://%s-nginx.%s.svc.cluster.local:%d" (include "galaxy.fullname" .) .Release.Namespace (int .Values.service.port) -}}
+{{- $galaxyUrl := include "galaxy.internalUrl" . -}}
 {{- $masterKey := .Values.configs | dig "galaxy.yml" "galaxy" "master_api_key" (.Values.configs | dig "galaxy.yml" "galaxy" "bootstrap_admin_api_key" "") -}}
 {{- $singleUser := .Values.configs | dig "galaxy.yml" "galaxy" "single_user" "" -}}
 apiVersion: v1
@@ -15,9 +15,10 @@ data:
     #!/bin/bash
     set -e
 
-    # Wait for Galaxy to be ready
+    # Wait for Galaxy to be ready. -f is required: without it curl exits 0 on a 404,
+    # so a misrouted URL would satisfy this loop and fail confusingly further down.
     echo "Waiting for Galaxy to be ready at {{ $galaxyUrl }}/api/version ..."
-    until curl -s "{{ $galaxyUrl }}/api/version" > /dev/null; do
+    until curl -sf "{{ $galaxyUrl }}/api/version" > /dev/null; do
       echo "Galaxy not ready yet, waiting..."
       sleep 10
     done
@@ -38,7 +39,9 @@ data:
     {{- if $singleUser }}
     # Single-user - hitting the url causes the web handler to create the default user.
     echo "Single user instance. User is $GALAXY_USER"
-    curl {{ $galaxyUrl }} > /dev/null
+    # Trailing slash matters: without it nginx answers 301 and curl (no -L) would
+    # exit 0 without ever reaching Galaxy, so the user would not be created.
+    curl -fsSL {{ $galaxyUrl }}/ > /dev/null
     USER_KEY=$(abm galaxy user key $GALAXY_USER)
     {{- else }}
     # Multi-user Galaxy instance - create user and get their key
@@ -46,6 +49,12 @@ data:
     USERNAME=$(echo "$GALAXY_USER" | cut -d'@' -f1)
     USER_KEY=$(abm galaxy user create $USERNAME $GALAXY_USER $GALAXY_MASTER_KEY | jq -r .key)
     {{- end }}
+    # Without a real user key ABM silently falls back to the master key, which makes
+    # Galaxy return 500 on user-scoped endpoints instead of a usable error.
+    if [ -z "$USER_KEY" ]; then
+      echo "ERROR: no API key obtained for $GALAXY_USER; cannot bootstrap." >&2
+      exit 1
+    fi
     abm config key galaxy $USER_KEY
     
     # Run bootstrap configuration

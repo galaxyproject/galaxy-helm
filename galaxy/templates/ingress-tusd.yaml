@@ -29,7 +29,7 @@ spec:
       http:
         paths:
           {{- range .paths }}
-          - path: {{ .path }}
+          - path: {{ tpl .path $ }}
             pathType: ImplementationSpecific
             backend:
               service:

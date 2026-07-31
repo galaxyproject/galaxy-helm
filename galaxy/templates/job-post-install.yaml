@@ -1,5 +1,5 @@
 {{- if .Values.postInstallJob.enabled }}
-{{- $galaxyUrl := printf "http://%s-nginx.%s.svc.cluster.local:%d" (include "galaxy.fullname" .) .Release.Namespace (int .Values.service.port) -}}
+{{- $galaxyUrl := include "galaxy.internalUrl" . -}}
 {{- $masterKey := .Values.configs | dig "galaxy.yml" "galaxy" "master_api_key" (.Values.configs | dig "galaxy.yml" "galaxy" "bootstrap_admin_api_key" "") -}}
 apiVersion: batch/v1
 kind: Job

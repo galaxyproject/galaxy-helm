@@ -885,13 +885,29 @@ tusd:
       nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
       nginx.ingress.kubernetes.io/proxy-buffering: "off"
       nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
-      nginx.ingress.kubernetes.io/connection-proxy-header: "upgrade"
+      #- Do not set `connection-proxy-header: upgrade` here. TUS is plain HTTP/1.1,
+      #- not a protocol upgrade, and ingress-nginx's annotation validator rejects
+      #- that value -- which makes it discard this entire Ingress, silently routing
+      #- uploads to galaxy-web instead of tusd.
       nginx.ingress.kubernetes.io/proxy-body-size: "0"
     hosts:
       - host: ~
         paths:
-          - path: "/galaxy/api/upload/resumable_upload"
+          #- Rendered with `tpl`, so it tracks `ingress.path` automatically. It must
+          #- stay in sync with the `-base-path` tusd is started with, otherwise the
+          #- route matches nothing and uploads silently fall through to galaxy-web.
+          - path: '{{ include "galaxy.add_trailing_slash" .Values.ingress.path }}api/upload/resumable_upload'
+            #- Gateway API match type; ignored by the Ingress path, which is always
+            #- ImplementationSpecific. Only set this to "Exact" if you do not need
+            #- resumable uploads to work -- see httproute-tusd.yaml.
+            type: PathPrefix
     tls: []
+  #- Directory tusd writes in-progress uploads to. Galaxy resolves a finished upload
+  #- from `tus_upload_store`, so the two must agree. Left empty, this follows
+  #- `configs.galaxy.yml.galaxy.tus_upload_store` when set, else `<mountPath>/tmp`
+  #- (which is where Galaxy's `new_file_path` defaults to). Only set this to point
+  #- tusd somewhere other than the directory Galaxy reads from.
+  uploadDir: ""
   resources:
     requests:
       cpu: 100m

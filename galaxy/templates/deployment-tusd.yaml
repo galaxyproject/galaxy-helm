@@ -1,4 +1,7 @@
 {{ if .Values.tusd.enabled -}}
+{{- /* Galaxy reads finished uploads from tus_upload_store, so tusd must write there. */ -}}
+{{- $galaxyTusStore := dig "galaxy.yml" "galaxy" "tus_upload_store" "" .Values.configs -}}
+{{- $tusdUploadDir := .Values.tusd.uploadDir | default $galaxyTusStore | default (printf "%s/tmp" .Values.persistence.mountPath) -}}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -47,7 +50,7 @@ spec:
             - "0.0.0.0"
             - "-port"
             - "1080"
-            - "-upload-dir={{ .Values.persistence.mountPath }}/tmp"
+            - "-upload-dir={{ $tusdUploadDir }}"
             - '-hooks-http=http://{{ include "galaxy.fullname" . }}-nginx:{{ .Values.service.port }}{{ template "galaxy.add_trailing_slash" .Values.ingress.path }}api/upload/hooks'
             - "-hooks-http-forward-headers=X-Api-Key,Cookie"
             - "-hooks-enabled-events=pre-create"

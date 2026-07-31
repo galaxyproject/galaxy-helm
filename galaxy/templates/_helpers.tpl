@@ -110,6 +110,21 @@ Add a trailing slash to a given path, if missing
 {{- end -}}
 
 {{/*
+In-cluster base URL for Galaxy, reached via the nginx service.
+
+Includes `ingress.path`, because nginx only defines location blocks under that
+prefix -- a prefix-less URL gets nginx's own 404 rather than reaching Galaxy.
+Emitted without a trailing slash so callers can append "/api/...".
+*/}}
+{{- define "galaxy.internalUrl" -}}
+{{- $prefix := "" -}}
+{{- if ne .Values.ingress.path "/" -}}
+{{- $prefix = trimSuffix "/" .Values.ingress.path -}}
+{{- end -}}
+{{- printf "http://%s-nginx.%s.svc.cluster.local:%d%s" (include "galaxy.fullname" .) .Release.Namespace (int .Values.service.port) $prefix -}}
+{{- end -}}
+
+{{/*
 Return which PVC to use
 */}}
 {{- define "galaxy.pvcname" -}}

@@ -93,6 +93,14 @@ webHandlers:
   gunicorn:
     timeout: 300
     workers: 1
+    # Peers whose X-Forwarded-* headers gunicorn will trust. Gunicorn defaults
+    # to 127.0.0.1, which never matches an in-cluster ingress controller, so
+    # X-Forwarded-Proto gets dropped and Galaxy builds absolute URLs (history
+    # export links, activation and notification emails, share links) with
+    # http:// even when the ingress terminates TLS. Narrow this to the ingress
+    # controller's pod CIDR if untrusted workloads can reach the Galaxy service
+    # directly.
+    forwardedAllowIps: "*"
     extraArgs: ""
   resources:
     requests:

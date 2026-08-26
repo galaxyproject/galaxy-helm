@@ -10,7 +10,7 @@ image:
   #- Repository containing the Galaxy image.
   repository: quay.io/galaxyproject/galaxy-min
   #- Galaxy Docker image tag (generally corresponds to the desired Galaxy version)
-  tag: "26.0.0"  # Galaxy versions prior to 24.1.1 contain a bug mapping the extra_files directory
+  tag: "26.1.1"  # Galaxy versions prior to 24.1.1 contain a bug mapping the extra_files directory
   #-  Galaxy image [pull policy](https://kubernetes.io/docs/concepts/configuration/overview/#container-images)
   pullPolicy: IfNotPresent
 
@@ -93,6 +93,14 @@ webHandlers:
   gunicorn:
     timeout: 300
     workers: 1
+    # Peers whose X-Forwarded-* headers gunicorn will trust. Gunicorn defaults
+    # to 127.0.0.1, which never matches an in-cluster ingress controller, so
+    # X-Forwarded-Proto gets dropped and Galaxy builds absolute URLs (history
+    # export links, activation and notification emails, share links) with
+    # http:// even when the ingress terminates TLS. Narrow this to the ingress
+    # controller's pod CIDR if untrusted workloads can reach the Galaxy service
+    # directly.
+    forwardedAllowIps: "*"
     extraArgs: ""
   resources:
     requests:

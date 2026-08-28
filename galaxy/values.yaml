@@ -531,6 +531,21 @@ refdata:
   type: cvmfs
   pvc:
     size: 10Gi
+  #- A handful of legacy Galaxy tools do not go through data tables. They take
+  #- `-g '${GALAXY_DATA_INDEX_DIR}'` and open `<tool_data_path>/<name>.loc`
+  #- directly, so pointing `tool_data_table_config_path` at the reference data
+  #- does not reach them and they fail with FileNotFoundError. The setup job
+  #- symlinks each of these from the reference data into `tool_data_path`
+  #- when it finds them; missing ones are skipped, and an existing real file
+  #- is never replaced. Set to [] to disable.
+  legacyLocFiles:
+    - alignseq.loc       #- Extract Genomic DNA, BLAT
+    - twobit.loc         #- Extract Genomic DNA, BLAT (fallback for alignseq)
+    - maf_index.loc      #- Interval2Maf, MAF stats, GeneBed/Interval MAF to FASTA
+    - maf_pairwise.loc   #- Interval2Maf pairwise
+    - microbial_data.loc #- Microbial data import
+    - sift_db.loc        #- SIFT
+    - srma_index.loc     #- SRMA
 
 #- Configuration block if `cvmfs` is used as `refdata.type`
 cvmfs:

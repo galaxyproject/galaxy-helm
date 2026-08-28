@@ -61,6 +61,45 @@ spec:
           volumeMounts:
             - name: galaxy-data
               mountPath: {{ .Values.persistence.mountPath }}
+        {{- if and .Values.refdata.enabled .Values.refdata.legacyLocFiles }}
+        - name: {{ .Chart.Name }}-init-tool-data
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              # Best effort on purpose: a missing .loc must not block startup,
+              # so this never exits non-zero and never replaces a real file.
+              echo "[`date`][init-tool-data] - Linking legacy .loc files into tool_data_path. Running as `id`."
+              TOOL_DATA="{{ .Values.persistence.mountPath }}/tool-data"
+              mkdir -p "$TOOL_DATA"
+              for f in {{ .Values.refdata.legacyLocFiles | join " " }}; do
+                if [ -e "$TOOL_DATA/$f" ]; then
+                  echo "[`date`][init-tool-data] - $f already present, leaving it as is."
+                  continue
+                fi
+                for d in /cvmfs/data.galaxyproject.org/byhand/location /cvmfs/data.galaxyproject.org/managed/location; do
+                  if [ -f "$d/$f" ]; then
+                    ln -s "$d/$f" "$TOOL_DATA/$f" && echo "[`date`][init-tool-data] - linked $f -> $d/$f"
+                    break
+                  fi
+                done
+                [ -e "$TOOL_DATA/$f" ] || echo "[`date`][init-tool-data] - $f not found in reference data, skipping."
+              done
+              echo "[`date`][init-tool-data] - init-tool-data container complete."
+          volumeMounts:
+            - name: galaxy-data
+              mountPath: {{ .Values.persistence.mountPath }}/tool-data
+              subPath: tool-data
+            - name: refdata-gxy
+              mountPath: /cvmfs/data.galaxyproject.org
+              {{- if eq .Values.refdata.type "cvmfs" }}
+              subPath: data.galaxyproject.org
+              # CVMFS automount volumes must be mounted with HostToContainer mount propagation.
+              mountPropagation: HostToContainer
+              {{- end }}
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}-init-db
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

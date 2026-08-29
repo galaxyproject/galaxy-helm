@@ -531,6 +531,27 @@ refdata:
   type: cvmfs
   pvc:
     size: 10Gi
+  #- A handful of legacy Galaxy tools do not go through data tables. They take
+  #- `-g '${GALAXY_DATA_INDEX_DIR}'` and open `<tool_data_path>/<name>.loc`
+  #- directly, so pointing `tool_data_table_config_path` at the reference data
+  #- does not reach them and they fail with FileNotFoundError. The setup job
+  #- symlinks each of these from the reference data into the chart's tool-data
+  #- directory when it finds them; missing ones are skipped, and an existing
+  #- real file is never replaced. Set to [] to disable.
+  #-
+  #- Like the rest of the chart, this assumes tool_data_path is left at its
+  #- default of `{persistence.mountPath}/tool-data`. Overriding
+  #- `configs."galaxy.yml".galaxy.tool_data_path` is not supported: the
+  #- long-running Galaxy pods mount only the whole PVC at
+  #- `persistence.mountPath`, so a custom path would not exist inside them.
+  legacyLocFiles:
+    - alignseq.loc       #- Extract Genomic DNA, BLAT
+    - twobit.loc         #- Extract Genomic DNA, BLAT (fallback for alignseq)
+    - maf_index.loc      #- Interval2Maf, MAF stats, GeneBed/Interval MAF to FASTA
+    - maf_pairwise.loc   #- Interval2Maf pairwise
+    - microbial_data.loc #- Microbial data import
+    - sift_db.loc        #- SIFT
+    - srma_index.loc     #- SRMA
 
 #- Configuration block if `cvmfs` is used as `refdata.type`
 cvmfs:
@@ -765,7 +786,17 @@ jobs:
             - id: force_default_container_for_built_in_tools
               if: |
                 from galaxy.tools import GALAXY_LIB_TOOLS_UNVERSIONED
-                tool.id in GALAXY_LIB_TOOLS_UNVERSIONED or "CONVERTER_" == tool.id[:10] or tool.is_datatype_converter
+                # Datatype converters fall into two kinds. Those needing only
+                # what the Galaxy image already ships stay pinned to it: most
+                # run a script from $__tool_directory__, and job pods mount
+                # only /galaxy/server/database, so the Galaxy tree under
+                # /galaxy/server/lib exists solely inside this image. The rest
+                # declare binaries the image does not carry (samtools, htslib,
+                # bedtools, UCSC, openbabel...); leaving them to the container
+                # resolver lets it find their biocontainer.
+                IN_IMAGE = {"python", "bx-python", "galaxy-util", "galaxy_sequence_utils", "coreutils", "bzip2"}
+                is_converter = ("CONVERTER_" == tool.id[:10]) or tool.is_datatype_converter
+                tool.id in GALAXY_LIB_TOOLS_UNVERSIONED or (is_converter and all(r.name in IN_IMAGE for r in tool.requirements.packages))
               params:
                 docker_container_id_override: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         .*data_manager.*:

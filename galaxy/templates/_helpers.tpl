@@ -353,23 +353,3 @@ parentRefs:
     namespace: {{ .Release.Namespace }}
 {{- end }}
 {{- end -}}
-
-{{/*
-The effective tool_data_path. Galaxy's own config is the source of truth, so
-read it back from configs."galaxy.yml".galaxy.tool_data_path and fall back to
-the chart default when it is unset. That value may itself contain template
-syntax, hence the tpl.
-
-Never reference this helper from tool_data_path itself - it reads that key, so
-doing so would recurse.
-*/}}
-{{- define "galaxy.toolDataPath" -}}
-{{- $cfg := (index (.Values.configs | default dict) "galaxy.yml") | default dict -}}
-{{- $galaxy := (index $cfg "galaxy") | default dict -}}
-{{- $path := index $galaxy "tool_data_path" -}}
-{{- if $path -}}
-{{- tpl (printf "%v" $path) . -}}
-{{- else -}}
-{{- printf "%s/tool-data" .Values.persistence.mountPath -}}
-{{- end -}}
-{{- end -}}

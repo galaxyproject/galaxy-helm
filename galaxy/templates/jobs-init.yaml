@@ -72,7 +72,7 @@ spec:
               # Best effort on purpose: a missing .loc must not block startup,
               # so this never exits non-zero and never replaces a real file.
               echo "[`date`][init-tool-data] - Linking legacy .loc files into tool_data_path. Running as `id`."
-              TOOL_DATA="{{ include "galaxy.toolDataPath" . }}"
+              TOOL_DATA="{{ .Values.persistence.mountPath }}/tool-data"
               mkdir -p "$TOOL_DATA"
               for f in {{ .Values.refdata.legacyLocFiles | join " " }}; do
                 # -e follows the link, so a dangling symlink reads as absent
@@ -103,7 +103,7 @@ spec:
               echo "[`date`][init-tool-data] - init-tool-data container complete."
           volumeMounts:
             - name: galaxy-data
-              mountPath: {{ include "galaxy.toolDataPath" . }}
+              mountPath: {{ .Values.persistence.mountPath }}/tool-data
               subPath: tool-data
             - name: refdata-gxy
               mountPath: /cvmfs/data.galaxyproject.org

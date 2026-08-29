@@ -535,9 +535,15 @@ refdata:
   #- `-g '${GALAXY_DATA_INDEX_DIR}'` and open `<tool_data_path>/<name>.loc`
   #- directly, so pointing `tool_data_table_config_path` at the reference data
   #- does not reach them and they fail with FileNotFoundError. The setup job
-  #- symlinks each of these from the reference data into `tool_data_path`
-  #- when it finds them; missing ones are skipped, and an existing real file
-  #- is never replaced. Set to [] to disable.
+  #- symlinks each of these from the reference data into the chart's tool-data
+  #- directory when it finds them; missing ones are skipped, and an existing
+  #- real file is never replaced. Set to [] to disable.
+  #-
+  #- Like the rest of the chart, this assumes tool_data_path is left at its
+  #- default of `{persistence.mountPath}/tool-data`. Overriding
+  #- `configs."galaxy.yml".galaxy.tool_data_path` is not supported: the
+  #- long-running Galaxy pods mount only the whole PVC at
+  #- `persistence.mountPath`, so a custom path would not exist inside them.
   legacyLocFiles:
     - alignseq.loc       #- Extract Genomic DNA, BLAT
     - twobit.loc         #- Extract Genomic DNA, BLAT (fallback for alignseq)
@@ -589,7 +595,7 @@ configs:
         k8s_persistent_volume_claims: |-
           {{ template "galaxy.pvcname" . -}}/config:{{ .Values.persistence.mountPath -}}/config:r,
           {{- template "galaxy.pvcname" . -}}/tmp:{{ .Values.persistence.mountPath -}}/tmp:rw,
-          {{- template "galaxy.pvcname" . -}}/tool-data:{{ include "galaxy.toolDataPath" . -}}:rw,
+          {{- template "galaxy.pvcname" . -}}/tool-data:{{ .Values.persistence.mountPath -}}/tool-data:rw,
           {{- template "galaxy.pvcname" . -}}/tools:{{ .Values.persistence.mountPath -}}/tools:r,
           {{- template "galaxy.pvcname" . -}}/shed_tools:{{ .Values.persistence.mountPath -}}/shed_tools:r
           {{- if .Values.refdata.enabled -}}

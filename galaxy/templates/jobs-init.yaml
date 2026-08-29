@@ -72,25 +72,38 @@ spec:
               # Best effort on purpose: a missing .loc must not block startup,
               # so this never exits non-zero and never replaces a real file.
               echo "[`date`][init-tool-data] - Linking legacy .loc files into tool_data_path. Running as `id`."
-              TOOL_DATA="{{ .Values.persistence.mountPath }}/tool-data"
+              TOOL_DATA="{{ include "galaxy.toolDataPath" . }}"
               mkdir -p "$TOOL_DATA"
               for f in {{ .Values.refdata.legacyLocFiles | join " " }}; do
-                if [ -e "$TOOL_DATA/$f" ]; then
+                # -e follows the link, so a dangling symlink reads as absent
+                # here but still blocks ln. Test -L separately and replace only
+                # those, leaving real files and working links untouched.
+                if [ -L "$TOOL_DATA/$f" ] && [ ! -e "$TOOL_DATA/$f" ]; then
+                  echo "[`date`][init-tool-data] - $f is a dangling symlink, replacing it."
+                  rm -f "$TOOL_DATA/$f"
+                elif [ -e "$TOOL_DATA/$f" ]; then
                   echo "[`date`][init-tool-data] - $f already present, leaving it as is."
                   continue
                 fi
+                src=""
                 for d in /cvmfs/data.galaxyproject.org/byhand/location /cvmfs/data.galaxyproject.org/managed/location; do
                   if [ -f "$d/$f" ]; then
-                    ln -s "$d/$f" "$TOOL_DATA/$f" && echo "[`date`][init-tool-data] - linked $f -> $d/$f"
+                    src="$d/$f"
                     break
                   fi
                 done
-                [ -e "$TOOL_DATA/$f" ] || echo "[`date`][init-tool-data] - $f not found in reference data, skipping."
+                if [ -z "$src" ]; then
+                  echo "[`date`][init-tool-data] - $f not found in reference data, skipping."
+                elif ln -s "$src" "$TOOL_DATA/$f"; then
+                  echo "[`date`][init-tool-data] - linked $f -> $src"
+                else
+                  echo "[`date`][init-tool-data] - WARNING: found $src but could not link $f."
+                fi
               done
               echo "[`date`][init-tool-data] - init-tool-data container complete."
           volumeMounts:
             - name: galaxy-data
-              mountPath: {{ .Values.persistence.mountPath }}/tool-data
+              mountPath: {{ include "galaxy.toolDataPath" . }}
               subPath: tool-data
             - name: refdata-gxy
               mountPath: /cvmfs/data.galaxyproject.org

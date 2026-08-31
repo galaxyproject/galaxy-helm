@@ -38,6 +38,7 @@ data:
         server {
             listen {{ .Values.nginx.containerPort }};
             server_name galaxy;
+            absolute_redirect off;
 
             location {{ template "galaxy.add_trailing_slash" .Values.ingress.path }}static {
                 alias {{ .Values.nginx.galaxyStaticDir }};

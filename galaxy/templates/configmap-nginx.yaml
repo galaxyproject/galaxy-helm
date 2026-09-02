@@ -31,8 +31,8 @@ data:
         client_max_body_size {{ .Values.nginx.conf.client_max_body_size }};
 
         map $http_x_forwarded_proto $proxy_x_forwarded_proto {
-          default $http_x_forwarded_proto;
-          '' $scheme;
+          default {{ .Values.nginx.conf.forwardedProtoOverride | default "$http_x_forwarded_proto" }};
+          '' {{ .Values.nginx.conf.forwardedProtoOverride | default "$scheme" }};
         }
 
         server {

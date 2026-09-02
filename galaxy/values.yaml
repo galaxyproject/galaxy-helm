@@ -896,6 +896,14 @@ nginx:
   containerPort: 7080
   conf:
     client_max_body_size: 100g
+    #- Value to pin the `X-Forwarded-Proto` header sent to Galaxy, overriding
+    #- whatever arrives from upstream. Set to `https` when TLS terminates at a
+    #- proxy outside the cluster that speaks plain HTTP inward without setting
+    #- the header (e.g. Terra/Leonardo): otherwise Galaxy sees `scheme == http`
+    #- and builds qualified URLs (history export links, share links, emails)
+    #- with `http://` and issues session cookies without the Secure flag.
+    #- Leave empty to pass the upstream header through unchanged (default).
+    forwardedProtoOverride: ""
   resources:
     # We recommend updating these based on the usage levels of the server
     requests:

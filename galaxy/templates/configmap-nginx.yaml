@@ -90,6 +90,16 @@ data:
                 add_header X-Frame-Options SAMEORIGIN;
                 add_header X-Content-Type-Options nosniff;
             }
+{{- with trimSuffix "/" .Values.ingress.path }}
+
+            # Galaxy releases without the fix from galaxyproject/galaxy#23274
+            # double the URL prefix in the post-login redirect ({{ . }}{{ . }}/...).
+            # Collapse the duplicated prefix until that fix ships in a tagged release.
+            location {{ . }}{{ . }}/ {
+                absolute_redirect off;
+                rewrite ^{{ . }}(.*)$ $1 redirect;
+            }
+{{- end }}
 {{- if .Values.trainingHook.enabled }}
             location /training-material/ {
                 proxy_pass {{ .Values.trainingHook.url }};

@@ -1,3 +1,14 @@
+{{- /*
+The override is interpolated straight into an nginx `map` directive, so an
+unusable value (a stray semicolon, an extra word) renders a config nginx cannot
+parse and galaxy-nginx crash-loops with the reason buried in pod logs. Reject it
+here instead, while the operator is still looking at a helm command.
+*/ -}}
+{{- with .Values.nginx.conf.forwardedProtoOverride }}
+{{- if not (has . (list "http" "https")) }}
+{{- fail (printf "nginx.conf.forwardedProtoOverride must be \"http\" or \"https\", got %q" .) }}
+{{- end }}
+{{- end }}
 ---
 apiVersion: v1
 kind: ConfigMap

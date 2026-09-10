@@ -799,6 +799,14 @@ jobs:
                 tool.id in GALAXY_LIB_TOOLS_UNVERSIONED or (is_converter and all(r.name in IN_IMAGE for r in tool.requirements.packages))
               params:
                 docker_container_id_override: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+              # The image carries the Galaxy tree at /galaxy/server/lib but
+              # never installs it into the venv, so `import galaxy` fails in a
+              # job container even though python resolves to the venv. Tools
+              # pinned here by definition need that tree - CONVERTER_archive_to_directory
+              # runs `python -c "from galaxy.util.compression_utils import ..."`
+              # and dies with ModuleNotFoundError without this.
+              env:
+                PYTHONPATH: /galaxy/server/lib
         .*data_manager.*:
           params:
             k8s_run_as_group_id: "{{ .Values.securityContext.runAsGroup }}"

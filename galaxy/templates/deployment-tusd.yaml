@@ -38,6 +38,9 @@ spec:
         runAsUser: {{ default .Values.securityContext.runAsUser .Values.tusd.securityContext.runAsUser }}
         runAsGroup: {{ default .Values.securityContext.runAsGroup .Values.tusd.securityContext.runAsGroup }}
         fsGroup: {{ default .Values.securityContext.fsGroup .Values.tusd.securityContext.fsGroup }}
+        {{- with default .Values.securityContext.fsGroupChangePolicy .Values.tusd.securityContext.fsGroupChangePolicy }}
+        fsGroupChangePolicy: {{ . }}
+        {{- end }}
       {{- if .Values.tusd.podSpecExtra -}}
         {{- tpl (toYaml .Values.tusd.podSpecExtra) . | nindent 6 }}
       {{- end }}

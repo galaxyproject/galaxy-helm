@@ -13,7 +13,9 @@ data:
 {{- .Values.postInstallJob.bootstrapConfig | nindent 4 }}
   post-install.sh: |
     #!/bin/bash
-    set -e
+    # pipefail is required: USER_KEY is captured from `abm ... | jq`, so without it a
+    # failing abm is masked by jq's exit 0 and set -e never trips.
+    set -eo pipefail
 
     # Wait for Galaxy to be ready. -f is required: without it curl exits 0 on a 404,
     # so a misrouted URL would satisfy this loop and fail confusingly further down.
@@ -50,8 +52,10 @@ data:
     USER_KEY=$(abm galaxy user create $USERNAME $GALAXY_USER $GALAXY_MASTER_KEY | jq -r .key)
     {{- end }}
     # Without a real user key ABM silently falls back to the master key, which makes
-    # Galaxy return 500 on user-scoped endpoints instead of a usable error.
-    if [ -z "$USER_KEY" ]; then
+    # Galaxy return 500 on user-scoped endpoints instead of a usable error. Treat the
+    # literal "null" as failure too: `jq -r .key` emits it when abm returns a JSON
+    # error object with no .key, and it would otherwise slip past the -z check.
+    if [ -z "$USER_KEY" ] || [ "$USER_KEY" = "null" ]; then
       echo "ERROR: no API key obtained for $GALAXY_USER; cannot bootstrap." >&2
       exit 1
     fi

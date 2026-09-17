@@ -667,6 +667,11 @@ configs:
         {{ include "galaxy-postgresql.connection-string" .}}
       integrated_tool_panel_config: "/galaxy/server/config/mutable/integrated_tool_panel.xml"
       sanitize_allowlist_file: "/galaxy/server/config/mutable/sanitize_allowlist.txt"
+      # Galaxy rejects HTML uploads by default, which leaves users unable to
+      # supply inputs to any tool declaring `format="html"`. Rendering stays
+      # safe without this check: sanitize_all_html serves uploaded HTML as
+      # text/plain, since an upload job is never in sanitize_allowlist_file.
+      check_upload_content: false
       tool_config_file: "/galaxy/server/config/tool_conf.xml{{if .Values.setupJob.downloadToolConfs.enabled}},{{ .Values.setupJob.downloadToolConfs.volume.mountPath }}/config/shed_tool_conf.xml{{end}}"
       shed_tool_config_file: "/galaxy/server/config/mutable/editable_shed_tool_conf.xml"
       tool_sheds_config_file: "/galaxy/server/config/tool_sheds_conf.xml"

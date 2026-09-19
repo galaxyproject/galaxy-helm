@@ -200,7 +200,7 @@ mkdir -p /galaxy/server/database/object_store_cache;
 mkdir -p /galaxy/server/database/jobs_directory;
 if [ -d /galaxy/server/database/files ]; then GALAXY_DATASET_DIR=/galaxy/server/database/files; else GALAXY_DATASET_DIR=/galaxy/server/database/objects; fi;
 mkdir -p "$GALAXY_DATASET_DIR";
-chown -R {{ .Values.securityContext.runAsUser }}:{{ .Values.securityContext.runAsUser }} /galaxy/server/database/cache /galaxy/server/database/tmp /galaxy/server/database/object_store_cache /galaxy/server/database/jobs_directory "$GALAXY_DATASET_DIR";
+chown -R {{ .Values.securityContext.runAsUser }}:{{ .Values.securityContext.runAsGroup }} /galaxy/server/database/cache /galaxy/server/database/tmp /galaxy/server/database/object_store_cache /galaxy/server/database/jobs_directory "$GALAXY_DATASET_DIR";
 echo "[`date`] - Syncing file system...";
 sync;
 echo "[`date`] - Init mounts container copy commands done.";

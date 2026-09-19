@@ -17,6 +17,7 @@
 | serviceAccount.name | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
 | rbac.enabled | Does the cluster use role based access control. |
 | securityContext.fsGroup | Security context and file system group used by jobs. |
+| securityContext.fsGroupChangePolicy | Controls when Kubernetes recursively changes the ownership and permissions of mounted volumes to match `fsGroup`. Set to `OnRootMismatch` to skip the recursive change when the root of the volume already has the expected group. Applies to the Galaxy handler pods and, when the Galaxy release in use supports the `k8s_fs_group_change_policy` runner parameter, to the dynamically created tool job pods. |
 | persistence | Configure the PVC used by Galaxy for local storage. |
 | persistence.enabled | Persistence is enabled by default |
 | persistence.name | Name of the PVC to create |

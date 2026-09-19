@@ -240,6 +240,13 @@ securityContext:
   runAsGroup: 10001
   #- Security context and file system group used by jobs.
   fsGroup: 10001
+  #- Controls when Kubernetes recursively changes the ownership and permissions of mounted volumes to match
+  #- `fsGroup`. The Kubernetes default (`Always`) can delay pod start-up considerably on large volumes. Set to
+  #- `OnRootMismatch` to skip the recursive change when the root of the volume already has the expected group.
+  #- Applies to the Galaxy handler pods and, when the Galaxy release in use supports the
+  #- `k8s_fs_group_change_policy` runner parameter, to the dynamically created tool job pods. The setup jobs
+  #- use `setupJob.securityContext`, where the same key can be set independently.
+  # fsGroupChangePolicy: OnRootMismatch
 
 #- Configure the PVC used by Galaxy for local storage.
 persistence:
@@ -783,6 +790,7 @@ jobs:
             container_monitor: false
             docker_default_container_id: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
             tmp_dir: "true"
+            k8s_fs_group_change_policy: "{{ .Values.securityContext.fsGroupChangePolicy }}"
           scheduling:
             reject:
               - local

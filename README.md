@@ -50,6 +50,87 @@ Simply install using
 
 ---
 
+## CVMFS reference repositories
+
+With `refdata.enabled: true` and `refdata.type: cvmfs`, Galaxy and Kubernetes
+tool jobs mount both `data.galaxyproject.org` and `idc.galaxyproject.org` from
+the existing reference-data PVC. Additional repositories are configured through
+`refdata.cvmfsAdditionalRepositories`. IDC is enabled by default; its client
+configuration is provided by the
+[Galaxy CVMFS CSI chart](https://github.com/CloudVE/galaxy-cvmfs-csi-helm)
+2.5.2 or later, consumed by `galaxy-deps`; no repository-specific values are
+needed in this chart.
+
+For existing deployments, upgrade the separate dependency release before
+rolling out Galaxy. Wait for its projected configuration to reach the CSI pods
+and verify that `/cvmfs/idc.galaxyproject.org/config/` is readable there. Older
+CSI releases need upgrading or equivalent administrator-provided repository
+configuration.
+
+| Configuration | Legacy data repository | IDC |
+| --- | --- | --- |
+| Mount in Galaxy and jobs | `/cvmfs/data.galaxyproject.org` | `/cvmfs/idc.galaxyproject.org` |
+| CSI volume | Existing reference-data PVC, subpath `data.galaxyproject.org` | Same PVC, subpath `idc.galaxyproject.org` |
+| Table definitions | `managed/location/tool_data_table_conf.xml` and `byhand/location/tool_data_table_conf.xml` | `config/tool_data_table_conf.xml` |
+| Reference paths | Existing paths under the legacy repository | Absolute paths in IDC's `.loc` files under its `data/` directory |
+
+The chart appends IDC's XML file to `galaxy.yml`'s
+`tool_data_table_config_path`, keeping the mutable local table config and both
+legacy XML files. Loading these tables makes reference choices available to
+installed tools; mounting the files alone does not. Job handlers and tool
+containers must also see the paths selected from those tables. Kubernetes tool
+jobs receive read-only PVC mounts through `k8s_persistent_volume_claims`.
+Galaxy and setup pods use `HostToContainer` mount propagation for CVMFS.
+The legacy builds, lengths, build-sites and `.loc` symlinks continue to use
+`data.galaxyproject.org`. The tool repository at `cloud.galaxyproject.org` is
+configured separately by `setupJob.downloadToolConfs`.
+Legacy tools that read `.loc` files directly would need consolidated `.loc`
+entries to use IDC-only genomes; adding table XML does not update those files.
+
+To opt out of IDC, disable its entry; both its mounts and table configuration
+are removed:
+
+```yaml
+refdata:
+  cvmfsAdditionalRepositories:
+    idc.galaxyproject.org:
+      enabled: false
+```
+
+Additional CVMFS repositories can be added to this map with `enabled: true`
+and repository-relative `toolDataTableConfigPaths`. Configure their server URLs
+and signing keys in the CSI driver first. Additional repositories are ignored
+when reference data is disabled or uses `s3csi`.
+
+### Remote jobs and newly published data
+
+Remote workers must mount the configured reference repositories and bind them
+into tool containers. Docker-based runners can use the chart's read-only
+reference binds:
+
+```yaml
+configs:
+  job_conf.yml:
+    runners:
+      remote:
+        docker_extra_volumes: >-
+          {{ include "galaxy.refdata_container_volumes" . }}
+```
+
+Use the corresponding read-only binds for Singularity/Apptainer destinations.
+The helper only generates binds; it does not mount CVMFS on remote workers.
+Tool repository binds, such as `cloud.galaxyproject.org`, are configured
+separately.
+
+After clients receive a new CVMFS revision, restart Galaxy processes to discover
+new table definitions, or reload an existing table through the admin API to
+pick up changed `.loc` rows. CVMFS downloads data on demand; size client caches
+for the working set. The reference PVC's capacity does not reserve space for
+all repository contents.
+
+See the [IDC administrator guide](https://github.com/galaxyproject/idc/blob/main/docs/using-idc-data.md)
+for table reloads and container configuration.
+
 ## Installing the chart
 
 ### Using the chart from the packaged chart repo
@@ -182,6 +263,7 @@ current default values can be found in `values.yaml` file.
 | `jobs.priorityClass.existingClass`         | Use an existing [priorityClass](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass) to assign if `jobs.priorityClass.enabled=true`                                   |
 | `refdata.enabled`                          | Whether or not to mount cloud-hosted Galaxy reference data and tools.                                           |
 | `refdata.type`                             | `s3csi` or `cvmfs`, determines the CSI to use for mounting reference data. `cvmfs` is the default type for reference data. |
+| `refdata.cvmfsAdditionalRepositories`        | Additional CVMFS repositories, mounted in Galaxy and Kubernetes jobs. IDC is enabled by default; requires CSI driver configuration. Each entry has `enabled` and repository-relative `toolDataTableConfigPaths`. Ignored for S3 or disabled reference data. |
 | `cvmfs.enabled`                            | Enable use of CVMFS in configs, and deployment of CVMFS Persistent Volume Claims for Galaxy                                                                                                                |
 | `cvmfs.pvc.{}`                             | Persistent Volume Claim to deploy for CVMFS repositories. See <a href="galaxy/values.yaml">`values.yaml`</a> for examples.                                                                                                                 |
 | `setupJob.ttlSecondsAfterFinished`          | Sets `ttlSecondsAfterFinished` for the initialization jobs. See the [Kubernetes documentation](https://kubernetes.io/docs/concepts/workloads/controllers/ttlafterfinished/#ttl-controller) for more details.       |

@@ -144,15 +144,7 @@ spec:
               mountPath: {{ $.Values.setupJob.downloadToolConfs.volume.mountPath }}
               subPath: {{ $.Values.setupJob.downloadToolConfs.volume.subPath }}
             {{- end }}
-            {{- if $.Values.refdata.enabled }}
-            - name: refdata-gxy
-              mountPath: /cvmfs/data.galaxyproject.org
-            {{- if eq $.Values.refdata.type "cvmfs" }}
-              subPath: data.galaxyproject.org
-              # CVMFS automount volumes must be mounted with HostToContainer mount propagation.
-              mountPropagation: HostToContainer
-            {{- end }}
-            {{- end }}
+            {{- include "galaxy.refdata_volume_mounts" $ | nindent 12 }}
             {{- if $.Values.extraVolumeMounts }}
             {{- tpl ($.Values.extraVolumeMounts | toYaml | nindent 12) $ }}
             {{- end }}

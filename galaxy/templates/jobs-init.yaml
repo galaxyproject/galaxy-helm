@@ -105,13 +105,7 @@ spec:
             - name: galaxy-data
               mountPath: {{ .Values.persistence.mountPath }}/tool-data
               subPath: tool-data
-            - name: refdata-gxy
-              mountPath: /cvmfs/data.galaxyproject.org
-              {{- if eq .Values.refdata.type "cvmfs" }}
-              subPath: data.galaxyproject.org
-              # CVMFS automount volumes must be mounted with HostToContainer mount propagation.
-              mountPropagation: HostToContainer
-              {{- end }}
+            {{- include "galaxy.refdata_volume_mounts" . | nindent 12 }}
         {{- end }}
       containers:
         - name: {{ .Chart.Name }}-init-db
@@ -165,15 +159,7 @@ spec:
             - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/
               subPath: config
-            {{- if .Values.refdata.enabled }}
-            - name: refdata-gxy
-              mountPath: /cvmfs/data.galaxyproject.org
-            {{- if eq .Values.refdata.type "cvmfs" }}
-              subPath: data.galaxyproject.org
-              # CVMFS automount volumes must be mounted with HostToContainer mount propagation.
-              mountPropagation: HostToContainer
-            {{- end }}
-            {{- end }}
+            {{- include "galaxy.refdata_volume_mounts" . | nindent 12 }}
             {{- if .Values.extraVolumeMounts }}
             {{- tpl (.Values.extraVolumeMounts | toYaml | nindent 12) . }}
             {{- end }}
@@ -273,15 +259,7 @@ spec:
             - name: galaxy-data
               mountPath: /galaxy/server/config/mutable/
               subPath: config
-            {{- if .Values.refdata.enabled }}
-            - name: refdata-gxy
-              mountPath: /cvmfs/data.galaxyproject.org
-            {{- if eq .Values.refdata.type "cvmfs" }}
-              subPath: data.galaxyproject.org
-              # CVMFS automount volumes must be mounted with HostToContainer mount propagation.
-              mountPropagation: HostToContainer
-            {{- end }}
-            {{- end }}
+            {{- include "galaxy.refdata_volume_mounts" . | nindent 12 }}
             {{- if .Values.extraVolumeMounts }}
             {{- tpl (.Values.extraVolumeMounts | toYaml | nindent 12) . }}
             {{- end }}

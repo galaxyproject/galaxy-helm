@@ -338,6 +338,80 @@ Define extra persistent volumes
 {{- end -}}
 
 {{/*
+The legacy repository also supplies builds, lengths and direct .loc files.
+Additional repository subpaths share the reference-data PVC.
+*/}}
+{{- define "galaxy.refdata_volume_mounts" -}}
+{{- if .Values.refdata.enabled }}
+- name: refdata-gxy
+  mountPath: /cvmfs/data.galaxyproject.org
+  {{- if eq .Values.refdata.type "cvmfs" }}
+  subPath: data.galaxyproject.org
+  mountPropagation: HostToContainer
+{{- range $repository, $config := .Values.refdata.cvmfsAdditionalRepositories }}
+{{- if $config.enabled }}
+- name: refdata-gxy
+  mountPath: {{ printf "/cvmfs/%s" $repository }}
+  subPath: {{ $repository }}
+  readOnly: true
+  mountPropagation: HostToContainer
+{{- end }}
+{{- end }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/* Comma-prefixed entries for the Kubernetes runner's PVC mount list. */}}
+{{- define "galaxy.refdata_pvc_mounts" -}}
+{{- if .Values.refdata.enabled -}}
+{{- $claim := printf "%s-refdata-gxy-pvc" (include "galaxy.fullname" .) -}}
+{{- if eq .Values.refdata.type "cvmfs" -}}
+,{{ $claim }}/data.galaxyproject.org:/cvmfs/data.galaxyproject.org:r
+{{- range $repository, $config := .Values.refdata.cvmfsAdditionalRepositories -}}
+{{- if $config.enabled -}}
+,{{ $claim }}/{{ $repository }}:/cvmfs/{{ $repository }}:r
+{{- end -}}
+{{- end -}}
+{{- else -}}
+,{{ $claim }}:/cvmfs/data.galaxyproject.org:r
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/* Comma-prefixed XML paths to append to Galaxy's local table config. */}}
+{{- define "galaxy.refdata_table_configs" -}}
+{{- if .Values.refdata.enabled -}}
+,/cvmfs/data.galaxyproject.org/managed/location/tool_data_table_conf.xml,/cvmfs/data.galaxyproject.org/byhand/location/tool_data_table_conf.xml
+{{- if eq .Values.refdata.type "cvmfs" -}}
+{{- range $repository, $config := .Values.refdata.cvmfsAdditionalRepositories -}}
+{{- if $config.enabled -}}
+{{- range $path := $config.toolDataTableConfigPaths -}}
+,/cvmfs/{{ $repository }}/{{ $path }}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Worker hosts must mount these paths before they can be bound into containers.
+Tool repository binds are configured separately.
+*/}}
+{{- define "galaxy.refdata_container_volumes" -}}
+{{- if .Values.refdata.enabled -}}
+/cvmfs/data.galaxyproject.org:/cvmfs/data.galaxyproject.org:ro
+{{- if eq .Values.refdata.type "cvmfs" -}}
+{{- range $repository, $config := .Values.refdata.cvmfsAdditionalRepositories -}}
+{{- if $config.enabled -}}
+,/cvmfs/{{ $repository }}:/cvmfs/{{ $repository }}:ro
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Render the `parentRefs:` block for an HTTPRoute, or nothing at all when neither
 `gateway.create` nor `gateway.existingGateway` is set (lets a Gateway API v1.4+
 default Gateway attach the route).

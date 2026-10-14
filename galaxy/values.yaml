@@ -531,6 +531,15 @@ refdata:
   type: cvmfs
   pvc:
     size: 10Gi
+  #- Repository subpaths shared by Galaxy processes and Kubernetes jobs.
+  #- The CSI driver must provide server URLs and keys; XML paths are relative
+  #- to each repository root. Disabled entries remove mounts and table configs.
+  #- Applies only when refdata.enabled is true and refdata.type is cvmfs.
+  cvmfsAdditionalRepositories:
+    idc.galaxyproject.org:
+      enabled: true
+      toolDataTableConfigPaths:
+        - config/tool_data_table_conf.xml
   #- A handful of legacy Galaxy tools do not go through data tables. They take
   #- `-g '${GALAXY_DATA_INDEX_DIR}'` and open `<tool_data_path>/<name>.loc`
   #- directly, so pointing `tool_data_table_config_path` at the reference data
@@ -598,13 +607,7 @@ configs:
           {{- template "galaxy.pvcname" . -}}/tool-data:{{ .Values.persistence.mountPath -}}/tool-data:rw,
           {{- template "galaxy.pvcname" . -}}/tools:{{ .Values.persistence.mountPath -}}/tools:r,
           {{- template "galaxy.pvcname" . -}}/shed_tools:{{ .Values.persistence.mountPath -}}/shed_tools:r
-          {{- if .Values.refdata.enabled -}}
-          {{- if eq .Values.refdata.type "cvmfs" -}}
-          ,{{- template "galaxy.fullname" $ -}}-refdata-gxy-pvc/data.galaxyproject.org:/cvmfs/data.galaxyproject.org:r
-          {{- else -}}
-          ,{{- template "galaxy.fullname" $ -}}-refdata-gxy-pvc:/cvmfs/data.galaxyproject.org:r
-          {{- end -}}
-          {{- end -}}
+          {{- include "galaxy.refdata_pvc_mounts" . -}}
           {{- if .Values.setupJob.downloadToolConfs.enabled -}}
           ,{{ template "galaxy.pvcname" . -}}/{{ .Values.setupJob.downloadToolConfs.volume.subPath }}:{{ .Values.setupJob.downloadToolConfs.volume.mountPath -}}:r
           {{- end -}}
@@ -678,9 +681,7 @@ configs:
       enable_tool_document_cache: false
       tool_data_table_config_path: |-
         /galaxy/server/config/mutable/shed_tool_data_table_conf.xml
-        {{ if .Values.refdata.enabled -}}
-        ,/cvmfs/data.galaxyproject.org/managed/location/tool_data_table_conf.xml,/cvmfs/data.galaxyproject.org/byhand/location/tool_data_table_conf.xml
-        {{- end }}
+        {{- include "galaxy.refdata_table_configs" . }}
       tool_dependency_dir: "{{.Values.persistence.mountPath}}/deps"
       job_config_file: "/galaxy/server/config/job_conf.yml"
       outputs_to_working_directory: true

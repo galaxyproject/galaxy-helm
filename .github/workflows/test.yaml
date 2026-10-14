@@ -33,6 +33,15 @@ jobs:
       - name: Helm linting for galaxy
         run: helm lint galaxy/
 
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Check rendered reference-data integration
+        run: |
+          python -m pip install PyYAML
+          python -m unittest discover -s tests -v
+
   test:
     runs-on: ubuntu-latest
     name: test (${{ matrix.mode }})

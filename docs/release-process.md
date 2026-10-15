@@ -63,7 +63,8 @@ enforced by `.github/workflows/pr-validation.yaml`.
    3. **Waits at the `release` environment approval gate** — a maintainer must
       approve the deployment in the GitHub UI for the release to proceed.
    4. Bumps `version:` in `galaxy/Chart.yaml`, commits, and pushes to `master`.
-   5. Packages the chart and pushes the `.tgz` + updated `index.yaml` to
+   5. Packages the chart and pushes the `.tgz` into `charts/`, with an updated
+      root `index.yaml`, in
       [`CloudVE/helm-charts`](https://github.com/CloudVE/helm-charts).
    6. Creates a `v<version>` git tag and a GitHub release with generated notes.
    7. Merges `master` back into `dev` so the version bump is reflected there.

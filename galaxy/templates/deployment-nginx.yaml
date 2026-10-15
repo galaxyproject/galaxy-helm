@@ -30,6 +30,9 @@ spec:
       serviceAccountName: {{ include "galaxy.serviceAccountName" . }}
       securityContext:
         fsGroup: {{ .Values.securityContext.fsGroup }}
+        {{- with .Values.securityContext.fsGroupChangePolicy }}
+        fsGroupChangePolicy: {{ . }}
+        {{- end }}
       {{- if .Values.webHandlers.podSpecExtra -}}
         {{- tpl (toYaml .Values.webHandlers.podSpecExtra) . | nindent 6 }}
       {{- end }}

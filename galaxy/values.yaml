@@ -766,6 +766,10 @@ configs:
     {{- (.Files.Get "files/configs/tool_conf.xml") }}
   shed_tool_data_table_conf.xml: |
     {{- (.Files.Get "files/configs/shed_tool_data_table_conf.xml") }}
+  # Assembly keys for annotations bundled with featureCounts, seeded only when
+  # the mutable registry is absent. This does not install cached GTF/GFF data.
+  featurecounts_anno.loc: |
+    {{- (.Files.Get "files/configs/featurecounts_anno.loc") }}
 
 #- Additional dynamic rules to map into the container.
 jobs:

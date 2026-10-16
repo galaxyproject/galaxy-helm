@@ -189,6 +189,10 @@ echo "[`date`] - Copying data_manager_conf.xml";
 cp -anL /galaxy/server/config/data_manager_conf.xml.sample /galaxy/server/config/mutable/shed_data_manager_conf.xml;
 echo "[`date`] - Copying tool_data_table_conf.xml";
 cp -anL /galaxy/server/config/shed_tool_data_table_conf.xml /galaxy/server/config/mutable/shed_tool_data_table_conf.xml;
+{{- if index .Values.configs "featurecounts_anno.loc" }}
+echo "[`date`] - Seeding featureCounts built-in annotation keys if absent";
+cp -anL /galaxy/server/config/featurecounts_anno.loc /galaxy/server/config/mutable/featurecounts_anno.loc;
+{{- end }}
 echo "[`date`] - Copying tool-data directory";
 cp -aruL /galaxy/server/tool-data {{.Values.persistence.mountPath}}/;
 echo "[`date`] - Copying tools directory";

@@ -50,6 +50,21 @@ Simply install using
 
 ---
 
+## featureCounts built-in annotations
+
+The setup job seeds `featurecounts_anno.loc` with the hg38, hg19, mm10 and mm9
+assembly keys when `/galaxy/server/config/mutable/featurecounts_anno.loc` is
+absent. These select annotations bundled in the featureCounts job environment;
+they work independently of CVMFS. Existing administrator-managed registries
+are preserved on upgrades. Override `configs.featurecounts_anno.loc` to change
+the initial keys, or set it to `null` to disable seeding. To change an existing
+registry, edit the mutable file and reload Galaxy's `featurecounts_anno` table.
+
+Production cached annotations use the separate `gene_sets` table and require
+real GTF/GFF files accessible to jobs. The chart does not populate that table
+with test fixtures. Publish shared annotations through IDC/CVMFS and configure
+their table entries separately.
+
 ## CVMFS reference repositories
 
 With `refdata.enabled: true` and `refdata.type: cvmfs`, Galaxy and Kubernetes

@@ -1,0 +1,6 @@
+# Assembly keys for annotations bundled inside the featureCounts job environment.
+# value	dbkey
+hg38	hg38
+hg19	hg19
+mm10	mm10
+mm9	mm9

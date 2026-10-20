@@ -45,15 +45,24 @@ jobs:
   test:
     runs-on: gcp-runner
     name: test (${{ matrix.mode }})
+    concurrency:
+      group: galaxy-helm-test-${{ matrix.mode }}
+      cancel-in-progress: false
     strategy:
       fail-fast: false
       matrix:
         include:
           # Default chart config is a multi-user Galaxy instance.
           - mode: multi-user
+            namespace: galaxy-multi-user
+            release: galaxy-multi-user
+            node_port: 30700
             extra_args: ""
           # single_user pins Galaxy to a single user instance.
           - mode: single-user
+            namespace: galaxy-single-user
+            release: galaxy-single-user
+            node_port: 30701
             extra_args: "--set 'configs.galaxy\\.yml.galaxy.single_user=admin@galaxy.org'"
     steps:
       - name: Free up disk space
@@ -97,38 +106,68 @@ jobs:
           helm version
           helm list
       - name: Helm repo add galaxy
-        run: helm repo add galaxy https://github.com/CloudVE/helm-charts/raw/master
+        run: |
+          helm repo add galaxy https://github.com/CloudVE/helm-charts/raw/master --force-update
+          helm repo update galaxy
       - name: Helm install galaxy-helm-deps
-        run: time bash -c 'helm install --create-namespace --wait -n "galaxy-deps" "galaxy-deps" galaxy/galaxy-deps --set cvmfs.cvmfscsi.cache.alien.enabled=false --wait --timeout=1200s'
+        run: |
+          time bash -c '
+            TARGET_CHART="galaxy-deps-$(helm search repo galaxy/galaxy-deps -o json | jq -r ".[0].version")"
+            echo "Target galaxy-deps chart: ${TARGET_CHART}"
+            for attempt in $(seq 1 60); do
+              RELEASE_JSON=$(helm list --all -n galaxy-deps -f "^galaxy-deps$" -o json 2>/dev/null || echo "[]")
+              STATUS=$(echo "$RELEASE_JSON" | jq -r ".[0].status // \"\"")
+              INSTALLED_CHART=$(echo "$RELEASE_JSON" | jq -r ".[0].chart // \"\"")
+              if [[ "$STATUS" == "deployed" && "$INSTALLED_CHART" == "$TARGET_CHART" ]]; then
+                echo "galaxy-deps is already deployed with ${INSTALLED_CHART}"
+                exit 0
+              elif [[ "$STATUS" == pending-* ]]; then
+                echo "Another job is currently installing/upgrading galaxy-deps (status=${STATUS}); waiting 10s..."
+                sleep 10
+                continue
+              fi
+              if helm upgrade --install --create-namespace --wait -n "galaxy-deps" "galaxy-deps" galaxy/galaxy-deps \
+                --set cvmfs.cvmfscsi.cache.alien.enabled=false --timeout=1200s; then
+                exit 0
+              fi
+              echo "Concurrent galaxy-deps operation detected; retrying in 10s..."
+              sleep 10
+            done
+            exit 1
+          '
       - name: Helm install Galaxy (${{ matrix.mode }})
         run: |
-          time helm install --create-namespace -n galaxy galaxy ./galaxy \
+          helm uninstall ${{ matrix.release }} -n ${{ matrix.namespace }} --wait --timeout=120s 2>/dev/null || true
+          kubectl delete ns ${{ matrix.namespace }} --wait=true --timeout=120s --ignore-not-found=true 2>/dev/null || true
+          kubectl delete priorityclass ${{ matrix.release }}-job-priority --ignore-not-found=true 2>/dev/null || true
+          time helm install --create-namespace -n ${{ matrix.namespace }} ${{ matrix.release }} ./galaxy \
             --set persistence.accessMode="ReadWriteOnce" \
             --set resources.requests.memory=0Mi,resources.requests.cpu=0m \
             --set refdata.enabled=false \
+            --set service.nodePort=${{ matrix.node_port }} \
             ${{ matrix.extra_args }} \
             --wait --timeout=1200s
       - name: Get events
-        run: kubectl get events -n galaxy; kubectl get events -n csi-drivers;
+        run: kubectl get events -n ${{ matrix.namespace }}; kubectl get events -n csi-drivers;
         if: always()
       - name: Get pods, pvc, and pv
-        run: kubectl get pods -n galaxy; kubectl get pvc -n galaxy; kubectl get pv -n galaxy
+        run: kubectl get pods -n ${{ matrix.namespace }}; kubectl get pvc -n ${{ matrix.namespace }}; kubectl get pv
         if: always()
       - name: Print handler logs
         run: |
           echo "=== Collecting Galaxy handler logs ==="
           for handler in web job workflow; do
             echo "--- ${handler} handler logs ---"
-            POD_NAME=$(kubectl get pods -n galaxy -l "app.kubernetes.io/component=galaxy-${handler}-handler" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+            POD_NAME=$(kubectl get pods -n ${{ matrix.namespace }} -l "app.kubernetes.io/component=galaxy-${handler}-handler" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
             if [[ -n "$POD_NAME" ]]; then
               echo "Pod: $POD_NAME"
-              kubectl logs -n galaxy "$POD_NAME" --tail=100 || echo "Failed to get logs for $POD_NAME"
+              kubectl logs -n ${{ matrix.namespace }} "$POD_NAME" --tail=100 || echo "Failed to get logs for $POD_NAME"
             else
               # Fallback to old method if label selector doesn't work
-              POD_NAME=$(kubectl get pods -n galaxy -o name | grep "galaxy-${handler}" | head -1 | cut -d/ -f2 2>/dev/null || echo "")
+              POD_NAME=$(kubectl get pods -n ${{ matrix.namespace }} -o name | grep "galaxy-${handler}" | head -1 | cut -d/ -f2 2>/dev/null || echo "")
               if [[ -n "$POD_NAME" ]]; then
                 echo "Pod (fallback): $POD_NAME"
-                kubectl logs -n galaxy "$POD_NAME" --tail=100 || echo "Failed to get logs for $POD_NAME"
+                kubectl logs -n ${{ matrix.namespace }} "$POD_NAME" --tail=100 || echo "Failed to get logs for $POD_NAME"
               else
                 echo "No ${handler} handler pod found"
               fi
@@ -139,10 +178,10 @@ jobs:
       - name: Check appVersion
         if: always()
         run: |
-          kubectl get svc -n galaxy
-          kubectl describe svc -n galaxy galaxy-nginx
+          kubectl get svc -n ${{ matrix.namespace }}
+          kubectl describe svc -n ${{ matrix.namespace }} ${{ matrix.release }}-nginx
           appVersion=$(cat galaxy/Chart.yaml | grep ^appVersion: | awk '{print $2}' | tr -d '"')
-          address=$(kubectl get svc -n galaxy galaxy-nginx -o jsonpath="http://{.spec.clusterIP}:{.spec.ports[0].port}/galaxy/api/version")
+          address=$(kubectl get svc -n ${{ matrix.namespace }} ${{ matrix.release }}-nginx -o jsonpath="http://{.spec.clusterIP}:{.spec.ports[0].port}/galaxy/api/version")
           echo "Address is $address"
           apiVersion=$(curl $address | jq -r '"\(.version_major).\(.version_minor)"')
           echo "appVersion: $appVersion"
@@ -150,3 +189,9 @@ jobs:
           if [ "$appVersion" != "$apiVersion" ]; then
             exit 1
           fi
+      - name: Cleanup Galaxy (${{ matrix.mode }})
+        if: always()
+        run: |
+          helm uninstall ${{ matrix.release }} -n ${{ matrix.namespace }} --wait --timeout=120s || true
+          kubectl delete ns ${{ matrix.namespace }} --wait=true --timeout=120s --ignore-not-found=true || true
+          kubectl delete priorityclass ${{ matrix.release }}-job-priority --ignore-not-found=true || true

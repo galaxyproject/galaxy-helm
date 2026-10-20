@@ -34,7 +34,7 @@ jobs:
   # Job 2: Prepare release (calculate version, etc.)
   prepare:
     needs: smoke-test
-    runs-on: ubuntu-latest
+    runs-on: gcp-runner
     outputs:
       new_version: ${{ steps.bump.outputs.new_version }}
       bump_type: ${{ steps.determine.outputs.bump_type }}
@@ -75,7 +75,7 @@ jobs:
   # Job 3: Manual approval gate
   approve-release:
     needs: prepare
-    runs-on: ubuntu-latest
+    runs-on: gcp-runner
     environment: release
     steps:
       - name: Approval gate
@@ -86,7 +86,7 @@ jobs:
   # Job 4: Execute release
   release:
     needs: [prepare, approve-release]
-    runs-on: ubuntu-latest
+    runs-on: gcp-runner
     env:
       NEW_VERSION: ${{ needs.prepare.outputs.new_version }}
     steps:
@@ -218,7 +218,7 @@ jobs:
   # Job 5: Trigger downstream updates
   trigger-downstream:
     needs: [prepare, release]
-    runs-on: ubuntu-latest
+    runs-on: gcp-runner
     steps:
       - name: Generate GitHub App token
         id: app-token
@@ -239,7 +239,7 @@ jobs:
   # Job 6: Send notifications
   notify:
     needs: [prepare, release]
-    runs-on: ubuntu-latest
+    runs-on: gcp-runner
     if: always()
     steps:
       - name: Slack notification (success)

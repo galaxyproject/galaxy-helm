@@ -12,7 +12,7 @@ jobs:
   enable-auto-merge:
     # Only run when PR is approved and targeting master
     if: github.event.review.state == 'approved' && github.event.pull_request.base.ref == 'master'
-    runs-on: ubuntu-latest
+    runs-on: gcp-runner
     steps:
       - name: Generate GitHub App token
         id: app-token

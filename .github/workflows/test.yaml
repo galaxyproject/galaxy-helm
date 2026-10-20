@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   linting:
-    runs-on: ubuntu-latest
+    runs-on: gcp-runner
     steps:
       - name: Install Kubectl
         run: curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl" && chmod +x ./kubectl && sudo mv ./kubectl /usr/local/bin/kubectl && kubectl version || true
@@ -43,7 +43,7 @@ jobs:
           python -m unittest discover -s tests -v
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: gcp-runner
     name: test (${{ matrix.mode }})
     strategy:
       fail-fast: false

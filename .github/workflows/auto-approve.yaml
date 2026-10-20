@@ -14,7 +14,7 @@ jobs:
     # Only run on PR comments (not issue comments) with /approve command
     # Use startsWith to handle trailing whitespace from GitHub's comment body
     if: github.event.issue.pull_request && startsWith(github.event.comment.body, '/approve')
-    runs-on: ubuntu-latest
+    runs-on: gcp-runner
     steps:
       - name: Check user permissions
         id: check-permission

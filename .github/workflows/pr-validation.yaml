@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   validate-release-pr:
-    runs-on: ubuntu-latest
+    runs-on: gcp-runner
     steps:
       - name: Check source branch
         if: github.head_ref != 'dev'

@@ -171,7 +171,8 @@ jobs:
           APP_TOKEN: ${{ steps.helm-charts-token.outputs.token }}
         run: |
           git clone https://x-access-token:${APP_TOKEN}@github.com/CloudVE/helm-charts.git /tmp/helm-charts
-          cp /tmp/galaxy-${NEW_VERSION}.tgz /tmp/helm-charts/
+          mkdir -p /tmp/helm-charts/charts
+          cp /tmp/galaxy-${NEW_VERSION}.tgz /tmp/helm-charts/charts/
           cd /tmp/helm-charts
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

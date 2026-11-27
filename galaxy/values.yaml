@@ -41,6 +41,9 @@ workflowHandlers:
   replicaCount: 1
   startupDelay: 10 # used to avoid race conditions
   annotations: {}
+  # Deployment update strategy, e.g. {rollingUpdate: {maxSurge: 0, maxUnavailable: 1}}.
+  # Empty uses the Kubernetes default (RollingUpdate, 25%/25%).
+  strategy: {}
   podAnnotations: {}
   podSpecExtra: {}
   startupProbe:
@@ -72,6 +75,9 @@ webHandlers:
   replicaCount: 1
   startupDelay: 0 # used to avoid race conditions
   annotations: {}
+  # Deployment update strategy, e.g. {rollingUpdate: {maxSurge: 0, maxUnavailable: 1}}.
+  # Empty uses the Kubernetes default (RollingUpdate, 25%/25%).
+  strategy: {}
   podAnnotations: {}
   podSpecExtra: {}
   startupProbe:
@@ -115,6 +121,9 @@ jobHandlers:
   replicaCount: 1
   startupDelay: 5 # used to avoid race conditions
   annotations: {}
+  # Deployment update strategy, e.g. {rollingUpdate: {maxSurge: 0, maxUnavailable: 1}}.
+  # Empty uses the Kubernetes default (RollingUpdate, 25%/25%).
+  strategy: {}
   podAnnotations: {}
   podSpecExtra: {}
   startupProbe:
@@ -149,6 +158,9 @@ celery:
   replicaCount: 1
   startupDelay: 5 # used to avoid race conditions
   annotations: {}
+  # Deployment update strategy, e.g. {rollingUpdate: {maxSurge: 0, maxUnavailable: 1}}.
+  # Empty uses the Kubernetes default (RollingUpdate, 25%/25%).
+  strategy: {}
   podAnnotations: {}
   podSpecExtra: {}
   startupProbe:
@@ -182,6 +194,9 @@ celeryBeat:
   replicaCount: 1
   startupDelay: 5 # used to avoid race conditions
   annotations: {}
+  # Deployment update strategy, e.g. {rollingUpdate: {maxSurge: 0, maxUnavailable: 1}}.
+  # Empty uses the Kubernetes default (RollingUpdate, 25%/25%).
+  strategy: {}
   podAnnotations: {}
   podSpecExtra: {}
   startupProbe:
@@ -269,6 +284,8 @@ extraVolumeMounts: []
 setupJob:
   #- create the database
   createDatabase: true
+  # Annotations added to the init Job metadata (e.g. Argo CD hook annotations).
+  annotations: {}
   securityContext:
     runAsUser: 0
     runAsGroup: 0
@@ -935,6 +952,9 @@ tusd:
   enabled: true
   replicaCount: 1
   annotations: {}
+  # Deployment update strategy, e.g. {rollingUpdate: {maxSurge: 0, maxUnavailable: 1}}.
+  # Empty uses the Kubernetes default (RollingUpdate, 25%/25%).
+  strategy: {}
   podAnnotations: {}
   podSpecExtra: {}
   securityContext: {}

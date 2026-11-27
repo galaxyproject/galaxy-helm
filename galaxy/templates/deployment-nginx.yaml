@@ -11,6 +11,10 @@ metadata:
 {{- end }}
 spec:
   replicas: {{ .Values.webHandlers.replicaCount }}
+  {{- with .Values.webHandlers.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "galaxy.selectorLabels" $ | nindent 6 }}

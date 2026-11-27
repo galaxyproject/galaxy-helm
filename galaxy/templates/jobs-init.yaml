@@ -1,3 +1,4 @@
+{{- $markerSuffix := include "galaxy.setup-marker-suffix" . -}}
 ---
 apiVersion: batch/v1
 kind: Job
@@ -118,10 +119,10 @@ spec:
             - >
               echo "[`date`][init-db] - Starting Galaxy database init. Running as `id`.";
               if (ls /galaxy/server/config/mutable/ | grep -qE "(init_db_done|db_init_done)");
-                then (echo "[`date`][init-db] - Existing database detected; running manage_db upgrade..."; /galaxy/server/manage_db.sh upgrade && echo "[`date`][init-db] - Manage DB upgrade done." > /galaxy/server/config/mutable/init_db_done_{{.Release.Revision}});
-                else (echo "[`date`][init-db] - No existing Galaxy database; initializing schema (manage_db init creates all tables and stamps the alembic version)..."; /galaxy/server/manage_db.sh init && echo "[`date`][init-db] - Manage DB init done." > /galaxy/server/config/mutable/init_db_done_{{.Release.Revision}};);
+                then (echo "[`date`][init-db] - Existing database detected; running manage_db upgrade..."; /galaxy/server/manage_db.sh upgrade && echo "[`date`][init-db] - Manage DB upgrade done." > /galaxy/server/config/mutable/init_db_done_{{ $markerSuffix }});
+                else (echo "[`date`][init-db] - No existing Galaxy database; initializing schema (manage_db init creates all tables and stamps the alembic version)..."; /galaxy/server/manage_db.sh init && echo "[`date`][init-db] - Manage DB init done." > /galaxy/server/config/mutable/init_db_done_{{ $markerSuffix }};);
               fi;
-              echo "[`date`][init-db] - Database init complete. Created file /galaxy/server/config/mutable/init_db_done_{{.Release.Revision}}.";
+              echo "[`date`][init-db] - Database init complete. Created file /galaxy/server/config/mutable/init_db_done_{{ $markerSuffix }}.";
               echo "`ls -la /galaxy/server/config/mutable/`";
               echo "[`date`][init-db] - init-db container complete.";
           {{- else }}
@@ -130,7 +131,7 @@ spec:
             - '-c'
             - >
               echo "[`date`][upgrade-db] - Starting Galaxy database upgrade. Running as `id`.";
-              /galaxy/server/manage_db.sh upgrade && echo "[`date`][upgrade-db] - Manage DB upgrade ran." > /galaxy/server/config/mutable/init_db_done_{{.Release.Revision}};
+              /galaxy/server/manage_db.sh upgrade && echo "[`date`][upgrade-db] - Manage DB upgrade ran." > /galaxy/server/config/mutable/init_db_done_{{ $markerSuffix }};
               echo "[`date`][upgrade-db] - Database upgrade complete.";
               echo "[`date`][upgrade-db] - init-db container complete.";
           {{- end }}
@@ -267,7 +268,7 @@ spec:
         - name: {{ .Chart.Name }}-init-cloud-repo
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ['sh', '-c', '{{- include "galaxy.extract-archive-if-changed-command" (dict "extractPath" .Values.setupJob.downloadToolConfs.volume.mountPath "downloadUrl" .Values.setupJob.downloadToolConfs.archives.startup) -}} && echo "Done" > /galaxy/server/config/mutable/init_clone_done_{{.Release.Revision}} && chown -R {{ .Values.securityContext.fsGroup }}:{{ .Values.securityContext.fsGroup }} /galaxy/server/config/mutable/']
+          command: ['sh', '-c', '{{- include "galaxy.extract-archive-if-changed-command" (dict "extractPath" .Values.setupJob.downloadToolConfs.volume.mountPath "downloadUrl" .Values.setupJob.downloadToolConfs.archives.startup) -}} && echo "Done" > /galaxy/server/config/mutable/init_clone_done_{{ $markerSuffix }} && chown -R {{ .Values.securityContext.fsGroup }}:{{ .Values.securityContext.fsGroup }} /galaxy/server/config/mutable/']
           volumeMounts:
             - name: galaxy-data
               mountPath: {{ .Values.setupJob.downloadToolConfs.volume.mountPath }}

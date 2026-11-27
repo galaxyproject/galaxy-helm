@@ -176,6 +176,21 @@ Lookup the existing secret values if they exist, or generate a random value
 {{- end -}}
 
 {{/*
+Suffix of the marker files that the setup jobs write when they finish and the Galaxy pods wait for.
+It changes on every Helm revision and whenever the image, the configuration or setupJob change, so
+pods wait for this rollout's setup jobs instead of finding a marker left by an earlier one. The
+content matters under Argo CD, which renders with `helm template`, where .Release.Revision is
+always 1. It is part of every Galaxy pod spec, so it must not depend on anything random.
+*/}}
+{{- define "galaxy.setup-marker-suffix" -}}
+{{- $inputs := list .Release.Revision .Chart.Version .Values.image .Values.setupJob
+    (include (print .Template.BasePath "/configs-galaxy.yaml") . | sha256sum)
+    (include (print .Template.BasePath "/configmap-galaxy-rules.yaml") . | sha256sum)
+    (include (print .Template.BasePath "/configmap-extra-files.yaml") . | sha256sum) -}}
+{{- toJson $inputs | sha256sum | trunc 12 -}}
+{{- end -}}
+
+{{/*
 Creates the bash command for the init container used to place files and change permissions in the galaxy pods
 */}}
 {{- define "galaxy.init-container-commands" -}}
@@ -204,22 +219,23 @@ chown -R {{ .Values.securityContext.runAsUser }}:{{ .Values.securityContext.runA
 echo "[`date`] - Syncing file system...";
 sync;
 echo "[`date`] - Init mounts container copy commands done.";
-echo "[`date`] - Init mounts container done." > /galaxy/server/config/mutable/init_mounts_done_{{.Release.Revision}};
+echo "[`date`] - Init mounts container done." > /galaxy/server/config/mutable/init_mounts_done_{{ include "galaxy.setup-marker-suffix" . }};
 {{- end -}}
 
 {{/*
 Creates the bash command for the handlers to wait for init scripts
 */}}
 {{- define "galaxy.init-container-wait-command" -}}
+{{- $markerSuffix := include "galaxy.setup-marker-suffix" $ -}}
 echo "[`date`] Initialization waits starting. Running as user `id`.";
-until [ -f /galaxy/server/config/mutable/init_db_done_{{$.Release.Revision}} ]; do echo "[`date`] Waiting for DB initialization..."; sleep 1; done;
+until [ -f /galaxy/server/config/mutable/init_db_done_{{ $markerSuffix }} ]; do echo "[`date`] Waiting for DB initialization..."; sleep 1; done;
 {{- if $.Values.rabbitmq.enabled }}
 until timeout 1 bash -c "echo > /dev/tcp/{{ template "galaxy-rabbitmq.fullname" $ }}/{{.Values.rabbitmq.port}}"; do echo "[`date`] Waiting for rabbitmq service..."; sleep 1; done;
 {{- end }}
-until [ -f /galaxy/server/config/mutable/init_mounts_done_{{$.Release.Revision}} ]; do echo "[`date`] Waiting for copying onto NFS (looking for file /galaxy/server/config/mutable/init_mounts_done_{{$.Release.Revision}})..."; sleep 1; done;
+until [ -f /galaxy/server/config/mutable/init_mounts_done_{{ $markerSuffix }} ]; do echo "[`date`] Waiting for copying onto NFS (looking for file /galaxy/server/config/mutable/init_mounts_done_{{ $markerSuffix }})..."; sleep 1; done;
 until [ -s /galaxy/server/config/mutable/shed_tool_data_table_conf.xml ] && grep -q "<tables>" /galaxy/server/config/mutable/shed_tool_data_table_conf.xml; do echo "[`date`] Waiting for shed_tool_data_table_conf.xml to be synced and readable..."; sleep 1; done;
 {{- if .Values.setupJob.downloadToolConfs.enabled }}
-until [ -f /galaxy/server/config/mutable/init_clone_done_{{$.Release.Revision}} ]; do echo "[`date`] Waiting for refdata copying..."; sleep 1; done;
+until [ -f /galaxy/server/config/mutable/init_clone_done_{{ $markerSuffix }} ]; do echo "[`date`] Waiting for refdata copying..."; sleep 1; done;
 {{- end }}
 echo "[`date`] Initialization waits complete.";
 {{- end -}}

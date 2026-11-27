@@ -335,7 +335,7 @@ Galaxy defines three handler types: `jobHandlers`, `webHandlers`, and
 | `annotations`    | Dictionary of annotations to add to this handler's metadata at the deployment level   |
 | `podAnnotations` | Dictionary of annotations to add to this handler's metadata at the pod level |
 | `podSpecExtra`   | Dictionary to add to this handler's pod template under `spec` |
-| `strategy`       | Deployment update strategy (`spec.strategy`) for this handler. Empty uses the Kubernetes default. Also available for `celery` and `celeryBeat`. |
+| `strategy`       | Deployment update strategy (`spec.strategy`) for this handler. Empty uses the Kubernetes default. Also available for `celery`, `celeryBeat` and `tusd`. `webHandlers.strategy` also applies to the nginx Deployment, which follows the web handler settings. |
 | `startupProbe`   | Probe used to determine if a pod has started. Other probes wait for the startup probe. <a href="#probes">See table below for all probe options</a> |
 | `livenessProbe`  | Probe used to determine if a pod should be restarted. <a href="#probes">See table below for all probe options</a>       |
 | `readinessProbe` | Probe used to determine if the pod is ready to accept workloads. <a href="#probes">See table below for all probe options</a> |

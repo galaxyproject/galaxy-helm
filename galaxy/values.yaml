@@ -952,6 +952,9 @@ tusd:
   enabled: true
   replicaCount: 1
   annotations: {}
+  # Deployment update strategy, e.g. {rollingUpdate: {maxSurge: 0, maxUnavailable: 1}}.
+  # Empty uses the Kubernetes default (RollingUpdate, 25%/25%).
+  strategy: {}
   podAnnotations: {}
   podSpecExtra: {}
   securityContext: {}

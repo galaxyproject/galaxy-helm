@@ -16,6 +16,10 @@ spec:
   # (used by the post-install job) exit with an error and fail the install.
   progressDeadlineSeconds: {{ .Values.progressDeadlineSeconds | default 1800 }}
   replicas: {{ .Values.webHandlers.replicaCount }}
+  {{- with .Values.webHandlers.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "galaxy.selectorLabels" $ | nindent 6 }}

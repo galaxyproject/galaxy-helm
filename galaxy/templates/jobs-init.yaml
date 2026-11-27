@@ -5,6 +5,10 @@ metadata:
   name: {{ include "galaxy.fullname" . }}-init-db-{{ randAlphaNum 5 | lower }}
   labels:
     {{- include "galaxy.labels" . | nindent 4 }}
+  {{- with .Values.setupJob.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   {{- if .Values.setupJob.ttlSecondsAfterFinished }}
   ttlSecondsAfterFinished: {{ .Values.setupJob.ttlSecondsAfterFinished }}
@@ -209,6 +213,10 @@ metadata:
   name: {{ include "galaxy.fullname" . }}-init-mounts-{{ randAlphaNum 5 | lower }}
   labels:
     {{- include "galaxy.labels" . | nindent 4 }}
+  {{- with .Values.setupJob.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   {{- if .Values.setupJob.ttlSecondsAfterFinished }}
   ttlSecondsAfterFinished: {{ .Values.setupJob.ttlSecondsAfterFinished }}

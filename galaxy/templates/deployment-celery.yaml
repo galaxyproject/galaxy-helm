@@ -12,6 +12,10 @@ metadata:
 spec:
   progressDeadlineSeconds: {{ .Values.progressDeadlineSeconds | default 1800 }}
   replicas: {{ .Values.celery.replicaCount }}
+  {{- with .Values.celery.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "galaxy.selectorLabels" $ | nindent 6 }}

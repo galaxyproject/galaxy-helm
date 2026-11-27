@@ -267,6 +267,7 @@ current default values can be found in `values.yaml` file.
 | `cvmfs.enabled`                            | Enable use of CVMFS in configs, and deployment of CVMFS Persistent Volume Claims for Galaxy                                                                                                                |
 | `cvmfs.pvc.{}`                             | Persistent Volume Claim to deploy for CVMFS repositories. See <a href="galaxy/values.yaml">`values.yaml`</a> for examples.                                                                                                                 |
 | `setupJob.ttlSecondsAfterFinished`          | Sets `ttlSecondsAfterFinished` for the initialization jobs. See the [Kubernetes documentation](https://kubernetes.io/docs/concepts/workloads/controllers/ttlafterfinished/#ttl-controller) for more details.       |
+| `setupJob.annotations.{}`                 | Dictionary of annotations to add to the initialization jobs' metadata, e.g. `argocd.argoproj.io/hook: Sync` so Argo CD runs them as sync hooks instead of tracking them (their names are randomised, so as tracked resources they never match a later render). |
 | `setupJob.downloadToolConfs.enabled`        | Download configuration files and the `tools` directory from an archive via a job at startup                                                                                                                |
 | `setupJob.downloadToolConfs.archives.startup` | A URL to a `tar.gz` publicly accessible archive containing AT LEAST conf files and XML tool wrappers. Meant to be enough for Galaxy handlers to startup.                                                   |
 | `setupJob.downloadToolConfs.archives.running` | A URL to a `tar.gz` publicly accessible archive containing AT LEAST confs, tool wrappers, and tool scripts but excluding test data. Meant to be enough for Galaxy handlers to run jobs.                    |
@@ -334,6 +335,7 @@ Galaxy defines three handler types: `jobHandlers`, `webHandlers`, and
 | `annotations`    | Dictionary of annotations to add to this handler's metadata at the deployment level   |
 | `podAnnotations` | Dictionary of annotations to add to this handler's metadata at the pod level |
 | `podSpecExtra`   | Dictionary to add to this handler's pod template under `spec` |
+| `strategy`       | Deployment update strategy (`spec.strategy`) for this handler. Empty uses the Kubernetes default. Also available for `celery` and `celeryBeat`. |
 | `startupProbe`   | Probe used to determine if a pod has started. Other probes wait for the startup probe. <a href="#probes">See table below for all probe options</a> |
 | `livenessProbe`  | Probe used to determine if a pod should be restarted. <a href="#probes">See table below for all probe options</a>       |
 | `readinessProbe` | Probe used to determine if the pod is ready to accept workloads. <a href="#probes">See table below for all probe options</a> |
